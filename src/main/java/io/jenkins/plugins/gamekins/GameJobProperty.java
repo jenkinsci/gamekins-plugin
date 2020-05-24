@@ -3,6 +3,7 @@ package io.jenkins.plugins.gamekins;
 import hudson.Extension;
 import hudson.model.*;
 import hudson.util.FormValidation;
+import hudson.util.ListBoxModel;
 import net.sf.json.JSONObject;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
@@ -14,12 +15,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class JobProperty extends hudson.model.JobProperty<AbstractProject<?, ?>> {
+public class GameJobProperty extends hudson.model.JobProperty<AbstractProject<?, ?>> {
 
     private boolean activated;
 
     @DataBoundConstructor
-    public JobProperty(boolean activated) {
+    public GameJobProperty(boolean activated) {
         this.activated = activated;
     }
 
@@ -30,6 +31,7 @@ public class JobProperty extends hudson.model.JobProperty<AbstractProject<?, ?>>
     @DataBoundSetter
     public void setActivated(boolean activated) {
         this.activated = activated;
+        DESCRIPTOR.save();
     }
 
     @Override
@@ -82,8 +84,11 @@ public class JobProperty extends hudson.model.JobProperty<AbstractProject<?, ?>>
     public static final DescriptorImpl DESCRIPTOR = new DescriptorImpl();
     public static class DescriptorImpl extends JobPropertyDescriptor {
 
+        private ArrayList<String> teams;
+
         public DescriptorImpl() {
-            super(JobProperty.class);
+            super(GameJobProperty.class);
+            teams = new ArrayList<>();
             load();
         }
 
@@ -100,6 +105,34 @@ public class JobProperty extends hudson.model.JobProperty<AbstractProject<?, ?>>
 
         public FormValidation doAddTeam(@QueryParameter String teamName) {
             if (teamName.isEmpty()) return FormValidation.error("Insert a name for the team");
+            teams.add(teamName);
+            save();
+            return FormValidation.ok();
+        }
+
+        public ListBoxModel doFillTeamsBoxItems() {
+            ListBoxModel listBoxModel = new ListBoxModel();
+            teams.forEach(listBoxModel::add);
+            return listBoxModel;
+        }
+
+        public ListBoxModel doFillUsersBoxItems() {
+            ListBoxModel listBoxModel = new ListBoxModel();
+            User.getAll().stream().map(User::getFullName).forEach(listBoxModel::add);
+            return listBoxModel;
+        }
+
+        public FormValidation doAddUserToTeam(@QueryParameter String teamsBox, @QueryParameter String usersBox) {
+            return FormValidation.ok();
+        }
+
+        public FormValidation doRemoveUserFromTeam(@QueryParameter String teamsBox, @QueryParameter String usersBox) {
+            return FormValidation.ok();
+        }
+
+        public FormValidation doDeleteTeam(@QueryParameter String teamsBox) {
+            teams.remove(teamsBox);
+            save();
             return FormValidation.ok();
         }
     }
