@@ -2,9 +2,11 @@ package io.jenkins.plugins.gamekins;
 
 import hudson.Extension;
 import hudson.model.*;
+import hudson.util.FormValidation;
 import net.sf.json.JSONObject;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
+import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 
 import javax.annotation.Nonnull;
@@ -94,6 +96,11 @@ public class JobProperty extends hudson.model.JobProperty<AbstractProject<?, ?>>
         @Override
         public boolean isApplicable(Class<? extends Job> jobType) {
             return AbstractProject.class.isAssignableFrom(jobType);
+        }
+
+        public FormValidation doAddTeam(@QueryParameter String teamName) {
+            if (teamName.isEmpty()) return FormValidation.error("Insert a name for the team");
+            return FormValidation.ok();
         }
     }
 }
