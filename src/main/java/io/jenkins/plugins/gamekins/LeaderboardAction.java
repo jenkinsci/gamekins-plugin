@@ -3,11 +3,11 @@ package io.jenkins.plugins.gamekins;
 import hudson.model.AbstractProject;
 import hudson.model.ProminentProjectAction;
 
-public class HelloWorldAction implements ProminentProjectAction {
+public class LeaderboardAction implements ProminentProjectAction {
 
     private final transient AbstractProject job;
 
-    public HelloWorldAction(AbstractProject job) {
+    public LeaderboardAction(AbstractProject job) {
         this.job = job;
     }
 

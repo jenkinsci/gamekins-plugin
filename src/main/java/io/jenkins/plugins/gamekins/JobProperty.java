@@ -12,12 +12,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class HelloWorldJobProperty extends JobProperty<AbstractProject<?, ?>> {
+public class JobProperty extends hudson.model.JobProperty<AbstractProject<?, ?>> {
 
     private boolean activated;
 
     @DataBoundConstructor
-    public HelloWorldJobProperty(boolean activated) {
+    public JobProperty(boolean activated) {
         this.activated = activated;
     }
 
@@ -36,7 +36,7 @@ public class HelloWorldJobProperty extends JobProperty<AbstractProject<?, ?>> {
     }
 
     @Override
-    public JobProperty<?> reconfigure(StaplerRequest req, JSONObject form) {
+    public hudson.model.JobProperty<?> reconfigure(StaplerRequest req, JSONObject form) {
         if (form != null) this.activated = (boolean) form.get("activated");
         return this;
     }
@@ -65,13 +65,13 @@ public class HelloWorldJobProperty extends JobProperty<AbstractProject<?, ?>> {
         List<Action> actions = new ArrayList<>(job.getActions());
         if (activated) {
             for (Action a : actions) {
-                if (a instanceof HelloWorldAction) {
+                if (a instanceof LeaderboardAction) {
                     return actions;
                 }
             }
-            actions.add(new HelloWorldAction(job));
+            actions.add(new LeaderboardAction(job));
         } else {
-            actions.removeIf(a -> a instanceof HelloWorldAction);
+            actions.removeIf(a -> a instanceof LeaderboardAction);
         }
         return actions;
     }
@@ -81,7 +81,7 @@ public class HelloWorldJobProperty extends JobProperty<AbstractProject<?, ?>> {
     public static class DescriptorImpl extends JobPropertyDescriptor {
 
         public DescriptorImpl() {
-            super(HelloWorldJobProperty.class);
+            super(JobProperty.class);
             load();
         }
 
