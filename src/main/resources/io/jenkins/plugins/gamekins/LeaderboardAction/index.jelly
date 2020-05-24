@@ -13,6 +13,7 @@
                     <tr>
                         <td class="pane-header" align="left,center">#</td>
                         <td class="pane-header" align="left,center">Participant</td>
+                        <td class="pane-header" align="left,center">Team</td>
                         <td class="pane-header" align="left,center">Absolved Challenges</td>
                         <td class="pane-header" initialSortDir="up" align="left" width="10%">Score</td>
                     </tr>
@@ -32,6 +33,31 @@
                         <td class="pane-header" align="left,center">Team</td>
                         <td class="pane-header" align="left,center">Absolved Challenges</td>
                         <td class="pane-header" initialSortDir="up" align="left" width="10%">Score</td>
+                    </tr>
+                </table>
+            </div>
+            <br/>
+            <br/>
+            <h1>
+                Challenges
+            </h1>
+            <div>
+                <table class="pane sortable bigtable" style="width:33%; float:left">
+                    <tr>
+                        <td class="pane-header" align="left,center">#</td>
+                        <td class="pane-header" align="left,center">Current Challenges</td>
+                    </tr>
+                </table>
+                <table class="pane sortable bigtable" style="width:33%; float:left; margin-left: 0.5%; margin-right: 0.5%">
+                    <tr>
+                        <td class="pane-header" align="left,center">#</td>
+                        <td class="pane-header" align="left,center">Absolved Challenges</td>
+                    </tr>
+                </table>
+                <table class="pane sortable bigtable" style="width:33%; float:right">
+                    <tr>
+                        <td class="pane-header" align="left,center">#</td>
+                        <td class="pane-header" align="left,center">Rejected Challenges</td>
                     </tr>
                 </table>
             </div>
