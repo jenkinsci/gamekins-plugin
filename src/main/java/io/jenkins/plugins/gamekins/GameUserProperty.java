@@ -12,6 +12,7 @@ public class GameUserProperty extends UserProperty {
 
     private int score;
     private boolean participating;
+    private String teamName;
     private ArrayList<Challenge> absolvedChallenges;
     private ArrayList<Challenge> currentChallenges;
     private ArrayList<Challenge> rejectedChallenges;
@@ -19,6 +20,7 @@ public class GameUserProperty extends UserProperty {
     public GameUserProperty() {
         this.score = 0;
         this.participating = false;
+        this.teamName = "";
         this.absolvedChallenges = new ArrayList<>();
         this.currentChallenges = new ArrayList<>();
         this.rejectedChallenges = new ArrayList<>();
@@ -42,6 +44,14 @@ public class GameUserProperty extends UserProperty {
 
     public void setParticipating(boolean participating) {
         this.participating = participating;
+    }
+
+    public String getTeamName() {
+        return this.teamName;
+    }
+
+    public void setTeamName(String teamName) {
+        this.teamName = teamName;
     }
 
     public ArrayList<Challenge> getAbsolvedChallenges() {

@@ -11,6 +11,8 @@ import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 
 import javax.annotation.Nonnull;
+import java.io.IOException;
+import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -105,6 +107,8 @@ public class GameJobProperty extends hudson.model.JobProperty<AbstractProject<?,
 
         public FormValidation doAddTeam(@QueryParameter String teamName) {
             if (teamName.isEmpty()) return FormValidation.error("Insert a name for the team");
+            if (teams.contains(teamName))
+                return FormValidation.error("The team already exists - please use another name for your team");
             teams.add(teamName);
             save();
             return FormValidation.ok();
@@ -119,18 +123,67 @@ public class GameJobProperty extends hudson.model.JobProperty<AbstractProject<?,
         public ListBoxModel doFillUsersBoxItems() {
             ListBoxModel listBoxModel = new ListBoxModel();
             User.getAll().stream().map(User::getFullName).forEach(listBoxModel::add);
+            listBoxModel.remove("unknown");
             return listBoxModel;
         }
 
         public FormValidation doAddUserToTeam(@QueryParameter String teamsBox, @QueryParameter String usersBox) {
-            return FormValidation.ok();
+            for (User user : User.getAll()) {
+                if (user.getFullName().equals(usersBox)) {
+                    GameUserProperty property = user.getProperty(GameUserProperty.class);
+                    if (property != null && property.getTeamName().equals("")) {
+                        property.setTeamName(teamsBox);
+                        property.setParticipating(true);
+                        //TODO: Add challenges
+                        try {
+                            user.save();
+                        } catch (IOException e) {
+                            return FormValidation.error(e, "There was an error with saving");
+                        }
+                        return FormValidation.ok();
+                    } else {
+                        return FormValidation.error("The user is already participating in a team");
+                    }
+                }
+            }
+            return FormValidation.error("No user with the specified name found");
         }
 
         public FormValidation doRemoveUserFromTeam(@QueryParameter String teamsBox, @QueryParameter String usersBox) {
-            return FormValidation.ok();
+            for (User user : User.getAll()) {
+                if (user.getFullName().equals(usersBox)) {
+                    GameUserProperty property = user.getProperty(GameUserProperty.class);
+                    if (property != null && property.getTeamName().equals(teamsBox)) {
+                        property.setTeamName("");
+                        property.setParticipating(false);
+                        try {
+                            user.save();
+                        } catch (IOException e) {
+                            return FormValidation.error(e, "There was an error with saving");
+                        }
+                        return FormValidation.ok();
+                    } else {
+                        return FormValidation.error("The user is not in the specified team");
+                    }
+                }
+            }
+            return FormValidation.error("No user with the specified name found");
         }
 
         public FormValidation doDeleteTeam(@QueryParameter String teamsBox) {
+            if (!teams.contains(teamsBox)) return FormValidation.error("The specified team does not exist");
+            for (User user : User.getAll()) {
+                GameUserProperty property = user.getProperty(GameUserProperty.class);
+                if (property != null && property.getTeamName().equals(teamsBox)) {
+                    property.setTeamName("");
+                    property.setParticipating(false);
+                    try {
+                        user.save();
+                    } catch (IOException e) {
+                        return FormValidation.error(e, "There was an error with saving");
+                    }
+                }
+            }
             teams.remove(teamsBox);
             save();
             return FormValidation.ok();

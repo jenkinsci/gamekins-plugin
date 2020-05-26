@@ -16,8 +16,8 @@
             <f:select field="usersBox" />
         </f:entry>
         <f:entry field="buttons">
-            <f:validateButton title="Add User to Team" method="addUserToTeam" with="teamsBox, usersBox" />
-            <f:validateButton title="Remove User from Team" method="removeUserFromTeam" with="teamsBox, usersBox" />
+            <f:validateButton title="Add User to Team" method="addUserToTeam" with="teamsBox,usersBox" />
+            <f:validateButton title="Remove User from Team" method="removeUserFromTeam" with="teamsBox,usersBox" />
             <f:validateButton title="Delete Team" method="deleteTeam" with="teamsBox" />
         </f:entry>
     </f:section>
