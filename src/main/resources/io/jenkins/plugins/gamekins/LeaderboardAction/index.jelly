@@ -17,15 +17,15 @@
                         <td class="pane-header" align="left,center">Absolved Challenges</td>
                         <td class="pane-header" initialSortDir="up" align="left" width="10%">Score</td>
                     </tr>
-                    <!--<j:forEach indexVar="index" var="userscore" items="${it.userScores}">
+                    <j:forEach indexVar="index" var="userdetail" items="${it.userDetails}">
                         <tr>
                             <td>${index + 1}</td>
-                            <j:if test="${it.userAvatarSupported}"><td><img src="${h.getUserAvatar(userscore.user,'48x48')}" alt="" height="48" width="48" /></td></j:if>
-                            <td><a href="${rootURL}/${userscore.user.url}">${userscore.user}</a></td>
-                            <td><j:out value="${userscore.description!=null ? app.markupFormatter.translate(userscore.description) : ''}" /></td>
-                            <td>${userscore.score}</td>
+                            <td>${userdetail.userName}</td>
+                            <td>${userdetail.teamName}</td>
+                            <td>${userdetail.absolvedChallenges}</td>
+                            <td>${userdetail.score}</td>
                         </tr>
-                    </j:forEach>-->
+                    </j:forEach>
                 </table>
                 <table class="pane sortable bigtable" style="width:49%; float:right">
                     <tr>
