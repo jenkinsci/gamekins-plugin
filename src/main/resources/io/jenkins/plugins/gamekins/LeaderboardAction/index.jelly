@@ -34,6 +34,14 @@
                         <td class="pane-header" align="left,center">Absolved Challenges</td>
                         <td class="pane-header" initialSortDir="up" align="left" width="10%">Score</td>
                     </tr>
+                    <j:forEach indexVar="index" var="teamdetail" items="${it.teamDetails}">
+                        <tr>
+                            <td>${index + 1}</td>
+                            <td>${teamdetail.teamName}</td>
+                            <td>${teamdetail.absolvedChallenges}</td>
+                            <td>${teamdetail.score}</td>
+                        </tr>
+                    </j:forEach>
                 </table>
             </div>
             <br/>

@@ -56,6 +56,36 @@ public class LeaderboardAction implements ProminentProjectAction {
         return details;
     }
 
+    public List<TeamDetails> getTeamDetails() {
+        ArrayList<TeamDetails> details = new ArrayList<>();
+        for (User user : User.getAll()) {
+            GameUserProperty property = user.getProperty(GameUserProperty.class);
+            if (property != null && property.isParticipating()) {
+                int index = -1;
+                for (int i = 0; i < details.size(); i++) {
+                    TeamDetails teamDetail = details.get(i);
+                    if (teamDetail.getTeamName().equals(property.getTeamName())) {
+                        index = i;
+                    }
+                }
+                if (index != -1) {
+                    details.get(index).addAbsolvedChallenges(property.getAbsolvedChallenges().size());
+                    details.get(index).addScore(property.getScore());
+                } else {
+                    details.add(
+                            new TeamDetails(
+                                    property.getTeamName(),
+                                    property.getScore(),
+                                    property.getAbsolvedChallenges().size()
+                            )
+                    );
+                }
+            }
+        }
+        details.sort(Comparator.comparingInt(TeamDetails::getScore));
+        return details;
+    }
+
     @ExportedBean(defaultVisibility = 999)
     public class UserDetails {
 
@@ -89,6 +119,45 @@ public class LeaderboardAction implements ProminentProjectAction {
         @Exported
         public int getAbsolvedChallenges() {
             return this.absolvedChallenges;
+        }
+    }
+
+    @ExportedBean(defaultVisibility = 999)
+    public class TeamDetails {
+
+        private String teamName;
+        private int score;
+        private int absolvedChallenges;
+
+        public TeamDetails(String teamName, int score, int absolvedChallenges) {
+            this.teamName = teamName;
+            this.score = score;
+            this.absolvedChallenges = absolvedChallenges;
+        }
+
+        @Exported
+        public String getTeamName() {
+            return this.teamName;
+        }
+
+        @Exported
+        public int getScore() {
+            return this.score;
+        }
+
+        @Exported
+        public void addScore(int score) {
+            this.score += score;
+        }
+
+        @Exported
+        public int getAbsolvedChallenges() {
+            return this.absolvedChallenges;
+        }
+
+        @Exported
+        public void addAbsolvedChallenges(int absolvedChallenges) {
+            this.absolvedChallenges += absolvedChallenges;
         }
     }
 }
