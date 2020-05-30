@@ -4,6 +4,7 @@ import hudson.Extension;
 import hudson.model.User;
 import hudson.model.UserProperty;
 import hudson.model.UserPropertyDescriptor;
+import io.jenkins.plugins.gamekins.challenge.Challenge;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
