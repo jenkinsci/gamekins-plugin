@@ -1,4 +1,4 @@
-package io.jenkins.plugins.gamekins;
+package io.jenkins.plugins.gamekins.challenge;
 
 public interface Challenge {
 

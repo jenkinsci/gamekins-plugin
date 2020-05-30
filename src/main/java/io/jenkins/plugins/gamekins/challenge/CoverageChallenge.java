@@ -1,4 +1,4 @@
-package io.jenkins.plugins.gamekins;
+package io.jenkins.plugins.gamekins.challenge;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
