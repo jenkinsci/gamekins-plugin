@@ -11,6 +11,7 @@ import java.util.ArrayList;
 
 public class GameUserProperty extends UserProperty {
 
+    //TODO: Improve for multi-project participation
     private int score;
     private boolean participating;
     private String teamName;
