@@ -44,7 +44,8 @@ public class ChallengeFactory {
 
     private static ClassCoverageChallenge generateClassCoverageChallenge(String workspace, String path)
             throws IOException {
-        String filePath = workspace + "/build/jacoco/html/";
+        //TODO: Change path for different build tools
+        String filePath = workspace + "/target/site/jacoco/";
         StringBuilder packageName = new StringBuilder();
         String className = "";
         for (String part : path.split("/")) {
