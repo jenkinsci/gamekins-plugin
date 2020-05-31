@@ -12,14 +12,13 @@ import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.eclipse.jgit.treewalk.AbstractTreeIterator;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
+import org.jsoup.nodes.Document;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Arrays;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.*;
 
 public class ChallengeFactory {
 
@@ -28,8 +27,42 @@ public class ChallengeFactory {
     }
 
     public static Challenge generateChallenge(String workspace, User user) throws IOException {
-        Set<String> lastChangedFilesOfUser = getLastChangedFilesOfUser(workspace, user);
+        ArrayList<String> lastChangedFilesOfUser = new ArrayList<>(getLastChangedFilesOfUser(workspace, user));
+        ArrayList<String> worklist = new ArrayList<>(lastChangedFilesOfUser);
+        Random random = new Random();
 
+        //TODO: Generate other Challenges
+        Challenge challenge;
+        do {
+            int index = random.nextInt(worklist.size());
+            challenge = generateClassCoverageChallenge(workspace, worklist.get(index));
+            worklist.remove(index);
+        } while (challenge == null);
+
+        return challenge;
+    }
+
+    private static ClassCoverageChallenge generateClassCoverageChallenge(String workspace, String path)
+            throws IOException {
+        String filePath = workspace + "/build/jacoco/html/";
+        StringBuilder packageName = new StringBuilder();
+        String className = "";
+        for (String part : path.split("/")) {
+            if (part.contains(".java")) {
+                packageName.deleteCharAt(packageName.length() - 1);
+                className = part.split("\\.")[0];
+                break;
+            }
+            if (!part.equals("src") && !part.equals("java") && !part.equals("main") && !part.isEmpty()) {
+                packageName.append(part).append(".");
+            }
+        }
+        Document document = CoverageChallenge.generateDocument(
+                filePath + packageName + "/" + className + ".java.html", "UTF-8");
+        if (CoverageChallenge.calculateCoveredLines(document, "pc") > 0
+                || CoverageChallenge.calculateCoveredLines(document, "nc") > 0) {
+            return new ClassCoverageChallenge(filePath + packageName, className);
+        }
         return null;
     }
 
