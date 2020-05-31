@@ -1,5 +1,7 @@
 package io.jenkins.plugins.gamekins.challenge;
 
+import hudson.model.AbstractBuild;
+
 import java.io.IOException;
 
 public class LineCoverageChallenge extends CoverageChallenge {
@@ -9,7 +11,7 @@ public class LineCoverageChallenge extends CoverageChallenge {
     }
 
     @Override
-    public boolean isSolved() {
+    public boolean isSolved(AbstractBuild<?, ?> build) {
         return false;
     }
 

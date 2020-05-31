@@ -1,5 +1,7 @@
 package io.jenkins.plugins.gamekins.challenge;
 
+import hudson.model.AbstractBuild;
+
 import java.io.IOException;
 
 public class ClassCoverageChallenge extends CoverageChallenge {
@@ -9,12 +11,13 @@ public class ClassCoverageChallenge extends CoverageChallenge {
     }
 
     @Override
-    public boolean isSolved() {
+    public boolean isSolved(AbstractBuild<?, ?> build) {
         return false;
     }
 
     @Override
     public String toString() {
-        return super.toString();
+        String[] split = getPackagePath().split("/");
+        return "Write a test to cover more lines in class " + getClassName() + " in package " + split[split.length - 1];
     }
 }

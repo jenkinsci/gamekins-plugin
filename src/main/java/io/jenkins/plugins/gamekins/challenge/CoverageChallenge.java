@@ -31,6 +31,10 @@ public abstract class CoverageChallenge implements Challenge {
         return elements.size();
     }
 
+    public static Document generateDocument(String filePath, String charset) throws IOException {
+        return Jsoup.parse(new File(filePath), charset);
+    }
+
     String getPackagePath() {
         return this.packagePath;
     }
