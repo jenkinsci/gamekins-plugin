@@ -12,16 +12,16 @@ import java.util.HashMap;
 
 public class GameUserProperty extends UserProperty {
 
-    private ArrayList<Challenge> absolvedChallenges;
-    private ArrayList<Challenge> currentChallenges;
-    private ArrayList<Challenge> rejectedChallenges;
-    private HashMap<String, String> participation;
-    private HashMap<String, Integer> score;
+    private final HashMap<String, ArrayList<Challenge>> absolvedChallenges;
+    private final HashMap<String, ArrayList<Challenge>> currentChallenges;
+    private final HashMap<String, ArrayList<Challenge>> rejectedChallenges;
+    private final HashMap<String, String> participation;
+    private final HashMap<String, Integer> score;
 
     public GameUserProperty() {
-        this.absolvedChallenges = new ArrayList<>();
-        this.currentChallenges = new ArrayList<>();
-        this.rejectedChallenges = new ArrayList<>();
+        this.absolvedChallenges = new HashMap<>();
+        this.currentChallenges = new HashMap<>();
+        this.rejectedChallenges = new HashMap<>();
         this.participation = new HashMap<>();
         this.score = new HashMap<>();
     }
@@ -31,6 +31,9 @@ public class GameUserProperty extends UserProperty {
     }
 
     public int getScore(String projectName) {
+        if (isParticipating(projectName) && this.score.get(projectName) == null) {
+            this.score.put(projectName, 0);
+        }
         return this.score.get(projectName);
     }
 
@@ -48,6 +51,10 @@ public class GameUserProperty extends UserProperty {
 
     public void setParticipating(String projectName, String teamName) {
         this.participation.put(projectName, teamName);
+        this.score.putIfAbsent(projectName, 0);
+        this.absolvedChallenges.putIfAbsent(projectName, new ArrayList<>());
+        this.currentChallenges.putIfAbsent(projectName, new ArrayList<>());
+        this.rejectedChallenges.putIfAbsent(projectName, new ArrayList<>());
     }
 
     public void removeParticipation(String projectName) {
@@ -58,30 +65,51 @@ public class GameUserProperty extends UserProperty {
         return this.participation.get(projectName);
     }
 
-    public ArrayList<Challenge> getAbsolvedChallenges() {
-        return this.absolvedChallenges;
+    public ArrayList<Challenge> getAbsolvedChallenges(String projectName) {
+        return this.absolvedChallenges.get(projectName);
     }
 
-    public ArrayList<Challenge> getCurrentChallenges() {
-        return this.currentChallenges;
+    public ArrayList<Challenge> getCurrentChallenges(String projectName) {
+        return this.currentChallenges.get(projectName);
     }
 
-    public ArrayList<Challenge> getRejectedChallenges() {
-        return this.rejectedChallenges;
+    public ArrayList<Challenge> getRejectedChallenges(String projectName) {
+        return this.rejectedChallenges.get(projectName);
     }
 
-    public void absolveChallenge(Challenge challenge) {
-        this.absolvedChallenges.add(challenge);
-        this.currentChallenges.remove(challenge);
+    public void absolveChallenge(String projectName, Challenge challenge) {
+        this.absolvedChallenges.computeIfAbsent(projectName, k -> new ArrayList<>());
+        ArrayList<Challenge> challenges = this.absolvedChallenges.get(projectName);
+        challenges.add(challenge);
+        this.absolvedChallenges.put(projectName, challenges);
+        challenges = this.currentChallenges.get(projectName);
+        challenges.remove(challenge);
+        this.currentChallenges.put(projectName, challenges);
     }
 
-    public void newChallenge(Challenge challenge) {
-        this.currentChallenges.add(challenge);
+    /**
+     * Only for debugging purposes
+     * @param projectName the name of the project
+     */
+    public void removeCurrentChallenges(String projectName) {
+        this.currentChallenges.put(projectName, new ArrayList<>());
     }
 
-    public void rejectChallenge(Challenge challenge) {
-        this.rejectedChallenges.add(challenge);
-        this.currentChallenges.remove(challenge);
+    public void newChallenge(String projectName, Challenge challenge) {
+        this.currentChallenges.computeIfAbsent(projectName, k -> new ArrayList<>());
+        ArrayList<Challenge> challenges = this.currentChallenges.get(projectName);
+        challenges.add(challenge);
+        this.currentChallenges.put(projectName, challenges);
+    }
+
+    public void rejectChallenge(String projectName, Challenge challenge) {
+        this.rejectedChallenges.computeIfAbsent(projectName, k -> new ArrayList<>());
+        ArrayList<Challenge> challenges = this.rejectedChallenges.get(projectName);
+        challenges.add(challenge);
+        this.rejectedChallenges.put(projectName, challenges);
+        challenges = this.currentChallenges.get(projectName);
+        challenges.remove(challenge);
+        this.currentChallenges.put(projectName, challenges);
     }
 
     @Override

@@ -47,7 +47,7 @@ public class LeaderboardAction implements ProminentProjectAction {
                                 user.getFullName(),
                                 property.getTeamName(job.getName()),
                                 property.getScore(job.getName()),
-                                property.getAbsolvedChallenges().size()
+                                property.getAbsolvedChallenges(job.getName()).size()
                         )
                 );
             }
@@ -69,14 +69,14 @@ public class LeaderboardAction implements ProminentProjectAction {
                     }
                 }
                 if (index != -1) {
-                    details.get(index).addAbsolvedChallenges(property.getAbsolvedChallenges().size());
+                    details.get(index).addAbsolvedChallenges(property.getAbsolvedChallenges(job.getName()).size());
                     details.get(index).addScore(property.getScore(job.getName()));
                 } else {
                     details.add(
                             new TeamDetails(
                                     property.getTeamName(job.getName()),
                                     property.getScore(job.getName()),
-                                    property.getAbsolvedChallenges().size()
+                                    property.getAbsolvedChallenges(job.getName()).size()
                             )
                     );
                 }
