@@ -41,12 +41,12 @@ public class LeaderboardAction implements ProminentProjectAction {
         ArrayList<UserDetails> details = new ArrayList<>();
         for (User user : User.getAll()) {
             GameUserProperty property = user.getProperty(GameUserProperty.class);
-            if (property != null && property.isParticipating()) {
+            if (property != null && property.isParticipating(job.getName())) {
                 details.add(
                         new UserDetails(
                                 user.getFullName(),
-                                property.getTeamName(),
-                                property.getScore(),
+                                property.getTeamName(job.getName()),
+                                property.getScore(job.getName()),
                                 property.getAbsolvedChallenges().size()
                         )
                 );
@@ -60,22 +60,22 @@ public class LeaderboardAction implements ProminentProjectAction {
         ArrayList<TeamDetails> details = new ArrayList<>();
         for (User user : User.getAll()) {
             GameUserProperty property = user.getProperty(GameUserProperty.class);
-            if (property != null && property.isParticipating()) {
+            if (property != null && property.isParticipating(job.getName())) {
                 int index = -1;
                 for (int i = 0; i < details.size(); i++) {
                     TeamDetails teamDetail = details.get(i);
-                    if (teamDetail.getTeamName().equals(property.getTeamName())) {
+                    if (teamDetail.getTeamName().equals(property.getTeamName(job.getName()))) {
                         index = i;
                     }
                 }
                 if (index != -1) {
                     details.get(index).addAbsolvedChallenges(property.getAbsolvedChallenges().size());
-                    details.get(index).addScore(property.getScore());
+                    details.get(index).addScore(property.getScore(job.getName()));
                 } else {
                     details.add(
                             new TeamDetails(
-                                    property.getTeamName(),
-                                    property.getScore(),
+                                    property.getTeamName(job.getName()),
+                                    property.getScore(job.getName()),
                                     property.getAbsolvedChallenges().size()
                             )
                     );

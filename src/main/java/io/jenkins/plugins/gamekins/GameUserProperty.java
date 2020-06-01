@@ -8,52 +8,54 @@ import io.jenkins.plugins.gamekins.challenge.Challenge;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class GameUserProperty extends UserProperty {
 
-    //TODO: Improve for multi-project participation
-    private int score;
-    private boolean participating;
-    private String teamName;
     private ArrayList<Challenge> absolvedChallenges;
     private ArrayList<Challenge> currentChallenges;
     private ArrayList<Challenge> rejectedChallenges;
+    private HashMap<String, String> participation;
+    private HashMap<String, Integer> score;
 
     public GameUserProperty() {
-        this.score = 0;
-        this.participating = false;
-        this.teamName = "";
         this.absolvedChallenges = new ArrayList<>();
         this.currentChallenges = new ArrayList<>();
         this.rejectedChallenges = new ArrayList<>();
+        this.participation = new HashMap<>();
+        this.score = new HashMap<>();
     }
 
     public User getUser() {
         return this.user;
     }
 
-    public int getScore() {
-        return this.score;
+    public int getScore(String projectName) {
+        return this.score.get(projectName);
     }
 
-    public void setScore(int score) {
-        this.score = score;
+    public void setScore(String projectName, int score) {
+        this.score.put(projectName, score);
     }
 
-    public boolean isParticipating() {
-        return this.participating;
+    public boolean isParticipating(String projectName) {
+        return this.participation.containsKey(projectName);
     }
 
-    public void setParticipating(boolean participating) {
-        this.participating = participating;
+    public boolean isParticipating(String projectName, String teamName) {
+        return this.participation.get(projectName).equals(teamName);
     }
 
-    public String getTeamName() {
-        return this.teamName;
+    public void setParticipating(String projectName, String teamName) {
+        this.participation.put(projectName, teamName);
     }
 
-    public void setTeamName(String teamName) {
-        this.teamName = teamName;
+    public void removeParticipation(String projectName) {
+        this.participation.remove(projectName);
+    }
+
+    public String getTeamName(String projectName) {
+        return this.participation.get(projectName);
     }
 
     public ArrayList<Challenge> getAbsolvedChallenges() {

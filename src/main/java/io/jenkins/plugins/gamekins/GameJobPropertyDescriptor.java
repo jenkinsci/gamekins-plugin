@@ -31,10 +31,15 @@ public class GameJobPropertyDescriptor extends JobPropertyDescriptor {
     }
 
     private GameJobProperty getCurrentGameJobProperty() {
+        Project project = getCurrentProject();
+        return project == null ? null : (GameJobProperty) project.getProperties().get(this);
+    }
+
+    private Project getCurrentProject() {
         String projectName = Stapler.getCurrentRequest().getOriginalRequestURI().split("/")[3];
         for (Project project : Jenkins.getInstanceOrNull().getProjects()) {
             if (project.getName().equals(projectName)) {
-                return (GameJobProperty) project.getProperties().get(this);
+                return project;
             }
         }
         return null;
@@ -73,10 +78,10 @@ public class GameJobPropertyDescriptor extends JobPropertyDescriptor {
     public FormValidation doAddUserToTeam(@QueryParameter String teamsBox, @QueryParameter String usersBox) {
         for (User user : User.getAll()) {
             if (user.getFullName().equals(usersBox)) {
+                String projectName = getCurrentProject().getName();
                 GameUserProperty property = user.getProperty(GameUserProperty.class);
-                if (property != null && property.getTeamName().equals("")) {
-                    property.setTeamName(teamsBox);
-                    property.setParticipating(true);
+                if (property != null && !property.isParticipating(projectName)) {
+                    property.setParticipating(projectName, teamsBox);
                     //TODO: Add challenges
                     try {
                         user.save();
@@ -95,10 +100,10 @@ public class GameJobPropertyDescriptor extends JobPropertyDescriptor {
     public FormValidation doRemoveUserFromTeam(@QueryParameter String teamsBox, @QueryParameter String usersBox) {
         for (User user : User.getAll()) {
             if (user.getFullName().equals(usersBox)) {
+                String projectName = getCurrentProject().getName();
                 GameUserProperty property = user.getProperty(GameUserProperty.class);
-                if (property != null && property.getTeamName().equals(teamsBox)) {
-                    property.setTeamName("");
-                    property.setParticipating(false);
+                if (property != null && property.isParticipating(projectName, teamsBox)) {
+                    property.removeParticipation(projectName);
                     try {
                         user.save();
                     } catch (IOException e) {
@@ -114,14 +119,14 @@ public class GameJobPropertyDescriptor extends JobPropertyDescriptor {
     }
 
     public FormValidation doDeleteTeam(@QueryParameter String teamsBox) {
+        String projectName = getCurrentProject().getName();
         GameJobProperty jobProperty = getCurrentGameJobProperty();
         if (jobProperty == null || jobProperty.getTeams() == null) return FormValidation.error("Unexpected Error");
         if (!jobProperty.getTeams().contains(teamsBox)) return FormValidation.error("The specified team does not exist");
         for (User user : User.getAll()) {
             GameUserProperty property = user.getProperty(GameUserProperty.class);
-            if (property != null && property.getTeamName().equals(teamsBox)) {
-                property.setTeamName("");
-                property.setParticipating(false);
+            if (property != null && property.isParticipating(projectName, teamsBox)) {
+                property.removeParticipation(projectName);
                 try {
                     user.save();
                 } catch (IOException e) {

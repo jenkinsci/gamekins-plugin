@@ -84,6 +84,17 @@ public class GameJobProperty extends hudson.model.JobProperty<AbstractProject<?,
     @Nonnull
     @Override
     public Collection<? extends Action> getJobActions(AbstractProject<?, ?> job) {
+        try {
+            if (!User.getAll().isEmpty()) {
+                for (User user : User.getAll()) {
+                    if (user.getFullName().equals("Philipp Straubinger")) {
+                        ChallengeFactory.generateChallenge(job.getSomeWorkspace().getRemote(), user);
+                    }
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         List<Action> actions = new ArrayList<>(job.getActions());
         if (activated) {
             for (Action a : actions) {
