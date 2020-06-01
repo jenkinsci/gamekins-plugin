@@ -7,10 +7,13 @@ import hudson.model.*;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Notifier;
 import hudson.tasks.Publisher;
+import io.jenkins.plugins.gamekins.challenge.Challenge;
+import io.jenkins.plugins.gamekins.challenge.ChallengeFactory;
 import jenkins.tasks.SimpleBuildStep;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import javax.annotation.Nonnull;
+import java.io.IOException;
 
 public class GamePublisher extends Notifier {
 
@@ -62,6 +65,40 @@ public class GamePublisher extends Notifier {
      */
     @Override
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) {
+        //TODO: Wait for JaCoCo to finish
+        String projectName = build.getProject().getName();
+        for (User user : User.getAll()) {
+            GameUserProperty property = user.getProperty(GameUserProperty.class);
+            if (property != null && property.isParticipating(projectName)) {
+                //TODO: Solved challenge?
+                property.removeCurrentChallenges(projectName);
+                if (property.getCurrentChallenges(projectName).size() < 3) {
+                    for (int i = property.getCurrentChallenges(projectName).size(); i < 3; i++) {
+                        try {
+                            Challenge challenge;
+                            boolean isChallengeUnique = true;
+                            do {
+                                challenge = ChallengeFactory.generateChallenge(build.getWorkspace().getRemote(), user);
+                                for (Challenge currentChallenge : property.getCurrentChallenges(projectName)) {
+                                    if (currentChallenge.toString().equals(challenge.toString())) {
+                                        isChallengeUnique = false;
+                                        break;
+                                    }
+                                }
+                            } while (!isChallengeUnique);
+                            property.newChallenge(projectName, challenge);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    try {
+                        user.save();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
         return true;
     }
 
