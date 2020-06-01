@@ -1,6 +1,7 @@
 package io.jenkins.plugins.gamekins.challenge;
 
 import hudson.model.User;
+import hudson.tasks.Mailer;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.diff.DiffFormatter;
 import org.eclipse.jgit.lib.Constants;
@@ -84,7 +85,9 @@ public class ChallengeFactory {
 
         while (countUserCommit < 10 && totalCount < 100) {
             if (currentCommit == null) break;
-            if (currentCommit.getAuthorIdent().getName().equals(user.getFullName())) {
+            if (currentCommit.getAuthorIdent().getName().equals(user.getFullName())
+                    || currentCommit.getAuthorIdent().getEmailAddress()
+                    .equals(user.getProperty(Mailer.UserProperty.class).getAddress())) {
                 String diff = getDiffOfCommit(git, repo, currentCommit);
 
                 String[] lines = diff.split("\n");
@@ -105,6 +108,7 @@ public class ChallengeFactory {
             totalCount++;
         }
 
+        //TODO: Remove non Java files
         if (!pathsToFiles.isEmpty()) {
             pathsToFiles.removeIf(path -> Arrays.asList(path.split("/")).contains("test"));
         }
