@@ -1,6 +1,8 @@
 package io.jenkins.plugins.gamekins.challenge;
 
 import hudson.model.AbstractBuild;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 
 import java.io.IOException;
 
@@ -12,7 +14,18 @@ public class ClassCoverageChallenge extends CoverageChallenge {
 
     @Override
     public boolean isSolved(AbstractBuild<?, ?> build) {
-        return false;
+        Document document;
+        try {
+            document = Jsoup.parse(classFile, "UTF-8");
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+        int fullyCoveredLines = calculateCoveredLines(document, "fc");
+        int partiallyCoveredLines = calculateCoveredLines(document, "pc");
+        int notCoveredLines = calculateCoveredLines(document, "nc");
+        double newCoverage = fullyCoveredLines / (double) (fullyCoveredLines + partiallyCoveredLines + notCoveredLines);
+        return fullyCoveredLines > this.fullyCoveredLines && newCoverage > this.coverage;
     }
 
     @Override

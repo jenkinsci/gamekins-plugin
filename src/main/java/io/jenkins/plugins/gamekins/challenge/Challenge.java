@@ -4,8 +4,6 @@ import hudson.model.AbstractBuild;
 
 public interface Challenge {
 
-    boolean solved = false;
-
     boolean isSolved(AbstractBuild<?, ?> build);
 
     int getScore();

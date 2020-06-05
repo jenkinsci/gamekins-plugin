@@ -9,12 +9,13 @@ import java.io.IOException;
 
 public abstract class CoverageChallenge implements Challenge {
 
-    private final String packagePath;
-    private final String className;
-    private final int fullyCoveredLines;
-    private final int partiallyCoveredLines;
-    private final int notCoveredLines;
-    private final File classFile;
+    final String packagePath;
+    final String className;
+    final int fullyCoveredLines;
+    final int partiallyCoveredLines;
+    final int notCoveredLines;
+    final double coverage;
+    final File classFile;
 
     public CoverageChallenge(String packagePath, String className) throws IOException {
         this.packagePath = packagePath;
@@ -24,6 +25,8 @@ public abstract class CoverageChallenge implements Challenge {
         this.fullyCoveredLines = calculateCoveredLines(document, "fc");
         this.partiallyCoveredLines = calculateCoveredLines(document, "pc");
         this.notCoveredLines = calculateCoveredLines(document, "nc");
+        this.coverage = this.fullyCoveredLines
+                / (double) (this.fullyCoveredLines + this.partiallyCoveredLines + this.notCoveredLines);
     }
 
     public static int calculateCoveredLines(Document document, String modifier) {
