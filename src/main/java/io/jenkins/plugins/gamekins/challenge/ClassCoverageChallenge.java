@@ -16,6 +16,11 @@ public class ClassCoverageChallenge extends CoverageChallenge {
     }
 
     @Override
+    public int getScore() {
+        return 1;
+    }
+
+    @Override
     public String toString() {
         String[] split = getPackagePath().split("/");
         return "Write a test to cover more lines in class " + getClassName() + " in package " + split[split.length - 1];

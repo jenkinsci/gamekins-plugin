@@ -16,6 +16,11 @@ public class LineCoverageChallenge extends CoverageChallenge {
     }
 
     @Override
+    public int getScore() {
+        return 2;
+    }
+
+    @Override
     public String toString() {
         return super.toString();
     }
