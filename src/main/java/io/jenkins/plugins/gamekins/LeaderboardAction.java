@@ -3,6 +3,7 @@ package io.jenkins.plugins.gamekins;
 import hudson.model.AbstractProject;
 import hudson.model.ProminentProjectAction;
 import hudson.model.User;
+import io.jenkins.plugins.gamekins.challenge.Challenge;
 import org.kohsuke.stapler.export.Exported;
 import org.kohsuke.stapler.export.ExportedBean;
 
@@ -84,6 +85,30 @@ public class LeaderboardAction implements ProminentProjectAction {
         }
         details.sort(Comparator.comparingInt(TeamDetails::getScore));
         return details;
+    }
+
+    public ArrayList<Challenge> getAbsolvedChallenges() {
+        User user = User.current();
+        if (user == null) return new ArrayList<>();
+        GameUserProperty property = user.getProperty(GameUserProperty.class);
+        if (property == null) return new ArrayList<>();
+        return property.getAbsolvedChallenges(job.getName());
+    }
+
+    public ArrayList<Challenge> getCurrentChallenges() {
+        User user = User.current();
+        if (user == null) return new ArrayList<>();
+        GameUserProperty property = user.getProperty(GameUserProperty.class);
+        if (property == null) return new ArrayList<>();
+        return property.getCurrentChallenges(job.getName());
+    }
+
+    public ArrayList<Challenge> getRejectedChallenges() {
+        User user = User.current();
+        if (user == null) return new ArrayList<>();
+        GameUserProperty property = user.getProperty(GameUserProperty.class);
+        if (property == null) return new ArrayList<>();
+        return property.getRejectedChallenges(job.getName());
     }
 
     @ExportedBean(defaultVisibility = 999)

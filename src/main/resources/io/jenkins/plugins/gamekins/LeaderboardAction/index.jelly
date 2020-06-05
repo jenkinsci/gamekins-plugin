@@ -54,18 +54,36 @@
                     <tr>
                         <td class="pane-header" align="left,center">#</td>
                         <td class="pane-header" align="left,center">Current Challenges</td>
+                        <j:forEach indexVar="index" var="currentChallenge" items="${it.currentChallenges}">
+                            <tr>
+                                <td>${index + 1}</td>
+                                <td>${currentChallenge}</td>
+                            </tr>
+                        </j:forEach>
                     </tr>
                 </table>
                 <table class="pane sortable bigtable" style="width:33%; float:left; margin-left: 0.5%; margin-right: 0.5%">
                     <tr>
                         <td class="pane-header" align="left,center">#</td>
                         <td class="pane-header" align="left,center">Absolved Challenges</td>
+                        <j:forEach indexVar="index" var="absolvedChallenge" items="${it.absolvedChallenges}">
+                            <tr>
+                                <td>${index + 1}</td>
+                                <td>${absolvedChallenge}</td>
+                            </tr>
+                        </j:forEach>
                     </tr>
                 </table>
                 <table class="pane sortable bigtable" style="width:33%; float:right">
                     <tr>
                         <td class="pane-header" align="left,center">#</td>
                         <td class="pane-header" align="left,center">Rejected Challenges</td>
+                        <j:forEach indexVar="index" var="rejectedChallenge" items="${it.rejectedChallenges}">
+                            <tr>
+                                <td>${index + 1}</td>
+                                <td>${rejectedChallenge}</td>
+                            </tr>
+                        </j:forEach>
                     </tr>
                 </table>
             </div>
