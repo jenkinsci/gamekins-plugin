@@ -65,12 +65,12 @@ public class GamePublisher extends Notifier {
      */
     @Override
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) {
-        //TODO: Wait for JaCoCo to finish
         String projectName = build.getProject().getName();
         for (User user : User.getAll()) {
             GameUserProperty property = user.getProperty(GameUserProperty.class);
             if (property != null && property.isParticipating(projectName)) {
                 //TODO: Solved challenge?
+                //TODO: Remove line
                 property.removeCurrentChallenges(projectName);
                 if (property.getCurrentChallenges(projectName).size() < 3) {
                     for (int i = property.getCurrentChallenges(projectName).size(); i < 3; i++) {

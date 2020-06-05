@@ -15,10 +15,7 @@ import org.eclipse.jgit.treewalk.AbstractTreeIterator;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 import org.jsoup.nodes.Document;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 import java.util.*;
 
 public class ChallengeFactory {
@@ -29,6 +26,8 @@ public class ChallengeFactory {
 
     public static Challenge generateChallenge(String workspace, User user) throws IOException {
         ArrayList<String> lastChangedFilesOfUser = new ArrayList<>(getLastChangedFilesOfUser(workspace, user));
+        //TODO: Choose class with low coverage
+        ArrayList<Double> coverageValues = getCoverageInPercentageFromJacoco(lastChangedFilesOfUser, workspace);
         ArrayList<String> worklist = new ArrayList<>(lastChangedFilesOfUser);
         Random random = new Random();
 
@@ -108,9 +107,9 @@ public class ChallengeFactory {
             totalCount++;
         }
 
-        //TODO: Remove non Java files
         if (!pathsToFiles.isEmpty()) {
             pathsToFiles.removeIf(path -> Arrays.asList(path.split("/")).contains("test"));
+            pathsToFiles.removeIf(path -> !path.contains(".java"));
         }
 
         return pathsToFiles;
@@ -119,6 +118,7 @@ public class ChallengeFactory {
     //Helper gets the diff as a string.
     private static String getDiffOfCommit(Git git, Repository repo, RevCommit newCommit) throws IOException {
 
+        //TODO: Get diff from first commit
         //Get commit that is previous to the current one.
         RevCommit oldCommit = getPrevHash(repo, newCommit);
         if(oldCommit == null){
@@ -162,5 +162,36 @@ public class ChallengeFactory {
                 return new CanonicalTreeParser(null, reader, treeId);
             }
         }
+    }
+
+    private static ArrayList<Double> getCoverageInPercentageFromJacoco(List<String> paths, String workspace) {
+        String filePath = workspace + "/target/site/jacoco/jacoco.csv";
+        List<List<String>> records = new ArrayList<>();
+        ArrayList<Double> coverageValues = new ArrayList<>();
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(filePath));
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] values = line.split(",");
+                records.add(Arrays.asList(values));
+            }
+
+            for (String path : paths) {
+                String[] split = path.split("/");
+                for (List<String> coverageLine : records ) {
+                    //TODO: Improve
+                    if (split[split.length - 1].contains(coverageLine.get(2))) {
+                        double value = Double.parseDouble(coverageLine.get(4))
+                                / (Double.parseDouble(coverageLine.get(3))
+                                + Double.parseDouble(coverageLine.get(4)));
+                        coverageValues.add(value);
+                        break;
+                    }
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return coverageValues;
     }
 }
