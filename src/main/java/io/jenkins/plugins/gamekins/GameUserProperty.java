@@ -41,6 +41,10 @@ public class GameUserProperty extends UserProperty {
         this.score.put(projectName, score);
     }
 
+    public void addScore(String projectName, int score) {
+        this.score.put(projectName, this.score.get(projectName) + score);
+    }
+
     public boolean isParticipating(String projectName) {
         return this.participation.containsKey(projectName);
     }

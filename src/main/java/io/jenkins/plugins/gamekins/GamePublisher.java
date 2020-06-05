@@ -69,7 +69,12 @@ public class GamePublisher extends Notifier {
         for (User user : User.getAll()) {
             GameUserProperty property = user.getProperty(GameUserProperty.class);
             if (property != null && property.isParticipating(projectName)) {
-                //TODO: Solved challenge?
+                for (Challenge challenge : property.getCurrentChallenges(projectName)) {
+                    if (challenge.isSolved(build)) {
+                        property.absolveChallenge(projectName, challenge);
+                        property.addScore(projectName, challenge.getScore());
+                    }
+                }
                 //TODO: Remove line
                 property.removeCurrentChallenges(projectName);
                 if (property.getCurrentChallenges(projectName).size() < 3) {
