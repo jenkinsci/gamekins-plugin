@@ -12,6 +12,7 @@ import org.kohsuke.stapler.export.ExportedBean;
 import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class LeaderboardAction implements ProminentProjectAction, Describable<LeaderboardAction> {
 
@@ -89,27 +90,27 @@ public class LeaderboardAction implements ProminentProjectAction, Describable<Le
         return details;
     }
 
-    public ArrayList<Challenge> getAbsolvedChallenges() {
+    public CopyOnWriteArrayList<Challenge> getAbsolvedChallenges() {
         User user = User.current();
-        if (user == null) return new ArrayList<>();
+        if (user == null) return new CopyOnWriteArrayList<>();
         GameUserProperty property = user.getProperty(GameUserProperty.class);
-        if (property == null) return new ArrayList<>();
+        if (property == null) return new CopyOnWriteArrayList<>();
         return property.getAbsolvedChallenges(job.getName());
     }
 
-    public ArrayList<Challenge> getCurrentChallenges() {
+    public CopyOnWriteArrayList<Challenge> getCurrentChallenges() {
         User user = User.current();
-        if (user == null) return new ArrayList<>();
+        if (user == null) return new CopyOnWriteArrayList<>();
         GameUserProperty property = user.getProperty(GameUserProperty.class);
-        if (property == null) return new ArrayList<>();
+        if (property == null) return new CopyOnWriteArrayList<>();
         return property.getCurrentChallenges(job.getName());
     }
 
-    public ArrayList<Challenge> getRejectedChallenges() {
+    public CopyOnWriteArrayList<Challenge> getRejectedChallenges() {
         User user = User.current();
-        if (user == null) return new ArrayList<>();
+        if (user == null) return new CopyOnWriteArrayList<>();
         GameUserProperty property = user.getProperty(GameUserProperty.class);
-        if (property == null) return new ArrayList<>();
+        if (property == null) return new CopyOnWriteArrayList<>();
         return property.getRejectedChallenges(job.getName());
     }
 

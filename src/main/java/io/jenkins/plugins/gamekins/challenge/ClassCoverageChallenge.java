@@ -30,7 +30,7 @@ public class ClassCoverageChallenge extends CoverageChallenge {
 
     @Override
     public int getScore() {
-        return 1;
+        return this.coverage >= 0.8 ? 2 : 1;
     }
 
     @Override

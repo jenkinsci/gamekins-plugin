@@ -14,6 +14,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
+import java.util.ArrayList;
 
 public class GamePublisher extends Notifier {
 
@@ -75,14 +76,13 @@ public class GamePublisher extends Notifier {
                         property.addScore(projectName, challenge.getScore());
                     }
                 }
-                //TODO: Remove line
-                property.removeCurrentChallenges(projectName);
                 if (property.getCurrentChallenges(projectName).size() < 3) {
                     for (int i = property.getCurrentChallenges(projectName).size(); i < 3; i++) {
                         try {
                             Challenge challenge;
-                            boolean isChallengeUnique = true;
+                            boolean isChallengeUnique;
                             do {
+                                isChallengeUnique = true;
                                 challenge = ChallengeFactory.generateChallenge(build.getWorkspace().getRemote(), user);
                                 for (Challenge currentChallenge : property.getCurrentChallenges(projectName)) {
                                     if (currentChallenge.toString().equals(challenge.toString())) {

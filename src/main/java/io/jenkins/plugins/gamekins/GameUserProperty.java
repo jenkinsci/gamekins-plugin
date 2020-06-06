@@ -7,14 +7,14 @@ import hudson.model.UserPropertyDescriptor;
 import io.jenkins.plugins.gamekins.challenge.Challenge;
 
 import javax.annotation.Nonnull;
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class GameUserProperty extends UserProperty {
 
-    private final HashMap<String, ArrayList<Challenge>> absolvedChallenges;
-    private final HashMap<String, ArrayList<Challenge>> currentChallenges;
-    private final HashMap<String, ArrayList<Challenge>> rejectedChallenges;
+    private final HashMap<String, CopyOnWriteArrayList<Challenge>> absolvedChallenges;
+    private final HashMap<String, CopyOnWriteArrayList<Challenge>> currentChallenges;
+    private final HashMap<String, CopyOnWriteArrayList<Challenge>> rejectedChallenges;
     private final HashMap<String, String> participation;
     private final HashMap<String, Integer> score;
 
@@ -56,9 +56,9 @@ public class GameUserProperty extends UserProperty {
     public void setParticipating(String projectName, String teamName) {
         this.participation.put(projectName, teamName);
         this.score.putIfAbsent(projectName, 0);
-        this.absolvedChallenges.putIfAbsent(projectName, new ArrayList<>());
-        this.currentChallenges.putIfAbsent(projectName, new ArrayList<>());
-        this.rejectedChallenges.putIfAbsent(projectName, new ArrayList<>());
+        this.absolvedChallenges.putIfAbsent(projectName, new CopyOnWriteArrayList<>());
+        this.currentChallenges.putIfAbsent(projectName, new CopyOnWriteArrayList<>());
+        this.rejectedChallenges.putIfAbsent(projectName, new CopyOnWriteArrayList<>());
     }
 
     public void removeParticipation(String projectName) {
@@ -69,21 +69,21 @@ public class GameUserProperty extends UserProperty {
         return this.participation.get(projectName);
     }
 
-    public ArrayList<Challenge> getAbsolvedChallenges(String projectName) {
+    public CopyOnWriteArrayList<Challenge> getAbsolvedChallenges(String projectName) {
         return this.absolvedChallenges.get(projectName);
     }
 
-    public ArrayList<Challenge> getCurrentChallenges(String projectName) {
+    public CopyOnWriteArrayList<Challenge> getCurrentChallenges(String projectName) {
         return this.currentChallenges.get(projectName);
     }
 
-    public ArrayList<Challenge> getRejectedChallenges(String projectName) {
+    public CopyOnWriteArrayList<Challenge> getRejectedChallenges(String projectName) {
         return this.rejectedChallenges.get(projectName);
     }
 
     public void absolveChallenge(String projectName, Challenge challenge) {
-        this.absolvedChallenges.computeIfAbsent(projectName, k -> new ArrayList<>());
-        ArrayList<Challenge> challenges = this.absolvedChallenges.get(projectName);
+        this.absolvedChallenges.computeIfAbsent(projectName, k -> new CopyOnWriteArrayList<>());
+        CopyOnWriteArrayList<Challenge> challenges = this.absolvedChallenges.get(projectName);
         challenges.add(challenge);
         this.absolvedChallenges.put(projectName, challenges);
         challenges = this.currentChallenges.get(projectName);
@@ -95,20 +95,22 @@ public class GameUserProperty extends UserProperty {
      * Only for debugging purposes
      * @param projectName the name of the project
      */
-    public void removeCurrentChallenges(String projectName) {
-        this.currentChallenges.put(projectName, new ArrayList<>());
+    public void removeChallenges(String projectName) {
+        this.currentChallenges.put(projectName, new CopyOnWriteArrayList<>());
+        this.absolvedChallenges.put(projectName, new CopyOnWriteArrayList<>());
+        this.rejectedChallenges.put(projectName, new CopyOnWriteArrayList<>());
     }
 
     public void newChallenge(String projectName, Challenge challenge) {
-        this.currentChallenges.computeIfAbsent(projectName, k -> new ArrayList<>());
-        ArrayList<Challenge> challenges = this.currentChallenges.get(projectName);
+        this.currentChallenges.computeIfAbsent(projectName, k -> new CopyOnWriteArrayList<>());
+        CopyOnWriteArrayList<Challenge> challenges = this.currentChallenges.get(projectName);
         challenges.add(challenge);
         this.currentChallenges.put(projectName, challenges);
     }
 
     public void rejectChallenge(String projectName, Challenge challenge) {
-        this.rejectedChallenges.computeIfAbsent(projectName, k -> new ArrayList<>());
-        ArrayList<Challenge> challenges = this.rejectedChallenges.get(projectName);
+        this.rejectedChallenges.computeIfAbsent(projectName, k -> new CopyOnWriteArrayList<>());
+        CopyOnWriteArrayList<Challenge> challenges = this.rejectedChallenges.get(projectName);
         challenges.add(challenge);
         this.rejectedChallenges.put(projectName, challenges);
         challenges = this.currentChallenges.get(projectName);
