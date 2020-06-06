@@ -1,7 +1,6 @@
 package io.jenkins.plugins.gamekins;
 
 import hudson.model.*;
-import io.jenkins.plugins.gamekins.challenge.ChallengeFactory;
 import net.sf.json.JSONObject;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;

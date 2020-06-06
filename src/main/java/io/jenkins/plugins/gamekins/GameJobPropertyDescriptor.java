@@ -35,7 +35,7 @@ public class GameJobPropertyDescriptor extends JobPropertyDescriptor {
         return project == null ? null : (GameJobProperty) project.getProperties().get(this);
     }
 
-    private Project getCurrentProject() {
+    public static Project getCurrentProject() {
         String projectName = Stapler.getCurrentRequest().getOriginalRequestURI().split("/")[3];
         for (Project project : Jenkins.getInstanceOrNull().getProjects()) {
             if (project.getName().equals(projectName)) {

@@ -1,17 +1,19 @@
 package io.jenkins.plugins.gamekins;
 
-import hudson.model.AbstractProject;
-import hudson.model.ProminentProjectAction;
-import hudson.model.User;
+import hudson.Extension;
+import hudson.model.*;
+import hudson.util.FormValidation;
 import io.jenkins.plugins.gamekins.challenge.Challenge;
+import jenkins.model.Jenkins;
+import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.export.Exported;
 import org.kohsuke.stapler.export.ExportedBean;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import javax.annotation.Nonnull;
+import java.io.IOException;
+import java.util.*;
 
-public class LeaderboardAction implements ProminentProjectAction {
+public class LeaderboardAction implements ProminentProjectAction, Describable<LeaderboardAction> {
 
     private final transient AbstractProject job;
 
@@ -111,6 +113,25 @@ public class LeaderboardAction implements ProminentProjectAction {
         return property.getRejectedChallenges(job.getName());
     }
 
+    /**
+     * Gets the descriptor for this instance.
+     *
+     * <p>
+     * {@link Descriptor} is a singleton for every concrete {@link Describable}
+     * implementation, so if {@code a.getClass() == b.getClass()} then by default
+     * {@code a.getDescriptor() == b.getDescriptor()} as well.
+     * (In rare cases a single implementation class may be used for instances with distinct descriptors.)
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    public Descriptor<LeaderboardAction> getDescriptor() {
+        Jenkins jenkins = Jenkins.getInstance();
+        if (jenkins == null) {
+            throw new IllegalStateException("Jenkins has not been started");
+        }
+        return jenkins.getDescriptorOrDie(getClass());
+    }
+
     @ExportedBean(defaultVisibility = 999)
     public class UserDetails {
 
@@ -183,6 +204,51 @@ public class LeaderboardAction implements ProminentProjectAction {
         @Exported
         public void addAbsolvedChallenges(int absolvedChallenges) {
             this.absolvedChallenges += absolvedChallenges;
+        }
+    }
+
+    @Extension
+    public static final class DescriptorImpl extends Descriptor<LeaderboardAction> {
+
+        public DescriptorImpl() {
+            super(LeaderboardAction.class);
+        }
+
+        /**
+         * Human readable name of this kind of configurable object.
+         * Should be overridden for most descriptors, if the display name is visible somehow.
+         * As a fallback it uses {@link Class#getSimpleName} on {@link #clazz}, so for example {@code MyThing} from {@code some.pkg.MyThing.DescriptorImpl}.
+         * Historically some implementations returned null as a way of hiding the descriptor from the UI,
+         * but this is generally managed by an explicit method such as {@code isEnabled} or {@code isApplicable}.
+         */
+        @Nonnull
+        @Override
+        public String getDisplayName() {
+            return super.getDisplayName();
+        }
+
+        public FormValidation doRejectChallenge(@QueryParameter String reject) {
+            User user = User.current();
+            if (user == null) return FormValidation.error("There is no user signed in");
+            GameUserProperty property = user.getProperty(GameUserProperty.class);
+            if (property == null) return FormValidation.error("Unexpected error");
+            String projectName = GameJobPropertyDescriptor.getCurrentProject().getName();
+            Challenge challenge = null;
+            for (Challenge chal : property.getCurrentChallenges(projectName)) {
+                if (chal.toString().equals(reject)) {
+                    challenge = chal;
+                    break;
+                }
+            }
+            if (challenge == null) return FormValidation.error("The challenge does not exist");
+            property.rejectChallenge(projectName, challenge);
+            try {
+                user.save();
+            } catch (IOException e) {
+                e.printStackTrace();
+                return FormValidation.error("Unexpected error");
+            }
+            return FormValidation.ok("Challenge rejected");
         }
     }
 }

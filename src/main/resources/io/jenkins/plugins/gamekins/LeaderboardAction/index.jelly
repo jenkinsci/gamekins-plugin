@@ -1,5 +1,5 @@
 <?jelly escape-by-default='true'?>
-<j:jelly xmlns:j="jelly:core" xmlns:l="/lib/layout" xmlns:st="jelly:stapler">
+<j:jelly xmlns:j="jelly:core" xmlns:l="/lib/layout" xmlns:st="jelly:stapler" xmlns:f="/lib/form">
     <l:layout title="Leaderboard">
         <l:side-panel>
             <st:include page="sidepanel.jelly" it="${it.job}" optional="true" />
@@ -9,7 +9,7 @@
                 Leaderboard
             </h1>
             <div>
-                <table class="pane sortable bigtable" style="width:49%; float:left">
+                <table class="pane sortable bigtable" style="width: 49.5%; display: inline-table; margin-right: 1%">
                     <tr>
                         <td class="pane-header" align="left,center">#</td>
                         <td class="pane-header" align="left,center">Participant</td>
@@ -27,7 +27,7 @@
                         </tr>
                     </j:forEach>
                 </table>
-                <table class="pane sortable bigtable" style="width:49%; float:right">
+                <table class="pane sortable bigtable" style="width: 49.5%; display: inline-table">
                     <tr>
                         <td class="pane-header" align="left,center">#</td>
                         <td class="pane-header" align="left,center">Team</td>
@@ -45,12 +45,11 @@
                 </table>
             </div>
             <br/>
-            <br/>
             <h1>
                 Challenges
             </h1>
             <div>
-                <table class="pane sortable bigtable" style="width:33%; float:left">
+                <table class="pane sortable bigtable" style="width:33%; display: inline-table">
                     <tr>
                         <td class="pane-header" align="left,center">#</td>
                         <td class="pane-header" align="left,center">Current Challenges</td>
@@ -62,7 +61,7 @@
                         </j:forEach>
                     </tr>
                 </table>
-                <table class="pane sortable bigtable" style="width:33%; float:left; margin-left: 0.5%; margin-right: 0.5%">
+                <table class="pane sortable bigtable" style="width:33%; display: inline-table; margin-left: 0.5%; margin-right: 0.5%">
                     <tr>
                         <td class="pane-header" align="left,center">#</td>
                         <td class="pane-header" align="left,center">Absolved Challenges</td>
@@ -74,7 +73,7 @@
                         </j:forEach>
                     </tr>
                 </table>
-                <table class="pane sortable bigtable" style="width:33%; float:right">
+                <table class="pane sortable bigtable" style="width:33%; display: inline-table">
                     <tr>
                         <td class="pane-header" align="left,center">#</td>
                         <td class="pane-header" align="left,center">Rejected Challenges</td>
@@ -86,6 +85,19 @@
                         </j:forEach>
                     </tr>
                 </table>
+            </div>
+            <br/>
+            <div>
+                <f:form descriptor="${it.descriptor}">
+                    <label for="reject">Reject Challenge: </label>
+                    <select name="reject">
+                        <j:forEach indexVar="index" var="challenge" items="${it.currentChallenges}">
+                            <option>${challenge}</option>
+                        </j:forEach>
+                    </select>
+                    <f:validateButton title="Reject" method="rejectChallenge" with="reject" />
+                    <!--<button type="button" style="margin-left: 1%">Reject</button>-->
+                </f:form>
             </div>
         </l:main-panel>
     </l:layout>
