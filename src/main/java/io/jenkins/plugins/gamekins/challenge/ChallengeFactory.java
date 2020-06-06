@@ -25,6 +25,7 @@ public class ChallengeFactory {
     }
 
     public static Challenge generateChallenge(String workspace, User user) throws IOException {
+        //TODO: If list if empty
         ArrayList<String> lastChangedFilesOfUser = new ArrayList<>(getLastChangedFilesOfUser(workspace, user));
         //TODO: Choose class with low coverage
         ArrayList<Double> coverageValues = getCoverageInPercentageFromJacoco(lastChangedFilesOfUser, workspace);
@@ -35,14 +36,23 @@ public class ChallengeFactory {
         Challenge challenge;
         do {
             int index = random.nextInt(worklist.size());
-            challenge = generateClassCoverageChallenge(workspace, worklist.get(index));
+            //TODO: Make more beautiful
+            int challengeType = random.nextInt(3);
+            Class challengeClass;
+            if (challengeType == 0) {
+                challengeClass = ClassCoverageChallenge.class;
+            } else {
+                challengeClass = LineCoverageChallenge.class;
+            }
+            challenge = generateCoverageChallenge(workspace, worklist.get(index), challengeClass);
             worklist.remove(index);
         } while (challenge == null);
 
         return challenge;
     }
 
-    private static ClassCoverageChallenge generateClassCoverageChallenge(String workspace, String path)
+    //TODO: Create Enum
+    private static CoverageChallenge generateCoverageChallenge(String workspace, String path, Class challengeClass)
             throws IOException {
         //TODO: Change path for different build tools
         String filePath = workspace + "/target/site/jacoco/";
@@ -62,7 +72,11 @@ public class ChallengeFactory {
                 filePath + packageName + "/" + className + ".java.html", "UTF-8");
         if (CoverageChallenge.calculateCoveredLines(document, "pc") > 0
                 || CoverageChallenge.calculateCoveredLines(document, "nc") > 0) {
-            return new ClassCoverageChallenge(filePath + packageName, className);
+            if (challengeClass == ClassCoverageChallenge.class) {
+                return new ClassCoverageChallenge(filePath + packageName, className);
+            } else {
+                return new LineCoverageChallenge(filePath + packageName, className);
+            }
         }
         return null;
     }
