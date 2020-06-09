@@ -28,8 +28,13 @@ public class ChallengeFactory {
 
     public static Challenge generateChallenge(AbstractBuild<?, ?> build, User user) throws IOException {
         String workspace = build.getWorkspace().getRemote();
-        //TODO: If list if empty
-        ArrayList<String> lastChangedFilesOfUser = new ArrayList<>(getLastChangedFilesOfUser(workspace, user));
+        ArrayList<String> lastChangedFilesOfUser = new ArrayList<>(getLastChangedFilesOfUser(workspace, user, 10));
+        if (lastChangedFilesOfUser.size() == 0) {
+            lastChangedFilesOfUser = new ArrayList<>(getLastChangedFilesOfUser(workspace, user, 100));
+        }
+        if (lastChangedFilesOfUser.size() == 0) {
+            return new DummyChallenge();
+        }
         //TODO: Choose class with low coverage
         ArrayList<Double> coverageValues = getCoverageInPercentageFromJacoco(lastChangedFilesOfUser, workspace);
         ArrayList<String> worklist = new ArrayList<>(lastChangedFilesOfUser);
@@ -86,14 +91,22 @@ public class ChallengeFactory {
         return null;
     }
 
-    private static Set<String> getLastChangedFilesOfUser(String workspace, User user) throws IOException {
-        FileRepositoryBuilder builder = new FileRepositoryBuilder();
-        Repository repo = builder.setGitDir(new File(workspace + "/.git")).setMustExist(true).build();
+    private static RevCommit getHead(Repository repo) throws IOException {
         RevWalk walk = new RevWalk(repo);
 
         ObjectId head = repo.resolve(Constants.HEAD);
         RevCommit headCommit = walk.parseCommit(head);
         walk.dispose();
+
+        return headCommit;
+    }
+
+    private static Set<String> getLastChangedFilesOfUser(String workspace, User user, int commitCount) throws IOException {
+        FileRepositoryBuilder builder = new FileRepositoryBuilder();
+        Repository repo = builder.setGitDir(new File(workspace + "/.git")).setMustExist(true).build();
+        RevWalk walk = new RevWalk(repo);
+
+        RevCommit headCommit = getHead(repo);
         Git git = new Git(repo);
 
         int countUserCommit = 0;
@@ -101,7 +114,7 @@ public class ChallengeFactory {
         RevCommit currentCommit = headCommit;
         LinkedHashSet<String> pathsToFiles = new LinkedHashSet<>();
 
-        while (countUserCommit < 10 && totalCount < 100) {
+        while (countUserCommit < commitCount && totalCount < commitCount * 5) {
             if (currentCommit == null) break;
             if (currentCommit.getAuthorIdent().getName().equals(user.getFullName())
                     || currentCommit.getAuthorIdent().getEmailAddress()
