@@ -14,7 +14,6 @@ import org.kohsuke.stapler.DataBoundConstructor;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
-import java.util.ArrayList;
 
 public class GamePublisher extends Notifier {
 
@@ -83,7 +82,7 @@ public class GamePublisher extends Notifier {
                             boolean isChallengeUnique;
                             do {
                                 isChallengeUnique = true;
-                                challenge = ChallengeFactory.generateChallenge(build.getWorkspace().getRemote(), user);
+                                challenge = ChallengeFactory.generateChallenge(build, user);
                                 for (Challenge currentChallenge : property.getCurrentChallenges(projectName)) {
                                     if (currentChallenge.toString().equals(challenge.toString())) {
                                         isChallengeUnique = false;

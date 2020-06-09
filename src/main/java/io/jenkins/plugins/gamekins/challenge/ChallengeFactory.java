@@ -1,5 +1,7 @@
 package io.jenkins.plugins.gamekins.challenge;
 
+import hudson.model.AbstractBuild;
+import hudson.model.Result;
 import hudson.model.User;
 import hudson.tasks.Mailer;
 import org.eclipse.jgit.api.Git;
@@ -24,7 +26,8 @@ public class ChallengeFactory {
 
     }
 
-    public static Challenge generateChallenge(String workspace, User user) throws IOException {
+    public static Challenge generateChallenge(AbstractBuild<?, ?> build, User user) throws IOException {
+        String workspace = build.getWorkspace().getRemote();
         //TODO: If list if empty
         ArrayList<String> lastChangedFilesOfUser = new ArrayList<>(getLastChangedFilesOfUser(workspace, user));
         //TODO: Choose class with low coverage
@@ -37,10 +40,12 @@ public class ChallengeFactory {
         do {
             int index = random.nextInt(worklist.size());
             //TODO: Make more beautiful
-            int challengeType = random.nextInt(3);
+            int challengeType = random.nextInt(4);
             Class challengeClass;
             if (challengeType == 0) {
                 challengeClass = ClassCoverageChallenge.class;
+            } else if (challengeType == 1 && build.getResult() != Result.SUCCESS) {
+                return new TestChallenge();
             } else {
                 challengeClass = LineCoverageChallenge.class;
             }
