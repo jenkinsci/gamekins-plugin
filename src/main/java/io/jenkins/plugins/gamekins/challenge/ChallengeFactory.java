@@ -27,6 +27,10 @@ public class ChallengeFactory {
     }
 
     public static Challenge generateChallenge(AbstractBuild<?, ?> build, User user) throws IOException {
+        if (build.getResult() != Result.SUCCESS && Math.random() > 0.5) {
+            return new BuildChallenge();
+        }
+
         String workspace = build.getWorkspace().getRemote();
         ArrayList<String> lastChangedFilesOfUser = new ArrayList<>(getLastChangedFilesOfUser(workspace, user, 10));
         if (lastChangedFilesOfUser.size() == 0) {
@@ -45,7 +49,6 @@ public class ChallengeFactory {
         files.sort(Comparator.comparingDouble(covFile -> covFile.coverage));
         Collections.reverse(files);
         ArrayList<CoverageFiles> worklist = new ArrayList<>(files);
-        Random random = new Random();
 
         final double c = 1.5;
         double[] rankValues = new double[worklist.size()];
@@ -56,6 +59,7 @@ public class ChallengeFactory {
 
         //TODO: Generate other Challenges
         Challenge challenge;
+        Random random = new Random();
         do {
             double probability = Math.random();
             CoverageFiles selectedClass = worklist.get(worklist.size() - 1);
@@ -66,12 +70,10 @@ public class ChallengeFactory {
                 }
             }
             //TODO: Make more beautiful
-            int challengeType = random.nextInt(4);
+            int challengeType = random.nextInt(3);
             Class challengeClass;
             if (challengeType == 0) {
                 challengeClass = ClassCoverageChallenge.class;
-            } else if (challengeType == 1 && build.getResult() != Result.SUCCESS) {
-                return new TestChallenge();
             } else {
                 challengeClass = LineCoverageChallenge.class;
             }
