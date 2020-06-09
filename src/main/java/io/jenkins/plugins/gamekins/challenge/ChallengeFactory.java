@@ -134,31 +134,36 @@ public class ChallengeFactory {
 
         int countUserCommit = 0;
         int totalCount = 0;
-        RevCommit currentCommit = headCommit;
+        ArrayList<RevCommit> currentCommits = new ArrayList<>();
+        currentCommits.add(headCommit);
         LinkedHashSet<String> pathsToFiles = new LinkedHashSet<>();
 
         while (countUserCommit < commitCount && totalCount < commitCount * 5) {
-            if (currentCommit == null) break;
-            if (currentCommit.getAuthorIdent().getName().equals(user.getFullName())
-                    || currentCommit.getAuthorIdent().getEmailAddress()
-                    .equals(user.getProperty(Mailer.UserProperty.class).getAddress())) {
-                String diff = getDiffOfCommit(git, repo, currentCommit);
+            if (currentCommits.isEmpty()) break;
+            ArrayList<RevCommit> newCommits = new ArrayList<>();
+            for (RevCommit commit : currentCommits) {
+                if (commit.getAuthorIdent().getName().equals(user.getFullName())
+                        || commit.getAuthorIdent().getEmailAddress()
+                        .equals(user.getProperty(Mailer.UserProperty.class).getAddress())) {
+                    String diff = getDiffOfCommit(git, repo, commit);
 
-                String[] lines = diff.split("\n");
-                for (String line : lines) {
-                    if (line.contains("diff --git")) {
-                        pathsToFiles.add(line.split(" ")[2].substring(1));
+                    String[] lines = diff.split("\n");
+                    for (String line : lines) {
+                        if (line.contains("diff --git")) {
+                            pathsToFiles.add(line.split(" ")[2].substring(1));
+                        }
                     }
+
+                    countUserCommit++;
                 }
 
-                countUserCommit++;
+                //TODO: Adjustment to git branches necessary?
+                for (RevCommit parent : commit.getParents()) {
+                    newCommits.add(walk.parseCommit(repo.resolve(parent.getName())));
+                    walk.dispose();
+                }
             }
-
-            //TODO: Case with more than one parent?
-            currentCommit = currentCommit.getParentCount() == 0
-                    ? null
-                    : walk.parseCommit(repo.resolve(currentCommit.getParent(0).getName()));
-            walk.dispose();
+            currentCommits = new ArrayList<>(newCommits);
             totalCount++;
         }
 
