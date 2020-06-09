@@ -31,19 +31,40 @@ public class ChallengeFactory {
         ArrayList<String> lastChangedFilesOfUser = new ArrayList<>(getLastChangedFilesOfUser(workspace, user, 10));
         if (lastChangedFilesOfUser.size() == 0) {
             lastChangedFilesOfUser = new ArrayList<>(getLastChangedFilesOfUser(workspace, user, 100));
+            if (lastChangedFilesOfUser.size() == 0) {
+                return new DummyChallenge();
+            }
         }
-        if (lastChangedFilesOfUser.size() == 0) {
-            return new DummyChallenge();
-        }
-        //TODO: Choose class with low coverage
+
         ArrayList<Double> coverageValues = getCoverageInPercentageFromJacoco(lastChangedFilesOfUser, workspace);
-        ArrayList<String> worklist = new ArrayList<>(lastChangedFilesOfUser);
+        ArrayList<CoverageFiles> files = new ArrayList<>();
+        for (int i = 0; i < lastChangedFilesOfUser.size(); i++) {
+            files.add(new CoverageFiles(lastChangedFilesOfUser.get(i), coverageValues.get(i)));
+        }
+        files.removeIf(coverageFiles -> coverageFiles.coverage == 1.0);
+        files.sort(Comparator.comparingDouble(covFile -> covFile.coverage));
+        Collections.reverse(files);
+        ArrayList<CoverageFiles> worklist = new ArrayList<>(files);
         Random random = new Random();
+
+        final double c = 1.5;
+        double[] rankValues = new double[worklist.size()];
+        for (int i = 0; i < worklist.size(); i++) {
+            rankValues[i] = (2 - c + 2 * (c - 1) * (i / (double) (worklist.size() - 1))) / (double) worklist.size();
+            if (i != 0) rankValues[i] += rankValues[i - 1];
+        }
 
         //TODO: Generate other Challenges
         Challenge challenge;
         do {
-            int index = random.nextInt(worklist.size());
+            double probability = Math.random();
+            CoverageFiles selectedClass = worklist.get(worklist.size() - 1);
+            for (int i = 0; i < worklist.size(); i++) {
+                if (rankValues[i] > probability) {
+                    selectedClass = worklist.get(i);
+                    break;
+                }
+            }
             //TODO: Make more beautiful
             int challengeType = random.nextInt(4);
             Class challengeClass;
@@ -54,8 +75,8 @@ public class ChallengeFactory {
             } else {
                 challengeClass = LineCoverageChallenge.class;
             }
-            challenge = generateCoverageChallenge(workspace, worklist.get(index), challengeClass);
-            worklist.remove(index);
+            challenge = generateCoverageChallenge(workspace, selectedClass.file, challengeClass);
+            worklist.remove(selectedClass);
         } while (challenge == null);
 
         return challenge;
@@ -225,5 +246,16 @@ public class ChallengeFactory {
             e.printStackTrace();
         }
         return coverageValues;
+    }
+
+    static class CoverageFiles {
+
+        final String file;
+        final double coverage;
+
+        CoverageFiles(String file, double coverage) {
+            this.file = file;
+            this.coverage = coverage;
+        }
     }
 }
