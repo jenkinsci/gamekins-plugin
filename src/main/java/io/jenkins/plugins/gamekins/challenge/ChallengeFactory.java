@@ -1,7 +1,6 @@
 package io.jenkins.plugins.gamekins.challenge;
 
 import hudson.model.AbstractBuild;
-import hudson.model.Result;
 import hudson.model.User;
 import hudson.tasks.Mailer;
 import org.eclipse.jgit.api.Git;
@@ -59,7 +58,6 @@ public class ChallengeFactory {
             if (i != 0) rankValues[i] += rankValues[i - 1];
         }
 
-        //TODO: Generate other Challenges
         Challenge challenge;
         Random random = new Random();
         do {
@@ -72,10 +70,12 @@ public class ChallengeFactory {
                 }
             }
             //TODO: Make more beautiful
-            int challengeType = random.nextInt(3);
+            int challengeType = random.nextInt(4);
             Class challengeClass;
             if (challengeType == 0) {
                 challengeClass = ClassCoverageChallenge.class;
+            } else if (challengeType == 1) {
+                challengeClass = MethodCoverageChallenge.class;
             } else {
                 challengeClass = LineCoverageChallenge.class;
             }
@@ -101,6 +101,11 @@ public class ChallengeFactory {
                 packageName.append(part).append(".");
             }
         }
+
+        if (challengeClass == MethodCoverageChallenge.class) {
+            return new MethodCoverageChallenge(jacocoPath + packageName, className);
+        }
+
         Document document = CoverageChallenge.generateDocument(
                 jacocoPath + packageName + "/" + className + ".java.html", "UTF-8");
         if (CoverageChallenge.calculateCoveredLines(document, "pc") > 0
