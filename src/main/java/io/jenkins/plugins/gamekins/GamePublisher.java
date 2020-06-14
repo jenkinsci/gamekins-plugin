@@ -7,19 +7,24 @@ import hudson.model.*;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Notifier;
 import hudson.tasks.Publisher;
+import hudson.util.FormValidation;
 import io.jenkins.plugins.gamekins.challenge.Challenge;
 import io.jenkins.plugins.gamekins.challenge.ChallengeFactory;
 import jenkins.tasks.SimpleBuildStep;
+import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.QueryParameter;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
 
 public class GamePublisher extends Notifier {
 
-    @DataBoundConstructor
-    public GamePublisher() {
+    private final String jacocoResultsPath;
 
+    @DataBoundConstructor
+    public GamePublisher(String jacocoResultsPath) {
+        this.jacocoResultsPath = jacocoResultsPath;
     }
 
     @Override
@@ -82,7 +87,7 @@ public class GamePublisher extends Notifier {
                             boolean isChallengeUnique;
                             do {
                                 isChallengeUnique = true;
-                                challenge = ChallengeFactory.generateChallenge(build, user);
+                                challenge = ChallengeFactory.generateChallenge(build, user, this.jacocoResultsPath);
                                 for (Challenge currentChallenge : property.getCurrentChallenges(projectName)) {
                                     if (currentChallenge.toString().equals(challenge.toString())) {
                                         isChallengeUnique = false;
@@ -104,6 +109,10 @@ public class GamePublisher extends Notifier {
             }
         }
         return true;
+    }
+
+    public String getJacocoResultsPath() {
+        return jacocoResultsPath;
     }
 
     @Extension
@@ -131,6 +140,17 @@ public class GamePublisher extends Notifier {
         @Override
         public boolean isApplicable(Class<? extends AbstractProject> jobType) {
             return AbstractProject.class.isAssignableFrom(jobType);
+        }
+
+        public FormValidation doCheckJacocoResultsPath(@AncestorInPath AbstractProject project, @QueryParameter String jacocoResultsPath) {
+            if (project == null) {
+                return FormValidation.ok();
+            }
+            try {
+                return FilePath.validateFileMask(project.getSomeWorkspace(), jacocoResultsPath);
+            } catch (IOException e) {
+                return FormValidation.error(e, "IOException");
+            }
         }
     }
 }

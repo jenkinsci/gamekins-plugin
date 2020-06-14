@@ -26,7 +26,7 @@ public class ChallengeFactory {
 
     }
 
-    public static Challenge generateChallenge(AbstractBuild<?, ?> build, User user) throws IOException {
+    public static Challenge generateChallenge(AbstractBuild<?, ?> build, User user, String jacocoPath) throws IOException {
         if (build.getResult() != Result.SUCCESS && Math.random() > 0.5) {
             return new BuildChallenge();
         }
@@ -77,7 +77,7 @@ public class ChallengeFactory {
             } else {
                 challengeClass = LineCoverageChallenge.class;
             }
-            challenge = generateCoverageChallenge(workspace, selectedClass.file, challengeClass);
+            challenge = generateCoverageChallenge(selectedClass.file, getFullJacocoPath(workspace, jacocoPath), challengeClass);
             worklist.remove(selectedClass);
         } while (challenge == null);
 
@@ -85,10 +85,8 @@ public class ChallengeFactory {
     }
 
     //TODO: Create Enum
-    private static CoverageChallenge generateCoverageChallenge(String workspace, String path, Class challengeClass)
+    private static CoverageChallenge generateCoverageChallenge(String path, String jacocoPath, Class challengeClass)
             throws IOException {
-        //TODO: Change path for different build tools
-        String filePath = workspace + "/target/site/jacoco/";
         StringBuilder packageName = new StringBuilder();
         String className = "";
         for (String part : path.split("/")) {
@@ -102,16 +100,25 @@ public class ChallengeFactory {
             }
         }
         Document document = CoverageChallenge.generateDocument(
-                filePath + packageName + "/" + className + ".java.html", "UTF-8");
+                jacocoPath + packageName + "/" + className + ".java.html", "UTF-8");
         if (CoverageChallenge.calculateCoveredLines(document, "pc") > 0
                 || CoverageChallenge.calculateCoveredLines(document, "nc") > 0) {
             if (challengeClass == ClassCoverageChallenge.class) {
-                return new ClassCoverageChallenge(filePath + packageName, className);
+                return new ClassCoverageChallenge(jacocoPath + packageName, className);
             } else {
-                return new LineCoverageChallenge(filePath + packageName, className);
+                return new LineCoverageChallenge(jacocoPath + packageName, className);
             }
         }
         return null;
+    }
+
+    private static String getFullJacocoPath(String workspace, String jacocoPath) {
+        if (jacocoPath.startsWith("**/")) {
+            String path = workspace + jacocoPath.substring(2);
+            if (!path.endsWith("/")) path += "/";
+            return path;
+        }
+        return jacocoPath;
     }
 
     private static RevCommit getHead(Repository repo) throws IOException {
