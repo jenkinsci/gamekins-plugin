@@ -27,10 +27,6 @@ public class ChallengeFactory {
     }
 
     public static Challenge generateChallenge(AbstractBuild<?, ?> build, User user, String jacocoPath) throws IOException {
-        if (build.getResult() != Result.SUCCESS && Math.random() > 0.5) {
-            return new BuildChallenge();
-        }
-
         String workspace = build.getWorkspace().getRemote();
         if (Math.random() > 0.9) {
             FileRepositoryBuilder builder = new FileRepositoryBuilder();
@@ -127,7 +123,7 @@ public class ChallengeFactory {
         return jacocoPath;
     }
 
-    private static RevCommit getHead(Repository repo) throws IOException {
+    public static RevCommit getHead(Repository repo) throws IOException {
         return getCommit(repo, Constants.HEAD);
     }
 

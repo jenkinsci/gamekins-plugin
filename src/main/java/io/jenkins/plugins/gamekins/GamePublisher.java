@@ -5,17 +5,23 @@ import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.*;
 import hudson.tasks.BuildStepDescriptor;
+import hudson.tasks.Mailer;
 import hudson.tasks.Notifier;
 import hudson.tasks.Publisher;
 import hudson.util.FormValidation;
+import io.jenkins.plugins.gamekins.challenge.BuildChallenge;
 import io.jenkins.plugins.gamekins.challenge.Challenge;
 import io.jenkins.plugins.gamekins.challenge.ChallengeFactory;
 import jenkins.tasks.SimpleBuildStep;
+import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 
 import javax.annotation.Nonnull;
+import java.io.File;
 import java.io.IOException;
 
 public class GamePublisher extends Notifier {
@@ -74,6 +80,22 @@ public class GamePublisher extends Notifier {
         for (User user : User.getAll()) {
             GameUserProperty property = user.getProperty(GameUserProperty.class);
             if (property != null && property.isParticipating(projectName)) {
+                try {
+                    FileRepositoryBuilder builder = new FileRepositoryBuilder();
+                    Repository repo = builder.setGitDir(
+                            new File(build.getWorkspace().getRemote() + "/.git")).setMustExist(true).build();
+                    RevCommit head = ChallengeFactory.getHead(repo);
+                    BuildChallenge challenge = new BuildChallenge();
+                    if (build.getResult() != Result.SUCCESS
+                            && (head.getAuthorIdent().getName().equals(user.getFullName())
+                            || head.getAuthorIdent().getEmailAddress()
+                            .equals(user.getProperty(Mailer.UserProperty.class).getAddress()))
+                            && !property.getCurrentChallenges(projectName).contains(challenge)) {
+                        property.newChallenge(projectName, challenge);
+                        user.save();
+                    }
+                } catch (IOException ignored){}
+
                 for (Challenge challenge : property.getCurrentChallenges(projectName)) {
                     if (challenge.isSolved(build)) {
                         property.absolveChallenge(projectName, challenge);
