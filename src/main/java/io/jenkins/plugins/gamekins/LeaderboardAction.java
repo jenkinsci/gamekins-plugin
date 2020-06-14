@@ -5,6 +5,7 @@ import hudson.model.*;
 import hudson.util.FormValidation;
 import io.jenkins.plugins.gamekins.challenge.Challenge;
 import jenkins.model.Jenkins;
+import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.export.Exported;
 import org.kohsuke.stapler.export.ExportedBean;
@@ -228,12 +229,12 @@ public class LeaderboardAction implements ProminentProjectAction, Describable<Le
             return super.getDisplayName();
         }
 
-        public FormValidation doRejectChallenge(@QueryParameter String reject) {
+        public FormValidation doRejectChallenge(@AncestorInPath AbstractProject project, @QueryParameter String reject) {
             User user = User.current();
             if (user == null) return FormValidation.error("There is no user signed in");
             GameUserProperty property = user.getProperty(GameUserProperty.class);
             if (property == null) return FormValidation.error("Unexpected error");
-            String projectName = GameJobPropertyDescriptor.getCurrentProject().getName();
+            String projectName = project.getName();
             Challenge challenge = null;
             for (Challenge chal : property.getCurrentChallenges(projectName)) {
                 if (chal.toString().equals(reject)) {

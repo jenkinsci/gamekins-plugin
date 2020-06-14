@@ -4,9 +4,8 @@ import hudson.Extension;
 import hudson.model.*;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
-import jenkins.model.Jenkins;
+import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.QueryParameter;
-import org.kohsuke.stapler.Stapler;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
@@ -30,24 +29,9 @@ public class GameJobPropertyDescriptor extends JobPropertyDescriptor {
         return AbstractProject.class.isAssignableFrom(jobType);
     }
 
-    private GameJobProperty getCurrentGameJobProperty() {
-        Project project = getCurrentProject();
-        return project == null ? null : (GameJobProperty) project.getProperties().get(this);
-    }
-
-    public static Project getCurrentProject() {
-        String projectName = Stapler.getCurrentRequest().getOriginalRequestURI().split("/")[3];
-        for (Project project : Jenkins.getInstanceOrNull().getProjects()) {
-            if (project.getName().equals(projectName)) {
-                return project;
-            }
-        }
-        return null;
-    }
-
-    public FormValidation doAddTeam(@QueryParameter String teamName) {
+    public FormValidation doAddTeam(@AncestorInPath AbstractProject project, @QueryParameter String teamName) {
         if (teamName.isEmpty()) return FormValidation.error("Insert a name for the team");
-        GameJobProperty property = getCurrentGameJobProperty();
+        GameJobProperty property = project == null ? null : (GameJobProperty) project.getProperties().get(this);
         if (property == null || property.getTeams() == null) return FormValidation.error("Unexpected Error");
         if (property.getTeams().contains(teamName))
             return FormValidation.error("The team already exists - please use another name for your team");
@@ -61,8 +45,8 @@ public class GameJobPropertyDescriptor extends JobPropertyDescriptor {
         return FormValidation.ok();
     }
 
-    public ListBoxModel doFillTeamsBoxItems() {
-        GameJobProperty property = getCurrentGameJobProperty();
+    public ListBoxModel doFillTeamsBoxItems(@AncestorInPath AbstractProject project) {
+        GameJobProperty property = project == null ? null : (GameJobProperty) project.getProperties().get(this);
         ListBoxModel listBoxModel = new ListBoxModel();
         if (property != null && property.getTeams() != null) property.getTeams().forEach(listBoxModel::add);
         return listBoxModel;
@@ -75,10 +59,10 @@ public class GameJobPropertyDescriptor extends JobPropertyDescriptor {
         return listBoxModel;
     }
 
-    public FormValidation doAddUserToTeam(@QueryParameter String teamsBox, @QueryParameter String usersBox) {
+    public FormValidation doAddUserToTeam(@AncestorInPath AbstractProject project, @QueryParameter String teamsBox, @QueryParameter String usersBox) {
         for (User user : User.getAll()) {
             if (user.getFullName().equals(usersBox)) {
-                String projectName = getCurrentProject().getName();
+                String projectName = project.getName();
                 GameUserProperty property = user.getProperty(GameUserProperty.class);
                 if (property != null && !property.isParticipating(projectName)) {
                     property.setParticipating(projectName, teamsBox);
@@ -97,10 +81,10 @@ public class GameJobPropertyDescriptor extends JobPropertyDescriptor {
         return FormValidation.error("No user with the specified name found");
     }
 
-    public FormValidation doRemoveUserFromTeam(@QueryParameter String teamsBox, @QueryParameter String usersBox) {
+    public FormValidation doRemoveUserFromTeam(@AncestorInPath AbstractProject project, @QueryParameter String teamsBox, @QueryParameter String usersBox) {
         for (User user : User.getAll()) {
             if (user.getFullName().equals(usersBox)) {
-                String projectName = getCurrentProject().getName();
+                String projectName = project.getName();
                 GameUserProperty property = user.getProperty(GameUserProperty.class);
                 if (property != null && property.isParticipating(projectName, teamsBox)) {
                     property.removeParticipation(projectName);
@@ -118,9 +102,9 @@ public class GameJobPropertyDescriptor extends JobPropertyDescriptor {
         return FormValidation.error("No user with the specified name found");
     }
 
-    public FormValidation doDeleteTeam(@QueryParameter String teamsBox) {
-        String projectName = getCurrentProject().getName();
-        GameJobProperty jobProperty = getCurrentGameJobProperty();
+    public FormValidation doDeleteTeam(@AncestorInPath AbstractProject project, @QueryParameter String teamsBox) {
+        String projectName = project.getName();
+        GameJobProperty jobProperty = (GameJobProperty) project.getProperties().get(this);
         if (jobProperty == null || jobProperty.getTeams() == null) return FormValidation.error("Unexpected Error");
         if (!jobProperty.getTeams().contains(teamsBox)) return FormValidation.error("The specified team does not exist");
         for (User user : User.getAll()) {
