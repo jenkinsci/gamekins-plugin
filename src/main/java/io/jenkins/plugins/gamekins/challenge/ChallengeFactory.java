@@ -32,9 +32,15 @@ public class ChallengeFactory {
         }
 
         String workspace = build.getWorkspace().getRemote();
-        ArrayList<String> lastChangedFilesOfUser = new ArrayList<>(getLastChangedFilesOfUser(workspace, user, 10));
+        if (Math.random() > 0.9) {
+            FileRepositoryBuilder builder = new FileRepositoryBuilder();
+            Repository repo = builder.setGitDir(new File(workspace + "/.git")).setMustExist(true).build();
+            return new TestChallenge(getHead(repo).getName(), getTestCount(build), user);
+        }
+
+        ArrayList<String> lastChangedFilesOfUser = new ArrayList<>(getLastChangedSourceFilesOfUser(workspace, user, 10, ""));
         if (lastChangedFilesOfUser.size() == 0) {
-            lastChangedFilesOfUser = new ArrayList<>(getLastChangedFilesOfUser(workspace, user, 100));
+            lastChangedFilesOfUser = new ArrayList<>(getLastChangedSourceFilesOfUser(workspace, user, 100, ""));
             if (lastChangedFilesOfUser.size() == 0) {
                 return new DummyChallenge();
             }
@@ -122,22 +128,52 @@ public class ChallengeFactory {
     }
 
     private static RevCommit getHead(Repository repo) throws IOException {
-        RevWalk walk = new RevWalk(repo);
-
-        ObjectId head = repo.resolve(Constants.HEAD);
-        RevCommit headCommit = walk.parseCommit(head);
-        walk.dispose();
-
-        return headCommit;
+        return getCommit(repo, Constants.HEAD);
     }
 
-    private static Set<String> getLastChangedFilesOfUser(String workspace, User user, int commitCount) throws IOException {
+    private static RevCommit getCommit(Repository repo, String hash) throws IOException {
+        RevWalk walk = new RevWalk(repo);
+
+        ObjectId id = repo.resolve(hash);
+        RevCommit commit = walk.parseCommit(id);
+        walk.dispose();
+
+        return commit;
+    }
+
+    static Set<String> getLastChangedSourceFilesOfUser(String workspace, User user, int commitCount, String commitHash) throws IOException {
+        Set<String> pathsToFiles = getLastChangedFilesOfUser(workspace, user, commitCount, commitHash);
+        if (!pathsToFiles.isEmpty()) {
+            pathsToFiles.removeIf(path -> Arrays.asList(path.split("/")).contains("test"));
+            pathsToFiles.removeIf(path -> !path.contains(".java"));
+        }
+        return pathsToFiles;
+    }
+
+    static Set<String> getLastChangedTestFilesOfUser(String workspace, User user, int commitCount, String commitHash) throws IOException {
+        Set<String> pathsToFiles = getLastChangedFilesOfUser(workspace, user, commitCount, commitHash);
+        if (!pathsToFiles.isEmpty()) {
+            pathsToFiles.removeIf(path -> !Arrays.asList(path.split("/")).contains("test"));
+            pathsToFiles.removeIf(path -> !path.contains(".java"));
+        }
+        return pathsToFiles;
+    }
+
+    private static Set<String> getLastChangedFilesOfUser(String workspace, User user, int commitCount, String commitHash) throws IOException {
+        if (commitCount <= 0) commitCount = Integer.MAX_VALUE;
+
         FileRepositoryBuilder builder = new FileRepositoryBuilder();
         Repository repo = builder.setGitDir(new File(workspace + "/.git")).setMustExist(true).build();
         RevWalk walk = new RevWalk(repo);
 
+        RevCommit targetCommit = null;
+        if (!commitHash.isEmpty()) {
+            targetCommit = getCommit(repo, commitHash);
+        }
         RevCommit headCommit = getHead(repo);
         Git git = new Git(repo);
+
+        if (targetCommit == headCommit) return new LinkedHashSet<>();
 
         int countUserCommit = 0;
         int totalCount = 0;
@@ -170,13 +206,11 @@ public class ChallengeFactory {
                     walk.dispose();
                 }
             }
+
+            if (targetCommit != null && newCommits.contains(targetCommit)) break;
+
             currentCommits = new ArrayList<>(newCommits);
             totalCount++;
-        }
-
-        if (!pathsToFiles.isEmpty()) {
-            pathsToFiles.removeIf(path -> Arrays.asList(path.split("/")).contains("test"));
-            pathsToFiles.removeIf(path -> !path.contains(".java"));
         }
 
         return pathsToFiles;
@@ -260,6 +294,29 @@ public class ChallengeFactory {
             e.printStackTrace();
         }
         return coverageValues;
+    }
+
+    //TODO: Make not MAVEN dependent
+    static int getTestCount(AbstractBuild<?, ?> build) throws IOException {
+        List<String> logLines = build.getLog(Integer.MAX_VALUE);
+        boolean foundTests = false;
+        boolean foundResults = false;
+
+        for (String line : logLines) {
+            if (line.equals("[INFO]  T E S T S")) {
+                foundTests = true;
+            }
+            if (foundTests && line.equals("[INFO] Results:")) {
+                foundResults = true;
+            }
+            if (foundTests && foundResults && line.contains("[INFO] Tests run:")) {
+                String[] splitComma = line.split(",");
+                String[] splitWhiteSpace = splitComma[0].split(" ");
+                return Integer.parseInt(splitWhiteSpace[splitWhiteSpace.length - 1]);
+            }
+        }
+
+        return 0;
     }
 
     static class CoverageFiles {
