@@ -127,10 +127,7 @@ public class LeaderboardAction implements ProminentProjectAction, Describable<Le
     @SuppressWarnings("unchecked")
     @Override
     public Descriptor<LeaderboardAction> getDescriptor() {
-        Jenkins jenkins = Jenkins.getInstance();
-        if (jenkins == null) {
-            throw new IllegalStateException("Jenkins has not been started");
-        }
+        Jenkins jenkins = Jenkins.get();
         return jenkins.getDescriptorOrDie(getClass());
     }
 
