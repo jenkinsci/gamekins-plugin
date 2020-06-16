@@ -24,6 +24,7 @@ import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 
 public class GamePublisher extends Notifier implements SimpleBuildStep {
 
@@ -283,40 +284,46 @@ public class GamePublisher extends Notifier implements SimpleBuildStep {
             return AbstractProject.class.isAssignableFrom(jobType);
         }
 
-        //TODO: Check if index.html exists
-        public FormValidation doCheckJacocoResultsPath(@AncestorInPath AbstractProject<?, ?> project, @QueryParameter String jacocoResultsPath) {
+        public FormValidation doCheckJacocoResultsPath(@AncestorInPath AbstractProject<?, ?> project,
+                                                       @QueryParameter String jacocoResultsPath) {
             if (project == null) {
                 return FormValidation.ok();
             }
-            try {
-                return FilePath.validateFileMask(project.getSomeWorkspace(), jacocoResultsPath);
-            } catch (IOException e) {
-                return FormValidation.error(e, "IOException");
-            }
+            if (!jacocoResultsPath.endsWith("/")) jacocoResultsPath += "/";
+            jacocoResultsPath += "index.html";
+            File file = new File(ChallengeFactory.getFullPath(
+                    project.getSomeWorkspace().getRemote(), jacocoResultsPath, true));
+            return file.exists() ? FormValidation.ok() : FormValidation.error("The folder is not correct");
         }
 
-        //TODO: Check if file exists
-        public FormValidation doCheckJacocoCSVPath(@AncestorInPath AbstractProject<?, ?> project, @QueryParameter String jacocoCSVPath) {
+        public FormValidation doCheckJacocoCSVPath(@AncestorInPath AbstractProject<?, ?> project,
+                                                   @QueryParameter String jacocoCSVPath) {
             if (project == null) {
                 return FormValidation.ok();
             }
-            try {
-                return FilePath.validateFileMask(project.getSomeWorkspace(), jacocoCSVPath);
-            } catch (IOException e) {
-                return FormValidation.error(e, "IOException");
-            }
+            File file = new File(ChallengeFactory.getFullPath(
+                    project.getSomeWorkspace().getRemote(), jacocoCSVPath, true));
+            return file.exists() ? FormValidation.ok() : FormValidation.error("The file could not be found");
         }
 
-        //TODO: Check if xmls exist
-        public FormValidation doCheckJunitResultsPath(@AncestorInPath AbstractProject<?, ?> project, @QueryParameter String junitResultsPath) {
+        public FormValidation doCheckJunitResultsPath(@AncestorInPath AbstractProject<?, ?> project,
+                                                      @QueryParameter String junitResultsPath) {
             if (project == null) {
                 return FormValidation.ok();
             }
+            FilePath folder = new FilePath(new File(ChallengeFactory.getFullPath(
+                    project.getSomeWorkspace().getRemote(), junitResultsPath, false)));
             try {
-                return FilePath.validateFileMask(project.getSomeWorkspace(), junitResultsPath);
-            } catch (IOException e) {
-                return FormValidation.error(e, "IOException");
+                List<FilePath> files = folder.list();
+                for (FilePath file : files) {
+                    if (!file.isDirectory() && file.getName().startsWith("TEST-") && file.getName().endsWith(".xml")) {
+                        return FormValidation.ok();
+                    }
+                }
+            } catch (IOException | InterruptedException e) {
+                return FormValidation.error(e, "Error reading folder");
             }
+            return FormValidation.error("The folder is not correct");
         }
     }
 }

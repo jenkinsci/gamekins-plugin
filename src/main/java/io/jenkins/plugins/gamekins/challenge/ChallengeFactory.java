@@ -130,7 +130,7 @@ public class ChallengeFactory {
         return null;
     }
 
-    private static String getFullPath(String workspace, String partPath, boolean file) {
+    public static String getFullPath(String workspace, String partPath, boolean file) {
         if (partPath.startsWith("**/")) {
             String path = workspace + partPath.substring(2);
             if (!file && !path.endsWith("/")) path += "/";
