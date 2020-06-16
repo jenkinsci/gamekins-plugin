@@ -5,6 +5,7 @@ import hudson.model.*;
 import hudson.util.FormValidation;
 import io.jenkins.plugins.gamekins.challenge.Challenge;
 import jenkins.model.Jenkins;
+import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.export.Exported;
@@ -113,6 +114,14 @@ public class LeaderboardAction implements ProminentProjectAction, Describable<Le
         GameUserProperty property = user.getProperty(GameUserProperty.class);
         if (property == null) return new CopyOnWriteArrayList<>();
         return property.getRejectedChallenges(job.getName());
+    }
+
+    public boolean isParticipating() {
+        User user = User.current();
+        if (user == null) return false;
+        GameUserProperty property = user.getProperty(GameUserProperty.class);
+        if (property == null) return false;
+        return property.isParticipating(job.getName());
     }
 
     /**
