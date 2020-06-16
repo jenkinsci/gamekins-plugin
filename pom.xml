@@ -78,54 +78,6 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/org.jenkins-ci.plugins/junit -->
-        <dependency>
-            <groupId>org.jenkins-ci.plugins</groupId>
-            <artifactId>junit</artifactId>
-            <version>1.29</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.jenkins-ci.plugins.workflow</groupId>
-                    <artifactId>workflow-step-api</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.jenkins-ci.plugins.workflow</groupId>
-                    <artifactId>workflow-api</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.jenkins-ci.plugins</groupId>
-                    <artifactId>script-security</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/org.jenkins-ci.plugins/jacoco -->
-        <dependency>
-            <groupId>org.jenkins-ci.plugins</groupId>
-            <artifactId>jacoco</artifactId>
-            <version>3.0.6</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.jacoco</groupId>
-                    <artifactId>jacoco-maven-plugin</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.apache.httpcomponents</groupId>
-                    <artifactId>httpcore</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.ow2.asm</groupId>
-                    <artifactId>asm</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.ow2.asm</groupId>
-                    <artifactId>asm-commons</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.ow2.asm</groupId>
-                    <artifactId>asm-tree</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
         <!-- https://mvnrepository.com/artifact/org.jenkins-ci.plugins/git -->
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
