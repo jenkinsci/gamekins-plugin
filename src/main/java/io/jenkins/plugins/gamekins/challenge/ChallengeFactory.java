@@ -1,6 +1,6 @@
 package io.jenkins.plugins.gamekins.challenge;
 
-import hudson.model.Run;
+import hudson.FilePath;
 import hudson.model.User;
 import hudson.tasks.Mailer;
 import org.eclipse.jgit.api.Git;
@@ -14,10 +14,17 @@ import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.eclipse.jgit.treewalk.AbstractTreeIterator;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
+import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.parser.Parser;
+import org.jsoup.select.Elements;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
+import java.util.stream.Stream;
 
 public class ChallengeFactory {
 
@@ -29,12 +36,12 @@ public class ChallengeFactory {
         constants.put("fullJacocoResultsPath", getFullPath(constants.get("workspace"), constants.get("jacocoResultsPath"), false));
         constants.put("fullJacocoCSVPath", getFullPath(constants.get("workspace"), constants.get("jacocoCSVPath"), true));
         constants.put("fullJunitResultsPath", getFullPath(constants.get("workspace"), constants.get("junitResultsPath"), false));
-        //TODO: Change TestChallenge from logs to files
-        /*if (Math.random() > 0.9) {
+
+        if (Math.random() > 0.9) {
             FileRepositoryBuilder builder = new FileRepositoryBuilder();
-            Repository repo = builder.setGitDir(new File(workspace + "/.git")).setMustExist(true).build();
-            return new TestChallenge(getHead(repo).getName(), getTestCount(build), user);
-        }*/
+            Repository repo = builder.setGitDir(new File(constants.get("workspace") + "/.git")).setMustExist(true).build();
+            return new TestChallenge(getHead(repo).getName(), getTestCount(constants), user);
+        }
 
         ArrayList<String> lastChangedFilesOfUser = new ArrayList<>(getLastChangedSourceFilesOfUser(constants.get("workspace"), user, 10, ""));
         if (lastChangedFilesOfUser.size() == 0) {
@@ -300,25 +307,27 @@ public class ChallengeFactory {
         return coverageValues;
     }
 
-    //TODO: Make not MAVEN dependent
-    static int getTestCount(Run<?, ?> run) throws IOException {
-        List<String> logLines = run.getLog(Integer.MAX_VALUE);
-        boolean foundTests = false;
-        boolean foundResults = false;
+    static int getTestCount(HashMap<String, String> constants) {
+        FilePath folder = new FilePath(new File(constants.get("fullJunitResultsPath")));
+        try {
+            List<FilePath> files = folder.list();
+            int testCount = 0;
+            for (FilePath file : files) {
+                if (file.isDirectory() || !file.getName().startsWith("TEST-") || !file.getName().endsWith(".xml")) {
+                    continue;
+                }
 
-        for (String line : logLines) {
-            if (line.equals("[INFO]  T E S T S")) {
-                foundTests = true;
+                StringBuilder xml = new StringBuilder();
+                try (Stream<String> stream = Files.lines( Paths.get(file.getRemote()), StandardCharsets.UTF_8)) {
+                    stream.forEach(s -> xml.append(s).append("\n"));
+                }
+
+                Document document = Jsoup.parse(xml.toString(), "", Parser.xmlParser());
+                Elements elements = document.select("testsuite");
+                testCount += Integer.parseInt(elements.first().attr("tests"));
             }
-            if (foundTests && line.equals("[INFO] Results:")) {
-                foundResults = true;
-            }
-            if (foundTests && foundResults && line.contains("[INFO] Tests run:")) {
-                String[] splitComma = line.split(",");
-                String[] splitWhiteSpace = splitComma[0].split(" ");
-                return Integer.parseInt(splitWhiteSpace[splitWhiteSpace.length - 1]);
-            }
-        }
+            return testCount;
+        } catch (IOException | InterruptedException ignored) { }
 
         return 0;
     }

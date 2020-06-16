@@ -22,7 +22,7 @@ public class TestChallenge implements Challenge {
     @Override
     public boolean isSolved(HashMap<String, String> constants, Run<?, ?> run) {
         try {
-            if (ChallengeFactory.getTestCount(run) <= this.testCount) {
+            if (ChallengeFactory.getTestCount(constants) <= this.testCount) {
                 return false;
             }
             ArrayList<String> lastChangedFilesOfUser =
