@@ -14,6 +14,7 @@ import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.eclipse.jgit.treewalk.AbstractTreeIterator;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
+import org.eclipse.jgit.treewalk.EmptyTreeIterator;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.parser.Parser;
@@ -240,16 +241,11 @@ public class ChallengeFactory {
     }
 
     private static String getDiffOfCommit(Git git, Repository repo, RevCommit newCommit) throws IOException {
-
-        //TODO: Get diff from first commit
-        //Get commit that is previous to the current one.
         RevCommit oldCommit = getPrevHash(repo, newCommit);
-        if(oldCommit == null){
-            return "Start of repo";
-        }
-        //Use treeIterator to diff.
-        AbstractTreeIterator oldTreeIterator = getCanonicalTreeParser(git, oldCommit);
+        AbstractTreeIterator oldTreeIterator = oldCommit == null
+                ? new EmptyTreeIterator() : getCanonicalTreeParser(git, oldCommit);
         AbstractTreeIterator newTreeIterator = getCanonicalTreeParser(git, newCommit);
+
         OutputStream outputStream = new ByteArrayOutputStream();
         try (DiffFormatter formatter = new DiffFormatter(outputStream)) {
             formatter.setRepository(git.getRepository());
@@ -259,13 +255,10 @@ public class ChallengeFactory {
     }
 
     public static RevCommit getPrevHash(Repository repo, RevCommit commit)  throws  IOException {
-
         try (RevWalk walk = new RevWalk(repo)) {
-            // Starting point
             walk.markStart(commit);
             int count = 0;
             for (RevCommit rev : walk) {
-                // got the previous commit.
                 if (count == 1) {
                     return rev;
                 }
@@ -273,7 +266,7 @@ public class ChallengeFactory {
             }
             walk.dispose();
         }
-        //Reached end and no previous commits.
+
         return null;
     }
 
