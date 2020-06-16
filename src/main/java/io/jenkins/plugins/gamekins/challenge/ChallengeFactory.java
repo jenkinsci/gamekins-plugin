@@ -57,10 +57,10 @@ public class ChallengeFactory {
             files.add(new CoverageFiles(lastChangedFilesOfUser.get(i), coverageValues.get(i)));
         }
         files.removeIf(coverageFiles -> coverageFiles.coverage == 1.0);
+        if (files.size() == 0) return new DummyChallenge();
         files.sort(Comparator.comparingDouble(covFile -> covFile.coverage));
         Collections.reverse(files);
         ArrayList<CoverageFiles> worklist = new ArrayList<>(files);
-        //TODO: If all classes have 100% coverage
 
         final double c = 1.5;
         double[] rankValues = new double[worklist.size()];
