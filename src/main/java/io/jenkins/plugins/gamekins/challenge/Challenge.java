@@ -1,10 +1,10 @@
 package io.jenkins.plugins.gamekins.challenge;
 
-import hudson.model.AbstractBuild;
+import hudson.model.Run;
 
 public interface Challenge {
 
-    boolean isSolved(AbstractBuild<?, ?> build);
+    boolean isSolved(String workspace, Run<?, ?> run);
 
     int getScore();
 

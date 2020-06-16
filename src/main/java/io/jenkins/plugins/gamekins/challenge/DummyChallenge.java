@@ -1,10 +1,10 @@
 package io.jenkins.plugins.gamekins.challenge;
 
-import hudson.model.AbstractBuild;
+import hudson.model.Run;
 
 public class DummyChallenge implements Challenge {
     @Override
-    public boolean isSolved(AbstractBuild<?, ?> build) {
+    public boolean isSolved(String workspace, Run<?, ?> run) {
         return true;
     }
 

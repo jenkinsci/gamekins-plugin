@@ -1,12 +1,12 @@
 package io.jenkins.plugins.gamekins.challenge;
 
-import hudson.model.AbstractBuild;
 import hudson.model.Result;
+import hudson.model.Run;
 
 public class BuildChallenge implements Challenge {
     @Override
-    public boolean isSolved(AbstractBuild<?, ?> build) {
-        return build.getResult() == Result.SUCCESS;
+    public boolean isSolved(String workspace, Run<?, ?> run) {
+        return run.getResult() == Result.SUCCESS;
     }
 
     @Override

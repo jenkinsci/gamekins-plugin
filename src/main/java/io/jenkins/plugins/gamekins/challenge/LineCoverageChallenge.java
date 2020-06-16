@@ -1,6 +1,6 @@
 package io.jenkins.plugins.gamekins.challenge;
 
-import hudson.model.AbstractBuild;
+import hudson.model.Run;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -43,7 +43,7 @@ public class LineCoverageChallenge extends CoverageChallenge {
     }
 
     @Override
-    public boolean isSolved(AbstractBuild<?, ?> build) {
+    public boolean isSolved(String workspace, Run<?, ?> run) {
         Document document;
         try {
             document = Jsoup.parse(classFile, "UTF-8");
@@ -69,6 +69,7 @@ public class LineCoverageChallenge extends CoverageChallenge {
     @Override
     public String toString() {
         String[] split = getPackagePath().split("/");
+        //TODO: Add content of line
         return "Write a test to cover line " + this.lineNumber + " in class " + getClassName()
                 + " in package " + split[split.length - 1];
     }

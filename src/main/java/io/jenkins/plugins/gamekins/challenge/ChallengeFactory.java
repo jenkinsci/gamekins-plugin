@@ -1,6 +1,6 @@
 package io.jenkins.plugins.gamekins.challenge;
 
-import hudson.model.AbstractBuild;
+import hudson.model.Run;
 import hudson.model.User;
 import hudson.tasks.Mailer;
 import org.eclipse.jgit.api.Git;
@@ -25,23 +25,26 @@ public class ChallengeFactory {
 
     }
 
-    public static Challenge generateChallenge(AbstractBuild<?, ?> build, User user, String jacocoPath) throws IOException {
-        String workspace = build.getWorkspace().getRemote();
-        if (Math.random() > 0.9) {
+    public static Challenge generateChallenge(User user, HashMap<String, String> constants) throws IOException {
+        constants.put("fullJacocoResultsPath", getFullPath(constants.get("workspace"), constants.get("jacocoResultsPath"), false));
+        constants.put("fullJacocoCSVPath", getFullPath(constants.get("workspace"), constants.get("jacocoCSVPath"), true));
+        constants.put("fullJunitResultsPath", getFullPath(constants.get("workspace"), constants.get("junitResultsPath"), false));
+        //TODO: Change TestChallenge from logs to files
+        /*if (Math.random() > 0.9) {
             FileRepositoryBuilder builder = new FileRepositoryBuilder();
             Repository repo = builder.setGitDir(new File(workspace + "/.git")).setMustExist(true).build();
             return new TestChallenge(getHead(repo).getName(), getTestCount(build), user);
-        }
+        }*/
 
-        ArrayList<String> lastChangedFilesOfUser = new ArrayList<>(getLastChangedSourceFilesOfUser(workspace, user, 10, ""));
+        ArrayList<String> lastChangedFilesOfUser = new ArrayList<>(getLastChangedSourceFilesOfUser(constants.get("workspace"), user, 10, ""));
         if (lastChangedFilesOfUser.size() == 0) {
-            lastChangedFilesOfUser = new ArrayList<>(getLastChangedSourceFilesOfUser(workspace, user, 100, ""));
+            lastChangedFilesOfUser = new ArrayList<>(getLastChangedSourceFilesOfUser(constants.get("workspace"), user, 100, ""));
             if (lastChangedFilesOfUser.size() == 0) {
                 return new DummyChallenge();
             }
         }
 
-        ArrayList<Double> coverageValues = getCoverageInPercentageFromJacoco(lastChangedFilesOfUser, workspace);
+        ArrayList<Double> coverageValues = getCoverageInPercentageFromJacoco(lastChangedFilesOfUser, constants.get("fullJacocoCSVPath"));
         ArrayList<CoverageFiles> files = new ArrayList<>();
         for (int i = 0; i < lastChangedFilesOfUser.size(); i++) {
             files.add(new CoverageFiles(lastChangedFilesOfUser.get(i), coverageValues.get(i)));
@@ -50,6 +53,7 @@ public class ChallengeFactory {
         files.sort(Comparator.comparingDouble(covFile -> covFile.coverage));
         Collections.reverse(files);
         ArrayList<CoverageFiles> worklist = new ArrayList<>(files);
+        //TODO: If all classes have 100% coverage
 
         final double c = 1.5;
         double[] rankValues = new double[worklist.size()];
@@ -79,7 +83,7 @@ public class ChallengeFactory {
             } else {
                 challengeClass = LineCoverageChallenge.class;
             }
-            challenge = generateCoverageChallenge(selectedClass.file, getFullJacocoPath(workspace, jacocoPath), challengeClass);
+            challenge = generateCoverageChallenge(selectedClass.file, constants.get("fullJacocoResultsPath"), challengeClass);
             worklist.remove(selectedClass);
         } while (challenge == null);
 
@@ -119,13 +123,13 @@ public class ChallengeFactory {
         return null;
     }
 
-    private static String getFullJacocoPath(String workspace, String jacocoPath) {
-        if (jacocoPath.startsWith("**/")) {
-            String path = workspace + jacocoPath.substring(2);
-            if (!path.endsWith("/")) path += "/";
+    private static String getFullPath(String workspace, String partPath, boolean file) {
+        if (partPath.startsWith("**/")) {
+            String path = workspace + partPath.substring(2);
+            if (!file && !path.endsWith("/")) path += "/";
             return path;
         }
-        return jacocoPath;
+        return partPath;
     }
 
     public static RevCommit getHead(Repository repo) throws IOException {
@@ -266,8 +270,7 @@ public class ChallengeFactory {
         }
     }
 
-    private static ArrayList<Double> getCoverageInPercentageFromJacoco(List<String> paths, String workspace) {
-        String filePath = workspace + "/target/site/jacoco/jacoco.csv";
+    private static ArrayList<Double> getCoverageInPercentageFromJacoco(List<String> paths, String filePath) {
         List<List<String>> records = new ArrayList<>();
         ArrayList<Double> coverageValues = new ArrayList<>();
         try {
@@ -298,8 +301,8 @@ public class ChallengeFactory {
     }
 
     //TODO: Make not MAVEN dependent
-    static int getTestCount(AbstractBuild<?, ?> build) throws IOException {
-        List<String> logLines = build.getLog(Integer.MAX_VALUE);
+    static int getTestCount(Run<?, ?> run) throws IOException {
+        List<String> logLines = run.getLog(Integer.MAX_VALUE);
         boolean foundTests = false;
         boolean foundResults = false;
 

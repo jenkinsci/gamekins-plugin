@@ -1,6 +1,6 @@
 package io.jenkins.plugins.gamekins.challenge;
 
-import hudson.model.AbstractBuild;
+import hudson.model.Run;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
@@ -13,7 +13,7 @@ public class ClassCoverageChallenge extends CoverageChallenge {
     }
 
     @Override
-    public boolean isSolved(AbstractBuild<?, ?> build) {
+    public boolean isSolved(String workspace, Run<?, ?> run) {
         Document document;
         try {
             document = Jsoup.parse(classFile, "UTF-8");

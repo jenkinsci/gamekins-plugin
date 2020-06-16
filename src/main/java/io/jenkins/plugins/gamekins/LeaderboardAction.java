@@ -17,13 +17,13 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 public class LeaderboardAction implements ProminentProjectAction, Describable<LeaderboardAction> {
 
-    private final transient AbstractProject job;
+    private final Job<?, ?> job;
 
-    public LeaderboardAction(AbstractProject job) {
+    public LeaderboardAction(Job<?, ?> job) {
         this.job = job;
     }
 
-    public AbstractProject getJob() {
+    public Job<?, ?> getJob() {
         return this.job;
     }
 
@@ -211,6 +211,7 @@ public class LeaderboardAction implements ProminentProjectAction, Describable<Le
 
         public DescriptorImpl() {
             super(LeaderboardAction.class);
+            load();
         }
 
         /**
@@ -226,12 +227,12 @@ public class LeaderboardAction implements ProminentProjectAction, Describable<Le
             return super.getDisplayName();
         }
 
-        public FormValidation doRejectChallenge(@AncestorInPath AbstractProject project, @QueryParameter String reject) {
+        public FormValidation doRejectChallenge(@AncestorInPath Job<?, ?> job, @QueryParameter String reject) {
             User user = User.current();
             if (user == null) return FormValidation.error("There is no user signed in");
             GameUserProperty property = user.getProperty(GameUserProperty.class);
             if (property == null) return FormValidation.error("Unexpected error");
-            String projectName = project.getName();
+            String projectName = job.getName();
             Challenge challenge = null;
             for (Challenge chal : property.getCurrentChallenges(projectName)) {
                 if (chal.toString().equals(reject)) {

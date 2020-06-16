@@ -1,6 +1,6 @@
 package io.jenkins.plugins.gamekins.challenge;
 
-import hudson.model.AbstractBuild;
+import hudson.model.Run;
 import hudson.model.User;
 
 import java.io.IOException;
@@ -19,12 +19,11 @@ public class TestChallenge implements Challenge {
     }
 
     @Override
-    public boolean isSolved(AbstractBuild<?, ?> build) {
+    public boolean isSolved(String workspace, Run<?, ?> run) {
         try {
-            if (ChallengeFactory.getTestCount(build) <= this.testCount) {
+            if (ChallengeFactory.getTestCount(run) <= this.testCount) {
                 return false;
             }
-            String workspace = build.getWorkspace().getRemote();
             ArrayList<String> lastChangedFilesOfUser =
                     new ArrayList<>(ChallengeFactory.getLastChangedTestFilesOfUser(
                             workspace, user, 0, currentCommit));

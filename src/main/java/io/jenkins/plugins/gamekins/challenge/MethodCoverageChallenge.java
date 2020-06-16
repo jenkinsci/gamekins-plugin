@@ -1,6 +1,6 @@
 package io.jenkins.plugins.gamekins.challenge;
 
-import hudson.model.AbstractBuild;
+import hudson.model.Run;
 import org.jsoup.nodes.Attribute;
 import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
@@ -74,7 +74,7 @@ public class MethodCoverageChallenge extends CoverageChallenge {
     }
 
     @Override
-    public boolean isSolved(AbstractBuild<?, ?> build) {
+    public boolean isSolved(String workspace, Run<?, ?> run) {
         try {
             ArrayList<CoverageMethod> methods = getMethodEntries();
             for (CoverageMethod method : methods) {

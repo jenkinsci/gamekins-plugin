@@ -5,6 +5,7 @@ import hudson.model.User;
 import hudson.model.UserProperty;
 import hudson.model.UserPropertyDescriptor;
 import io.jenkins.plugins.gamekins.challenge.Challenge;
+import io.jenkins.plugins.gamekins.challenge.DummyChallenge;
 
 import javax.annotation.Nonnull;
 import java.util.HashMap;
@@ -82,6 +83,7 @@ public class GameUserProperty extends UserProperty {
     }
 
     public void absolveChallenge(String projectName, Challenge challenge) {
+        //TODO: if (challenge instanceof DummyChallenge) return;
         this.absolvedChallenges.computeIfAbsent(projectName, k -> new CopyOnWriteArrayList<>());
         CopyOnWriteArrayList<Challenge> challenges = this.absolvedChallenges.get(projectName);
         challenges.add(challenge);

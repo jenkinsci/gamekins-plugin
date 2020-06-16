@@ -2,6 +2,7 @@ package io.jenkins.plugins.gamekins;
 
 import hudson.model.*;
 import net.sf.json.JSONObject;
+import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.StaplerRequest;
@@ -12,10 +13,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class GameJobProperty extends hudson.model.JobProperty<AbstractProject<?, ?>> {
+public class GameJobProperty extends hudson.model.JobProperty<Job<?, ?>> {
 
     private boolean activated;
-    private ArrayList<String> teams;
+    private final ArrayList<String> teams;
 
     @DataBoundConstructor
     public GameJobProperty(boolean activated) {
@@ -59,6 +60,19 @@ public class GameJobProperty extends hudson.model.JobProperty<AbstractProject<?,
     @Override
     public hudson.model.JobProperty<?> reconfigure(StaplerRequest req, JSONObject form) {
         if (form != null) this.activated = (boolean) form.get("activated");
+        if (owner instanceof WorkflowJob) {
+            if (this.activated) {
+                owner.getActions().removeIf(a -> a instanceof LeaderboardAction);
+                owner.getActions().add(new LeaderboardAction(owner));
+            } else {
+                owner.getActions().removeIf(a -> a instanceof LeaderboardAction);
+            }
+            try {
+                owner.save();
+            } catch (IOException e) {
+                return this;
+            }
+        }
         return this;
     }
 
@@ -82,7 +96,7 @@ public class GameJobProperty extends hudson.model.JobProperty<AbstractProject<?,
      */
     @Nonnull
     @Override
-    public Collection<? extends Action> getJobActions(AbstractProject<?, ?> job) {
+    public Collection<? extends Action> getJobActions(Job<?, ?> job) {
         List<Action> actions = new ArrayList<>(job.getActions());
         if (activated) {
             for (Action a : actions) {
