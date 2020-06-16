@@ -60,7 +60,8 @@ public class GameJobPropertyDescriptor extends JobPropertyDescriptor {
         return listBoxModel;
     }
 
-    public FormValidation doAddUserToTeam(@AncestorInPath Job<?, ?> job, @QueryParameter String teamsBox, @QueryParameter String usersBox) {
+    public FormValidation doAddUserToTeam(@AncestorInPath Job<?, ?> job, @QueryParameter String teamsBox,
+                                          @QueryParameter String usersBox) {
         for (User user : User.getAll()) {
             if (user.getFullName().equals(usersBox)) {
                 String projectName = job.getName();
@@ -81,7 +82,8 @@ public class GameJobPropertyDescriptor extends JobPropertyDescriptor {
         return FormValidation.error("No user with the specified name found");
     }
 
-    public FormValidation doRemoveUserFromTeam(@AncestorInPath Job<?, ?> job, @QueryParameter String teamsBox, @QueryParameter String usersBox) {
+    public FormValidation doRemoveUserFromTeam(@AncestorInPath Job<?, ?> job, @QueryParameter String teamsBox,
+                                               @QueryParameter String usersBox) {
         for (User user : User.getAll()) {
             if (user.getFullName().equals(usersBox)) {
                 String projectName = job.getName();
@@ -106,7 +108,8 @@ public class GameJobPropertyDescriptor extends JobPropertyDescriptor {
         String projectName = job.getName();
         GameJobProperty jobProperty = (GameJobProperty) job.getProperties().get(this);
         if (jobProperty == null || jobProperty.getTeams() == null) return FormValidation.error("Unexpected Error");
-        if (!jobProperty.getTeams().contains(teamsBox)) return FormValidation.error("The specified team does not exist");
+        if (!jobProperty.getTeams().contains(teamsBox))
+            return FormValidation.error("The specified team does not exist");
         for (User user : User.getAll()) {
             GameUserProperty property = user.getProperty(GameUserProperty.class);
             if (property != null && property.isParticipating(projectName, teamsBox)) {

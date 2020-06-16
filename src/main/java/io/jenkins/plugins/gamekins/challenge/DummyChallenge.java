@@ -4,6 +4,7 @@ import hudson.model.Run;
 
 import java.util.HashMap;
 
+//TODO: Add text why the DummyChallenge has been created
 public class DummyChallenge implements Challenge {
     @Override
     public boolean isSolved(HashMap<String, String> constants, Run<?, ?> run) {

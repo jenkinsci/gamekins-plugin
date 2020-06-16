@@ -93,7 +93,8 @@ public class GamePublisher extends Notifier implements SimpleBuildStep {
      * @param build
      * @param launcher
      * @param listener
-     * @return Delegates to {@link SimpleBuildStep#perform(Run, FilePath, Launcher, TaskListener)} if possible, always returning true or throwing an error.
+     * @return Delegates to {@link SimpleBuildStep#perform(Run, FilePath, Launcher, TaskListener)}
+     * if possible, always returning true or throwing an error.
      */
     @Override
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) {
@@ -188,7 +189,8 @@ public class GamePublisher extends Notifier implements SimpleBuildStep {
      * @param listener  a place to send output
      */
     @Override
-    public void perform(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, @Nonnull Launcher launcher, @Nonnull TaskListener listener) {
+    public void perform(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace,
+                        @Nonnull Launcher launcher, @Nonnull TaskListener listener) {
         if (!run.getParent().getProperty(GameJobProperty.class).getActivated()) return;
         HashMap<String, String> constants = new HashMap<>();
         constants.put("workspace", workspace.getRemote());
@@ -235,7 +237,8 @@ public class GamePublisher extends Notifier implements SimpleBuildStep {
                                 isChallengeUnique = true;
                                 challenge = ChallengeFactory.generateChallenge(user, constants);
                                 if (challenge instanceof DummyChallenge) break;
-                                for (Challenge currentChallenge : property.getCurrentChallenges(constants.get("projectName"))) {
+                                for (Challenge currentChallenge
+                                        : property.getCurrentChallenges(constants.get("projectName"))) {
                                     if (currentChallenge.toString().equals(challenge.toString())) {
                                         isChallengeUnique = false;
                                         break;

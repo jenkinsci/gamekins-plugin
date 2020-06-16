@@ -217,7 +217,8 @@ public class LeaderboardAction implements ProminentProjectAction, Describable<Le
         /**
          * Human readable name of this kind of configurable object.
          * Should be overridden for most descriptors, if the display name is visible somehow.
-         * As a fallback it uses {@link Class#getSimpleName} on {@link #clazz}, so for example {@code MyThing} from {@code some.pkg.MyThing.DescriptorImpl}.
+         * As a fallback it uses {@link Class#getSimpleName} on {@link #clazz}, so for example {@code MyThing}
+         * from {@code some.pkg.MyThing.DescriptorImpl}.
          * Historically some implementations returned null as a way of hiding the descriptor from the UI,
          * but this is generally managed by an explicit method such as {@code isEnabled} or {@code isApplicable}.
          */

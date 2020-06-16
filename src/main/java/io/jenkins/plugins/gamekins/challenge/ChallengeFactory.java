@@ -33,25 +33,32 @@ public class ChallengeFactory {
     }
 
     public static Challenge generateChallenge(User user, HashMap<String, String> constants) throws IOException {
-        constants.put("fullJacocoResultsPath", getFullPath(constants.get("workspace"), constants.get("jacocoResultsPath"), false));
-        constants.put("fullJacocoCSVPath", getFullPath(constants.get("workspace"), constants.get("jacocoCSVPath"), true));
-        constants.put("fullJunitResultsPath", getFullPath(constants.get("workspace"), constants.get("junitResultsPath"), false));
+        constants.put("fullJacocoResultsPath", getFullPath(
+                constants.get("workspace"), constants.get("jacocoResultsPath"), false));
+        constants.put("fullJacocoCSVPath", getFullPath(
+                constants.get("workspace"), constants.get("jacocoCSVPath"), true));
+        constants.put("fullJunitResultsPath", getFullPath(
+                constants.get("workspace"), constants.get("junitResultsPath"), false));
 
         if (Math.random() > 0.9) {
             FileRepositoryBuilder builder = new FileRepositoryBuilder();
-            Repository repo = builder.setGitDir(new File(constants.get("workspace") + "/.git")).setMustExist(true).build();
+            Repository repo = builder.setGitDir(
+                    new File(constants.get("workspace") + "/.git")).setMustExist(true).build();
             return new TestChallenge(getHead(repo).getName(), getTestCount(constants), user);
         }
 
-        ArrayList<String> lastChangedFilesOfUser = new ArrayList<>(getLastChangedSourceFilesOfUser(constants.get("workspace"), user, 10, ""));
+        ArrayList<String> lastChangedFilesOfUser = new ArrayList<>(getLastChangedSourceFilesOfUser(
+                constants.get("workspace"), user, 10, ""));
         if (lastChangedFilesOfUser.size() == 0) {
-            lastChangedFilesOfUser = new ArrayList<>(getLastChangedSourceFilesOfUser(constants.get("workspace"), user, 100, ""));
+            lastChangedFilesOfUser = new ArrayList<>(getLastChangedSourceFilesOfUser(
+                    constants.get("workspace"), user, 100, ""));
             if (lastChangedFilesOfUser.size() == 0) {
                 return new DummyChallenge();
             }
         }
 
-        ArrayList<Double> coverageValues = getCoverageInPercentageFromJacoco(lastChangedFilesOfUser, constants.get("fullJacocoCSVPath"));
+        ArrayList<Double> coverageValues = getCoverageInPercentageFromJacoco(
+                lastChangedFilesOfUser, constants.get("fullJacocoCSVPath"));
         ArrayList<CoverageFiles> files = new ArrayList<>();
         for (int i = 0; i < lastChangedFilesOfUser.size(); i++) {
             files.add(new CoverageFiles(lastChangedFilesOfUser.get(i), coverageValues.get(i)));
@@ -90,7 +97,8 @@ public class ChallengeFactory {
             } else {
                 challengeClass = LineCoverageChallenge.class;
             }
-            challenge = generateCoverageChallenge(selectedClass.file, constants.get("fullJacocoResultsPath"), challengeClass);
+            challenge = generateCoverageChallenge(
+                    selectedClass.file, constants.get("fullJacocoResultsPath"), challengeClass);
             worklist.remove(selectedClass);
         } while (challenge == null);
 
@@ -153,7 +161,8 @@ public class ChallengeFactory {
         return commit;
     }
 
-    static Set<String> getLastChangedSourceFilesOfUser(String workspace, User user, int commitCount, String commitHash) throws IOException {
+    static Set<String> getLastChangedSourceFilesOfUser(String workspace, User user, int commitCount,
+                                                       String commitHash) throws IOException {
         Set<String> pathsToFiles = getLastChangedFilesOfUser(workspace, user, commitCount, commitHash);
         if (!pathsToFiles.isEmpty()) {
             pathsToFiles.removeIf(path -> Arrays.asList(path.split("/")).contains("test"));
@@ -162,7 +171,8 @@ public class ChallengeFactory {
         return pathsToFiles;
     }
 
-    static Set<String> getLastChangedTestFilesOfUser(String workspace, User user, int commitCount, String commitHash) throws IOException {
+    static Set<String> getLastChangedTestFilesOfUser(String workspace, User user, int commitCount,
+                                                     String commitHash) throws IOException {
         Set<String> pathsToFiles = getLastChangedFilesOfUser(workspace, user, commitCount, commitHash);
         if (!pathsToFiles.isEmpty()) {
             pathsToFiles.removeIf(path -> !Arrays.asList(path.split("/")).contains("test"));
@@ -171,7 +181,8 @@ public class ChallengeFactory {
         return pathsToFiles;
     }
 
-    private static Set<String> getLastChangedFilesOfUser(String workspace, User user, int commitCount, String commitHash) throws IOException {
+    private static Set<String> getLastChangedFilesOfUser(String workspace, User user, int commitCount,
+                                                         String commitHash) throws IOException {
         if (commitCount <= 0) commitCount = Integer.MAX_VALUE;
 
         FileRepositoryBuilder builder = new FileRepositoryBuilder();
@@ -228,7 +239,6 @@ public class ChallengeFactory {
         return pathsToFiles;
     }
 
-    //Helper gets the diff as a string.
     private static String getDiffOfCommit(Git git, Repository repo, RevCommit newCommit) throws IOException {
 
         //TODO: Get diff from first commit
@@ -247,7 +257,7 @@ public class ChallengeFactory {
         }
         return outputStream.toString();
     }
-    //Helper function to get the previous commit.
+
     public static RevCommit getPrevHash(Repository repo, RevCommit commit)  throws  IOException {
 
         try (RevWalk walk = new RevWalk(repo)) {
@@ -266,7 +276,7 @@ public class ChallengeFactory {
         //Reached end and no previous commits.
         return null;
     }
-    //Helper function to get the tree of the changes in a commit. Written by Rüdiger Herrmann
+
     private static AbstractTreeIterator getCanonicalTreeParser(Git git, ObjectId commitId) throws IOException {
         try (RevWalk walk = new RevWalk(git.getRepository())) {
             RevCommit commit = walk.parseCommit(commitId);

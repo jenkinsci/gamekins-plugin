@@ -25,7 +25,8 @@ public class ClassCoverageChallenge extends CoverageChallenge {
         int fullyCoveredLines = calculateCoveredLines(document, "fc");
         int partiallyCoveredLines = calculateCoveredLines(document, "pc");
         int notCoveredLines = calculateCoveredLines(document, "nc");
-        double newCoverage = fullyCoveredLines / (double) (fullyCoveredLines + partiallyCoveredLines + notCoveredLines);
+        double newCoverage = fullyCoveredLines
+                / (double) (fullyCoveredLines + partiallyCoveredLines + notCoveredLines);
         return fullyCoveredLines > this.fullyCoveredLines && newCoverage > this.coverage;
     }
 
@@ -37,6 +38,7 @@ public class ClassCoverageChallenge extends CoverageChallenge {
     @Override
     public String toString() {
         String[] split = getPackagePath().split("/");
-        return "Write a test to cover more lines in class " + getClassName() + " in package " + split[split.length - 1];
+        return "Write a test to cover more lines in class " + getClassName()
+                + " in package " + split[split.length - 1];
     }
 }
