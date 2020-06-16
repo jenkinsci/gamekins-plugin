@@ -83,11 +83,13 @@ public class GameUserProperty extends UserProperty {
     }
 
     public void absolveChallenge(String projectName, Challenge challenge) {
-        //TODO: if (challenge instanceof DummyChallenge) return;
-        this.absolvedChallenges.computeIfAbsent(projectName, k -> new CopyOnWriteArrayList<>());
-        CopyOnWriteArrayList<Challenge> challenges = this.absolvedChallenges.get(projectName);
-        challenges.add(challenge);
-        this.absolvedChallenges.put(projectName, challenges);
+        CopyOnWriteArrayList<Challenge> challenges;
+        if (!(challenge instanceof DummyChallenge)) {
+            this.absolvedChallenges.computeIfAbsent(projectName, k -> new CopyOnWriteArrayList<>());
+            challenges = this.absolvedChallenges.get(projectName);
+            challenges.add(challenge);
+            this.absolvedChallenges.put(projectName, challenges);
+        }
         challenges = this.currentChallenges.get(projectName);
         challenges.remove(challenge);
         this.currentChallenges.put(projectName, challenges);
@@ -142,7 +144,7 @@ public class GameUserProperty extends UserProperty {
          * See {@link User} class javadoc for more details about the life cycle
          * of {@link User} and when this method is invoked.
          *
-         * @param user
+         * @param user the user who needs the GameUserProperty
          * @return null
          * if the implementation choose not to add any property object for such user.
          */
