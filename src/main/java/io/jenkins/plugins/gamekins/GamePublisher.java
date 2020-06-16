@@ -96,6 +96,7 @@ public class GamePublisher extends Notifier implements SimpleBuildStep {
      */
     @Override
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) {
+        if (!build.getProject().getProperty(GameJobProperty.class).getActivated()) return true;
         HashMap<String, String> constants = new HashMap<>();
         constants.put("workspace", build.getWorkspace().getRemote());
         constants.put("projectName", build.getProject().getName());
@@ -187,6 +188,7 @@ public class GamePublisher extends Notifier implements SimpleBuildStep {
      */
     @Override
     public void perform(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, @Nonnull Launcher launcher, @Nonnull TaskListener listener) {
+        if (!run.getParent().getProperty(GameJobProperty.class).getActivated()) return;
         HashMap<String, String> constants = new HashMap<>();
         constants.put("workspace", workspace.getRemote());
         constants.put("projectName", run.getParent().getName());
@@ -197,7 +199,7 @@ public class GamePublisher extends Notifier implements SimpleBuildStep {
         constants.put("jacocoResultsPath", getJacocoResultsPath());
         constants.put("jacocoCSVPath", getJacocoCSVPath());
         constants.put("junitResultsPath", getJunitResultsPath());
-        //TODO: Execute only if activated
+
         for (User user : User.getAll()) {
             GameUserProperty property = user.getProperty(GameUserProperty.class);
             if (property != null && property.isParticipating(constants.get("projectName"))) {
