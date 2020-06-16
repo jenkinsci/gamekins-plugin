@@ -63,6 +63,25 @@ public class LineCoverageChallenge extends CoverageChallenge {
     }
 
     @Override
+    public boolean isSolvable(HashMap<String, String> constants) {
+        Document document;
+        try {
+            document = Jsoup.parse(classFile, "UTF-8");
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+        Elements elements = document.select("span." + "pc");
+        elements.addAll(document.select("span." + "nc"));
+        for (Element element : elements) {
+            if (element.text().equals(this.lineContent)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
     public int getScore() {
         return (this.coverage >= 0.8 || this.coverageType.equals("pc")) ? 3 : 2;
     }

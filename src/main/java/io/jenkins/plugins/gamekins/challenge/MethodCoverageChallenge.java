@@ -90,6 +90,21 @@ public class MethodCoverageChallenge extends CoverageChallenge {
     }
 
     @Override
+    public boolean isSolvable(HashMap<String, String> constants) {
+        try {
+            ArrayList<CoverageMethod> methods = getMethodEntries();
+            for (CoverageMethod method : methods) {
+                if (method.getMethodName().equals(this.methodName)) {
+                    return method.missedLines > 0;
+                }
+            }
+        } catch (IOException e) {
+            return false;
+        }
+        return false;
+    }
+
+    @Override
     public int getScore() {
         return ((this.lines - this.missedLines) / (double) this.lines) > 0.8 ? 3 : 2;
     }

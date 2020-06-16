@@ -228,6 +228,14 @@ public class GamePublisher extends Notifier implements SimpleBuildStep {
                         property.addScore(constants.get("projectName"), challenge.getScore());
                     }
                 }
+
+                //TODO: Add Map for unsolvable challenges
+                for (Challenge challenge : property.getCurrentChallenges(constants.get("projectName"))) {
+                    if (!challenge.isSolvable(constants)) {
+                        property.rejectChallenge(constants.get("projectName"), challenge);
+                    }
+                }
+
                 if (property.getCurrentChallenges(constants.get("projectName")).size() < 3) {
                     for (int i = property.getCurrentChallenges(constants.get("projectName")).size(); i < 3; i++) {
                         try {

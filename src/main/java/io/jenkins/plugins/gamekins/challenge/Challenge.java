@@ -8,6 +8,8 @@ public interface Challenge {
 
     boolean isSolved(HashMap<String, String> constants, Run<?, ?> run);
 
+    boolean isSolvable(HashMap<String, String> constants);
+
     int getScore();
 
     @Override

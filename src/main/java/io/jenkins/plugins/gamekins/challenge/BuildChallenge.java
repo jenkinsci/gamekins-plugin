@@ -12,6 +12,11 @@ public class BuildChallenge implements Challenge {
     }
 
     @Override
+    public boolean isSolvable(HashMap<String, String> constants) {
+        return true;
+    }
+
+    @Override
     public int getScore() {
         return 1;
     }

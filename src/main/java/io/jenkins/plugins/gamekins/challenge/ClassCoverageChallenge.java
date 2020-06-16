@@ -31,6 +31,19 @@ public class ClassCoverageChallenge extends CoverageChallenge {
     }
 
     @Override
+    public boolean isSolvable(HashMap<String, String> constants) {
+        Document document;
+        try {
+            document = Jsoup.parse(classFile, "UTF-8");
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+        return !(calculateCoveredLines(document, "pc") == 0
+                && calculateCoveredLines(document, "nc") == 0);
+    }
+
+    @Override
     public int getScore() {
         return this.coverage >= 0.8 ? 2 : 1;
     }
