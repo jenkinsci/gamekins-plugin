@@ -7,6 +7,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Random;
 
 public class LineCoverageChallenge extends CoverageChallenge {
@@ -43,7 +44,7 @@ public class LineCoverageChallenge extends CoverageChallenge {
     }
 
     @Override
-    public boolean isSolved(String workspace, Run<?, ?> run) {
+    public boolean isSolved(HashMap<String, String> constants, Run<?, ?> run) {
         Document document;
         try {
             document = Jsoup.parse(classFile, "UTF-8");

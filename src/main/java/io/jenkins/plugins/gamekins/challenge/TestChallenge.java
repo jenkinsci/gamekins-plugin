@@ -5,6 +5,7 @@ import hudson.model.User;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class TestChallenge implements Challenge {
 
@@ -19,14 +20,14 @@ public class TestChallenge implements Challenge {
     }
 
     @Override
-    public boolean isSolved(String workspace, Run<?, ?> run) {
+    public boolean isSolved(HashMap<String, String> constants, Run<?, ?> run) {
         try {
             if (ChallengeFactory.getTestCount(run) <= this.testCount) {
                 return false;
             }
             ArrayList<String> lastChangedFilesOfUser =
                     new ArrayList<>(ChallengeFactory.getLastChangedTestFilesOfUser(
-                            workspace, user, 0, currentCommit));
+                            constants.get("workspace"), user, 0, currentCommit));
             return lastChangedFilesOfUser.size() > 0;
         } catch (IOException e) {
             return false;

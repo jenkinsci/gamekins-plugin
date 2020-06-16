@@ -3,9 +3,11 @@ package io.jenkins.plugins.gamekins.challenge;
 import hudson.model.Result;
 import hudson.model.Run;
 
+import java.util.HashMap;
+
 public class BuildChallenge implements Challenge {
     @Override
-    public boolean isSolved(String workspace, Run<?, ?> run) {
+    public boolean isSolved(HashMap<String, String> constants, Run<?, ?> run) {
         return run.getResult() == Result.SUCCESS;
     }
 

@@ -9,6 +9,7 @@ import org.jsoup.select.Elements;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Random;
 
 public class MethodCoverageChallenge extends CoverageChallenge {
@@ -74,7 +75,7 @@ public class MethodCoverageChallenge extends CoverageChallenge {
     }
 
     @Override
-    public boolean isSolved(String workspace, Run<?, ?> run) {
+    public boolean isSolved(HashMap<String, String> constants, Run<?, ?> run) {
         try {
             ArrayList<CoverageMethod> methods = getMethodEntries();
             for (CoverageMethod method : methods) {

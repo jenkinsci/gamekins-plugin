@@ -5,6 +5,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
 import java.io.IOException;
+import java.util.HashMap;
 
 public class ClassCoverageChallenge extends CoverageChallenge {
 
@@ -13,7 +14,7 @@ public class ClassCoverageChallenge extends CoverageChallenge {
     }
 
     @Override
-    public boolean isSolved(String workspace, Run<?, ?> run) {
+    public boolean isSolved(HashMap<String, String> constants, Run<?, ?> run) {
         Document document;
         try {
             document = Jsoup.parse(classFile, "UTF-8");

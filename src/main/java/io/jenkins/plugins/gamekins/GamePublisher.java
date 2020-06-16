@@ -218,7 +218,7 @@ public class GamePublisher extends Notifier implements SimpleBuildStep {
                 } catch (IOException ignored){}
 
                 for (Challenge challenge : property.getCurrentChallenges(constants.get("projectName"))) {
-                    if (challenge.isSolved(constants.get("workspace"), run)) {
+                    if (challenge.isSolved(constants, run)) {
                         property.absolveChallenge(constants.get("projectName"), challenge);
                         property.addScore(constants.get("projectName"), challenge.getScore());
                     }
