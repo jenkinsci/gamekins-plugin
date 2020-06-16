@@ -132,12 +132,12 @@ public class LeaderboardAction implements ProminentProjectAction, Describable<Le
     }
 
     @ExportedBean(defaultVisibility = 999)
-    public class UserDetails {
+    public static class UserDetails {
 
-        private String userName;
-        private String teamName;
-        private int score;
-        private int absolvedChallenges;
+        private final String userName;
+        private final String teamName;
+        private final int score;
+        private final int absolvedChallenges;
 
         public UserDetails(String userName, String teamName, int score, int absolvedChallenges) {
             this.userName = userName;
@@ -168,9 +168,9 @@ public class LeaderboardAction implements ProminentProjectAction, Describable<Le
     }
 
     @ExportedBean(defaultVisibility = 999)
-    public class TeamDetails {
+    public static class TeamDetails {
 
-        private String teamName;
+        private final String teamName;
         private int score;
         private int absolvedChallenges;
 
