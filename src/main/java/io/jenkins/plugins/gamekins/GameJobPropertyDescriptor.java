@@ -4,6 +4,7 @@ import hudson.Extension;
 import hudson.model.*;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
+import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.QueryParameter;
 
@@ -26,8 +27,7 @@ public class GameJobPropertyDescriptor extends JobPropertyDescriptor {
 
     @Override
     public boolean isApplicable(Class<? extends Job> jobType) {
-        //TODO: Only for FreeStyle and WorkflowJob
-        return true;
+        return jobType == FreeStyleProject.class || jobType == WorkflowJob.class;
     }
 
     public FormValidation doAddTeam(@AncestorInPath Job<?, ?> job, @QueryParameter String teamName) {
