@@ -13,6 +13,8 @@ public class TestChallenge implements Challenge {
     private final int testCount;
     private final User user;
     private final String branch;
+    private final long created = System.currentTimeMillis();
+    private long solved = 0;
 
     public TestChallenge(String currentCommit, int testCount, User user, String branch) {
         this.currentCommit = currentCommit;
@@ -31,10 +33,12 @@ public class TestChallenge implements Challenge {
             ArrayList<String> lastChangedFilesOfUser =
                     new ArrayList<>(ChallengeFactory.getLastChangedTestFilesOfUser(
                             constants.get("workspace"), user, 0, currentCommit));
-            return lastChangedFilesOfUser.size() > 0;
-        } catch (IOException e) {
-            return false;
-        }
+            if (lastChangedFilesOfUser.size() > 0) {
+                this.solved = System.currentTimeMillis();
+                return true;
+            }
+        } catch (IOException ignored) { }
+        return false;
     }
 
     @Override

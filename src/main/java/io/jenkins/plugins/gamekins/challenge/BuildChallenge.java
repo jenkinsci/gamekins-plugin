@@ -6,9 +6,17 @@ import hudson.model.Run;
 import java.util.HashMap;
 
 public class BuildChallenge implements Challenge {
+
+    private final long created = System.currentTimeMillis();
+    private long solved = 0;
+
     @Override
     public boolean isSolved(HashMap<String, String> constants, Run<?, ?> run) {
-        return run.getResult() == Result.SUCCESS;
+        if (run.getResult() == Result.SUCCESS) {
+            solved = System.currentTimeMillis();
+            return true;
+        }
+        return false;
     }
 
     @Override

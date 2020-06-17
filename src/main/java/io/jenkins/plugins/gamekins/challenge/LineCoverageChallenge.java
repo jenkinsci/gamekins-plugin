@@ -56,6 +56,7 @@ public class LineCoverageChallenge extends CoverageChallenge {
         if (coverageType.equals("nc")) elements.addAll(document.select("span." + "pc"));
         for (Element element : elements) {
             if (element.text().equals(this.lineContent)) {
+                this.solved = System.currentTimeMillis();
                 return true;
             }
         }

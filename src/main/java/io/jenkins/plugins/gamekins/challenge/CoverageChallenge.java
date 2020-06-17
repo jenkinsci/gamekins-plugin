@@ -17,6 +17,8 @@ public abstract class CoverageChallenge implements Challenge {
     final double coverage;
     final File classFile;
     final String branch;
+    final long created = System.currentTimeMillis();
+    long solved = 0;
 
     public CoverageChallenge(String packagePath, String className, String branch) throws IOException {
         this.packagePath = packagePath;

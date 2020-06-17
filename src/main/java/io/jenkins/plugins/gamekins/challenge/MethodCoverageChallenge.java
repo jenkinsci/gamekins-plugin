@@ -80,12 +80,13 @@ public class MethodCoverageChallenge extends CoverageChallenge {
             ArrayList<CoverageMethod> methods = getMethodEntries();
             for (CoverageMethod method : methods) {
                 if (method.getMethodName().equals(this.methodName)) {
-                    return method.missedLines < this.missedLines;
+                    if (method.missedLines < this.missedLines) {
+                        this.solved = System.currentTimeMillis();
+                        return true;
+                    }
                 }
             }
-        } catch (IOException e) {
-            return false;
-        }
+        } catch (IOException ignored) { }
         return false;
     }
 

@@ -27,7 +27,11 @@ public class ClassCoverageChallenge extends CoverageChallenge {
         int notCoveredLines = calculateCoveredLines(document, "nc");
         double newCoverage = fullyCoveredLines
                 / (double) (fullyCoveredLines + partiallyCoveredLines + notCoveredLines);
-        return fullyCoveredLines > this.fullyCoveredLines && newCoverage > this.coverage;
+        if (fullyCoveredLines > this.fullyCoveredLines && newCoverage > this.coverage) {
+            this.solved = System.currentTimeMillis();
+            return true;
+        }
+        return false;
     }
 
     @Override

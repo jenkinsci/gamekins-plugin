@@ -10,6 +10,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import javax.annotation.Nonnull;
 import java.util.HashMap;
+import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
@@ -20,6 +21,7 @@ public class GameUserProperty extends UserProperty {
     private final HashMap<String, CopyOnWriteArrayList<ImmutablePair<Challenge, String>>> rejectedChallenges;
     private final HashMap<String, String> participation;
     private final HashMap<String, Integer> score;
+    private final UUID pseudonym;
 
     public GameUserProperty() {
         this.completedChallenges = new HashMap<>();
@@ -27,6 +29,7 @@ public class GameUserProperty extends UserProperty {
         this.rejectedChallenges = new HashMap<>();
         this.participation = new HashMap<>();
         this.score = new HashMap<>();
+        this.pseudonym = UUID.randomUUID();
     }
 
     public User getUser() {
