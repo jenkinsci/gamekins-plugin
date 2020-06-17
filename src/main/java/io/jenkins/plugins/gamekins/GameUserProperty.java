@@ -6,16 +6,18 @@ import hudson.model.UserProperty;
 import hudson.model.UserPropertyDescriptor;
 import io.jenkins.plugins.gamekins.challenge.Challenge;
 import io.jenkins.plugins.gamekins.challenge.DummyChallenge;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Collectors;
 
 public class GameUserProperty extends UserProperty {
 
     private final HashMap<String, CopyOnWriteArrayList<Challenge>> completedChallenges;
     private final HashMap<String, CopyOnWriteArrayList<Challenge>> currentChallenges;
-    private final HashMap<String, CopyOnWriteArrayList<Challenge>> rejectedChallenges;
+    private final HashMap<String, CopyOnWriteArrayList<ImmutablePair<Challenge, String>>> rejectedChallenges;
     private final HashMap<String, String> participation;
     private final HashMap<String, Integer> score;
 
@@ -79,7 +81,8 @@ public class GameUserProperty extends UserProperty {
     }
 
     public CopyOnWriteArrayList<Challenge> getRejectedChallenges(String projectName) {
-        return this.rejectedChallenges.get(projectName);
+        return this.rejectedChallenges.get(projectName).stream().map(ImmutablePair::getLeft)
+                .collect(Collectors.toCollection(CopyOnWriteArrayList::new));
     }
 
     public void completeChallenge(String projectName, Challenge challenge) {
@@ -112,14 +115,14 @@ public class GameUserProperty extends UserProperty {
         this.currentChallenges.put(projectName, challenges);
     }
 
-    public void rejectChallenge(String projectName, Challenge challenge) {
+    public void rejectChallenge(String projectName, Challenge challenge, String reason) {
         this.rejectedChallenges.computeIfAbsent(projectName, k -> new CopyOnWriteArrayList<>());
-        CopyOnWriteArrayList<Challenge> challenges = this.rejectedChallenges.get(projectName);
-        challenges.add(challenge);
+        CopyOnWriteArrayList<ImmutablePair<Challenge, String>> challenges = this.rejectedChallenges.get(projectName);
+        challenges.add(new ImmutablePair<>(challenge, reason));
         this.rejectedChallenges.put(projectName, challenges);
-        challenges = this.currentChallenges.get(projectName);
-        challenges.remove(challenge);
-        this.currentChallenges.put(projectName, challenges);
+        CopyOnWriteArrayList<Challenge> currentChallenges = this.currentChallenges.get(projectName);
+        currentChallenges.remove(challenge);
+        this.currentChallenges.put(projectName, currentChallenges);
     }
 
     @Override

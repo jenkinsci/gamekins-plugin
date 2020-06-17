@@ -236,7 +236,8 @@ public class LeaderboardAction implements ProminentProjectAction, Describable<Le
             return super.getDisplayName();
         }
 
-        public FormValidation doRejectChallenge(@AncestorInPath Job<?, ?> job, @QueryParameter String reject) {
+        public FormValidation doRejectChallenge(@AncestorInPath Job<?, ?> job, @QueryParameter String reject, @QueryParameter String reason) {
+            if (reason.isEmpty()) return FormValidation.error("Please insert your reason for rejection");
             User user = User.current();
             if (user == null) return FormValidation.error("There is no user signed in");
             GameUserProperty property = user.getProperty(GameUserProperty.class);
@@ -250,7 +251,7 @@ public class LeaderboardAction implements ProminentProjectAction, Describable<Le
                 }
             }
             if (challenge == null) return FormValidation.error("The challenge does not exist");
-            property.rejectChallenge(projectName, challenge);
+            property.rejectChallenge(projectName, challenge, reason);
             try {
                 user.save();
             } catch (IOException e) {

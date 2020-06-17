@@ -90,13 +90,14 @@
                 <br/>
                 <div>
                     <f:form descriptor="${it.descriptor}">
-                        <label for="reject">Reject Challenge: </label>
-                        <select name="reject">
+                        <label for="reject" style="display: inline">Reject Challenge: </label>
+                        <select name="reject" style="display: inline">
                             <j:forEach indexVar="index" var="challenge" items="${it.currentChallenges}">
                                 <option>${challenge}</option>
                             </j:forEach>
                         </select>
-                        <f:validateButton title="Reject" method="rejectChallenge" with="reject" />
+                        <f:textbox field="reason"/>
+                        <f:validateButton title="Reject" method="rejectChallenge" with="reject,reason" />
                         <!--<button type="button" style="margin-left: 1%">Reject</button>-->
                     </f:form>
                 </div>
