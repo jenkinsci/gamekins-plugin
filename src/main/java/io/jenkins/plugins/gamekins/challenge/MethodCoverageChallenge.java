@@ -19,8 +19,8 @@ public class MethodCoverageChallenge extends CoverageChallenge {
     final int lines;
     final int missedLines;
 
-    public MethodCoverageChallenge(String packagePath, String className) throws IOException {
-        super(packagePath, className);
+    public MethodCoverageChallenge(String packagePath, String className, String branch) throws IOException {
+        super(packagePath, className, branch);
         this.coverageFile = new File(packagePath + "/" + className + ".html");
         Random random = new Random();
         ArrayList<CoverageMethod> methods = getNotFullyCoveredMethodEntries();
@@ -91,6 +91,7 @@ public class MethodCoverageChallenge extends CoverageChallenge {
 
     @Override
     public boolean isSolvable(HashMap<String, String> constants) {
+        if (!this.branch.equals(constants.get("branch"))) return true;
         try {
             ArrayList<CoverageMethod> methods = getMethodEntries();
             for (CoverageMethod method : methods) {
@@ -113,7 +114,7 @@ public class MethodCoverageChallenge extends CoverageChallenge {
     public String toString() {
         String[] split = getPackagePath().split("/");
         return "Write a test to cover more lines of method " + this.methodName + " in class " + getClassName()
-                + " in package " + split[split.length - 1];
+                + " in package " + split[split.length - 1] + "created for branch " + branch + ")";
     }
 
     static class CoverageMethod {

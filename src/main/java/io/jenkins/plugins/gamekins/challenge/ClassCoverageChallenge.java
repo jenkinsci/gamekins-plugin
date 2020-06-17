@@ -9,8 +9,8 @@ import java.util.HashMap;
 
 public class ClassCoverageChallenge extends CoverageChallenge {
 
-    public ClassCoverageChallenge(String packagePath, String className) throws IOException {
-        super(packagePath, className);
+    public ClassCoverageChallenge(String packagePath, String className, String branch) throws IOException {
+        super(packagePath, className, branch);
     }
 
     @Override
@@ -32,6 +32,7 @@ public class ClassCoverageChallenge extends CoverageChallenge {
 
     @Override
     public boolean isSolvable(HashMap<String, String> constants) {
+        if (!this.branch.equals(constants.get("branch"))) return true;
         Document document;
         try {
             document = Jsoup.parse(classFile, "UTF-8");
@@ -52,6 +53,6 @@ public class ClassCoverageChallenge extends CoverageChallenge {
     public String toString() {
         String[] split = getPackagePath().split("/");
         return "Write a test to cover more lines in class " + getClassName()
-                + " in package " + split[split.length - 1];
+                + " in package " + split[split.length - 1] + "created for branch " + branch + ")";
     }
 }

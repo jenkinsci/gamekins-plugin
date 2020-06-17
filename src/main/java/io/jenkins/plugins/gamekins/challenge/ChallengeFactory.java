@@ -45,7 +45,7 @@ public class ChallengeFactory {
             FileRepositoryBuilder builder = new FileRepositoryBuilder();
             Repository repo = builder.setGitDir(
                     new File(constants.get("workspace") + "/.git")).setMustExist(true).build();
-            return new TestChallenge(getHead(repo).getName(), getTestCount(constants), user);
+            return new TestChallenge(getHead(repo).getName(), getTestCount(constants), user, constants.get("branch"));
         }
 
         ArrayList<String> lastChangedFilesOfUser = new ArrayList<>(getLastChangedSourceFilesOfUser(
@@ -98,8 +98,8 @@ public class ChallengeFactory {
             } else {
                 challengeClass = LineCoverageChallenge.class;
             }
-            challenge = generateCoverageChallenge(
-                    selectedClass.file, constants.get("fullJacocoResultsPath"), challengeClass);
+            challenge = generateCoverageChallenge(selectedClass.file, constants.get("fullJacocoResultsPath"),
+                    challengeClass, constants.get("branch"));
             worklist.remove(selectedClass);
         } while (challenge == null);
 
@@ -107,7 +107,8 @@ public class ChallengeFactory {
     }
 
     //TODO: Create Enum
-    private static CoverageChallenge generateCoverageChallenge(String path, String jacocoPath, Class challengeClass)
+    private static CoverageChallenge generateCoverageChallenge(String path, String jacocoPath,
+                                                               Class challengeClass, String branch)
             throws IOException {
         StringBuilder packageName = new StringBuilder();
         String className = "";
@@ -123,7 +124,7 @@ public class ChallengeFactory {
         }
 
         if (challengeClass == MethodCoverageChallenge.class) {
-            return new MethodCoverageChallenge(jacocoPath + packageName, className);
+            return new MethodCoverageChallenge(jacocoPath + packageName, className, branch);
         }
 
         Document document = CoverageChallenge.generateDocument(
@@ -131,9 +132,9 @@ public class ChallengeFactory {
         if (CoverageChallenge.calculateCoveredLines(document, "pc") > 0
                 || CoverageChallenge.calculateCoveredLines(document, "nc") > 0) {
             if (challengeClass == ClassCoverageChallenge.class) {
-                return new ClassCoverageChallenge(jacocoPath + packageName, className);
+                return new ClassCoverageChallenge(jacocoPath + packageName, className, branch);
             } else {
-                return new LineCoverageChallenge(jacocoPath + packageName, className);
+                return new LineCoverageChallenge(jacocoPath + packageName, className, branch);
             }
         }
         return null;
@@ -333,6 +334,17 @@ public class ChallengeFactory {
         } catch (IOException | InterruptedException ignored) { }
 
         return 0;
+    }
+
+    public static String getBranch(String workspace) {
+        FileRepositoryBuilder builder = new FileRepositoryBuilder();
+        try {
+            Repository repo = builder.setGitDir(new File(workspace + "/.git")).setMustExist(true).build();
+            return repo.getBranch();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return "";
     }
 
     static class CoverageFiles {

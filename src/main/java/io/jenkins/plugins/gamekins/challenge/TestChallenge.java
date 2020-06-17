@@ -12,15 +12,18 @@ public class TestChallenge implements Challenge {
     private final String currentCommit;
     private final int testCount;
     private final User user;
+    private final String branch;
 
-    public TestChallenge(String currentCommit, int testCount, User user) {
+    public TestChallenge(String currentCommit, int testCount, User user, String branch) {
         this.currentCommit = currentCommit;
         this.testCount = testCount;
         this.user = user;
+        this.branch = branch;
     }
 
     @Override
     public boolean isSolved(HashMap<String, String> constants, Run<?, ?> run) {
+        if (!this.branch.equals(constants.get("branch"))) return false;
         try {
             if (ChallengeFactory.getTestCount(constants) <= this.testCount) {
                 return false;
@@ -46,6 +49,6 @@ public class TestChallenge implements Challenge {
 
     @Override
     public String toString() {
-        return "Write a new test";
+        return "Write a new test in branch " + branch;
     }
 }

@@ -16,8 +16,8 @@ public class LineCoverageChallenge extends CoverageChallenge {
     private final String lineContent;
     private final String coverageType;
 
-    public LineCoverageChallenge(String packagePath, String className) throws IOException {
-        super(packagePath, className);
+    public LineCoverageChallenge(String packagePath, String className, String branch) throws IOException {
+        super(packagePath, className, branch);
         Elements elements = getLines();
         Random random = new Random();
         Element element = elements.get(random.nextInt(elements.size()));
@@ -64,6 +64,7 @@ public class LineCoverageChallenge extends CoverageChallenge {
 
     @Override
     public boolean isSolvable(HashMap<String, String> constants) {
+        if (!this.branch.equals(constants.get("branch"))) return true;
         Document document;
         try {
             document = Jsoup.parse(classFile, "UTF-8");
@@ -91,6 +92,6 @@ public class LineCoverageChallenge extends CoverageChallenge {
         String[] split = getPackagePath().split("/");
         //TODO: Add content of line
         return "Write a test to cover line " + this.lineNumber + " in class " + getClassName()
-                + " in package " + split[split.length - 1];
+                + " in package " + split[split.length - 1] + "created for branch " + branch + ")";
     }
 }

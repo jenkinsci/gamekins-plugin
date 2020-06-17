@@ -202,6 +202,7 @@ public class GamePublisher extends Notifier implements SimpleBuildStep {
         constants.put("jacocoResultsPath", getJacocoResultsPath());
         constants.put("jacocoCSVPath", getJacocoCSVPath());
         constants.put("junitResultsPath", getJunitResultsPath());
+        constants.put("branch", ChallengeFactory.getBranch(constants.get("workspace")));
 
         for (User user : User.getAll()) {
             GameUserProperty property = user.getProperty(GameUserProperty.class);

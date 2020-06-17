@@ -16,10 +16,12 @@ public abstract class CoverageChallenge implements Challenge {
     final int notCoveredLines;
     final double coverage;
     final File classFile;
+    final String branch;
 
-    public CoverageChallenge(String packagePath, String className) throws IOException {
+    public CoverageChallenge(String packagePath, String className, String branch) throws IOException {
         this.packagePath = packagePath;
         this.className = className;
+        this.branch = branch;
         this.classFile = new File(packagePath + "/" + className + ".java.html");
         Document document = Jsoup.parse(classFile, "UTF-8");
         this.fullyCoveredLines = calculateCoveredLines(document, "fc");
