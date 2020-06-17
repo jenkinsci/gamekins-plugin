@@ -14,7 +14,7 @@
                         <td class="pane-header" align="left,center">#</td>
                         <td class="pane-header" align="left,center">Participant</td>
                         <td class="pane-header" align="left,center">Team</td>
-                        <td class="pane-header" align="left,center">Absolved Challenges</td>
+                        <td class="pane-header" align="left,center">Completed Challenges</td>
                         <td class="pane-header" initialSortDir="up" align="left" width="10%">Score</td>
                     </tr>
                     <j:forEach indexVar="index" var="userdetail" items="${it.userDetails}">
@@ -22,7 +22,7 @@
                             <td>${index + 1}</td>
                             <td>${userdetail.userName}</td>
                             <td>${userdetail.teamName}</td>
-                            <td>${userdetail.absolvedChallenges}</td>
+                            <td>${userdetail.completedChallenges}</td>
                             <td>${userdetail.score}</td>
                         </tr>
                     </j:forEach>
@@ -31,14 +31,14 @@
                     <tr>
                         <td class="pane-header" align="left,center">#</td>
                         <td class="pane-header" align="left,center">Team</td>
-                        <td class="pane-header" align="left,center">Absolved Challenges</td>
+                        <td class="pane-header" align="left,center">Completed Challenges</td>
                         <td class="pane-header" initialSortDir="up" align="left" width="10%">Score</td>
                     </tr>
                     <j:forEach indexVar="index" var="teamdetail" items="${it.teamDetails}">
                         <tr>
                             <td>${index + 1}</td>
                             <td>${teamdetail.teamName}</td>
-                            <td>${teamdetail.absolvedChallenges}</td>
+                            <td>${teamdetail.completedChallenges}</td>
                             <td>${teamdetail.score}</td>
                         </tr>
                     </j:forEach>
@@ -65,11 +65,11 @@
                     <table class="pane sortable bigtable" style="width:33%; display: inline-table; margin-left: 0.5%; margin-right: 0.5%">
                         <tr>
                             <td class="pane-header" align="left,center">#</td>
-                            <td class="pane-header" align="left,center">Absolved Challenges</td>
-                            <j:forEach indexVar="index" var="absolvedChallenge" items="${it.absolvedChallenges}">
+                            <td class="pane-header" align="left,center">Completed Challenges</td>
+                            <j:forEach indexVar="index" var="completedChallenge" items="${it.completedChallenges}">
                                 <tr>
                                     <td>${index + 1}</td>
-                                    <td>${absolvedChallenge}</td>
+                                    <td>${completedChallenge}</td>
                                 </tr>
                             </j:forEach>
                         </tr>

@@ -225,7 +225,7 @@ public class GamePublisher extends Notifier implements SimpleBuildStep {
 
                 for (Challenge challenge : property.getCurrentChallenges(constants.get("projectName"))) {
                     if (challenge.isSolved(constants, run)) {
-                        property.absolveChallenge(constants.get("projectName"), challenge);
+                        property.completeChallenge(constants.get("projectName"), challenge);
                         property.addScore(constants.get("projectName"), challenge.getScore());
                     }
                 }

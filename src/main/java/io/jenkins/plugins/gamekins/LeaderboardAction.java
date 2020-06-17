@@ -5,7 +5,6 @@ import hudson.model.*;
 import hudson.util.FormValidation;
 import io.jenkins.plugins.gamekins.challenge.Challenge;
 import jenkins.model.Jenkins;
-import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.export.Exported;
@@ -53,7 +52,7 @@ public class LeaderboardAction implements ProminentProjectAction, Describable<Le
                                 user.getFullName(),
                                 property.getTeamName(job.getName()),
                                 property.getScore(job.getName()),
-                                property.getAbsolvedChallenges(job.getName()).size()
+                                property.getCompletedChallenges(job.getName()).size()
                         )
                 );
             }
@@ -75,14 +74,14 @@ public class LeaderboardAction implements ProminentProjectAction, Describable<Le
                     }
                 }
                 if (index != -1) {
-                    details.get(index).addAbsolvedChallenges(property.getAbsolvedChallenges(job.getName()).size());
+                    details.get(index).addCompletedChallenges(property.getCompletedChallenges(job.getName()).size());
                     details.get(index).addScore(property.getScore(job.getName()));
                 } else {
                     details.add(
                             new TeamDetails(
                                     property.getTeamName(job.getName()),
                                     property.getScore(job.getName()),
-                                    property.getAbsolvedChallenges(job.getName()).size()
+                                    property.getCompletedChallenges(job.getName()).size()
                             )
                     );
                 }
@@ -92,12 +91,12 @@ public class LeaderboardAction implements ProminentProjectAction, Describable<Le
         return details;
     }
 
-    public CopyOnWriteArrayList<Challenge> getAbsolvedChallenges() {
+    public CopyOnWriteArrayList<Challenge> getCompletedChallenges() {
         User user = User.current();
         if (user == null) return new CopyOnWriteArrayList<>();
         GameUserProperty property = user.getProperty(GameUserProperty.class);
         if (property == null) return new CopyOnWriteArrayList<>();
-        return property.getAbsolvedChallenges(job.getName());
+        return property.getCompletedChallenges(job.getName());
     }
 
     public CopyOnWriteArrayList<Challenge> getCurrentChallenges() {
@@ -146,13 +145,13 @@ public class LeaderboardAction implements ProminentProjectAction, Describable<Le
         private final String userName;
         private final String teamName;
         private final int score;
-        private final int absolvedChallenges;
+        private final int completedChallenges;
 
-        public UserDetails(String userName, String teamName, int score, int absolvedChallenges) {
+        public UserDetails(String userName, String teamName, int score, int completedChallenges) {
             this.userName = userName;
             this.teamName = teamName;
             this.score = score;
-            this.absolvedChallenges = absolvedChallenges;
+            this.completedChallenges = completedChallenges;
         }
 
         @Exported
@@ -171,8 +170,8 @@ public class LeaderboardAction implements ProminentProjectAction, Describable<Le
         }
 
         @Exported
-        public int getAbsolvedChallenges() {
-            return this.absolvedChallenges;
+        public int getCompletedChallenges() {
+            return this.completedChallenges;
         }
     }
 
@@ -181,12 +180,12 @@ public class LeaderboardAction implements ProminentProjectAction, Describable<Le
 
         private final String teamName;
         private int score;
-        private int absolvedChallenges;
+        private int completedChallenges;
 
-        public TeamDetails(String teamName, int score, int absolvedChallenges) {
+        public TeamDetails(String teamName, int score, int completedChallenges) {
             this.teamName = teamName;
             this.score = score;
-            this.absolvedChallenges = absolvedChallenges;
+            this.completedChallenges = completedChallenges;
         }
 
         @Exported
@@ -205,13 +204,13 @@ public class LeaderboardAction implements ProminentProjectAction, Describable<Le
         }
 
         @Exported
-        public int getAbsolvedChallenges() {
-            return this.absolvedChallenges;
+        public int getCompletedChallenges() {
+            return this.completedChallenges;
         }
 
         @Exported
-        public void addAbsolvedChallenges(int absolvedChallenges) {
-            this.absolvedChallenges += absolvedChallenges;
+        public void addCompletedChallenges(int completedChallenges) {
+            this.completedChallenges += completedChallenges;
         }
     }
 

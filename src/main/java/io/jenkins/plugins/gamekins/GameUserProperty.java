@@ -13,14 +13,14 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 public class GameUserProperty extends UserProperty {
 
-    private final HashMap<String, CopyOnWriteArrayList<Challenge>> absolvedChallenges;
+    private final HashMap<String, CopyOnWriteArrayList<Challenge>> completedChallenges;
     private final HashMap<String, CopyOnWriteArrayList<Challenge>> currentChallenges;
     private final HashMap<String, CopyOnWriteArrayList<Challenge>> rejectedChallenges;
     private final HashMap<String, String> participation;
     private final HashMap<String, Integer> score;
 
     public GameUserProperty() {
-        this.absolvedChallenges = new HashMap<>();
+        this.completedChallenges = new HashMap<>();
         this.currentChallenges = new HashMap<>();
         this.rejectedChallenges = new HashMap<>();
         this.participation = new HashMap<>();
@@ -57,7 +57,7 @@ public class GameUserProperty extends UserProperty {
     public void setParticipating(String projectName, String teamName) {
         this.participation.put(projectName, teamName);
         this.score.putIfAbsent(projectName, 0);
-        this.absolvedChallenges.putIfAbsent(projectName, new CopyOnWriteArrayList<>());
+        this.completedChallenges.putIfAbsent(projectName, new CopyOnWriteArrayList<>());
         this.currentChallenges.putIfAbsent(projectName, new CopyOnWriteArrayList<>());
         this.rejectedChallenges.putIfAbsent(projectName, new CopyOnWriteArrayList<>());
     }
@@ -70,8 +70,8 @@ public class GameUserProperty extends UserProperty {
         return this.participation.get(projectName);
     }
 
-    public CopyOnWriteArrayList<Challenge> getAbsolvedChallenges(String projectName) {
-        return this.absolvedChallenges.get(projectName);
+    public CopyOnWriteArrayList<Challenge> getCompletedChallenges(String projectName) {
+        return this.completedChallenges.get(projectName);
     }
 
     public CopyOnWriteArrayList<Challenge> getCurrentChallenges(String projectName) {
@@ -82,13 +82,13 @@ public class GameUserProperty extends UserProperty {
         return this.rejectedChallenges.get(projectName);
     }
 
-    public void absolveChallenge(String projectName, Challenge challenge) {
+    public void completeChallenge(String projectName, Challenge challenge) {
         CopyOnWriteArrayList<Challenge> challenges;
         if (!(challenge instanceof DummyChallenge)) {
-            this.absolvedChallenges.computeIfAbsent(projectName, k -> new CopyOnWriteArrayList<>());
-            challenges = this.absolvedChallenges.get(projectName);
+            this.completedChallenges.computeIfAbsent(projectName, k -> new CopyOnWriteArrayList<>());
+            challenges = this.completedChallenges.get(projectName);
             challenges.add(challenge);
-            this.absolvedChallenges.put(projectName, challenges);
+            this.completedChallenges.put(projectName, challenges);
         }
         challenges = this.currentChallenges.get(projectName);
         challenges.remove(challenge);
@@ -101,7 +101,7 @@ public class GameUserProperty extends UserProperty {
      */
     public void removeChallenges(String projectName) {
         this.currentChallenges.put(projectName, new CopyOnWriteArrayList<>());
-        this.absolvedChallenges.put(projectName, new CopyOnWriteArrayList<>());
+        this.completedChallenges.put(projectName, new CopyOnWriteArrayList<>());
         this.rejectedChallenges.put(projectName, new CopyOnWriteArrayList<>());
     }
 
