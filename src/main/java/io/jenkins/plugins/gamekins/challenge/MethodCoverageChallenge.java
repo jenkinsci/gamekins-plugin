@@ -114,7 +114,7 @@ public class MethodCoverageChallenge extends CoverageChallenge {
     public String toString() {
         String[] split = getPackagePath().split("/");
         return "Write a test to cover more lines of method " + this.methodName + " in class " + getClassName()
-                + " in package " + split[split.length - 1] + "created for branch " + branch + ")";
+                + " in package " + split[split.length - 1] + " (created for branch " + branch + ")";
     }
 
     static class CoverageMethod {

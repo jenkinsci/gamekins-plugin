@@ -53,6 +53,6 @@ public class ClassCoverageChallenge extends CoverageChallenge {
     public String toString() {
         String[] split = getPackagePath().split("/");
         return "Write a test to cover more lines in class " + getClassName()
-                + " in package " + split[split.length - 1] + "created for branch " + branch + ")";
+                + " in package " + split[split.length - 1] + " (created for branch " + branch + ")";
     }
 }

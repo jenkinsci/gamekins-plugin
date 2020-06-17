@@ -92,6 +92,6 @@ public class LineCoverageChallenge extends CoverageChallenge {
         String[] split = getPackagePath().split("/");
         //TODO: Add content of line
         return "Write a test to cover line " + this.lineNumber + " in class " + getClassName()
-                + " in package " + split[split.length - 1] + "created for branch " + branch + ")";
+                + " in package " + split[split.length - 1] + " (created for branch " + branch + ")";
     }
 }
