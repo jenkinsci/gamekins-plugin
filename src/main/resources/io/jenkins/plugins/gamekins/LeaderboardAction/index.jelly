@@ -54,10 +54,12 @@
                         <tr>
                             <td class="pane-header" align="left,center">#</td>
                             <td class="pane-header" align="left,center">Current Challenges</td>
+                            <td class="pane-header" align="left,center">Points</td>
                             <j:forEach indexVar="index" var="currentChallenge" items="${it.currentChallenges}">
                                 <tr>
                                     <td>${index + 1}</td>
                                     <td>${currentChallenge}</td>
+                                    <td>${currentChallenge.score}</td>
                                 </tr>
                             </j:forEach>
                         </tr>
