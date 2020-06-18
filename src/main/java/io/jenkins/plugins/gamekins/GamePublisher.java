@@ -31,7 +31,7 @@ public class GamePublisher extends Notifier implements SimpleBuildStep {
     private String jacocoCSVPath;
 
     @DataBoundConstructor
-    public GamePublisher(String jacocoResultsPath, String jacocoCSVPath, String junitResultsPath) {
+    public GamePublisher(String jacocoResultsPath, String jacocoCSVPath) {
         this.jacocoResultsPath = jacocoResultsPath;
         this.jacocoCSVPath = jacocoCSVPath;
     }
