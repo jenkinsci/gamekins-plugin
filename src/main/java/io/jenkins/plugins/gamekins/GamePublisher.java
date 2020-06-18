@@ -24,19 +24,16 @@ import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
 
 public class GamePublisher extends Notifier implements SimpleBuildStep {
 
     private String jacocoResultsPath;
     private String jacocoCSVPath;
-    private String junitResultsPath;
 
     @DataBoundConstructor
     public GamePublisher(String jacocoResultsPath, String jacocoCSVPath, String junitResultsPath) {
         this.jacocoResultsPath = jacocoResultsPath;
         this.jacocoCSVPath = jacocoCSVPath;
-        this.junitResultsPath = junitResultsPath;
     }
 
     @DataBoundSetter
@@ -47,11 +44,6 @@ public class GamePublisher extends Notifier implements SimpleBuildStep {
     @DataBoundSetter
     public void setJacocoCSVPath(String jacocoCSVPath) {
         this.jacocoCSVPath = jacocoCSVPath;
-    }
-
-    @DataBoundSetter
-    public void setJunitResultsPath(String junitResultsPath) {
-        this.junitResultsPath = junitResultsPath;
     }
 
     @Override
@@ -176,10 +168,6 @@ public class GamePublisher extends Notifier implements SimpleBuildStep {
         return jacocoCSVPath;
     }
 
-    public String getJunitResultsPath() {
-        return junitResultsPath;
-    }
-
     /**
      * Run this step.
      *
@@ -201,7 +189,6 @@ public class GamePublisher extends Notifier implements SimpleBuildStep {
     private void executePublisher(Run<?, ?> run, HashMap<String, String> constants, Result result) {
         constants.put("jacocoResultsPath", getJacocoResultsPath());
         constants.put("jacocoCSVPath", getJacocoCSVPath());
-        constants.put("junitResultsPath", getJunitResultsPath());
         constants.put("branch", ChallengeFactory.getBranch(constants.get("workspace")));
 
         for (User user : User.getAll()) {
@@ -318,27 +305,6 @@ public class GamePublisher extends Notifier implements SimpleBuildStep {
             File file = new File(ChallengeFactory.getFullPath(
                     project.getSomeWorkspace().getRemote(), jacocoCSVPath, true));
             return file.exists() ? FormValidation.ok() : FormValidation.error("The file could not be found");
-        }
-
-        //TODO: Check sub directories
-        public FormValidation doCheckJunitResultsPath(@AncestorInPath AbstractProject<?, ?> project,
-                                                      @QueryParameter String junitResultsPath) {
-            if (project == null) {
-                return FormValidation.ok();
-            }
-            FilePath folder = new FilePath(new File(ChallengeFactory.getFullPath(
-                    project.getSomeWorkspace().getRemote(), junitResultsPath, false)));
-            try {
-                List<FilePath> files = folder.list();
-                for (FilePath file : files) {
-                    if (!file.isDirectory() && file.getName().startsWith("TEST-") && file.getName().endsWith(".xml")) {
-                        return FormValidation.ok();
-                    }
-                }
-            } catch (IOException | InterruptedException e) {
-                return FormValidation.error(e, "Error reading folder");
-            }
-            return FormValidation.error("The folder is not correct");
         }
     }
 }

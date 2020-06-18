@@ -34,9 +34,6 @@ public class ChallengeFactory {
     }
 
     public static Challenge generateChallenge(User user, HashMap<String, String> constants) throws IOException {
-        constants.put("fullJunitResultsPath", getFullPath(
-                constants.get("workspace"), constants.get("junitResultsPath"), false));
-
         if (Math.random() > 0.9) {
             FileRepositoryBuilder builder = new FileRepositoryBuilder();
             Repository repo = builder.setGitDir(
@@ -283,15 +280,10 @@ public class ChallengeFactory {
     //TODO: Check sub directories
     //TODO: Use JUnit-Plugin if possible
     static int getTestCount(HashMap<String, String> constants) {
-        FilePath folder = new FilePath(new File(constants.get("fullJunitResultsPath")));
         try {
-            List<FilePath> files = folder.list();
+            List<FilePath> files = getFilesInAllSubDirectories(constants.get("workspace"), "TEST-.+\\.xml");
             int testCount = 0;
             for (FilePath file : files) {
-                if (file.isDirectory() || !file.getName().startsWith("TEST-") || !file.getName().endsWith(".xml")) {
-                    continue;
-                }
-
                 StringBuilder xml = new StringBuilder();
                 try (Stream<String> stream = Files.lines( Paths.get(file.getRemote()), StandardCharsets.UTF_8)) {
                     stream.forEach(s -> xml.append(s).append("\n"));
@@ -302,9 +294,26 @@ public class ChallengeFactory {
                 testCount += Integer.parseInt(elements.first().attr("tests"));
             }
             return testCount;
-        } catch (IOException | InterruptedException ignored) { }
+        } catch (IOException ignored) { }
 
         return 0;
+    }
+
+    public static ArrayList<FilePath> getFilesInAllSubDirectories(String directory, String regex) {
+        FilePath rootPath = new FilePath(new File(directory));
+        ArrayList<FilePath> files = new ArrayList<>();
+        try {
+            for (FilePath path : rootPath.list()) {
+                if (path.isDirectory()) {
+                    files.addAll(getFilesInAllSubDirectories(path.getRemote(), regex));
+                } else {
+                    if (path.getName().matches(regex)) files.add(path);
+                }
+            }
+        } catch (IOException | InterruptedException ignored) {
+            return new ArrayList<>();
+        }
+        return files;
     }
 
     public static String getBranch(String workspace) {
