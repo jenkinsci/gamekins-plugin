@@ -1,8 +1,10 @@
 package io.jenkins.plugins.gamekins.challenge;
 
 import hudson.FilePath;
+import hudson.model.Run;
 import hudson.model.User;
 import hudson.tasks.Mailer;
+import hudson.tasks.junit.TestResultAction;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.diff.DiffFormatter;
 import org.eclipse.jgit.lib.Constants;
@@ -277,8 +279,16 @@ public class ChallengeFactory {
         return 0.0;
     }
 
-    //TODO: Check sub directories
-    //TODO: Use JUnit-Plugin if possible
+    static int getTestCount(HashMap<String, String> constants, Run<?, ?> run) {
+        if (run != null) {
+            TestResultAction action = run.getAction(TestResultAction.class);
+            if (action != null) {
+                return action.getTotalCount();
+            }
+        }
+        return getTestCount(constants);
+    }
+
     static int getTestCount(HashMap<String, String> constants) {
         try {
             List<FilePath> files = getFilesInAllSubDirectories(constants.get("workspace"), "TEST-.+\\.xml");

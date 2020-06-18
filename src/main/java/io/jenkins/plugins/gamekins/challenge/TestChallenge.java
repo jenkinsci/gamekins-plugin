@@ -27,7 +27,7 @@ public class TestChallenge implements Challenge {
     public boolean isSolved(HashMap<String, String> constants, Run<?, ?> run) {
         if (!this.branch.equals(constants.get("branch"))) return false;
         try {
-            if (ChallengeFactory.getTestCount(constants) <= this.testCount) {
+            if (ChallengeFactory.getTestCount(constants, run) <= this.testCount) {
                 return false;
             }
             ArrayList<String> lastChangedFilesOfUser =
