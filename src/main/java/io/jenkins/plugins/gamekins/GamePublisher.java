@@ -296,6 +296,7 @@ public class GamePublisher extends Notifier implements SimpleBuildStep {
             return AbstractProject.class.isAssignableFrom(jobType);
         }
 
+        //TODO: Check sub directories
         public FormValidation doCheckJacocoResultsPath(@AncestorInPath AbstractProject<?, ?> project,
                                                        @QueryParameter String jacocoResultsPath) {
             if (project == null) {
@@ -308,6 +309,7 @@ public class GamePublisher extends Notifier implements SimpleBuildStep {
             return file.exists() ? FormValidation.ok() : FormValidation.error("The folder is not correct");
         }
 
+        //TODO: Check sub directories
         public FormValidation doCheckJacocoCSVPath(@AncestorInPath AbstractProject<?, ?> project,
                                                    @QueryParameter String jacocoCSVPath) {
             if (project == null) {
@@ -318,6 +320,7 @@ public class GamePublisher extends Notifier implements SimpleBuildStep {
             return file.exists() ? FormValidation.ok() : FormValidation.error("The file could not be found");
         }
 
+        //TODO: Check sub directories
         public FormValidation doCheckJunitResultsPath(@AncestorInPath AbstractProject<?, ?> project,
                                                       @QueryParameter String junitResultsPath) {
             if (project == null) {

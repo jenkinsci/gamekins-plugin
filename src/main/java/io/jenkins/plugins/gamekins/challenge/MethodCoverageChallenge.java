@@ -14,14 +14,12 @@ import java.util.Random;
 
 public class MethodCoverageChallenge extends CoverageChallenge {
 
-    final File coverageFile;
     final String methodName;
     final int lines;
     final int missedLines;
 
-    public MethodCoverageChallenge(String packagePath, String className, String branch) throws IOException {
-        super(packagePath, className, branch);
-        this.coverageFile = new File(packagePath + "/" + className + ".html");
+    public MethodCoverageChallenge(ChallengeFactory.ClassDetails classDetails, String branch) throws IOException {
+        super(classDetails, branch);
         Random random = new Random();
         ArrayList<CoverageMethod> methods = getNotFullyCoveredMethodEntries();
         CoverageMethod method = methods.get(random.nextInt(methods.size()));
@@ -37,7 +35,7 @@ public class MethodCoverageChallenge extends CoverageChallenge {
     }
 
     private ArrayList<CoverageMethod> getMethodEntries() throws IOException {
-        Elements elements = generateDocument(coverageFile.getPath(), "UTF-8").select("tr");
+        Elements elements = generateDocument(classDetails.jacocoMethodFile.getPath(), "UTF-8").select("tr");
         ArrayList<CoverageMethod> methods = new ArrayList<>();
         for (Element element : elements) {
             boolean matches = false;
@@ -113,9 +111,8 @@ public class MethodCoverageChallenge extends CoverageChallenge {
 
     @Override
     public String toString() {
-        String[] split = getPackagePath().split("/");
-        return "Write a test to cover more lines of method " + this.methodName + " in class " + getClassName()
-                + " in package " + split[split.length - 1] + " (created for branch " + branch + ")";
+        return "Write a test to cover more lines of method " + this.methodName + " in class " + classDetails.className
+                + " in package " + classDetails.packageName + " (created for branch " + branch + ")";
     }
 
     static class CoverageMethod {

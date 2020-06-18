@@ -34,10 +34,6 @@ public class ChallengeFactory {
     }
 
     public static Challenge generateChallenge(User user, HashMap<String, String> constants) throws IOException {
-        constants.put("fullJacocoResultsPath", getFullPath(
-                constants.get("workspace"), constants.get("jacocoResultsPath"), false));
-        constants.put("fullJacocoCSVPath", getFullPath(
-                constants.get("workspace"), constants.get("jacocoCSVPath"), true));
         constants.put("fullJunitResultsPath", getFullPath(
                 constants.get("workspace"), constants.get("junitResultsPath"), false));
 
@@ -58,17 +54,15 @@ public class ChallengeFactory {
             }
         }
 
-        ArrayList<Double> coverageValues = getCoverageInPercentageFromJacoco(
-                lastChangedFilesOfUser, constants.get("fullJacocoCSVPath"));
-        ArrayList<CoverageFiles> files = new ArrayList<>();
-        for (int i = 0; i < lastChangedFilesOfUser.size(); i++) {
-            files.add(new CoverageFiles(lastChangedFilesOfUser.get(i), coverageValues.get(i)));
+        ArrayList<ClassDetails> files = new ArrayList<>();
+        for (String file : lastChangedFilesOfUser) {
+            files.add(new ClassDetails(constants.get("workspace"), file, constants.get("jacocoResultsPath"), constants.get("jacocoCSVPath")));
         }
-        files.removeIf(coverageFiles -> coverageFiles.coverage == 1.0);
+        files.removeIf(classDetails -> classDetails.coverage == 1.0);
         if (files.size() == 0) return new DummyChallenge();
         files.sort(Comparator.comparingDouble(covFile -> covFile.coverage));
         Collections.reverse(files);
-        ArrayList<CoverageFiles> worklist = new ArrayList<>(files);
+        ArrayList<ClassDetails> worklist = new ArrayList<>(files);
 
         final double c = 1.5;
         double[] rankValues = new double[worklist.size()];
@@ -81,7 +75,7 @@ public class ChallengeFactory {
         Random random = new Random();
         do {
             double probability = Math.random();
-            CoverageFiles selectedClass = worklist.get(worklist.size() - 1);
+            ClassDetails selectedClass = worklist.get(worklist.size() - 1);
             for (int i = 0; i < worklist.size(); i++) {
                 if (rankValues[i] > probability) {
                     selectedClass = worklist.get(i);
@@ -98,8 +92,7 @@ public class ChallengeFactory {
             } else {
                 challengeClass = LineCoverageChallenge.class;
             }
-            challenge = generateCoverageChallenge(selectedClass.file, constants.get("fullJacocoResultsPath"),
-                    challengeClass, constants.get("branch"));
+            challenge = generateCoverageChallenge(selectedClass, challengeClass, constants.get("branch"));
             worklist.remove(selectedClass);
         } while (challenge == null);
 
@@ -107,34 +100,17 @@ public class ChallengeFactory {
     }
 
     //TODO: Create Enum
-    private static CoverageChallenge generateCoverageChallenge(String path, String jacocoPath,
-                                                               Class challengeClass, String branch)
-            throws IOException {
-        StringBuilder packageName = new StringBuilder();
-        String className = "";
-        for (String part : path.split("/")) {
-            if (part.contains(".java")) {
-                packageName.deleteCharAt(packageName.length() - 1);
-                className = part.split("\\.")[0];
-                break;
-            }
-            if (!part.equals("src") && !part.equals("java") && !part.equals("main") && !part.isEmpty()) {
-                packageName.append(part).append(".");
-            }
-        }
-
-        if (challengeClass == MethodCoverageChallenge.class) {
-            return new MethodCoverageChallenge(jacocoPath + packageName, className, branch);
-        }
-
-        Document document = CoverageChallenge.generateDocument(
-                jacocoPath + packageName + "/" + className + ".java.html", "UTF-8");
+    private static CoverageChallenge generateCoverageChallenge(ClassDetails classDetails, Class challengeClass,
+                                                               String branch) throws IOException {
+        Document document = CoverageChallenge.generateDocument(classDetails.jacocoSourceFile, "UTF-8");
         if (CoverageChallenge.calculateCoveredLines(document, "pc") > 0
                 || CoverageChallenge.calculateCoveredLines(document, "nc") > 0) {
             if (challengeClass == ClassCoverageChallenge.class) {
-                return new ClassCoverageChallenge(jacocoPath + packageName, className, branch);
+                return new ClassCoverageChallenge(classDetails, branch);
+            } else if (challengeClass == MethodCoverageChallenge.class) {
+                return new MethodCoverageChallenge(classDetails, branch);
             } else {
-                return new LineCoverageChallenge(jacocoPath + packageName, className, branch);
+                return new LineCoverageChallenge(classDetails, branch);
             }
         }
         return null;
@@ -168,7 +144,7 @@ public class ChallengeFactory {
         Set<String> pathsToFiles = getLastChangedFilesOfUser(workspace, user, commitCount, commitHash);
         if (!pathsToFiles.isEmpty()) {
             pathsToFiles.removeIf(path -> Arrays.asList(path.split("/")).contains("test"));
-            pathsToFiles.removeIf(path -> !path.contains(".java"));
+            pathsToFiles.removeIf(path -> !(path.contains(".java") || path.contains(".kt")));
         }
         return pathsToFiles;
     }
@@ -178,7 +154,7 @@ public class ChallengeFactory {
         Set<String> pathsToFiles = getLastChangedFilesOfUser(workspace, user, commitCount, commitHash);
         if (!pathsToFiles.isEmpty()) {
             pathsToFiles.removeIf(path -> !Arrays.asList(path.split("/")).contains("test"));
-            pathsToFiles.removeIf(path -> !path.contains(".java"));
+            pathsToFiles.removeIf(path -> !(path.contains(".java") || path.contains(".kt")));
         }
         return pathsToFiles;
     }
@@ -281,36 +257,31 @@ public class ChallengeFactory {
         }
     }
 
-    private static ArrayList<Double> getCoverageInPercentageFromJacoco(List<String> paths, String filePath) {
+    private static Double getCoverageInPercentageFromJacoco(String className, File csv) {
         List<List<String>> records = new ArrayList<>();
-        ArrayList<Double> coverageValues = new ArrayList<>();
         try {
-            BufferedReader br = new BufferedReader(new FileReader(filePath));
+            BufferedReader br = new BufferedReader(new FileReader(csv));
             String line;
             while ((line = br.readLine()) != null) {
                 String[] values = line.split(",");
                 records.add(Arrays.asList(values));
             }
-
-            for (String path : paths) {
-                String[] split = path.split("/");
-                for (List<String> coverageLine : records ) {
-                    //TODO: Improve
-                    if (split[split.length - 1].contains(coverageLine.get(2))) {
-                        double value = Double.parseDouble(coverageLine.get(4))
-                                / (Double.parseDouble(coverageLine.get(3))
-                                + Double.parseDouble(coverageLine.get(4)));
-                        coverageValues.add(value);
-                        break;
-                    }
+            for (List<String> coverageLine : records ) {
+                //TODO: Improve
+                if (className.contains(coverageLine.get(2))) {
+                    return Double.parseDouble(coverageLine.get(4))
+                            / (Double.parseDouble(coverageLine.get(3))
+                            + Double.parseDouble(coverageLine.get(4)));
                 }
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return coverageValues;
+        return 0.0;
     }
 
+    //TODO: Check sub directories
+    //TODO: Use JUnit-Plugin if possible
     static int getTestCount(HashMap<String, String> constants) {
         FilePath folder = new FilePath(new File(constants.get("fullJunitResultsPath")));
         try {
@@ -347,14 +318,54 @@ public class ChallengeFactory {
         return "";
     }
 
-    static class CoverageFiles {
+    static class ClassDetails {
 
-        final String file;
+        final String className;
+        final String extension;
+        final String packageName;
+        final File jacocoMethodFile;
+        final File jacocoSourceFile;
+        final File jacocoCSVFile;
+        final File file;
         final double coverage;
 
-        CoverageFiles(String file, double coverage) {
-            this.file = file;
-            this.coverage = coverage;
+        /**
+         *
+         * @param workspace Workspace of the project
+         * @param shortFilePath Path of the file, starting in the workspace root directory
+         * @param shortJacocoPath Path of the JaCoCo root directory, beginning with ** / (without space)
+         * @param shortJacocoCSVPath Path of the JaCoCo csv file, beginning with ** / (without space)
+         */
+        ClassDetails(String workspace, String shortFilePath, String shortJacocoPath, String shortJacocoCSVPath) {
+            ArrayList<String> pathSplit = new ArrayList<>(Arrays.asList(shortFilePath.split("/")));
+            this.className = pathSplit.get(pathSplit.size() - 1).split("\\.")[0];
+            this.extension = pathSplit.get(pathSplit.size() - 1).split("\\.")[1];
+            this.packageName = computePackageName(shortFilePath);
+            String jacocoPath = workspace;
+            int i = 0;
+            while (!pathSplit.get(i).equals("src")) {
+                if (!pathSplit.get(i).isEmpty()) jacocoPath = jacocoPath + "/" + pathSplit.get(i);
+                i++;
+            }
+            this.jacocoCSVFile = new File(jacocoPath + shortJacocoCSVPath.substring(2));
+            jacocoPath = jacocoPath + shortJacocoPath.substring(2) + this.packageName + "/";
+            this.jacocoMethodFile = new File(jacocoPath + this.className + ".html");
+            this.jacocoSourceFile = new File(jacocoPath + this.className + "." + this.extension + ".html");
+            this.file = new File(workspace + shortFilePath);
+            this.coverage = getCoverageInPercentageFromJacoco(this.className, this.jacocoCSVFile);
+        }
+
+        static String computePackageName(String shortFilePath) {
+            ArrayList<String> pathSplit = new ArrayList<>(Arrays.asList(shortFilePath.split("/")));
+            String packageName = "";
+            for (int i = pathSplit.size() - 2; i >= 0; i--) {
+                if (pathSplit.get(i).equals("src") || pathSplit.get(i).equals("main") || pathSplit.get(i).equals("java")) {
+                    packageName = packageName.substring(1);
+                    break;
+                }
+                packageName = "." + pathSplit.get(i) + packageName;
+            }
+            return  packageName;
         }
     }
 }

@@ -9,15 +9,15 @@ import java.util.HashMap;
 
 public class ClassCoverageChallenge extends CoverageChallenge {
 
-    public ClassCoverageChallenge(String packagePath, String className, String branch) throws IOException {
-        super(packagePath, className, branch);
+    public ClassCoverageChallenge(ChallengeFactory.ClassDetails classDetails, String branch) throws IOException {
+        super(classDetails, branch);
     }
 
     @Override
     public boolean isSolved(HashMap<String, String> constants, Run<?, ?> run) {
         Document document;
         try {
-            document = Jsoup.parse(classFile, "UTF-8");
+            document = Jsoup.parse(classDetails.jacocoSourceFile, "UTF-8");
         } catch (IOException e) {
             e.printStackTrace();
             return false;
@@ -39,7 +39,7 @@ public class ClassCoverageChallenge extends CoverageChallenge {
         if (!this.branch.equals(constants.get("branch"))) return true;
         Document document;
         try {
-            document = Jsoup.parse(classFile, "UTF-8");
+            document = Jsoup.parse(classDetails.jacocoSourceFile, "UTF-8");
         } catch (IOException e) {
             e.printStackTrace();
             return false;
@@ -55,8 +55,7 @@ public class ClassCoverageChallenge extends CoverageChallenge {
 
     @Override
     public String toString() {
-        String[] split = getPackagePath().split("/");
-        return "Write a test to cover more lines in class " + getClassName()
-                + " in package " + split[split.length - 1] + " (created for branch " + branch + ")";
+        return "Write a test to cover more lines in class " + classDetails.className
+                + " in package " + classDetails.packageName + " (created for branch " + branch + ")";
     }
 }

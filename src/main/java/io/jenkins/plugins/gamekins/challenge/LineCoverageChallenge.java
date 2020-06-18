@@ -16,8 +16,8 @@ public class LineCoverageChallenge extends CoverageChallenge {
     private final String lineContent;
     private final String coverageType;
 
-    public LineCoverageChallenge(String packagePath, String className, String branch) throws IOException {
-        super(packagePath, className, branch);
+    public LineCoverageChallenge(ChallengeFactory.ClassDetails classDetails, String branch) throws IOException {
+        super(classDetails, branch);
         Elements elements = getLines();
         Random random = new Random();
         Element element = elements.get(random.nextInt(elements.size()));
@@ -27,7 +27,7 @@ public class LineCoverageChallenge extends CoverageChallenge {
     }
 
     private Elements getLines() throws IOException {
-        Document document = Jsoup.parse(classFile, "UTF-8");
+        Document document = Jsoup.parse(classDetails.jacocoSourceFile, "UTF-8");
         Elements elements = document.select("span." + "pc");
         elements.addAll(document.select("span." + "nc"));
         elements.removeIf(e -> e.text().contains("{")
@@ -47,7 +47,7 @@ public class LineCoverageChallenge extends CoverageChallenge {
     public boolean isSolved(HashMap<String, String> constants, Run<?, ?> run) {
         Document document;
         try {
-            document = Jsoup.parse(classFile, "UTF-8");
+            document = Jsoup.parse(classDetails.jacocoSourceFile, "UTF-8");
         } catch (IOException e) {
             e.printStackTrace();
             return false;
@@ -68,7 +68,7 @@ public class LineCoverageChallenge extends CoverageChallenge {
         if (!this.branch.equals(constants.get("branch"))) return true;
         Document document;
         try {
-            document = Jsoup.parse(classFile, "UTF-8");
+            document = Jsoup.parse(classDetails.jacocoSourceFile, "UTF-8");
         } catch (IOException e) {
             e.printStackTrace();
             return false;
@@ -90,9 +90,8 @@ public class LineCoverageChallenge extends CoverageChallenge {
 
     @Override
     public String toString() {
-        String[] split = getPackagePath().split("/");
         //TODO: Add content of line
-        return "Write a test to cover line " + this.lineNumber + " in class " + getClassName()
-                + " in package " + split[split.length - 1] + " (created for branch " + branch + ")";
+        return "Write a test to cover line " + this.lineNumber + " in class " + classDetails.className
+                + " in package " + classDetails.packageName + " (created for branch " + branch + ")";
     }
 }
