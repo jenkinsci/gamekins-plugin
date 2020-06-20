@@ -65,6 +65,12 @@
             <artifactId>workflow-durable-task-step</artifactId>
             <scope>test</scope>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.jenkins-ci.plugins.workflow/workflow-multibranch -->
+        <dependency>
+            <groupId>org.jenkins-ci.plugins.workflow</groupId>
+            <artifactId>workflow-multibranch</artifactId>
+            <version>2.21</version>
+        </dependency>
         <!-- https://mvnrepository.com/artifact/org.eclipse.jgit/org.eclipse.jgit -->
         <dependency>
             <groupId>org.eclipse.jgit</groupId>

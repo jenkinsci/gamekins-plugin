@@ -17,13 +17,13 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 public class LeaderboardAction implements ProminentProjectAction, Describable<LeaderboardAction> {
 
-    private final Job<?, ?> job;
+    private final AbstractItem job;
 
-    public LeaderboardAction(Job<?, ?> job) {
+    public LeaderboardAction(AbstractItem job) {
         this.job = job;
     }
 
-    public Job<?, ?> getJob() {
+    public AbstractItem getJob() {
         return this.job;
     }
 
@@ -236,7 +236,8 @@ public class LeaderboardAction implements ProminentProjectAction, Describable<Le
             return super.getDisplayName();
         }
 
-        public FormValidation doRejectChallenge(@AncestorInPath Job<?, ?> job, @QueryParameter String reject, @QueryParameter String reason) {
+        public FormValidation doRejectChallenge(@AncestorInPath Job<?, ?> job, @QueryParameter String reject,
+                                                @QueryParameter String reason) {
             if (reason.isEmpty()) return FormValidation.error("Please insert your reason for rejection");
             User user = User.current();
             if (user == null) return FormValidation.error("There is no user signed in");

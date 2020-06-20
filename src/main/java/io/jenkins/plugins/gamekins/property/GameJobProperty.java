@@ -1,8 +1,9 @@
-package io.jenkins.plugins.gamekins;
+package io.jenkins.plugins.gamekins.property;
 
 import hudson.model.*;
+import io.jenkins.plugins.gamekins.LeaderboardAction;
+import io.jenkins.plugins.gamekins.util.PropertyUtil;
 import net.sf.json.JSONObject;
-import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.StaplerRequest;
@@ -13,7 +14,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class GameJobProperty extends hudson.model.JobProperty<Job<?, ?>> {
+public class GameJobProperty extends hudson.model.JobProperty<Job<?, ?>> implements GameProperty {
 
     private boolean activated;
     private final ArrayList<String> teams;
@@ -60,19 +61,7 @@ public class GameJobProperty extends hudson.model.JobProperty<Job<?, ?>> {
     @Override
     public hudson.model.JobProperty<?> reconfigure(StaplerRequest req, JSONObject form) {
         if (form != null) this.activated = (boolean) form.get("activated");
-        if (owner instanceof WorkflowJob) {
-            if (this.activated) {
-                owner.getActions().removeIf(a -> a instanceof LeaderboardAction);
-                owner.getActions().add(new LeaderboardAction(owner));
-            } else {
-                owner.getActions().removeIf(a -> a instanceof LeaderboardAction);
-            }
-            try {
-                owner.save();
-            } catch (IOException e) {
-                return this;
-            }
-        }
+        PropertyUtil.reconfigure(owner, this.activated);
         return this;
     }
 

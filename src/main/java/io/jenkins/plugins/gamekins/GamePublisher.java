@@ -10,12 +10,16 @@ import io.jenkins.plugins.gamekins.challenge.BuildChallenge;
 import io.jenkins.plugins.gamekins.challenge.Challenge;
 import io.jenkins.plugins.gamekins.challenge.ChallengeFactory;
 import io.jenkins.plugins.gamekins.challenge.DummyChallenge;
+import io.jenkins.plugins.gamekins.property.GameJobProperty;
+import io.jenkins.plugins.gamekins.property.GameMultiBranchProperty;
 import io.jenkins.plugins.gamekins.util.GitUtil;
 import jenkins.tasks.SimpleBuildStep;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.jenkinsci.Symbol;
+import org.jenkinsci.plugins.workflow.job.WorkflowRun;
+import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
@@ -180,17 +184,27 @@ public class GamePublisher extends Notifier implements SimpleBuildStep {
     @Override
     public void perform(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace,
                         @Nonnull Launcher launcher, @Nonnull TaskListener listener) {
-        if (!run.getParent().getProperty(GameJobProperty.class).getActivated()) return;
         HashMap<String, String> constants = new HashMap<>();
+        if (run instanceof WorkflowRun) {
+            WorkflowMultiBranchProject project = (WorkflowMultiBranchProject) run.getParent().getParent();
+            if (!project.getProperties().get(GameMultiBranchProperty.class).getActivated()) return;
+            constants.put("projectName", project.getName());
+        } else {
+            if (!run.getParent().getProperty(GameJobProperty.class).getActivated()) return;
+            constants.put("projectName", run.getParent().getName());
+        }
         constants.put("workspace", workspace.getRemote());
-        constants.put("projectName", run.getParent().getName());
         executePublisher(run, constants, run.getResult());
     }
 
     private void executePublisher(Run<?, ?> run, HashMap<String, String> constants, Result result) {
         constants.put("jacocoResultsPath", getJacocoResultsPath());
         constants.put("jacocoCSVPath", getJacocoCSVPath());
-        constants.put("branch", GitUtil.getBranch(constants.get("workspace")));
+        if (run instanceof WorkflowRun) {
+            constants.put("branch", run.getParent().getName());
+        } else {
+            constants.put("branch", GitUtil.getBranch(constants.get("workspace")));
+        }
 
         for (User user : User.getAll()) {
             GameUserProperty property = user.getProperty(GameUserProperty.class);

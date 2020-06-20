@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form">
+    <f:section title="Gamekins">
+        <f:entry title="Activate Gamekins" field="activated">
+            <f:checkbox />
+        </f:entry>
+        <f:entry title="Add Team" field="teamName">
+            <f:textbox />
+            <f:validateButton title="Add" method="addTeam" with="teamName" />
+        </f:entry>
+        <f:entry title="Choose Team" field="manageTeam">
+            <f:select field="teamsBox" />
+        </f:entry>
+        <f:entry title="Choose User" field="manageUser">
+            <f:select field="usersBox" />
+        </f:entry>
+        <f:entry field="buttons">
+            <f:validateButton title="Add User to Team" method="addUserToTeam" with="teamsBox,usersBox" />
+            <f:validateButton title="Remove User from Team" method="removeUserFromTeam" with="teamsBox,usersBox" />
+            <f:validateButton title="Delete Team" method="deleteTeam" with="teamsBox" />
+        </f:entry>
+    </f:section>
+</j:jelly>
