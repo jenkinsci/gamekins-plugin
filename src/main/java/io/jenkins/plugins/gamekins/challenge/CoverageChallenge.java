@@ -1,15 +1,14 @@
 package io.jenkins.plugins.gamekins.challenge;
 
+import io.jenkins.plugins.gamekins.util.JacocoUtil;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.select.Elements;
 
-import java.io.File;
 import java.io.IOException;
 
 public abstract class CoverageChallenge implements Challenge {
 
-    final ChallengeFactory.ClassDetails classDetails;
+    final JacocoUtil.ClassDetails classDetails;
     final int fullyCoveredLines;
     final int partiallyCoveredLines;
     final int notCoveredLines;
@@ -19,27 +18,14 @@ public abstract class CoverageChallenge implements Challenge {
     final long created = System.currentTimeMillis();
     long solved = 0;
 
-    public CoverageChallenge(ChallengeFactory.ClassDetails classDetails, String branch) throws IOException {
+    public CoverageChallenge(JacocoUtil.ClassDetails classDetails, String branch) throws IOException {
         this.classDetails = classDetails;
         this.branch = branch;
-        Document document = Jsoup.parse(this.classDetails.jacocoSourceFile, "UTF-8");
-        this.fullyCoveredLines = calculateCoveredLines(document, "fc");
-        this.partiallyCoveredLines = calculateCoveredLines(document, "pc");
-        this.notCoveredLines = calculateCoveredLines(document, "nc");
-        this.coverage = classDetails.coverage;
-    }
-
-    public static int calculateCoveredLines(Document document, String modifier) {
-        Elements elements = document.select("span." + modifier);
-        return elements.size();
-    }
-
-    public static Document generateDocument(String filePath, String charset) throws IOException {
-        return Jsoup.parse(new File(filePath), charset);
-    }
-
-    public static Document generateDocument(File file, String charset) throws IOException {
-        return Jsoup.parse(file, charset);
+        Document document = Jsoup.parse(this.classDetails.getJacocoSourceFile(), "UTF-8");
+        this.fullyCoveredLines = JacocoUtil.calculateCoveredLines(document, "fc");
+        this.partiallyCoveredLines = JacocoUtil.calculateCoveredLines(document, "pc");
+        this.notCoveredLines = JacocoUtil.calculateCoveredLines(document, "nc");
+        this.coverage = classDetails.getCoverage();
     }
 
     public int getFullyCoveredLines() {

@@ -1,6 +1,7 @@
 package io.jenkins.plugins.gamekins.challenge;
 
 import hudson.model.Run;
+import io.jenkins.plugins.gamekins.util.JacocoUtil;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -16,9 +17,9 @@ public class LineCoverageChallenge extends CoverageChallenge {
     private final String lineContent;
     private final String coverageType;
 
-    public LineCoverageChallenge(ChallengeFactory.ClassDetails classDetails, String branch) throws IOException {
+    public LineCoverageChallenge(JacocoUtil.ClassDetails classDetails, String branch) throws IOException {
         super(classDetails, branch);
-        Elements elements = getLines();
+        Elements elements = JacocoUtil.getLines(classDetails.getJacocoSourceFile());
         Random random = new Random();
         Element element = elements.get(random.nextInt(elements.size()));
         this.lineNumber = Integer.parseInt(element.attr("id").substring(1));
@@ -26,28 +27,11 @@ public class LineCoverageChallenge extends CoverageChallenge {
         this.lineContent = element.text();
     }
 
-    private Elements getLines() throws IOException {
-        Document document = Jsoup.parse(classDetails.jacocoSourceFile, "UTF-8");
-        Elements elements = document.select("span." + "pc");
-        elements.addAll(document.select("span." + "nc"));
-        elements.removeIf(e -> e.text().contains("{")
-                || e.text().contains("}")
-                || e.text().contains("class")
-                || e.text().contains("void")
-                || e.text().contains("public")
-                || e.text().contains("private")
-                || e.text().contains("protected")
-                || e.text().contains("static")
-                || e.text().equals("(")
-                || e.text().equals(")"));
-        return elements;
-    }
-
     @Override
     public boolean isSolved(HashMap<String, String> constants, Run<?, ?> run) {
         Document document;
         try {
-            document = Jsoup.parse(classDetails.jacocoSourceFile, "UTF-8");
+            document = Jsoup.parse(classDetails.getJacocoSourceFile(), "UTF-8");
         } catch (IOException e) {
             e.printStackTrace();
             return false;
@@ -57,8 +41,8 @@ public class LineCoverageChallenge extends CoverageChallenge {
         for (Element element : elements) {
             if (element.text().equals(this.lineContent)) {
                 this.solved = System.currentTimeMillis();
-                this.solvedCoverage = ChallengeFactory.
-                        getCoverageInPercentageFromJacoco(this.classDetails.className, this.classDetails.jacocoCSVFile);
+                this.solvedCoverage = JacocoUtil.getCoverageInPercentageFromJacoco(this.classDetails.getClassName(),
+                                this.classDetails.getJacocoCSVFile());
                 return true;
             }
         }
@@ -70,7 +54,7 @@ public class LineCoverageChallenge extends CoverageChallenge {
         if (!this.branch.equals(constants.get("branch"))) return true;
         Document document;
         try {
-            document = Jsoup.parse(classDetails.jacocoSourceFile, "UTF-8");
+            document = Jsoup.parse(classDetails.getJacocoSourceFile(), "UTF-8");
         } catch (IOException e) {
             e.printStackTrace();
             return false;
@@ -93,7 +77,7 @@ public class LineCoverageChallenge extends CoverageChallenge {
     @Override
     public String toString() {
         //TODO: Add content of line
-        return "Write a test to cover line " + this.lineNumber + " in class " + classDetails.className
-                + " in package " + classDetails.packageName + " (created for branch " + branch + ")";
+        return "Write a test to cover line " + this.lineNumber + " in class " + classDetails.getClassName()
+                + " in package " + classDetails.getPackageName() + " (created for branch " + branch + ")";
     }
 }

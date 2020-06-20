@@ -3,6 +3,7 @@ package io.jenkins.plugins.gamekins.challenge;
 import hudson.model.Run;
 import hudson.model.User;
 import io.jenkins.plugins.gamekins.util.GitUtil;
+import io.jenkins.plugins.gamekins.util.JacocoUtil;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -28,7 +29,7 @@ public class TestChallenge implements Challenge {
     public boolean isSolved(HashMap<String, String> constants, Run<?, ?> run) {
         if (!this.branch.equals(constants.get("branch"))) return false;
         try {
-            if (ChallengeFactory.getTestCount(constants, run) <= this.testCount) {
+            if (JacocoUtil.getTestCount(constants, run) <= this.testCount) {
                 return false;
             }
             ArrayList<String> lastChangedFilesOfUser =

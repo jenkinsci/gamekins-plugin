@@ -1,23 +1,14 @@
 package io.jenkins.plugins.gamekins.challenge;
 
-import hudson.FilePath;
-import hudson.model.Run;
 import hudson.model.User;
-import hudson.tasks.junit.TestResultAction;
 import io.jenkins.plugins.gamekins.util.GitUtil;
+import io.jenkins.plugins.gamekins.util.JacocoUtil;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
-import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.parser.Parser;
-import org.jsoup.select.Elements;
 
 import java.io.*;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.*;
-import java.util.stream.Stream;
 
 public class ChallengeFactory {
 
@@ -30,7 +21,8 @@ public class ChallengeFactory {
             FileRepositoryBuilder builder = new FileRepositoryBuilder();
             Repository repo = builder.setGitDir(
                     new File(constants.get("workspace") + "/.git")).setMustExist(true).build();
-            return new TestChallenge(GitUtil.getHead(repo).getName(), getTestCount(constants), user, constants.get("branch"));
+            return new TestChallenge(GitUtil.getHead(repo).getName(), JacocoUtil.getTestCount(constants),
+                    user, constants.get("branch"));
         }
 
         ArrayList<String> lastChangedFilesOfUser = new ArrayList<>(GitUtil.getLastChangedSourceFilesOfUser(
@@ -43,15 +35,16 @@ public class ChallengeFactory {
             }
         }
 
-        ArrayList<ClassDetails> files = new ArrayList<>();
+        ArrayList<JacocoUtil.ClassDetails> files = new ArrayList<>();
         for (String file : lastChangedFilesOfUser) {
-            files.add(new ClassDetails(constants.get("workspace"), file, constants.get("jacocoResultsPath"), constants.get("jacocoCSVPath")));
+            files.add(new JacocoUtil.ClassDetails(constants.get("workspace"), file,
+                    constants.get("jacocoResultsPath"), constants.get("jacocoCSVPath")));
         }
-        files.removeIf(classDetails -> classDetails.coverage == 1.0);
+        files.removeIf(classDetails -> classDetails.getCoverage() == 1.0);
         if (files.size() == 0) return new DummyChallenge();
-        files.sort(Comparator.comparingDouble(covFile -> covFile.coverage));
+        files.sort(Comparator.comparingDouble(JacocoUtil.ClassDetails::getCoverage));
         Collections.reverse(files);
-        ArrayList<ClassDetails> worklist = new ArrayList<>(files);
+        ArrayList<JacocoUtil.ClassDetails> worklist = new ArrayList<>(files);
 
         final double c = 1.5;
         double[] rankValues = new double[worklist.size()];
@@ -64,7 +57,7 @@ public class ChallengeFactory {
         Random random = new Random();
         do {
             double probability = Math.random();
-            ClassDetails selectedClass = worklist.get(worklist.size() - 1);
+            JacocoUtil.ClassDetails selectedClass = worklist.get(worklist.size() - 1);
             for (int i = 0; i < worklist.size(); i++) {
                 if (rankValues[i] > probability) {
                     selectedClass = worklist.get(i);
@@ -89,11 +82,12 @@ public class ChallengeFactory {
     }
 
     //TODO: Create Enum
-    private static CoverageChallenge generateCoverageChallenge(ClassDetails classDetails, Class challengeClass,
-                                                               String branch) throws IOException {
-        Document document = CoverageChallenge.generateDocument(classDetails.jacocoSourceFile, "UTF-8");
-        if (CoverageChallenge.calculateCoveredLines(document, "pc") > 0
-                || CoverageChallenge.calculateCoveredLines(document, "nc") > 0) {
+    private static CoverageChallenge generateCoverageChallenge(JacocoUtil.ClassDetails classDetails,
+                                                               Class challengeClass, String branch)
+            throws IOException {
+        Document document = JacocoUtil.generateDocument(classDetails.getJacocoSourceFile(), "UTF-8");
+        if (JacocoUtil.calculateCoveredLines(document, "pc") > 0
+                || JacocoUtil.calculateCoveredLines(document, "nc") > 0) {
             if (challengeClass == ClassCoverageChallenge.class) {
                 return new ClassCoverageChallenge(classDetails, branch);
             } else if (challengeClass == MethodCoverageChallenge.class) {
@@ -114,124 +108,4 @@ public class ChallengeFactory {
         return partPath;
     }
 
-    static Double getCoverageInPercentageFromJacoco(String className, File csv) {
-        List<List<String>> records = new ArrayList<>();
-        try {
-            BufferedReader br = new BufferedReader(new FileReader(csv));
-            String line;
-            while ((line = br.readLine()) != null) {
-                String[] values = line.split(",");
-                records.add(Arrays.asList(values));
-            }
-            for (List<String> coverageLine : records ) {
-                //TODO: Improve
-                if (className.contains(coverageLine.get(2))) {
-                    return Double.parseDouble(coverageLine.get(4))
-                            / (Double.parseDouble(coverageLine.get(3))
-                            + Double.parseDouble(coverageLine.get(4)));
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return 0.0;
-    }
-
-    static int getTestCount(HashMap<String, String> constants, Run<?, ?> run) {
-        if (run != null) {
-            TestResultAction action = run.getAction(TestResultAction.class);
-            if (action != null) {
-                return action.getTotalCount();
-            }
-        }
-        return getTestCount(constants);
-    }
-
-    static int getTestCount(HashMap<String, String> constants) {
-        try {
-            List<FilePath> files = getFilesInAllSubDirectories(constants.get("workspace"), "TEST-.+\\.xml");
-            int testCount = 0;
-            for (FilePath file : files) {
-                StringBuilder xml = new StringBuilder();
-                try (Stream<String> stream = Files.lines( Paths.get(file.getRemote()), StandardCharsets.UTF_8)) {
-                    stream.forEach(s -> xml.append(s).append("\n"));
-                }
-
-                Document document = Jsoup.parse(xml.toString(), "", Parser.xmlParser());
-                Elements elements = document.select("testsuite");
-                testCount += Integer.parseInt(elements.first().attr("tests"));
-            }
-            return testCount;
-        } catch (IOException ignored) { }
-
-        return 0;
-    }
-
-    public static ArrayList<FilePath> getFilesInAllSubDirectories(String directory, String regex) {
-        FilePath rootPath = new FilePath(new File(directory));
-        ArrayList<FilePath> files = new ArrayList<>();
-        try {
-            for (FilePath path : rootPath.list()) {
-                if (path.isDirectory()) {
-                    files.addAll(getFilesInAllSubDirectories(path.getRemote(), regex));
-                } else {
-                    if (path.getName().matches(regex)) files.add(path);
-                }
-            }
-        } catch (IOException | InterruptedException ignored) {
-            return new ArrayList<>();
-        }
-        return files;
-    }
-
-    static class ClassDetails {
-
-        final String className;
-        final String extension;
-        final String packageName;
-        final File jacocoMethodFile;
-        final File jacocoSourceFile;
-        final File jacocoCSVFile;
-        final File file;
-        final double coverage;
-
-        /**
-         *
-         * @param workspace Workspace of the project
-         * @param shortFilePath Path of the file, starting in the workspace root directory
-         * @param shortJacocoPath Path of the JaCoCo root directory, beginning with ** / (without space)
-         * @param shortJacocoCSVPath Path of the JaCoCo csv file, beginning with ** / (without space)
-         */
-        ClassDetails(String workspace, String shortFilePath, String shortJacocoPath, String shortJacocoCSVPath) {
-            ArrayList<String> pathSplit = new ArrayList<>(Arrays.asList(shortFilePath.split("/")));
-            this.className = pathSplit.get(pathSplit.size() - 1).split("\\.")[0];
-            this.extension = pathSplit.get(pathSplit.size() - 1).split("\\.")[1];
-            this.packageName = computePackageName(shortFilePath);
-            String jacocoPath = workspace;
-            int i = 0;
-            while (!pathSplit.get(i).equals("src")) {
-                if (!pathSplit.get(i).isEmpty()) jacocoPath = jacocoPath + "/" + pathSplit.get(i);
-                i++;
-            }
-            this.jacocoCSVFile = new File(jacocoPath + shortJacocoCSVPath.substring(2));
-            jacocoPath = jacocoPath + shortJacocoPath.substring(2) + this.packageName + "/";
-            this.jacocoMethodFile = new File(jacocoPath + this.className + ".html");
-            this.jacocoSourceFile = new File(jacocoPath + this.className + "." + this.extension + ".html");
-            this.file = new File(workspace + shortFilePath);
-            this.coverage = getCoverageInPercentageFromJacoco(this.className, this.jacocoCSVFile);
-        }
-
-        static String computePackageName(String shortFilePath) {
-            ArrayList<String> pathSplit = new ArrayList<>(Arrays.asList(shortFilePath.split("/")));
-            String packageName = "";
-            for (int i = pathSplit.size() - 2; i >= 0; i--) {
-                if (pathSplit.get(i).equals("src") || pathSplit.get(i).equals("main") || pathSplit.get(i).equals("java")) {
-                    packageName = packageName.substring(1);
-                    break;
-                }
-                packageName = "." + pathSplit.get(i) + packageName;
-            }
-            return  packageName;
-        }
-    }
 }
