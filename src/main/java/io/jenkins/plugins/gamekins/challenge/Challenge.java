@@ -12,6 +12,10 @@ public interface Challenge {
 
     int getScore();
 
+    long getCreated();
+
+    long getSolved();
+
     @Override
     String toString();
 }

@@ -256,7 +256,7 @@ public class ChallengeFactory {
         }
     }
 
-    private static Double getCoverageInPercentageFromJacoco(String className, File csv) {
+    static Double getCoverageInPercentageFromJacoco(String className, File csv) {
         List<List<String>> records = new ArrayList<>();
         try {
             BufferedReader br = new BufferedReader(new FileReader(csv));

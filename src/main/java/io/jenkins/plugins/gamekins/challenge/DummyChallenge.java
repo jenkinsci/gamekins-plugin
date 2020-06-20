@@ -22,6 +22,16 @@ public class DummyChallenge implements Challenge {
     }
 
     @Override
+    public long getCreated() {
+        return 0;
+    }
+
+    @Override
+    public long getSolved() {
+        return 0;
+    }
+
+    @Override
     public String toString() {
         return "You have nothing developed recently";
     }

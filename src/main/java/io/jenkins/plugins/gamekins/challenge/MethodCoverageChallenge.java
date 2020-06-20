@@ -6,7 +6,6 @@ import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
 import org.jsoup.select.Elements;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -80,6 +79,8 @@ public class MethodCoverageChallenge extends CoverageChallenge {
                 if (method.getMethodName().equals(this.methodName)) {
                     if (method.missedLines < this.missedLines) {
                         this.solved = System.currentTimeMillis();
+                        this.solvedCoverage = ChallengeFactory.getCoverageInPercentageFromJacoco(
+                                this.classDetails.className, this.classDetails.jacocoCSVFile);
                         return true;
                     }
                 }

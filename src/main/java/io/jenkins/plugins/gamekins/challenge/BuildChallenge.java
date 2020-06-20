@@ -30,6 +30,16 @@ public class BuildChallenge implements Challenge {
     }
 
     @Override
+    public long getCreated() {
+        return this.created;
+    }
+
+    @Override
+    public long getSolved() {
+        return this.solved;
+    }
+
+    @Override
     public String toString() {
         return "Let the Build run successfully";
     }

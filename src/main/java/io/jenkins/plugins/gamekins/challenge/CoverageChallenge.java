@@ -14,6 +14,7 @@ public abstract class CoverageChallenge implements Challenge {
     final int partiallyCoveredLines;
     final int notCoveredLines;
     final double coverage;
+    double solvedCoverage = 0;
     final String branch;
     final long created = System.currentTimeMillis();
     long solved = 0;
@@ -21,13 +22,11 @@ public abstract class CoverageChallenge implements Challenge {
     public CoverageChallenge(ChallengeFactory.ClassDetails classDetails, String branch) throws IOException {
         this.classDetails = classDetails;
         this.branch = branch;
-        //this.classFile = new File(packagePath + "/" + className + ".java.html");
         Document document = Jsoup.parse(this.classDetails.jacocoSourceFile, "UTF-8");
         this.fullyCoveredLines = calculateCoveredLines(document, "fc");
         this.partiallyCoveredLines = calculateCoveredLines(document, "pc");
         this.notCoveredLines = calculateCoveredLines(document, "nc");
-        this.coverage = this.fullyCoveredLines
-                / (double) (this.fullyCoveredLines + this.partiallyCoveredLines + this.notCoveredLines);
+        this.coverage = classDetails.coverage;
     }
 
     public static int calculateCoveredLines(Document document, String modifier) {
@@ -53,5 +52,15 @@ public abstract class CoverageChallenge implements Challenge {
 
     public int getNotCoveredLines() {
         return notCoveredLines;
+    }
+
+    @Override
+    public long getCreated() {
+        return this.created;
+    }
+
+    @Override
+    public long getSolved() {
+        return this.solved;
     }
 }

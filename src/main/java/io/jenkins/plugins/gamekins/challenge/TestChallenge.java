@@ -52,6 +52,16 @@ public class TestChallenge implements Challenge {
     }
 
     @Override
+    public long getCreated() {
+        return this.created;
+    }
+
+    @Override
+    public long getSolved() {
+        return this.solved;
+    }
+
+    @Override
     public String toString() {
         return "Write a new test in branch " + branch;
     }

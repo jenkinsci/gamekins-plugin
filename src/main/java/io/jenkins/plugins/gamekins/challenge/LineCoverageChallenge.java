@@ -57,6 +57,8 @@ public class LineCoverageChallenge extends CoverageChallenge {
         for (Element element : elements) {
             if (element.text().equals(this.lineContent)) {
                 this.solved = System.currentTimeMillis();
+                this.solvedCoverage = ChallengeFactory.
+                        getCoverageInPercentageFromJacoco(this.classDetails.className, this.classDetails.jacocoCSVFile);
                 return true;
             }
         }

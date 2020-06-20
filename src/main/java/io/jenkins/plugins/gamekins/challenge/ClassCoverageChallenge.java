@@ -29,6 +29,8 @@ public class ClassCoverageChallenge extends CoverageChallenge {
                 / (double) (fullyCoveredLines + partiallyCoveredLines + notCoveredLines);
         if (fullyCoveredLines > this.fullyCoveredLines && newCoverage > this.coverage) {
             this.solved = System.currentTimeMillis();
+            this.solvedCoverage = ChallengeFactory.
+                    getCoverageInPercentageFromJacoco(this.classDetails.className, this.classDetails.jacocoCSVFile);
             return true;
         }
         return false;
