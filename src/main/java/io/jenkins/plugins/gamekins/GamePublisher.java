@@ -10,6 +10,7 @@ import io.jenkins.plugins.gamekins.challenge.BuildChallenge;
 import io.jenkins.plugins.gamekins.challenge.Challenge;
 import io.jenkins.plugins.gamekins.challenge.ChallengeFactory;
 import io.jenkins.plugins.gamekins.challenge.DummyChallenge;
+import io.jenkins.plugins.gamekins.util.GitUtil;
 import jenkins.tasks.SimpleBuildStep;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -189,7 +190,7 @@ public class GamePublisher extends Notifier implements SimpleBuildStep {
     private void executePublisher(Run<?, ?> run, HashMap<String, String> constants, Result result) {
         constants.put("jacocoResultsPath", getJacocoResultsPath());
         constants.put("jacocoCSVPath", getJacocoCSVPath());
-        constants.put("branch", ChallengeFactory.getBranch(constants.get("workspace")));
+        constants.put("branch", GitUtil.getBranch(constants.get("workspace")));
 
         for (User user : User.getAll()) {
             GameUserProperty property = user.getProperty(GameUserProperty.class);
@@ -198,7 +199,7 @@ public class GamePublisher extends Notifier implements SimpleBuildStep {
                     FileRepositoryBuilder builder = new FileRepositoryBuilder();
                     Repository repo = builder.setGitDir(
                             new File(constants.get("workspace") + "/.git")).setMustExist(true).build();
-                    RevCommit head = ChallengeFactory.getHead(repo);
+                    RevCommit head = GitUtil.getHead(repo);
                     BuildChallenge challenge = new BuildChallenge();
                     if (result != Result.SUCCESS
                             && (head.getAuthorIdent().getName().equals(user.getFullName())

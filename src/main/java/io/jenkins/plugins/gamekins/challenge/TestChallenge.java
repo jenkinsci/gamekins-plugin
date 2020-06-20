@@ -2,6 +2,7 @@ package io.jenkins.plugins.gamekins.challenge;
 
 import hudson.model.Run;
 import hudson.model.User;
+import io.jenkins.plugins.gamekins.util.GitUtil;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -31,7 +32,7 @@ public class TestChallenge implements Challenge {
                 return false;
             }
             ArrayList<String> lastChangedFilesOfUser =
-                    new ArrayList<>(ChallengeFactory.getLastChangedTestFilesOfUser(
+                    new ArrayList<>(GitUtil.getLastChangedTestFilesOfUser(
                             constants.get("workspace"), user, 0, currentCommit));
             if (lastChangedFilesOfUser.size() > 0) {
                 this.solved = System.currentTimeMillis();
