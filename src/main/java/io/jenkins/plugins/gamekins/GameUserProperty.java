@@ -6,6 +6,7 @@ import hudson.model.UserProperty;
 import hudson.model.UserPropertyDescriptor;
 import io.jenkins.plugins.gamekins.challenge.Challenge;
 import io.jenkins.plugins.gamekins.challenge.DummyChallenge;
+import io.jenkins.plugins.gamekins.util.Pair;
 
 import javax.annotation.Nonnull;
 import java.util.HashMap;
@@ -17,7 +18,7 @@ public class GameUserProperty extends UserProperty {
     private final HashMap<String, CopyOnWriteArrayList<Challenge>> completedChallenges;
     private final HashMap<String, CopyOnWriteArrayList<Challenge>> currentChallenges;
     //TODO: Write Pair class
-    private final HashMap<String, CopyOnWriteArrayList<HashMap<Challenge, String>>> rejectedChallenges;
+    private final HashMap<String, CopyOnWriteArrayList<Pair<Challenge, String>>> rejectedChallenges;
     private final HashMap<String, String> participation;
     private final HashMap<String, Integer> score;
     private final UUID pseudonym;
@@ -84,7 +85,7 @@ public class GameUserProperty extends UserProperty {
 
     public CopyOnWriteArrayList<Challenge> getRejectedChallenges(String projectName) {
         CopyOnWriteArrayList<Challenge> list = new CopyOnWriteArrayList<>();
-        this.rejectedChallenges.get(projectName).stream().map(HashMap::keySet).forEach(list::addAll);
+        this.rejectedChallenges.get(projectName).stream().map(Pair::getFirst).forEach(list::add);
         return list;
     }
 
@@ -120,10 +121,8 @@ public class GameUserProperty extends UserProperty {
 
     public void rejectChallenge(String projectName, Challenge challenge, String reason) {
         this.rejectedChallenges.computeIfAbsent(projectName, k -> new CopyOnWriteArrayList<>());
-        CopyOnWriteArrayList<HashMap<Challenge, String>> challenges = this.rejectedChallenges.get(projectName);
-        HashMap<Challenge, String> map = new HashMap<>();
-        map.put(challenge, reason);
-        challenges.add(map);
+        CopyOnWriteArrayList<Pair<Challenge, String>> challenges = this.rejectedChallenges.get(projectName);
+        challenges.add(new Pair<>(challenge, reason));
         this.rejectedChallenges.put(projectName, challenges);
         CopyOnWriteArrayList<Challenge> currentChallenges = this.currentChallenges.get(projectName);
         currentChallenges.remove(challenge);

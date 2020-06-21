@@ -236,7 +236,7 @@ public class LeaderboardAction implements ProminentProjectAction, Describable<Le
             return super.getDisplayName();
         }
 
-        public FormValidation doRejectChallenge(@AncestorInPath Job<?, ?> job, @QueryParameter String reject,
+        public FormValidation doRejectChallenge(@AncestorInPath AbstractItem job, @QueryParameter String reject,
                                                 @QueryParameter String reason) {
             if (reason.isEmpty()) return FormValidation.error("Please insert your reason for rejection");
             User user = User.current();
