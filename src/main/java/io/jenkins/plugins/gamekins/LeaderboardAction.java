@@ -239,6 +239,7 @@ public class LeaderboardAction implements ProminentProjectAction, Describable<Le
         public FormValidation doRejectChallenge(@AncestorInPath AbstractItem job, @QueryParameter String reject,
                                                 @QueryParameter String reason) {
             if (reason.isEmpty()) return FormValidation.error("Please insert your reason for rejection");
+            if (reason.matches("\\s+")) reason = "No reason provided";
             User user = User.current();
             if (user == null) return FormValidation.error("There is no user signed in");
             GameUserProperty property = user.getProperty(GameUserProperty.class);
