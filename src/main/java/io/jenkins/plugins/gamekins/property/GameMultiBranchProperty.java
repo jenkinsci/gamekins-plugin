@@ -3,9 +3,12 @@ package io.jenkins.plugins.gamekins.property;
 import com.cloudbees.hudson.plugins.folder.AbstractFolder;
 import com.cloudbees.hudson.plugins.folder.AbstractFolderProperty;
 import com.cloudbees.hudson.plugins.folder.AbstractFolderPropertyDescriptor;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Extension;
+import hudson.model.AbstractItem;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
+import io.jenkins.plugins.gamekins.statistics.Statistics;
 import io.jenkins.plugins.gamekins.util.PropertyUtil;
 import net.sf.json.JSONObject;
 import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject;
@@ -19,11 +22,13 @@ public class GameMultiBranchProperty extends AbstractFolderProperty<AbstractFold
 
     boolean activated;
     private final ArrayList<String> teams;
+    private final Statistics statistics;
 
     @DataBoundConstructor
-    public GameMultiBranchProperty(boolean activated) {
-        this. activated = activated;
+    public GameMultiBranchProperty(AbstractItem job, boolean activated) {
+        this.activated = activated;
         this.teams = new ArrayList<>();
+        this.statistics = new Statistics(job);
     }
 
     public boolean getActivated() {
@@ -37,6 +42,11 @@ public class GameMultiBranchProperty extends AbstractFolderProperty<AbstractFold
 
     public ArrayList<String> getTeams() {
         return this.teams;
+    }
+
+    @Override
+    public Statistics getStatistics() {
+        return this.statistics;
     }
 
     public boolean addTeam(String teamName) throws IOException {
@@ -83,6 +93,12 @@ public class GameMultiBranchProperty extends AbstractFolderProperty<AbstractFold
         @Override
         public boolean isApplicable(Class<? extends AbstractFolder> containerType) {
             return containerType == WorkflowMultiBranchProject.class || super.isApplicable(containerType);
+        }
+
+        @Override
+        public AbstractFolderProperty<?> newInstance(StaplerRequest req, JSONObject formData) throws FormException {
+            return new GameMultiBranchProperty((AbstractItem) req.findAncestor(AbstractItem.class).getObject(),
+                    (boolean) formData.get("activated"));
         }
 
         public FormValidation doAddTeam(@AncestorInPath WorkflowMultiBranchProject job,

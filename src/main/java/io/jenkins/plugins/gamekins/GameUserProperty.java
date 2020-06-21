@@ -17,7 +17,6 @@ public class GameUserProperty extends UserProperty {
 
     private final HashMap<String, CopyOnWriteArrayList<Challenge>> completedChallenges;
     private final HashMap<String, CopyOnWriteArrayList<Challenge>> currentChallenges;
-    //TODO: Write Pair class
     private final HashMap<String, CopyOnWriteArrayList<Pair<Challenge, String>>> rejectedChallenges;
     private final HashMap<String, String> participation;
     private final HashMap<String, Integer> score;
@@ -132,6 +131,26 @@ public class GameUserProperty extends UserProperty {
     @Override
     public UserPropertyDescriptor getDescriptor() {
         return DESCRIPTOR;
+    }
+
+    public String printToXML(String projectName, String indentation) {
+        StringBuilder print = new StringBuilder();
+        print.append(indentation).append("<User id=\"").append(this.pseudonym).append("\" project=\"")
+                .append(projectName).append("\" score=\"").append(getScore(projectName)).append("\">\n");
+        print.append(indentation).append("    <CompletedChallenges count=\"")
+                .append(getCompletedChallenges(projectName).size()).append("\">\n");
+        for (Challenge challenge : getCompletedChallenges(projectName)) {
+            print.append(challenge.printToXML("", indentation + "        ")).append("\n");
+        }
+        print.append(indentation).append("    </CompletedChallenges>\n");
+        print.append(indentation).append("    <RejectedChallenges count=\"")
+                .append(getRejectedChallenges(projectName).size()).append("\">\n");
+        for (Pair<Challenge, String> pair : this.rejectedChallenges.get(projectName)) {
+            print.append(pair.getFirst().printToXML(pair.getSecond(),indentation + "        ")).append("\n");
+        }
+        print.append(indentation).append("    </RejectedChallenges>\n");
+        print.append(indentation).append("</User>");
+        return print.toString();
     }
 
     @Extension

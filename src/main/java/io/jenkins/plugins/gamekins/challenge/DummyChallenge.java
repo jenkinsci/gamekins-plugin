@@ -32,6 +32,11 @@ public class DummyChallenge implements Challenge {
     }
 
     @Override
+    public String printToXML(String reason, String indentation) {
+        return "";
+    }
+
+    @Override
     public String toString() {
         return "You have nothing developed recently";
     }

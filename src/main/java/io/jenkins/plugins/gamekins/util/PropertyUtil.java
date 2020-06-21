@@ -18,6 +18,8 @@ import java.util.List;
 
 public class PropertyUtil {
 
+    private PropertyUtil() {}
+
     public static void reconfigure(AbstractItem owner, boolean activated) {
         if (owner instanceof WorkflowJob) {
             if (activated) {

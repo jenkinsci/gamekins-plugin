@@ -16,6 +16,8 @@ public interface Challenge {
 
     long getSolved();
 
+    String printToXML(String reason, String indentation);
+
     @Override
     String toString();
 }

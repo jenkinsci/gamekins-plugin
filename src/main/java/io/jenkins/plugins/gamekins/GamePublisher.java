@@ -12,13 +12,14 @@ import io.jenkins.plugins.gamekins.challenge.ChallengeFactory;
 import io.jenkins.plugins.gamekins.challenge.DummyChallenge;
 import io.jenkins.plugins.gamekins.property.GameJobProperty;
 import io.jenkins.plugins.gamekins.property.GameMultiBranchProperty;
+import io.jenkins.plugins.gamekins.property.GameProperty;
+import io.jenkins.plugins.gamekins.statistics.Statistics;
 import io.jenkins.plugins.gamekins.util.GitUtil;
 import jenkins.tasks.SimpleBuildStep;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.jenkinsci.Symbol;
-import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -185,7 +186,7 @@ public class GamePublisher extends Notifier implements SimpleBuildStep {
     public void perform(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace,
                         @Nonnull Launcher launcher, @Nonnull TaskListener listener) {
         HashMap<String, String> constants = new HashMap<>();
-        if (run instanceof WorkflowRun) {
+        if (run.getParent().getParent() instanceof WorkflowMultiBranchProject) {
             WorkflowMultiBranchProject project = (WorkflowMultiBranchProject) run.getParent().getParent();
             if (!project.getProperties().get(GameMultiBranchProperty.class).getActivated()) return;
             constants.put("projectName", project.getName());
@@ -200,12 +201,14 @@ public class GamePublisher extends Notifier implements SimpleBuildStep {
     private void executePublisher(Run<?, ?> run, HashMap<String, String> constants, Result result) {
         constants.put("jacocoResultsPath", getJacocoResultsPath());
         constants.put("jacocoCSVPath", getJacocoCSVPath());
-        if (run instanceof WorkflowRun) {
+        if (run.getParent().getParent() instanceof WorkflowMultiBranchProject) {
             constants.put("branch", run.getParent().getName());
         } else {
             constants.put("branch", GitUtil.getBranch(constants.get("workspace")));
         }
 
+        int solved = 0;
+        int generated = 0;
         for (User user : User.getAll()) {
             GameUserProperty property = user.getProperty(GameUserProperty.class);
             if (property != null && property.isParticipating(constants.get("projectName"))) {
@@ -221,6 +224,7 @@ public class GamePublisher extends Notifier implements SimpleBuildStep {
                             .equals(user.getProperty(Mailer.UserProperty.class).getAddress()))
                             && !property.getCurrentChallenges(constants.get("projectName")).contains(challenge)) {
                         property.newChallenge(constants.get("projectName"), challenge);
+                        generated++;
                         user.save();
                     }
                 } catch (IOException ignored){}
@@ -229,6 +233,7 @@ public class GamePublisher extends Notifier implements SimpleBuildStep {
                     if (challenge.isSolved(constants, run)) {
                         property.completeChallenge(constants.get("projectName"), challenge);
                         property.addScore(constants.get("projectName"), challenge.getScore());
+                        solved++;
                     }
                 }
 
@@ -257,6 +262,7 @@ public class GamePublisher extends Notifier implements SimpleBuildStep {
                                 }
                             } while (!isChallengeUnique);
                             property.newChallenge(constants.get("projectName"), challenge);
+                            generated++;
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
@@ -268,6 +274,27 @@ public class GamePublisher extends Notifier implements SimpleBuildStep {
                     }
                 }
             }
+        }
+
+        GameProperty property;
+        if (run.getParent().getParent() instanceof WorkflowMultiBranchProject) {
+            property = ((WorkflowMultiBranchProject) run.getParent().getParent()).getProperties().get(GameMultiBranchProperty.class);
+        } else {
+            property = (GameProperty) run.getParent().getProperty(GameProperty.class.getName());
+        }
+        property.getStatistics().addRunEntry(new Statistics.RunEntry(
+                run.getNumber(),
+                constants.get("branch"),
+                run.getResult(),
+                run.getStartTimeInMillis(),
+                generated,
+                solved
+        ));
+
+        try {
+            property.getOwner().save();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 

@@ -25,6 +25,9 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 public class GitUtil {
+
+    private GitUtil() {}
+
     public static RevCommit getHead(Repository repo) throws IOException {
         return getCommit(repo, Constants.HEAD);
     }

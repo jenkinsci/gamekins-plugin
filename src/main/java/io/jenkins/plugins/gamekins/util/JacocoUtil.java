@@ -18,13 +18,16 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Stream;
 
+//TODO: Get overall coverage
 public class JacocoUtil {
+
+    public static HashMap<String, UUID> classMapping = new HashMap<>();
+
+    private JacocoUtil() {}
+
     public static Double getCoverageInPercentageFromJacoco(String className, File csv) {
         List<List<String>> records = new ArrayList<>();
         try {
@@ -217,6 +220,7 @@ public class JacocoUtil {
         final File jacocoCSVFile;
         final File file;
         final double coverage;
+        final UUID id;
 
         /**
          *
@@ -245,6 +249,12 @@ public class JacocoUtil {
             this.jacocoSourceFile = new File(jacocoPath + this.className + "." + this.extension + ".html");
             this.file = new File(workspace + shortFilePath);
             this.coverage = getCoverageInPercentageFromJacoco(this.className, this.jacocoCSVFile);
+            if (JacocoUtil.classMapping.containsKey(this.className)) {
+                this.id = JacocoUtil.classMapping.get(this.className);
+            } else {
+                this.id = UUID.randomUUID();
+                JacocoUtil.classMapping.put(this.className, this.id);
+            }
         }
 
         public String getClassName() {
@@ -277,6 +287,10 @@ public class JacocoUtil {
 
         public double getCoverage() {
             return coverage;
+        }
+
+        public UUID getId() {
+            return id;
         }
     }
 }

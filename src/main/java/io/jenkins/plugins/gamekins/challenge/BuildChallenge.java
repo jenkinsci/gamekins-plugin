@@ -40,6 +40,16 @@ public class BuildChallenge implements Challenge {
     }
 
     @Override
+    public String printToXML(String reason, String indentation) {
+        String print = indentation + "<BuildChallenge created=\"" + this.created + "\" solved=\"" + this.solved;
+        if (!reason.isEmpty()) {
+            print += "\" reason=\"" + reason;
+        }
+        print += "\"/>";
+        return print;
+    }
+
+    @Override
     public String toString() {
         return "Let the Build run successfully";
     }

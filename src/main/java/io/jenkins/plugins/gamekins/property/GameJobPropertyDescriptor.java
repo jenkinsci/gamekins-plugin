@@ -5,9 +5,11 @@ import hudson.model.*;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import io.jenkins.plugins.gamekins.util.PropertyUtil;
+import net.sf.json.JSONObject;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.QueryParameter;
+import org.kohsuke.stapler.StaplerRequest;
 
 import javax.annotation.Nonnull;
 
@@ -28,6 +30,12 @@ public class GameJobPropertyDescriptor extends JobPropertyDescriptor {
     @Override
     public boolean isApplicable(Class<? extends Job> jobType) {
         return jobType == FreeStyleProject.class || jobType == WorkflowJob.class;
+    }
+
+    @Override
+    public JobProperty<?> newInstance(StaplerRequest req, JSONObject formData) throws FormException {
+        return new GameJobProperty((AbstractItem) req.findAncestor(AbstractItem.class).getObject(),
+                (boolean) formData.get("activated"));
     }
 
     public FormValidation doAddTeam(@AncestorInPath Job<?, ?> job, @QueryParameter String teamName) {

@@ -2,6 +2,7 @@ package io.jenkins.plugins.gamekins.property;
 
 import hudson.model.*;
 import io.jenkins.plugins.gamekins.LeaderboardAction;
+import io.jenkins.plugins.gamekins.statistics.Statistics;
 import io.jenkins.plugins.gamekins.util.PropertyUtil;
 import net.sf.json.JSONObject;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -18,11 +19,13 @@ public class GameJobProperty extends hudson.model.JobProperty<Job<?, ?>> impleme
 
     private boolean activated;
     private final ArrayList<String> teams;
+    private final Statistics statistics;
 
     @DataBoundConstructor
-    public GameJobProperty(boolean activated) {
+    public GameJobProperty(AbstractItem job, boolean activated) {
         this.activated = activated;
         this.teams = new ArrayList<>();
+        this.statistics = new Statistics(job);
     }
 
     public boolean getActivated() {
@@ -36,6 +39,16 @@ public class GameJobProperty extends hudson.model.JobProperty<Job<?, ?>> impleme
 
     public ArrayList<String> getTeams() {
         return this.teams;
+    }
+
+    @Override
+    public Statistics getStatistics() {
+        return this.statistics;
+    }
+
+    @Override
+    public AbstractItem getOwner() {
+        return this.owner;
     }
 
     public boolean addTeam(String teamName) throws IOException {

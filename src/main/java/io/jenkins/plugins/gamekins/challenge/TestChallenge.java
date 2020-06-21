@@ -17,6 +17,7 @@ public class TestChallenge implements Challenge {
     private final String branch;
     private final long created = System.currentTimeMillis();
     private long solved = 0;
+    private int testCountSolved = 0;
 
     public TestChallenge(String currentCommit, int testCount, User user, String branch) {
         this.currentCommit = currentCommit;
@@ -29,7 +30,8 @@ public class TestChallenge implements Challenge {
     public boolean isSolved(HashMap<String, String> constants, Run<?, ?> run) {
         if (!this.branch.equals(constants.get("branch"))) return false;
         try {
-            if (JacocoUtil.getTestCount(constants, run) <= this.testCount) {
+            int testCountSolved = JacocoUtil.getTestCount(constants, run);
+            if (testCountSolved <= this.testCount) {
                 return false;
             }
             ArrayList<String> lastChangedFilesOfUser =
@@ -37,6 +39,7 @@ public class TestChallenge implements Challenge {
                             constants.get("workspace"), user, 0, currentCommit));
             if (lastChangedFilesOfUser.size() > 0) {
                 this.solved = System.currentTimeMillis();
+                this.testCountSolved = testCountSolved;
                 return true;
             }
         } catch (IOException ignored) { }
@@ -61,6 +64,17 @@ public class TestChallenge implements Challenge {
     @Override
     public long getSolved() {
         return this.solved;
+    }
+
+    @Override
+    public String printToXML(String reason, String indentation) {
+        String print = indentation + "<TestChallenge created=\"" + this.created + "\" solved=\"" + this.solved
+                + "\" tests=\"" + this.testCount + "\" testsAtSolved=\"" + this.testCountSolved;
+        if (!reason.isEmpty()) {
+            print += "\" reason=\"" + reason;
+        }
+        print += "\"/>";
+        return print;
     }
 
     @Override
