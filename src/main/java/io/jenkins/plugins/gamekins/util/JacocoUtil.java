@@ -21,14 +21,41 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Stream;
 
-//TODO: Get overall coverage
 public class JacocoUtil {
 
     public static HashMap<String, UUID> classMapping = new HashMap<>();
 
     private JacocoUtil() {}
 
-    public static Double getCoverageInPercentageFromJacoco(String className, File csv) {
+    public static double getProjectCoverage(String workspace, String csvName) {
+        ArrayList<FilePath> files = getFilesInAllSubDirectories(workspace, csvName);
+        List<List<String>> records = new ArrayList<>();
+        int instructionCount = 0;
+        int coveredInstructionCount = 0;
+        for (FilePath file : files) {
+            try {
+                BufferedReader br = new BufferedReader(new FileReader(file.getRemote()));
+                String line;
+                while ((line = br.readLine()) != null) {
+                    String[] values = line.split(",");
+                    records.add(Arrays.asList(values));
+                }
+                for (List<String> coverageLine : records ) {
+                    //TODO: Improve
+                    if (!coverageLine.get(2).equals("CLASS")) {
+                        coveredInstructionCount += Double.parseDouble(coverageLine.get(4));
+                        instructionCount += (Double.parseDouble(coverageLine.get(3))
+                                + Double.parseDouble(coverageLine.get(4)));
+                    }
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return coveredInstructionCount / (double) instructionCount;
+    }
+
+    public static double getCoverageInPercentageFromJacoco(String className, File csv) {
         List<List<String>> records = new ArrayList<>();
         try {
             BufferedReader br = new BufferedReader(new FileReader(csv));
@@ -58,6 +85,7 @@ public class JacocoUtil {
                 return action.getTotalCount();
             }
         }
+        if (constants == null) return 0;
         return getTestCount(constants);
     }
 

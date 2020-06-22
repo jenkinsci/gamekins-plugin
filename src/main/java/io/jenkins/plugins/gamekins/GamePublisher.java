@@ -15,6 +15,7 @@ import io.jenkins.plugins.gamekins.property.GameMultiBranchProperty;
 import io.jenkins.plugins.gamekins.property.GameProperty;
 import io.jenkins.plugins.gamekins.statistics.Statistics;
 import io.jenkins.plugins.gamekins.util.GitUtil;
+import io.jenkins.plugins.gamekins.util.JacocoUtil;
 import jenkins.tasks.SimpleBuildStep;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -288,7 +289,11 @@ public class GamePublisher extends Notifier implements SimpleBuildStep {
                 run.getResult(),
                 run.getStartTimeInMillis(),
                 generated,
-                solved
+                solved,
+                JacocoUtil.getTestCount(constants, run),
+                JacocoUtil.getProjectCoverage(constants.get("workspace"),
+                        constants.get("jacocoCSVPath").split("/")
+                                [constants.get("jacocoCSVPath").split("/").length - 1])
         ));
 
         try {

@@ -2,6 +2,7 @@ package io.jenkins.plugins.gamekins.statistics;
 
 import hudson.model.*;
 import io.jenkins.plugins.gamekins.GameUserProperty;
+import io.jenkins.plugins.gamekins.util.JacocoUtil;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject;
@@ -51,7 +52,9 @@ public class Statistics {
                             workflowRun.getResult(),
                             workflowRun.getStartTimeInMillis(),
                             0,
-                            0));
+                            0,
+                            JacocoUtil.getTestCount(null, workflowRun),
+                            0.0));
                 }
             }
         } else if (job instanceof WorkflowJob) {
@@ -62,7 +65,9 @@ public class Statistics {
                         workflowRun.getResult(),
                         workflowRun.getStartTimeInMillis(),
                         0,
-                        0));
+                        0,
+                        JacocoUtil.getTestCount(null, workflowRun),
+                        0.0));
             }
         } else if (job instanceof AbstractProject<?, ?>) {
             for (AbstractBuild<?, ?> abstractBuild : ((AbstractProject<?, ?>) job).getBuilds()) {
@@ -72,12 +77,15 @@ public class Statistics {
                         abstractBuild.getResult(),
                         abstractBuild.getStartTimeInMillis(),
                         0,
-                        0));
+                        0,
+                        JacocoUtil.getTestCount(null, abstractBuild),
+                        0.0));
             }
         }
         return entries;
     }
 
+    //TODO: If previous run does not exist
     public void addRunEntry(RunEntry entry) {
         this.runEntries.add(entry);
     }
@@ -90,15 +98,19 @@ public class Statistics {
         private final long startTime;
         private final int generatedChallenges;
         private final int solvedChallenges;
+        private final int testCount;
+        private final double coverage;
 
         public RunEntry(int runNumber, String branch, Result result, long startTime,
-                        int generatedChallenges, int solvedChallenges) {
+                        int generatedChallenges, int solvedChallenges, int testCount, double coverage) {
             this.runNumber = runNumber;
             this.branch = branch;
             this.result = result;
             this.startTime = startTime;
             this.generatedChallenges = generatedChallenges;
             this.solvedChallenges = solvedChallenges;
+            this.testCount = testCount;
+            this.coverage = coverage;
         }
 
         public int getRunNumber() {
@@ -125,11 +137,20 @@ public class Statistics {
             return solvedChallenges;
         }
 
+        public int getTestCount() {
+            return testCount;
+        }
+
+        public double getCoverage() {
+            return coverage;
+        }
+
         public String printToXML(String indentation) {
             return indentation + "<Run number=\"" + this.runNumber + "\" branch=\"" + this.branch +
                     "\" result=\"" + this.result.toString() + "\" startTime=\"" +
                     this.startTime + "\" generatedChallenges=\"" + this.generatedChallenges +
-                    "\" solvedChallenges=\"" + this.solvedChallenges + "\"/>";
+                    "\" solvedChallenges=\"" + this.solvedChallenges + "\" tests=\"" + this.testCount
+                    + "\" coverage=\"" + this.coverage + "\"/>";
         }
     }
 }
