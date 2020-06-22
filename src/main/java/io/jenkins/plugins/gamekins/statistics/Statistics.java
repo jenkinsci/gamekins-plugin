@@ -7,6 +7,7 @@ import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject;
 
+import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -89,12 +90,14 @@ public class Statistics {
                         0.0));
             }
         }
+        entries.sort(RunEntry::compareTo);
         return entries;
     }
 
     public void addRunEntry(AbstractItem job, String branch, RunEntry entry) {
         addPreviousEntries(job, branch, entry.getRunNumber() - 1);
         this.runEntries.add(entry);
+        this.runEntries.sort(RunEntry::compareTo);
     }
 
     private void addPreviousEntries(AbstractItem job, String branch, int number) {
@@ -158,7 +161,7 @@ public class Statistics {
         }
     }
 
-    public static class RunEntry {
+    public static class RunEntry implements Comparable<RunEntry> {
 
         private final int runNumber;
         private final String branch;
@@ -219,6 +222,14 @@ public class Statistics {
                     this.startTime + "\" generatedChallenges=\"" + this.generatedChallenges +
                     "\" solvedChallenges=\"" + this.solvedChallenges + "\" tests=\"" + this.testCount
                     + "\" coverage=\"" + this.coverage + "\"/>";
+        }
+
+
+        @Override
+        public int compareTo(RunEntry o) {
+            int result = Collator.getInstance().compare(this.getBranch(), o.getBranch());
+            if (result == 0) return Integer.compare(this.getRunNumber(), o.getRunNumber());
+            return result;
         }
     }
 }
