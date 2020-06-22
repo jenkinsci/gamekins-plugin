@@ -109,7 +109,7 @@ public class JacocoUtil {
         return 0;
     }
 
-    private static ArrayList<FilePath> getFilesInAllSubDirectories(String directory, String regex) {
+    public static ArrayList<FilePath> getFilesInAllSubDirectories(String directory, String regex) {
         FilePath rootPath = new FilePath(new File(directory));
         ArrayList<FilePath> files = new ArrayList<>();
         try {

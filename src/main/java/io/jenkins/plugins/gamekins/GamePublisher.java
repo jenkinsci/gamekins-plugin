@@ -31,6 +31,7 @@ import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 
 public class GamePublisher extends Notifier implements SimpleBuildStep {
 
@@ -332,28 +333,39 @@ public class GamePublisher extends Notifier implements SimpleBuildStep {
             return AbstractProject.class.isAssignableFrom(jobType);
         }
 
-        //TODO: Check sub directories
         public FormValidation doCheckJacocoResultsPath(@AncestorInPath AbstractProject<?, ?> project,
                                                        @QueryParameter String jacocoResultsPath) {
             if (project == null) {
                 return FormValidation.ok();
             }
             if (!jacocoResultsPath.endsWith("/")) jacocoResultsPath += "/";
-            jacocoResultsPath += "index.html";
-            File file = new File(ChallengeFactory.getFullPath(
-                    project.getSomeWorkspace().getRemote(), jacocoResultsPath, true));
-            return file.exists() ? FormValidation.ok() : FormValidation.error("The folder is not correct");
+            if (jacocoResultsPath.startsWith("**")) jacocoResultsPath = jacocoResultsPath.substring(2);
+            List<FilePath> files = JacocoUtil.getFilesInAllSubDirectories(
+                    project.getSomeWorkspace().getRemote(), "index.html");
+            for (FilePath file : files) {
+                String path = file.getRemote();
+                if (path.substring(0, path.length() - 10).endsWith(jacocoResultsPath)) {
+                    return FormValidation.ok();
+                }
+            }
+            return FormValidation.error("The folder is not correct");
         }
 
-        //TODO: Check sub directories
         public FormValidation doCheckJacocoCSVPath(@AncestorInPath AbstractProject<?, ?> project,
                                                    @QueryParameter String jacocoCSVPath) {
             if (project == null) {
                 return FormValidation.ok();
             }
-            File file = new File(ChallengeFactory.getFullPath(
-                    project.getSomeWorkspace().getRemote(), jacocoCSVPath, true));
-            return file.exists() ? FormValidation.ok() : FormValidation.error("The file could not be found");
+            if (jacocoCSVPath.startsWith("**")) jacocoCSVPath = jacocoCSVPath.substring(2);
+            String[] split = jacocoCSVPath.split("/");
+            List<FilePath> files = JacocoUtil.getFilesInAllSubDirectories(
+                    project.getSomeWorkspace().getRemote(), split[split.length - 1]);
+            for (FilePath file : files) {
+                if (file.getRemote().endsWith(jacocoCSVPath)) {
+                    return FormValidation.ok();
+                }
+            }
+            return FormValidation.error("The file could not be found");
         }
     }
 }
