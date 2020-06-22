@@ -92,7 +92,6 @@ public class Statistics {
         return entries;
     }
 
-    //TODO: If previous run does not exist
     public void addRunEntry(AbstractItem job, String branch, RunEntry entry) {
         addPreviousEntries(job, branch, entry.getRunNumber() - 1);
         this.runEntries.add(entry);
