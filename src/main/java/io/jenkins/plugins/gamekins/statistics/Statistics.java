@@ -21,8 +21,10 @@ public class Statistics {
     public String printToXML() {
         StringBuilder print = new StringBuilder();
         print.append("<Statistics project=\"").append(this.projectName).append("\">\n");
-        print.append("    <Users count=\"").append(User.getAll().size()).append("\">\n");
-        for (User user : User.getAll()) {
+        ArrayList<User> users = new ArrayList<>(User.getAll());
+        users.removeIf(user -> !user.getProperty(GameUserProperty.class).isParticipating(this.projectName));
+        print.append("    <Users count=\"").append(users.size()).append("\">\n");
+        for (User user : users) {
             GameUserProperty property = user.getProperty(GameUserProperty.class);
             if (property != null && property.isParticipating(this.projectName)) {
                 print.append(property.printToXML(this.projectName, "        ")).append("\n");
