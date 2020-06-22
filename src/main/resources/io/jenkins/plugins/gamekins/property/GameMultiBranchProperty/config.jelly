@@ -5,6 +5,9 @@
         <f:entry title="Activate Gamekins" field="activated">
             <f:checkbox />
         </f:entry>
+        <f:entry title="Show Statistics" field="showStatistics">
+            <f:checkbox />
+        </f:entry>
         <f:entry title="Add Team" field="teamName">
             <f:textbox />
             <f:validateButton title="Add" method="addTeam" with="teamName" />

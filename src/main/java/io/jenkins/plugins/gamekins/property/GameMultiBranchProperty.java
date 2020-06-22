@@ -3,7 +3,6 @@ package io.jenkins.plugins.gamekins.property;
 import com.cloudbees.hudson.plugins.folder.AbstractFolder;
 import com.cloudbees.hudson.plugins.folder.AbstractFolderProperty;
 import com.cloudbees.hudson.plugins.folder.AbstractFolderPropertyDescriptor;
-import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Extension;
 import hudson.model.AbstractItem;
 import hudson.util.FormValidation;
@@ -20,13 +19,15 @@ import java.util.ArrayList;
 
 public class GameMultiBranchProperty extends AbstractFolderProperty<AbstractFolder<?>> implements GameProperty {
 
-    boolean activated;
+    private boolean activated;
+    private boolean showStatistics;
     private final ArrayList<String> teams;
     private final Statistics statistics;
 
     @DataBoundConstructor
-    public GameMultiBranchProperty(AbstractItem job, boolean activated) {
+    public GameMultiBranchProperty(AbstractItem job, boolean activated, boolean showStatistics) {
         this.activated = activated;
+        this.showStatistics = showStatistics;
         this.teams = new ArrayList<>();
         this.statistics = new Statistics(job);
     }
@@ -38,6 +39,15 @@ public class GameMultiBranchProperty extends AbstractFolderProperty<AbstractFold
     @DataBoundSetter
     public void setActivated(boolean activated) {
         this.activated = activated;
+    }
+
+    public boolean getShowStatistics() {
+        return this.showStatistics;
+    }
+
+    @DataBoundSetter
+    public void setShowStatistics(boolean showStatistics) {
+        this.showStatistics = showStatistics;
     }
 
     public ArrayList<String> getTeams() {
@@ -71,8 +81,9 @@ public class GameMultiBranchProperty extends AbstractFolderProperty<AbstractFold
 
     @Override
     public AbstractFolderProperty<?> reconfigure(StaplerRequest req, JSONObject form) {
-        if (form != null) this.activated = (boolean) form.get("activated");
-        PropertyUtil.reconfigure(owner, this.activated);
+        if (form != null) this.activated = form.getBoolean("activated");
+        if (form != null) this.showStatistics = form.getBoolean("showStatistics");
+        PropertyUtil.reconfigure(owner, this.activated, this.showStatistics);
         return this;
     }
 
@@ -98,7 +109,7 @@ public class GameMultiBranchProperty extends AbstractFolderProperty<AbstractFold
         @Override
         public AbstractFolderProperty<?> newInstance(StaplerRequest req, JSONObject formData) throws FormException {
             return new GameMultiBranchProperty((AbstractItem) req.findAncestor(AbstractItem.class).getObject(),
-                    (boolean) formData.get("activated"));
+                    formData.getBoolean("activated"), formData.getBoolean("showStatistics"));
         }
 
         public FormValidation doAddTeam(@AncestorInPath WorkflowMultiBranchProject job,

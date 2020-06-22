@@ -6,6 +6,7 @@ import hudson.model.Actionable;
 import hudson.model.User;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
+import io.jenkins.plugins.gamekins.StatisticsAction;
 import io.jenkins.plugins.gamekins.property.GameProperty;
 import io.jenkins.plugins.gamekins.GameUserProperty;
 import io.jenkins.plugins.gamekins.LeaderboardAction;
@@ -20,12 +21,17 @@ public class PropertyUtil {
 
     private PropertyUtil() {}
 
-    public static void reconfigure(AbstractItem owner, boolean activated) {
+    public static void reconfigure(AbstractItem owner, boolean activated, boolean showStatistics) {
         if (owner instanceof WorkflowJob) {
             if (activated) {
                 owner.addOrReplaceAction(new LeaderboardAction(owner));
             } else {
                 owner.removeAction(new LeaderboardAction(owner));
+            }
+            if (showStatistics) {
+                owner.addOrReplaceAction(new StatisticsAction(owner));
+            } else {
+                owner.removeAction(new StatisticsAction(owner));
             }
             try {
                 owner.save();
@@ -42,6 +48,12 @@ public class PropertyUtil {
                     ((List<Action>) actionField.get(owner)).add(new LeaderboardAction(owner));
                 } else {
                     ((List<Action>) actionField.get(owner)).removeIf(action -> action instanceof LeaderboardAction);
+                }
+                if (showStatistics) {
+                    ((List<Action>) actionField.get(owner)).removeIf(action -> action instanceof StatisticsAction);
+                    ((List<Action>) actionField.get(owner)).add(new StatisticsAction(owner));
+                } else {
+                    ((List<Action>) actionField.get(owner)).removeIf(action -> action instanceof StatisticsAction);
                 }
             } catch (NoSuchFieldException | IllegalAccessException e) {
                 e.printStackTrace();

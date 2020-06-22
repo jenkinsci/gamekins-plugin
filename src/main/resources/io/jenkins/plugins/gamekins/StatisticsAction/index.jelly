@@ -1,0 +1,18 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:l="/lib/layout" xmlns:st="jelly:stapler" xmlns:f="/lib/form">
+    <l:layout title="Leaderboard">
+        <l:side-panel>
+            <st:include page="sidepanel.jelly" it="${it.job}" optional="true" />
+        </l:side-panel>
+        <l:main-panel>
+            <h1>
+                Statistics
+            </h1>
+            <div>
+                <pre>
+                    ${it.statistics}
+                </pre>
+            </div>
+        </l:main-panel>
+    </l:layout>
+</j:jelly>

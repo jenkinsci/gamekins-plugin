@@ -35,7 +35,7 @@ public class GameJobPropertyDescriptor extends JobPropertyDescriptor {
     @Override
     public JobProperty<?> newInstance(StaplerRequest req, JSONObject formData) throws FormException {
         return new GameJobProperty((AbstractItem) req.findAncestor(AbstractItem.class).getObject(),
-                (boolean) formData.get("activated"));
+                formData.getBoolean("activated"), formData.getBoolean("showStatistics"));
     }
 
     public FormValidation doAddTeam(@AncestorInPath Job<?, ?> job, @QueryParameter String teamName) {

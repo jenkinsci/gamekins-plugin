@@ -18,12 +18,14 @@ import java.util.List;
 public class GameJobProperty extends hudson.model.JobProperty<Job<?, ?>> implements GameProperty {
 
     private boolean activated;
+    private boolean showStatistics;
     private final ArrayList<String> teams;
     private final Statistics statistics;
 
     @DataBoundConstructor
-    public GameJobProperty(AbstractItem job, boolean activated) {
+    public GameJobProperty(AbstractItem job, boolean activated, boolean showStatistics) {
         this.activated = activated;
+        this.showStatistics = showStatistics;
         this.teams = new ArrayList<>();
         this.statistics = new Statistics(job);
     }
@@ -35,6 +37,15 @@ public class GameJobProperty extends hudson.model.JobProperty<Job<?, ?>> impleme
     @DataBoundSetter
     public void setActivated(boolean activated) {
         this.activated = activated;
+    }
+
+    public boolean getShowStatistics() {
+        return this.showStatistics;
+    }
+
+    @DataBoundSetter
+    public void setShowStatistics(boolean showStatistics) {
+        this.showStatistics = showStatistics;
     }
 
     public ArrayList<String> getTeams() {
@@ -73,8 +84,9 @@ public class GameJobProperty extends hudson.model.JobProperty<Job<?, ?>> impleme
 
     @Override
     public hudson.model.JobProperty<?> reconfigure(StaplerRequest req, JSONObject form) {
-        if (form != null) this.activated = (boolean) form.get("activated");
-        PropertyUtil.reconfigure(owner, this.activated);
+        if (form != null) this.activated = form.getBoolean("activated");
+        if (form != null) this.showStatistics = form.getBoolean("showStatistics");
+        PropertyUtil.reconfigure(owner, this.activated, this.showStatistics);
         return this;
     }
 
