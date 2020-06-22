@@ -50,6 +50,19 @@
                     Challenges
                 </h1>
                 <div>
+                    <f:form descriptor="${it.descriptor}">
+                        <label for="reject" style="display: inline">Reject Challenge: </label>
+                        <select name="reject" style="display: inline">
+                            <j:forEach indexVar="index" var="challenge" items="${it.currentChallenges}">
+                                <option>${challenge}</option>
+                            </j:forEach>
+                        </select>
+                        <f:textbox field="reason"/>
+                        <f:validateButton title="Reject" method="rejectChallenge" with="reject,reason" />
+                    </f:form>
+                </div>
+                <br/>
+                <div>
                     <table class="pane sortable bigtable" style="width:33%; display: inline-table">
                         <tr>
                             <td class="pane-header" align="left,center">#</td>
@@ -88,20 +101,6 @@
                             </j:forEach>
                         </tr>
                     </table>
-                </div>
-                <br/>
-                <div>
-                    <f:form descriptor="${it.descriptor}">
-                        <label for="reject" style="display: inline">Reject Challenge: </label>
-                        <select name="reject" style="display: inline">
-                            <j:forEach indexVar="index" var="challenge" items="${it.currentChallenges}">
-                                <option>${challenge}</option>
-                            </j:forEach>
-                        </select>
-                        <f:textbox field="reason"/>
-                        <f:validateButton title="Reject" method="rejectChallenge" with="reject,reason" />
-                        <!--<button type="button" style="margin-left: 1%">Reject</button>-->
-                    </f:form>
                 </div>
             </j:if>
         </l:main-panel>
