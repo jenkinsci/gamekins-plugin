@@ -8,6 +8,7 @@ import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 public class Statistics {
 
@@ -45,7 +46,9 @@ public class Statistics {
         ArrayList<RunEntry> entries = new ArrayList<>();
         if (job instanceof WorkflowMultiBranchProject) {
             for (WorkflowJob workflowJob : ((WorkflowMultiBranchProject) job).getItems()) {
-                for (WorkflowRun workflowRun : workflowJob.getBuilds()) {
+                ArrayList<WorkflowRun> list = new ArrayList<>(workflowJob.getBuilds());
+                Collections.reverse(list);
+                for (WorkflowRun workflowRun : list) {
                     entries.add(new RunEntry(
                             workflowRun.getNumber(),
                             workflowJob.getName(),
@@ -58,7 +61,9 @@ public class Statistics {
                 }
             }
         } else if (job instanceof WorkflowJob) {
-            for (WorkflowRun workflowRun : ((WorkflowJob) job).getBuilds()) {
+            ArrayList<WorkflowRun> list = new ArrayList<>(((WorkflowJob) job).getBuilds());
+            Collections.reverse(list);
+            for (WorkflowRun workflowRun : list) {
                 entries.add(new RunEntry(
                         workflowRun.getNumber(),
                         "",
@@ -70,7 +75,9 @@ public class Statistics {
                         0.0));
             }
         } else if (job instanceof AbstractProject<?, ?>) {
-            for (AbstractBuild<?, ?> abstractBuild : ((AbstractProject<?, ?>) job).getBuilds()) {
+            ArrayList<AbstractBuild<?, ?>> list = new ArrayList<>(((AbstractProject<?, ?>) job).getBuilds());
+            Collections.reverse(list);
+            for (AbstractBuild<?, ?> abstractBuild : list) {
                 entries.add(new RunEntry(
                         abstractBuild.getNumber(),
                         "",
@@ -86,8 +93,70 @@ public class Statistics {
     }
 
     //TODO: If previous run does not exist
-    public void addRunEntry(RunEntry entry) {
+    public void addRunEntry(AbstractItem job, String branch, RunEntry entry) {
+        addPreviousEntries(job, branch, entry.getRunNumber() - 1);
         this.runEntries.add(entry);
+    }
+
+    private void addPreviousEntries(AbstractItem job, String branch, int number) {
+        if (number <= 0) return;
+        for (RunEntry entry : this.runEntries) {
+            if (entry.getBranch().equals(branch) && entry.getRunNumber() == number) return;
+        }
+        addPreviousEntries(job, branch, number - 1);
+        if (job instanceof WorkflowMultiBranchProject) {
+            for (WorkflowJob workflowJob : ((WorkflowMultiBranchProject) job).getItems()) {
+                if (workflowJob.getName().equals(branch)) {
+                    ArrayList<WorkflowRun> list = new ArrayList<>(workflowJob.getBuilds());
+                    for (WorkflowRun workflowRun : list) {
+                        if (workflowRun.getNumber() == number) {
+                            this.runEntries.add(new RunEntry(
+                                    workflowRun.getNumber(),
+                                    workflowJob.getName(),
+                                    workflowRun.getResult(),
+                                    workflowRun.getStartTimeInMillis(),
+                                    0,
+                                    0,
+                                    JacocoUtil.getTestCount(null, workflowRun),
+                                    0.0));
+                            return;
+                        }
+                    }
+                }
+            }
+        } else if (job instanceof WorkflowJob) {
+            ArrayList<WorkflowRun> list = new ArrayList<>(((WorkflowJob) job).getBuilds());
+            for (WorkflowRun workflowRun : list) {
+                if (workflowRun.getNumber() == number) {
+                    this.runEntries.add(new RunEntry(
+                            workflowRun.getNumber(),
+                            "",
+                            workflowRun.getResult(),
+                            workflowRun.getStartTimeInMillis(),
+                            0,
+                            0,
+                            JacocoUtil.getTestCount(null, workflowRun),
+                            0.0));
+                    return;
+                }
+            }
+        } else if (job instanceof AbstractProject<?, ?>) {
+            ArrayList<AbstractBuild<?, ?>> list = new ArrayList<>(((AbstractProject<?, ?>) job).getBuilds());
+            for (AbstractBuild<?, ?> abstractBuild : list) {
+                if (abstractBuild.getNumber() == number) {
+                    this.runEntries.add(new RunEntry(
+                            abstractBuild.getNumber(),
+                            "",
+                            abstractBuild.getResult(),
+                            abstractBuild.getStartTimeInMillis(),
+                            0,
+                            0,
+                            JacocoUtil.getTestCount(null, abstractBuild),
+                            0.0));
+                    return;
+                }
+            }
+        }
     }
 
     public static class RunEntry {

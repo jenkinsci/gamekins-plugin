@@ -278,12 +278,15 @@ public class GamePublisher extends Notifier implements SimpleBuildStep {
         }
 
         GameProperty property;
+        AbstractItem job;
         if (run.getParent().getParent() instanceof WorkflowMultiBranchProject) {
+            job = (AbstractItem) run.getParent().getParent();
             property = ((WorkflowMultiBranchProject) run.getParent().getParent()).getProperties().get(GameMultiBranchProperty.class);
         } else {
+            job = run.getParent();
             property = (GameProperty) run.getParent().getProperty(GameProperty.class.getName());
         }
-        property.getStatistics().addRunEntry(new Statistics.RunEntry(
+        property.getStatistics().addRunEntry(job, constants.get("branch"), new Statistics.RunEntry(
                 run.getNumber(),
                 constants.get("branch"),
                 run.getResult(),
