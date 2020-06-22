@@ -76,6 +76,8 @@ public class PropertyUtil {
         ListBoxModel listBoxModel = new ListBoxModel();
         User.getAll().stream().map(User::getFullName).forEach(listBoxModel::add);
         listBoxModel.remove("unknown");
+        listBoxModel.remove("root");
+        listBoxModel.remove("SYSTEM");
         return listBoxModel;
     }
 
