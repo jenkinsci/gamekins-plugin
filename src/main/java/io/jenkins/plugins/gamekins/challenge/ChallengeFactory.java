@@ -98,14 +98,4 @@ public class ChallengeFactory {
         }
         return null;
     }
-
-    public static String getFullPath(String workspace, String partPath, boolean file) {
-        if (partPath.startsWith("**/")) {
-            String path = workspace + partPath.substring(2);
-            if (!file && !path.endsWith("/")) path += "/";
-            return path;
-        }
-        return partPath;
-    }
-
 }
