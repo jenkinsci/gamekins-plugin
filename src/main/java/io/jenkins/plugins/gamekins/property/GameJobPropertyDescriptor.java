@@ -51,8 +51,8 @@ public class GameJobPropertyDescriptor extends JobPropertyDescriptor {
         return PropertyUtil.doFillTeamsBoxItems(property);
     }
 
-    public ListBoxModel doFillUsersBoxItems() {
-        return PropertyUtil.doFillUsersBoxItems();
+    public ListBoxModel doFillUsersBoxItems(@AncestorInPath Job<?, ?> job) {
+        return PropertyUtil.doFillUsersBoxItems(job.getName());
     }
 
     public FormValidation doAddUserToTeam(@AncestorInPath Job<?, ?> job, @QueryParameter String teamsBox,

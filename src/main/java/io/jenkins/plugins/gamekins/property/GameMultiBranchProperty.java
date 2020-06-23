@@ -127,8 +127,8 @@ public class GameMultiBranchProperty extends AbstractFolderProperty<AbstractFold
             return PropertyUtil.doFillTeamsBoxItems(property);
         }
 
-        public ListBoxModel doFillUsersBoxItems() {
-            return PropertyUtil.doFillUsersBoxItems();
+        public ListBoxModel doFillUsersBoxItems(@AncestorInPath WorkflowMultiBranchProject job) {
+            return PropertyUtil.doFillUsersBoxItems(job.getName());
         }
 
         public FormValidation doAddUserToTeam(@AncestorInPath WorkflowMultiBranchProject job,
