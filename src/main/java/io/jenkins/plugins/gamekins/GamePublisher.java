@@ -16,6 +16,7 @@ import io.jenkins.plugins.gamekins.property.GameProperty;
 import io.jenkins.plugins.gamekins.statistics.Statistics;
 import io.jenkins.plugins.gamekins.util.GitUtil;
 import io.jenkins.plugins.gamekins.util.JacocoUtil;
+import io.jenkins.plugins.gamekins.util.PublisherUtil;
 import jenkins.tasks.SimpleBuildStep;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -202,6 +203,14 @@ public class GamePublisher extends Notifier implements SimpleBuildStep {
 
     private void executePublisher(Run<?, ?> run, HashMap<String, String> constants, Result result,
                                   TaskListener listener) {
+        if (!PublisherUtil.doCheckJacocoResultsPath(constants.get("workspace"), this.jacocoResultsPath)) {
+            listener.getLogger().println("[Gamekins] JaCoCo folder is not correct");
+            return;
+        }
+        if (!PublisherUtil.doCheckJacocoCSVPath(constants.get("workspace"), this.jacocoCSVPath)) {
+            listener.getLogger().println("[Gamekins] JaCoCo csv file could not be found");
+            return;
+        }
         constants.put("jacocoResultsPath", getJacocoResultsPath());
         constants.put("jacocoCSVPath", getJacocoCSVPath());
         if (run.getParent().getParent() instanceof WorkflowMultiBranchProject) {
@@ -349,17 +358,8 @@ public class GamePublisher extends Notifier implements SimpleBuildStep {
             if (project == null) {
                 return FormValidation.ok();
             }
-            if (!jacocoResultsPath.endsWith("/")) jacocoResultsPath += "/";
-            if (jacocoResultsPath.startsWith("**")) jacocoResultsPath = jacocoResultsPath.substring(2);
-            List<FilePath> files = JacocoUtil.getFilesInAllSubDirectories(
-                    project.getSomeWorkspace().getRemote(), "index.html");
-            for (FilePath file : files) {
-                String path = file.getRemote();
-                if (path.substring(0, path.length() - 10).endsWith(jacocoResultsPath)) {
-                    return FormValidation.ok();
-                }
-            }
-            return FormValidation.error("The folder is not correct");
+            return PublisherUtil.doCheckJacocoCSVPath(project.getSomeWorkspace().getRemote(), jacocoResultsPath)
+                    ? FormValidation.ok() : FormValidation.error("The folder is not correct");
         }
 
         public FormValidation doCheckJacocoCSVPath(@AncestorInPath AbstractProject<?, ?> project,
@@ -367,16 +367,8 @@ public class GamePublisher extends Notifier implements SimpleBuildStep {
             if (project == null) {
                 return FormValidation.ok();
             }
-            if (jacocoCSVPath.startsWith("**")) jacocoCSVPath = jacocoCSVPath.substring(2);
-            String[] split = jacocoCSVPath.split("/");
-            List<FilePath> files = JacocoUtil.getFilesInAllSubDirectories(
-                    project.getSomeWorkspace().getRemote(), split[split.length - 1]);
-            for (FilePath file : files) {
-                if (file.getRemote().endsWith(jacocoCSVPath)) {
-                    return FormValidation.ok();
-                }
-            }
-            return FormValidation.error("The file could not be found");
+            return PublisherUtil.doCheckJacocoCSVPath(project.getSomeWorkspace().getRemote(), jacocoCSVPath)
+                    ? FormValidation.ok() : FormValidation.error("The file could not be found");
         }
     }
 }
