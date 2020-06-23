@@ -15,6 +15,7 @@ import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.List;
 
 public class PropertyUtil {
@@ -72,12 +73,25 @@ public class PropertyUtil {
         return listBoxModel;
     }
 
-    public static ListBoxModel doFillUsersBoxItems() {
+    public static ListBoxModel doFillUsersBoxItems(String projectName) {
+        ArrayList<String> participatingUser = new ArrayList<>();
+        ArrayList<String> otherUsers = new ArrayList<>();
+        for (User user : User.getAll()) {
+            GameUserProperty property = user.getProperty(GameUserProperty.class);
+            if (property != null) {
+                if (property.isParticipating(projectName)) {
+                    participatingUser.add(user.getFullName());
+                } else {
+                    otherUsers.add(user.getFullName());
+                }
+            }
+        }
+        participatingUser.addAll(otherUsers);
+        participatingUser.remove("unknown");
+        participatingUser.remove("root");
+        participatingUser.remove("SYSTEM");
         ListBoxModel listBoxModel = new ListBoxModel();
-        User.getAll().stream().map(User::getFullName).forEach(listBoxModel::add);
-        listBoxModel.remove("unknown");
-        listBoxModel.remove("root");
-        listBoxModel.remove("SYSTEM");
+        participatingUser.forEach(listBoxModel::add);
         return listBoxModel;
     }
 
