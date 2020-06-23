@@ -225,7 +225,7 @@ public class GamePublisher extends Notifier implements SimpleBuildStep {
                     RevCommit head = GitUtil.getHead(repo);
                     BuildChallenge challenge = new BuildChallenge();
                     if (result != Result.SUCCESS
-                            && (head.getAuthorIdent().getName().equals(user.getFullName())
+                            && (GitUtil.userEquals(head.getAuthorIdent().getName(), user.getFullName())
                             || head.getAuthorIdent().getEmailAddress()
                             .equals(user.getProperty(Mailer.UserProperty.class).getAddress()))
                             && !property.getCurrentChallenges(constants.get("projectName")).contains(challenge)) {

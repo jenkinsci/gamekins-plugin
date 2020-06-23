@@ -89,7 +89,7 @@ public class GitUtil {
             if (currentCommits.isEmpty()) break;
             ArrayList<RevCommit> newCommits = new ArrayList<>();
             for (RevCommit commit : currentCommits) {
-                if (commit.getAuthorIdent().getName().equals(user.getFullName())
+                if (GitUtil.userEquals(commit.getAuthorIdent().getName(), user.getFullName())
                         || commit.getAuthorIdent().getEmailAddress()
                         .equals(user.getProperty(Mailer.UserProperty.class).getAddress())) {
                     String diff = getDiffOfCommit(git, repo, commit);
@@ -169,5 +169,11 @@ public class GitUtil {
             e.printStackTrace();
         }
         return "";
+    }
+
+    public static boolean userEquals(String commitUsername, String jenkinsUserName) {
+        if (commitUsername.equals(jenkinsUserName)) return true;
+        String[] split = commitUsername.split(" ");
+        return jenkinsUserName.contains(split[0]) && jenkinsUserName.contains(split[split.length - 1]);
     }
 }
