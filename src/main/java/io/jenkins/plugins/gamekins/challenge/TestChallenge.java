@@ -4,6 +4,8 @@ import hudson.model.Run;
 import hudson.model.User;
 import io.jenkins.plugins.gamekins.util.GitUtil;
 import io.jenkins.plugins.gamekins.util.JacocoUtil;
+import org.jenkinsci.plugins.workflow.job.WorkflowJob;
+import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -47,8 +49,15 @@ public class TestChallenge implements Challenge {
     }
 
     @Override
-    public boolean isSolvable(HashMap<String, String> constants) {
-        return true;
+    public boolean isSolvable(HashMap<String, String> constants, Run<?, ?> run) {
+        if (run.getParent().getParent() instanceof WorkflowMultiBranchProject) {
+            for (WorkflowJob workflowJob : ((WorkflowMultiBranchProject) run.getParent().getParent()).getItems()) {
+                if (workflowJob.getName().equals(this.branch)) return true;
+            }
+        } else {
+            return true;
+        }
+        return false;
     }
 
     @Override

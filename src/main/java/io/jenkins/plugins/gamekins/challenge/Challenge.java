@@ -8,7 +8,7 @@ public interface Challenge {
 
     boolean isSolved(HashMap<String, String> constants, Run<?, ?> run);
 
-    boolean isSolvable(HashMap<String, String> constants);
+    boolean isSolvable(HashMap<String, String> constants, Run<?, ?> run);
 
     int getScore();
 

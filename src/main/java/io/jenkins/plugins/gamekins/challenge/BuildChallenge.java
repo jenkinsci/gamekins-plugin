@@ -20,7 +20,7 @@ public class BuildChallenge implements Challenge {
     }
 
     @Override
-    public boolean isSolvable(HashMap<String, String> constants) {
+    public boolean isSolvable(HashMap<String, String> constants, Run<?, ?> run) {
         return true;
     }
 

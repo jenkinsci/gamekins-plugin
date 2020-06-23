@@ -244,7 +244,7 @@ public class GamePublisher extends Notifier implements SimpleBuildStep {
                 }
 
                 for (Challenge challenge : property.getCurrentChallenges(constants.get("projectName"))) {
-                    if (!challenge.isSolvable(constants)) {
+                    if (!challenge.isSolvable(constants, run)) {
                         property.rejectChallenge(constants.get("projectName"), challenge, "Not solvable");
                     }
                 }

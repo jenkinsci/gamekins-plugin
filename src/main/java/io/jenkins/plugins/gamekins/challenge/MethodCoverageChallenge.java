@@ -45,7 +45,7 @@ public class MethodCoverageChallenge extends CoverageChallenge {
     }
 
     @Override
-    public boolean isSolvable(HashMap<String, String> constants) {
+    public boolean isSolvable(HashMap<String, String> constants, Run<?, ?> run) {
         if (!this.branch.equals(constants.get("branch"))) return true;
         try {
             ArrayList<JacocoUtil.CoverageMethod> methods =
