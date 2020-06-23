@@ -102,7 +102,7 @@ public class GamePublisher extends Notifier implements SimpleBuildStep {
         HashMap<String, String> constants = new HashMap<>();
         constants.put("workspace", build.getWorkspace().getRemote());
         constants.put("projectName", build.getProject().getName());
-        executePublisher(build, constants, build.getResult());
+        executePublisher(build, constants, build.getResult(), listener);
         return true;
     }
 
@@ -197,10 +197,11 @@ public class GamePublisher extends Notifier implements SimpleBuildStep {
             constants.put("projectName", run.getParent().getName());
         }
         constants.put("workspace", workspace.getRemote());
-        executePublisher(run, constants, run.getResult());
+        executePublisher(run, constants, run.getResult(), listener);
     }
 
-    private void executePublisher(Run<?, ?> run, HashMap<String, String> constants, Result result) {
+    private void executePublisher(Run<?, ?> run, HashMap<String, String> constants, Result result,
+                                  TaskListener listener) {
         constants.put("jacocoResultsPath", getJacocoResultsPath());
         constants.put("jacocoCSVPath", getJacocoCSVPath());
         if (run.getParent().getParent() instanceof WorkflowMultiBranchProject) {
@@ -208,6 +209,9 @@ public class GamePublisher extends Notifier implements SimpleBuildStep {
         } else {
             constants.put("branch", GitUtil.getBranch(constants.get("workspace")));
         }
+
+        listener.getLogger().println("[Gamekins] Start");
+        listener.getLogger().println("[Gamekins] Solve Challenges and generate new Challenges");
 
         int solved = 0;
         int generated = 0;
@@ -277,11 +281,16 @@ public class GamePublisher extends Notifier implements SimpleBuildStep {
             }
         }
 
+        listener.getLogger().println("[Gamekins] Solved " + solved + " Challenges and generated "
+                + generated + " Challenges");
+        listener.getLogger().println("[Gamekins] Update Statistics");
+
         GameProperty property;
         AbstractItem job;
         if (run.getParent().getParent() instanceof WorkflowMultiBranchProject) {
             job = (AbstractItem) run.getParent().getParent();
-            property = ((WorkflowMultiBranchProject) run.getParent().getParent()).getProperties().get(GameMultiBranchProperty.class);
+            property = ((WorkflowMultiBranchProject) run.getParent().getParent())
+                    .getProperties().get(GameMultiBranchProperty.class);
         } else {
             job = run.getParent();
             property = (GameProperty) run.getParent().getProperty(GameProperty.class.getName());
@@ -304,6 +313,8 @@ public class GamePublisher extends Notifier implements SimpleBuildStep {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        listener.getLogger().println("[Gamekins] Finished");
     }
 
     public static final GamePublisher.GameDescriptor DESCRIPTOR = new GamePublisher.GameDescriptor();
