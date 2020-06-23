@@ -5,6 +5,7 @@ import io.jenkins.plugins.gamekins.util.JacocoUtil;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 
@@ -16,9 +17,13 @@ public class ClassCoverageChallenge extends CoverageChallenge {
 
     @Override
     public boolean isSolved(HashMap<String, String> constants, Run<?, ?> run) {
+        File jacocoSourceFile = JacocoUtil.getJacocoFileInMultiBranchProject(run, constants,
+                classDetails.getJacocoSourceFile(), this.branch);
+        File jacocoCSVFile = JacocoUtil.getJacocoFileInMultiBranchProject(run, constants,
+                classDetails.getJacocoCSVFile(), this.branch);
         Document document;
         try {
-            document = Jsoup.parse(classDetails.getJacocoSourceFile(), "UTF-8");
+            document = Jsoup.parse(jacocoSourceFile, "UTF-8");
         } catch (IOException e) {
             e.printStackTrace();
             return false;
@@ -32,7 +37,7 @@ public class ClassCoverageChallenge extends CoverageChallenge {
             this.solved = System.currentTimeMillis();
             this.solvedCoverage = JacocoUtil.
                     getCoverageInPercentageFromJacoco(this.classDetails.getClassName(),
-                            this.classDetails.getJacocoCSVFile());
+                            jacocoCSVFile);
             return true;
         }
         return false;

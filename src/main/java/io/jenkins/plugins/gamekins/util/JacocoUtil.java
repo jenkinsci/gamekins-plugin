@@ -1,8 +1,10 @@
 package io.jenkins.plugins.gamekins.util;
 
 import hudson.FilePath;
+import hudson.model.AbstractItem;
 import hudson.model.Run;
 import hudson.tasks.junit.TestResultAction;
+import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Attribute;
 import org.jsoup.nodes.Document;
@@ -209,6 +211,17 @@ public class JacocoUtil {
             packageName.insert(0, "." + pathSplit.get(i));
         }
         return packageName.toString();
+    }
+
+    public static File getJacocoFileInMultiBranchProject(Run<?, ?> run, HashMap<String, String> constants,
+                                                         File jacocoFile, String oldBranch) {
+        if (run.getParent().getParent() instanceof WorkflowMultiBranchProject
+                && constants.get("branch").equals(oldBranch)) {
+            return new File(jacocoFile.getPath().replace(constants.get("projectName") + "_" + oldBranch,
+                    constants.get("projectName") + "_" + constants.get("branch")));
+        } else {
+            return jacocoFile;
+        }
     }
 
     public static class CoverageMethod {

@@ -3,6 +3,7 @@ package io.jenkins.plugins.gamekins.challenge;
 import hudson.model.Run;
 import io.jenkins.plugins.gamekins.util.JacocoUtil;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,15 +28,19 @@ public class MethodCoverageChallenge extends CoverageChallenge {
 
     @Override
     public boolean isSolved(HashMap<String, String> constants, Run<?, ?> run) {
+        File jacocoMethodFile = JacocoUtil.getJacocoFileInMultiBranchProject(run, constants,
+                classDetails.getJacocoMethodFile(), this.branch);
+        File jacocoCSVFile = JacocoUtil.getJacocoFileInMultiBranchProject(run, constants,
+                classDetails.getJacocoCSVFile(), this.branch);
         try {
             ArrayList<JacocoUtil.CoverageMethod> methods =
-                    JacocoUtil.getMethodEntries(classDetails.getJacocoMethodFile());
+                    JacocoUtil.getMethodEntries(jacocoMethodFile);
             for (JacocoUtil.CoverageMethod method : methods) {
                 if (method.getMethodName().equals(this.methodName)) {
                     if (method.getMissedLines() < this.missedLines) {
                         this.solved = System.currentTimeMillis();
                         this.solvedCoverage = JacocoUtil.getCoverageInPercentageFromJacoco(
-                                this.classDetails.getClassName(), this.classDetails.getJacocoCSVFile());
+                                this.classDetails.getClassName(), jacocoCSVFile);
                         return true;
                     }
                 }
