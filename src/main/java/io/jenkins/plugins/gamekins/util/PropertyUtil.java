@@ -107,7 +107,7 @@ public class PropertyUtil {
                     } catch (IOException e) {
                         return FormValidation.error(e, "There was an error with saving");
                     }
-                    return FormValidation.ok();
+                    return FormValidation.ok("User successfully added");
                 } else {
                     return FormValidation.error("The user is already participating in a team");
                 }
@@ -128,7 +128,7 @@ public class PropertyUtil {
                     } catch (IOException e) {
                         return FormValidation.error(e, "There was an error with saving");
                     }
-                    return FormValidation.ok();
+                    return FormValidation.ok("User successfully removed");
                 } else {
                     return FormValidation.error("The user is not in the specified team");
                 }
@@ -158,7 +158,7 @@ public class PropertyUtil {
             e.printStackTrace();
             return FormValidation.error("Unexpected Error");
         }
-        return FormValidation.ok();
+        return FormValidation.ok("Team successfully deleted");
     }
 
     public static FormValidation doAddTeam(GameProperty property, String teamName) {
@@ -171,6 +171,6 @@ public class PropertyUtil {
             e.printStackTrace();
             return FormValidation.error("Unexpected Error");
         }
-        return FormValidation.ok();
+        return FormValidation.ok("Team successfully added");
     }
 }
