@@ -250,38 +250,53 @@ public class GamePublisher extends Notifier implements SimpleBuildStep {
                     }
                 } catch (IOException ignored){}
 
+                listener.getLogger().println("[Gamekins] Start checking solved status of challenges for user " + user.getFullName());
                 for (Challenge challenge : property.getCurrentChallenges(constants.get("projectName"))) {
                     if (challenge.isSolved(constants, run)) {
                         property.completeChallenge(constants.get("projectName"), challenge);
                         property.addScore(constants.get("projectName"), challenge.getScore());
+                        listener.getLogger().println("[Gamekins] Solved challenges " + challenge.toString());
                         solved++;
                     }
                 }
 
+                listener.getLogger().println("[Gamekins] Start checking solvable state of challenges for user " + user.getFullName());
                 for (Challenge challenge : property.getCurrentChallenges(constants.get("projectName"))) {
                     if (!challenge.isSolvable(constants, run)) {
                         property.rejectChallenge(constants.get("projectName"), challenge, "Not solvable");
+                        listener.getLogger().println("[Gamekins] Challenge " + challenge.toString() + " can not be solved anymore");
                     }
                 }
 
                 if (property.getCurrentChallenges(constants.get("projectName")).size() < 3) {
+                    listener.getLogger().println("[Gamekins] Start generating challenges for user " + user.getFullName());
                     for (int i = property.getCurrentChallenges(constants.get("projectName")).size(); i < 3; i++) {
                         try {
                             Challenge challenge;
                             boolean isChallengeUnique;
+                            int count = 0;
                             do {
+                                if (count == 3) {
+                                    challenge = new DummyChallenge();
+                                    break;
+                                }
                                 isChallengeUnique = true;
-                                challenge = ChallengeFactory.generateChallenge(user, constants);
+                                listener.getLogger().println("[Gamekins] Started to generate challenge");
+                                challenge = ChallengeFactory.generateChallenge(user, constants, listener);
+                                listener.getLogger().println("[Gamekins] Generated challenge " + challenge.toString());
                                 if (challenge instanceof DummyChallenge) break;
                                 for (Challenge currentChallenge
                                         : property.getCurrentChallenges(constants.get("projectName"))) {
                                     if (currentChallenge.toString().equals(challenge.toString())) {
                                         isChallengeUnique = false;
+                                        listener.getLogger().println("[Gamekins] Challenge is not unique");
                                         break;
                                     }
                                 }
+                                count++;
                             } while (!isChallengeUnique);
                             property.newChallenge(constants.get("projectName"), challenge);
+                            listener.getLogger().println("[Gamekins] Added challenge " + challenge.toString());
                             generated++;
                         } catch (IOException e) {
                             e.printStackTrace();

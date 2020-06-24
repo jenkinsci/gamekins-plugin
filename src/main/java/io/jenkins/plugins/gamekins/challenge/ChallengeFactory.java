@@ -1,5 +1,6 @@
 package io.jenkins.plugins.gamekins.challenge;
 
+import hudson.model.TaskListener;
 import hudson.model.User;
 import io.jenkins.plugins.gamekins.util.GitUtil;
 import io.jenkins.plugins.gamekins.util.JacocoUtil;
@@ -16,7 +17,7 @@ public class ChallengeFactory {
 
     }
 
-    public static Challenge generateChallenge(User user, HashMap<String, String> constants) throws IOException {
+    public static Challenge generateChallenge(User user, HashMap<String, String> constants, TaskListener listener) throws IOException {
         if (Math.random() > 0.9) {
             FileRepositoryBuilder builder = new FileRepositoryBuilder();
             Repository repo = builder.setGitDir(
@@ -27,9 +28,11 @@ public class ChallengeFactory {
 
         ArrayList<String> lastChangedFilesOfUser = new ArrayList<>(GitUtil.getLastChangedSourceFilesOfUser(
                 constants.get("workspace"), user, 10, ""));
+        listener.getLogger().println("[Gamekins] Found " + lastChangedFilesOfUser.size() + " last changed files of user " + user.getFullName());
         if (lastChangedFilesOfUser.size() == 0) {
             lastChangedFilesOfUser = new ArrayList<>(GitUtil.getLastChangedSourceFilesOfUser(
-                    constants.get("workspace"), user, 100, ""));
+                    constants.get("workspace"), user, 40, ""));
+            listener.getLogger().println("[Gamekins] Found " + lastChangedFilesOfUser.size() + " last changed files of user " + user.getFullName());
             if (lastChangedFilesOfUser.size() == 0) {
                 return new DummyChallenge();
             }
@@ -41,6 +44,7 @@ public class ChallengeFactory {
                     constants.get("jacocoResultsPath"), constants.get("jacocoCSVPath")));
         }
         files.removeIf(classDetails -> classDetails.getCoverage() == 1.0);
+        listener.getLogger().println("[Gamekins] Found " + files.size() + " files without 100% coverage of user " + user.getFullName());
         if (files.size() == 0) return new DummyChallenge();
         files.sort(Comparator.comparingDouble(JacocoUtil.ClassDetails::getCoverage));
         Collections.reverse(files);
@@ -55,7 +59,12 @@ public class ChallengeFactory {
 
         Challenge challenge;
         Random random = new Random();
+        int count = 0;
         do {
+            if (count == 5 || worklist.isEmpty()) {
+                listener.getLogger().println("[Gamekins] No CoverageChallenge could be built");
+                return new DummyChallenge();
+            }
             double probability = Math.random();
             JacocoUtil.ClassDetails selectedClass = worklist.get(worklist.size() - 1);
             for (int i = 0; i < worklist.size(); i++) {
@@ -74,8 +83,10 @@ public class ChallengeFactory {
             } else {
                 challengeClass = LineCoverageChallenge.class;
             }
+            listener.getLogger().println("[Gamekins] Try class " + selectedClass + " and type " + challengeClass.getName());
             challenge = generateCoverageChallenge(selectedClass, challengeClass, constants.get("branch"));
             worklist.remove(selectedClass);
+            count ++;
         } while (challenge == null);
 
         return challenge;

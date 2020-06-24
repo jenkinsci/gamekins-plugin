@@ -50,6 +50,7 @@ public class StatisticsAction implements ProminentProjectAction {
         } else {
             property = ((AbstractProject<?, ?>) job).getProperty(GameJobProperty.class);
         }
+        if (property.getStatistics() == null) return "Statistics is null";
         return property.getStatistics().printToXML();
     }
 }
