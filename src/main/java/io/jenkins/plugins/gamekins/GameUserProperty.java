@@ -35,6 +35,10 @@ public class GameUserProperty extends UserProperty {
         return this.user;
     }
 
+    public String getPseudonym() {
+        return pseudonym.toString();
+    }
+
     public int getScore(String projectName) {
         if (isParticipating(projectName) && this.score.get(projectName) == null) {
             this.score.put(projectName, 0);
