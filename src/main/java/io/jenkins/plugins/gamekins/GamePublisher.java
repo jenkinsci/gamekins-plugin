@@ -99,7 +99,9 @@ public class GamePublisher extends Notifier implements SimpleBuildStep {
      */
     @Override
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) {
-        if (!build.getProject().getProperty(GameJobProperty.class).getActivated()) return true;
+        if (build.getProject() == null || build.getProject().getProperty(GameJobProperty.class) == null
+                || !build.getProject().getProperty(GameJobProperty.class).getActivated())
+            return true;
         HashMap<String, String> constants = new HashMap<>();
         constants.put("workspace", build.getWorkspace().getRemote());
         constants.put("projectName", build.getProject().getName());
@@ -191,10 +193,14 @@ public class GamePublisher extends Notifier implements SimpleBuildStep {
         HashMap<String, String> constants = new HashMap<>();
         if (run.getParent().getParent() instanceof WorkflowMultiBranchProject) {
             WorkflowMultiBranchProject project = (WorkflowMultiBranchProject) run.getParent().getParent();
-            if (!project.getProperties().get(GameMultiBranchProperty.class).getActivated()) return;
+            if (project.getProperties().get(GameMultiBranchProperty.class) == null
+                    || !project.getProperties().get(GameMultiBranchProperty.class).getActivated())
+                return;
             constants.put("projectName", project.getName());
         } else {
-            if (!run.getParent().getProperty(GameJobProperty.class).getActivated()) return;
+            if (run.getParent().getProperty(GameJobProperty.class) == null
+                    || !run.getParent().getProperty(GameJobProperty.class).getActivated())
+                return;
             constants.put("projectName", run.getParent().getName());
         }
         constants.put("workspace", workspace.getRemote());
