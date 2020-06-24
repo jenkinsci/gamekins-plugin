@@ -3,6 +3,7 @@ package io.jenkins.plugins.gamekins.util;
 import hudson.FilePath;
 import hudson.model.AbstractItem;
 import hudson.model.Run;
+import hudson.model.User;
 import hudson.tasks.junit.TestResultAction;
 import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject;
 import org.jsoup.Jsoup;
@@ -259,6 +260,7 @@ public class JacocoUtil {
         final File jacocoCSVFile;
         final File file;
         final double coverage;
+        final ArrayList<User> changedByUsers;
 
         /**
          *
@@ -287,6 +289,7 @@ public class JacocoUtil {
             this.jacocoSourceFile = new File(jacocoPath + this.className + "." + this.extension + ".html");
             this.file = new File(workspace + shortFilePath);
             this.coverage = getCoverageInPercentageFromJacoco(this.className, this.jacocoCSVFile);
+            this.changedByUsers = new ArrayList<>();
         }
 
         public String getClassName() {
@@ -319,6 +322,14 @@ public class JacocoUtil {
 
         public double getCoverage() {
             return coverage;
+        }
+
+        public ArrayList<User> getChangedByUsers() {
+            return this.changedByUsers;
+        }
+
+        public void addUser(User user) {
+            this.changedByUsers.add(user);
         }
     }
 }

@@ -4,10 +4,7 @@ import hudson.model.User;
 import hudson.tasks.Mailer;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.diff.DiffFormatter;
-import org.eclipse.jgit.lib.Constants;
-import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.lib.ObjectReader;
-import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.lib.*;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
@@ -19,10 +16,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.*;
 
 public class GitUtil {
 
@@ -175,5 +169,88 @@ public class GitUtil {
         if (commitUsername.equals(jenkinsUserName)) return true;
         String[] split = commitUsername.split(" ");
         return jenkinsUserName.contains(split[0]) && jenkinsUserName.contains(split[split.length - 1]);
+    }
+
+    public static User mapUser(PersonIdent ident) {
+        String[] split = ident.getName().split(" ");
+        for (User user : User.getAll()) {
+            if ((user.getFullName().contains(split[0]) && user.getFullName().contains(split[split.length - 1]))
+                    || ident.getEmailAddress().equals(user.getProperty(Mailer.UserProperty.class).getAddress())) {
+                return user;
+            }
+        }
+        return null;
+    }
+
+    public static ArrayList<JacocoUtil.ClassDetails> getLastChangedFiles(int count, HashMap<String, String> constants) throws IOException {
+        FileRepositoryBuilder builder = new FileRepositoryBuilder();
+        Repository repo = builder.setGitDir(new File(constants.get("workspace") + "/.git")).setMustExist(true).build();
+        RevWalk walk = new RevWalk(repo);
+
+        RevCommit headCommit = getHead(repo);
+        Git git = new Git(repo);
+
+        int totalCount = 0;
+        ArrayList<RevCommit> currentCommits = new ArrayList<>();
+        currentCommits.add(headCommit);
+
+        ArrayList<JacocoUtil.ClassDetails> classes = new ArrayList<>();
+        HashMap<PersonIdent, User> authorMapping = new HashMap<>();
+
+        while (totalCount < count) {
+            if (currentCommits.isEmpty()) break;
+            ArrayList<RevCommit> newCommits = new ArrayList<>();
+            for (RevCommit commit : currentCommits) {
+                String diff = getDiffOfCommit(git, repo, commit);
+
+                String[] lines = diff.split("\n");
+                for (String line : lines) {
+                    if (line.contains("diff --git")) {
+                        String path = line.split(" ")[2].substring(1);
+                        String[] pathSplit = path.split("/");
+                        if (Arrays.asList(path.split("/")).contains("test")
+                                || !(path.contains(".java") || path.contains(".kt"))) {
+                            continue;
+                        }
+                        String classname = pathSplit[pathSplit.length - 1].split("\\.")[0];
+
+                        boolean found = false;
+                        for (JacocoUtil.ClassDetails details : classes) {
+                            if (details.getClassName().equals(classname)) {
+                                User user = authorMapping.get(commit.getAuthorIdent());
+                                if (user == null) {
+                                    user = mapUser(commit.getAuthorIdent());
+                                    authorMapping.put(commit.getAuthorIdent(), user);
+                                }
+                                details.addUser(user);
+                                found = true;
+                                break;
+                            }
+                        }
+                        if (!found) {
+                            JacocoUtil.ClassDetails details = new JacocoUtil.ClassDetails(constants.get("workspace"), path,
+                                    constants.get("jacocoResultsPath"), constants.get("jacocoCSVPath"));
+                            User user = authorMapping.get(commit.getAuthorIdent());
+                            if (user == null) {
+                                user = mapUser(commit.getAuthorIdent());
+                                authorMapping.put(commit.getAuthorIdent(), user);
+                            }
+                            details.addUser(user);
+                            classes.add(details);
+                        }
+                    }
+                }
+
+                for (RevCommit parent : commit.getParents()) {
+                    newCommits.add(walk.parseCommit(repo.resolve(parent.getName())));
+                    walk.dispose();
+                }
+            }
+
+            currentCommits = new ArrayList<>(newCommits);
+            totalCount++;
+        }
+
+        return classes;
     }
 }

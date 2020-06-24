@@ -31,8 +31,7 @@ import org.kohsuke.stapler.QueryParameter;
 import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 public class GamePublisher extends Notifier implements SimpleBuildStep {
 
@@ -228,6 +227,19 @@ public class GamePublisher extends Notifier implements SimpleBuildStep {
         listener.getLogger().println("[Gamekins] Start");
         listener.getLogger().println("[Gamekins] Solve Challenges and generate new Challenges");
 
+        ArrayList<JacocoUtil.ClassDetails> classes;
+        try {
+            classes = GitUtil.getLastChangedFiles(200, constants);
+            listener.getLogger().println("[Gamekins] Found " + classes.size() + " last changed files");
+            classes.removeIf(classDetails -> classDetails.getCoverage() == 1.0);
+            listener.getLogger().println("[Gamekins] Found " + classes.size() + " last changed files without 100% coverage");
+            classes.sort(Comparator.comparingDouble(JacocoUtil.ClassDetails::getCoverage));
+            Collections.reverse(classes);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return;
+        }
+
         int solved = 0;
         int generated = 0;
         for (User user : User.getAll()) {
@@ -245,6 +257,7 @@ public class GamePublisher extends Notifier implements SimpleBuildStep {
                             .equals(user.getProperty(Mailer.UserProperty.class).getAddress()))
                             && !property.getCurrentChallenges(constants.get("projectName")).contains(challenge)) {
                         property.newChallenge(constants.get("projectName"), challenge);
+                        listener.getLogger().println("[Gamekins] Generated new BuildChallenge");
                         generated++;
                         user.save();
                     }
@@ -270,7 +283,16 @@ public class GamePublisher extends Notifier implements SimpleBuildStep {
 
                 if (property.getCurrentChallenges(constants.get("projectName")).size() < 3) {
                     listener.getLogger().println("[Gamekins] Start generating challenges for user " + user.getFullName());
+
+                    ArrayList<JacocoUtil.ClassDetails> userClasses = new ArrayList<>(classes);
+                    userClasses.removeIf(classDetails -> !classDetails.getChangedByUsers().contains(user));
+                    listener.getLogger().println("[Gamekins] Found " + userClasses.size() + " last changed files of user " + user.getFullName());
+
                     for (int i = property.getCurrentChallenges(constants.get("projectName")).size(); i < 3; i++) {
+                        if (userClasses.size() == 0) {
+                            property.newChallenge(constants.get("projectName"), new DummyChallenge());
+                            break;
+                        }
                         try {
                             Challenge challenge;
                             boolean isChallengeUnique;
@@ -282,7 +304,7 @@ public class GamePublisher extends Notifier implements SimpleBuildStep {
                                 }
                                 isChallengeUnique = true;
                                 listener.getLogger().println("[Gamekins] Started to generate challenge");
-                                challenge = ChallengeFactory.generateChallenge(user, constants, listener);
+                                challenge = ChallengeFactory.generateChallenge(user, constants, listener, userClasses);
                                 listener.getLogger().println("[Gamekins] Generated challenge " + challenge.toString());
                                 if (challenge instanceof DummyChallenge) break;
                                 for (Challenge currentChallenge

@@ -17,38 +17,18 @@ public class ChallengeFactory {
 
     }
 
-    public static Challenge generateChallenge(User user, HashMap<String, String> constants, TaskListener listener) throws IOException {
+    public static Challenge generateChallenge(User user, HashMap<String, String> constants, TaskListener listener, ArrayList<JacocoUtil.ClassDetails> classes) throws IOException {
         if (Math.random() > 0.9) {
             FileRepositoryBuilder builder = new FileRepositoryBuilder();
             Repository repo = builder.setGitDir(
                     new File(constants.get("workspace") + "/.git")).setMustExist(true).build();
+            listener.getLogger().println("[Gamekins] Generated new TestChallenge");
             return new TestChallenge(GitUtil.getHead(repo).getName(), JacocoUtil.getTestCount(constants),
                     user, constants.get("branch"));
         }
 
-        ArrayList<String> lastChangedFilesOfUser = new ArrayList<>(GitUtil.getLastChangedSourceFilesOfUser(
-                constants.get("workspace"), user, 10, ""));
-        listener.getLogger().println("[Gamekins] Found " + lastChangedFilesOfUser.size() + " last changed files of user " + user.getFullName());
-        if (lastChangedFilesOfUser.size() == 0) {
-            lastChangedFilesOfUser = new ArrayList<>(GitUtil.getLastChangedSourceFilesOfUser(
-                    constants.get("workspace"), user, 40, ""));
-            listener.getLogger().println("[Gamekins] Found " + lastChangedFilesOfUser.size() + " last changed files of user " + user.getFullName());
-            if (lastChangedFilesOfUser.size() == 0) {
-                return new DummyChallenge();
-            }
-        }
 
-        ArrayList<JacocoUtil.ClassDetails> files = new ArrayList<>();
-        for (String file : lastChangedFilesOfUser) {
-            files.add(new JacocoUtil.ClassDetails(constants.get("workspace"), file,
-                    constants.get("jacocoResultsPath"), constants.get("jacocoCSVPath")));
-        }
-        files.removeIf(classDetails -> classDetails.getCoverage() == 1.0);
-        listener.getLogger().println("[Gamekins] Found " + files.size() + " files without 100% coverage of user " + user.getFullName());
-        if (files.size() == 0) return new DummyChallenge();
-        files.sort(Comparator.comparingDouble(JacocoUtil.ClassDetails::getCoverage));
-        Collections.reverse(files);
-        ArrayList<JacocoUtil.ClassDetails> worklist = new ArrayList<>(files);
+        ArrayList<JacocoUtil.ClassDetails> worklist = new ArrayList<>(classes);
 
         final double c = 1.5;
         double[] rankValues = new double[worklist.size()];
