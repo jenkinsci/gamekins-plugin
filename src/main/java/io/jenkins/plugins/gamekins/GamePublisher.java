@@ -234,7 +234,8 @@ public class GamePublisher extends Notifier implements SimpleBuildStep {
             classes = GitUtil.getLastChangedFiles(SEARCH_COMMIT_COUNT, constants);
             listener.getLogger().println("[Gamekins] Found " + classes.size() + " last changed files");
             classes.removeIf(classDetails -> classDetails.getCoverage() == 1.0);
-            listener.getLogger().println("[Gamekins] Found " + classes.size() + " last changed files without 100% coverage");
+            listener.getLogger().println("[Gamekins] Found " + classes.size()
+                    + " last changed files without 100% coverage");
             classes.sort(Comparator.comparingDouble(JacocoUtil.ClassDetails::getCoverage));
             Collections.reverse(classes);
         } catch (IOException e) {
@@ -248,24 +249,26 @@ public class GamePublisher extends Notifier implements SimpleBuildStep {
             GameUserProperty property = user.getProperty(GameUserProperty.class);
             if (property != null && property.isParticipating(constants.get("projectName"))) {
                 try {
-                    FileRepositoryBuilder builder = new FileRepositoryBuilder();
-                    Repository repo = builder.setGitDir(
-                            new File(constants.get("workspace") + "/.git")).setMustExist(true).build();
-                    RevCommit head = GitUtil.getHead(repo);
-                    BuildChallenge challenge = new BuildChallenge();
-                    if (result != Result.SUCCESS
-                            && (GitUtil.userEquals(head.getAuthorIdent().getName(), user.getFullName())
-                            || head.getAuthorIdent().getEmailAddress()
-                            .equals(user.getProperty(Mailer.UserProperty.class).getAddress()))
-                            && !property.getCurrentChallenges(constants.get("projectName")).contains(challenge)) {
-                        property.newChallenge(constants.get("projectName"), challenge);
-                        listener.getLogger().println("[Gamekins] Generated new BuildChallenge");
-                        generated++;
-                        user.save();
+                    if (result != Result.SUCCESS) {
+                        FileRepositoryBuilder builder = new FileRepositoryBuilder();
+                        Repository repo = builder.setGitDir(
+                                new File(constants.get("workspace") + "/.git")).setMustExist(true).build();
+                        RevCommit head = GitUtil.getHead(repo);
+                        BuildChallenge challenge = new BuildChallenge();
+                        if ((GitUtil.userEquals(head.getAuthorIdent().getName(), user.getFullName())
+                                || head.getAuthorIdent().getEmailAddress()
+                                .equals(user.getProperty(Mailer.UserProperty.class).getAddress()))
+                                && !property.getCurrentChallenges(constants.get("projectName")).contains(challenge)) {
+                            property.newChallenge(constants.get("projectName"), challenge);
+                            listener.getLogger().println("[Gamekins] Generated new BuildChallenge");
+                            generated++;
+                            user.save();
+                        }
                     }
                 } catch (IOException ignored){}
 
-                listener.getLogger().println("[Gamekins] Start checking solved status of challenges for user " + user.getFullName());
+                listener.getLogger().println("[Gamekins] Start checking solved status of challenges for user "
+                        + user.getFullName());
                 for (Challenge challenge : property.getCurrentChallenges(constants.get("projectName"))) {
                     if (challenge.isSolved(constants, run)) {
                         property.completeChallenge(constants.get("projectName"), challenge);
@@ -275,20 +278,24 @@ public class GamePublisher extends Notifier implements SimpleBuildStep {
                     }
                 }
 
-                listener.getLogger().println("[Gamekins] Start checking solvable state of challenges for user " + user.getFullName());
+                listener.getLogger().println("[Gamekins] Start checking solvable state of challenges for user "
+                        + user.getFullName());
                 for (Challenge challenge : property.getCurrentChallenges(constants.get("projectName"))) {
                     if (!challenge.isSolvable(constants, run)) {
                         property.rejectChallenge(constants.get("projectName"), challenge, "Not solvable");
-                        listener.getLogger().println("[Gamekins] Challenge " + challenge.toString() + " can not be solved anymore");
+                        listener.getLogger().println("[Gamekins] Challenge " + challenge.toString()
+                                + " can not be solved anymore");
                     }
                 }
 
                 if (property.getCurrentChallenges(constants.get("projectName")).size() < 3) {
-                    listener.getLogger().println("[Gamekins] Start generating challenges for user " + user.getFullName());
+                    listener.getLogger().println("[Gamekins] Start generating challenges for user "
+                            + user.getFullName());
 
                     ArrayList<JacocoUtil.ClassDetails> userClasses = new ArrayList<>(classes);
                     userClasses.removeIf(classDetails -> !classDetails.getChangedByUsers().contains(user));
-                    listener.getLogger().println("[Gamekins] Found " + userClasses.size() + " last changed files of user " + user.getFullName());
+                    listener.getLogger().println("[Gamekins] Found " + userClasses.size()
+                            + " last changed files of user " + user.getFullName());
 
                     for (int i = property.getCurrentChallenges(constants.get("projectName")).size(); i < 3; i++) {
                         if (userClasses.size() == 0) {
