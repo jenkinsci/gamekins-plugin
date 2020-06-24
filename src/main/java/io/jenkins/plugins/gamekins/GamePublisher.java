@@ -35,6 +35,8 @@ import java.util.*;
 
 public class GamePublisher extends Notifier implements SimpleBuildStep {
 
+    private final int SEARCH_COMMIT_COUNT = 200;
+
     private String jacocoResultsPath;
     private String jacocoCSVPath;
 
@@ -229,7 +231,7 @@ public class GamePublisher extends Notifier implements SimpleBuildStep {
 
         ArrayList<JacocoUtil.ClassDetails> classes;
         try {
-            classes = GitUtil.getLastChangedFiles(200, constants);
+            classes = GitUtil.getLastChangedFiles(SEARCH_COMMIT_COUNT, constants);
             listener.getLogger().println("[Gamekins] Found " + classes.size() + " last changed files");
             classes.removeIf(classDetails -> classDetails.getCoverage() == 1.0);
             listener.getLogger().println("[Gamekins] Found " + classes.size() + " last changed files without 100% coverage");

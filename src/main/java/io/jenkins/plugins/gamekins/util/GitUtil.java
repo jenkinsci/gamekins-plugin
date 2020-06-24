@@ -182,9 +182,11 @@ public class GitUtil {
         return null;
     }
 
-    public static ArrayList<JacocoUtil.ClassDetails> getLastChangedFiles(int count, HashMap<String, String> constants) throws IOException {
+    public static ArrayList<JacocoUtil.ClassDetails> getLastChangedFiles(int count, HashMap<String, String> constants)
+            throws IOException {
         FileRepositoryBuilder builder = new FileRepositoryBuilder();
-        Repository repo = builder.setGitDir(new File(constants.get("workspace") + "/.git")).setMustExist(true).build();
+        Repository repo = builder.setGitDir(new File(constants.get("workspace") + "/.git"))
+                .setMustExist(true).build();
         RevWalk walk = new RevWalk(repo);
 
         RevCommit headCommit = getHead(repo);
@@ -228,8 +230,8 @@ public class GitUtil {
                             }
                         }
                         if (!found) {
-                            JacocoUtil.ClassDetails details = new JacocoUtil.ClassDetails(constants.get("workspace"), path,
-                                    constants.get("jacocoResultsPath"), constants.get("jacocoCSVPath"));
+                            JacocoUtil.ClassDetails details = new JacocoUtil.ClassDetails(constants.get("workspace"),
+                                    path, constants.get("jacocoResultsPath"), constants.get("jacocoCSVPath"));
                             User user = authorMapping.get(commit.getAuthorIdent());
                             if (user == null) {
                                 user = mapUser(commit.getAuthorIdent());

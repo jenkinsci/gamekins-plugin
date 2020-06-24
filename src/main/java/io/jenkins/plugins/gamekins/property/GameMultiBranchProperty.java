@@ -107,7 +107,7 @@ public class GameMultiBranchProperty extends AbstractFolderProperty<AbstractFold
         }
 
         @Override
-        public AbstractFolderProperty<?> newInstance(StaplerRequest req, JSONObject formData) throws FormException {
+        public AbstractFolderProperty<?> newInstance(StaplerRequest req, JSONObject formData) {
             return new GameMultiBranchProperty((AbstractItem) req.findAncestor(AbstractItem.class).getObject(),
                     formData.getBoolean("activated"), formData.getBoolean("showStatistics"));
         }

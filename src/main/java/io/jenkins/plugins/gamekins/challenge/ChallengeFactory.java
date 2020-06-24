@@ -17,7 +17,8 @@ public class ChallengeFactory {
 
     }
 
-    public static Challenge generateChallenge(User user, HashMap<String, String> constants, TaskListener listener, ArrayList<JacocoUtil.ClassDetails> classes) throws IOException {
+    public static Challenge generateChallenge(User user, HashMap<String, String> constants, TaskListener listener,
+                                              ArrayList<JacocoUtil.ClassDetails> classes) throws IOException {
         if (Math.random() > 0.9) {
             FileRepositoryBuilder builder = new FileRepositoryBuilder();
             Repository repo = builder.setGitDir(
@@ -63,7 +64,8 @@ public class ChallengeFactory {
             } else {
                 challengeClass = LineCoverageChallenge.class;
             }
-            listener.getLogger().println("[Gamekins] Try class " + selectedClass + " and type " + challengeClass.getName());
+            listener.getLogger().println("[Gamekins] Try class " + selectedClass + " and type "
+                    + challengeClass.getName());
             challenge = generateCoverageChallenge(selectedClass, challengeClass, constants.get("branch"));
             worklist.remove(selectedClass);
             count ++;
