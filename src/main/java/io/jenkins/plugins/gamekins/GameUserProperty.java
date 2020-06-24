@@ -146,7 +146,7 @@ public class GameUserProperty extends UserProperty {
         for (Challenge challenge : getCurrentChallenges(projectName)) {
             print.append(challenge.printToXML("", indentation + "        ")).append("\n");
         }
-        print.append(indentation).append("    </CompletedChallenges>\n");
+        print.append(indentation).append("    </CurrentChallenges>\n");
         print.append(indentation).append("    <CompletedChallenges count=\"")
                 .append(getCompletedChallenges(projectName).size()).append("\">\n");
         for (Challenge challenge : getCompletedChallenges(projectName)) {
