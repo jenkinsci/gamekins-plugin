@@ -228,6 +228,10 @@ public class GitUtil {
                                 User user = authorMapping.get(commit.getAuthorIdent());
                                 if (user == null) {
                                     user = mapUser(commit.getAuthorIdent());
+                                    if (user == null) {
+                                        found = true;
+                                        break;
+                                    }
                                     authorMapping.put(commit.getAuthorIdent(), user);
                                 }
                                 details.addUser(user);
@@ -241,6 +245,7 @@ public class GitUtil {
                             User user = authorMapping.get(commit.getAuthorIdent());
                             if (user == null) {
                                 user = mapUser(commit.getAuthorIdent());
+                                if (user == null) continue;
                                 authorMapping.put(commit.getAuthorIdent(), user);
                             }
                             details.addUser(user);
