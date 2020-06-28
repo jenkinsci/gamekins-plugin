@@ -64,9 +64,9 @@ public class ChallengeFactory {
             } else {
                 challengeClass = LineCoverageChallenge.class;
             }
-            listener.getLogger().println("[Gamekins] Try class " + selectedClass + " and type "
+            listener.getLogger().println("[Gamekins] Try class " + selectedClass.getClassName() + " and type "
                     + challengeClass.getName());
-            challenge = generateCoverageChallenge(selectedClass, challengeClass, constants.get("branch"));
+            challenge = generateCoverageChallenge(selectedClass, challengeClass, constants.get("branch"), listener);
             worklist.remove(selectedClass);
             count ++;
         } while (challenge == null);
@@ -76,9 +76,18 @@ public class ChallengeFactory {
 
     //TODO: Create Enum
     private static CoverageChallenge generateCoverageChallenge(JacocoUtil.ClassDetails classDetails,
-                                                               Class challengeClass, String branch)
+                                                               Class challengeClass, String branch,
+                                                               TaskListener listener)
             throws IOException {
-        Document document = JacocoUtil.generateDocument(classDetails.getJacocoSourceFile(), "UTF-8");
+        Document document;
+        try {
+            document = JacocoUtil.generateDocument(classDetails.getJacocoSourceFile(), "UTF-8");
+        } catch (IOException e) {
+            listener.getLogger().println("[Gamekins] IOException with JaCoCoSourceFile "
+                    + classDetails.getJacocoSourceFile().getAbsolutePath());
+            e.printStackTrace(listener.getLogger());
+            throw e;
+        }
         if (JacocoUtil.calculateCoveredLines(document, "pc") > 0
                 || JacocoUtil.calculateCoveredLines(document, "nc") > 0) {
             if (challengeClass == ClassCoverageChallenge.class) {

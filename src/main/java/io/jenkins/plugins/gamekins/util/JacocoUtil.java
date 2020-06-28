@@ -1,8 +1,8 @@
 package io.jenkins.plugins.gamekins.util;
 
 import hudson.FilePath;
-import hudson.model.AbstractItem;
 import hudson.model.Run;
+import hudson.model.TaskListener;
 import hudson.model.User;
 import hudson.tasks.junit.TestResultAction;
 import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject;
@@ -132,10 +132,6 @@ public class JacocoUtil {
         return elements.size();
     }
 
-    public static Document generateDocument(String filePath, String charset) throws IOException {
-        return Jsoup.parse(new File(filePath), charset);
-    }
-
     public static Document generateDocument(File file, String charset) throws IOException {
         return Jsoup.parse(file, charset);
     }
@@ -164,7 +160,7 @@ public class JacocoUtil {
     }
 
     public static ArrayList<CoverageMethod> getMethodEntries(File jacocoMethodFile) throws IOException {
-        Elements elements = generateDocument(jacocoMethodFile.getPath(), "UTF-8").select("tr");
+        Elements elements = generateDocument(jacocoMethodFile, "UTF-8").select("tr");
         ArrayList<CoverageMethod> methods = new ArrayList<>();
         for (Element element : elements) {
             boolean matches = false;
@@ -218,7 +214,7 @@ public class JacocoUtil {
                                                          File jacocoFile, String oldBranch) {
         if (run.getParent().getParent() instanceof WorkflowMultiBranchProject
                 && constants.get("branch").equals(oldBranch)) {
-            return new File(jacocoFile.getPath().replace(constants.get("projectName") + "_" + oldBranch,
+            return new File(jacocoFile.getAbsolutePath().replace(constants.get("projectName") + "_" + oldBranch,
                     constants.get("projectName") + "_" + constants.get("branch")));
         } else {
             return jacocoFile;
@@ -272,7 +268,8 @@ public class JacocoUtil {
         public ClassDetails(String workspace,
                             String shortFilePath,
                             String shortJacocoPath,
-                            String shortJacocoCSVPath) {
+                            String shortJacocoCSVPath,
+                            TaskListener listener) {
             ArrayList<String> pathSplit = new ArrayList<>(Arrays.asList(shortFilePath.split("/")));
             this.className = pathSplit.get(pathSplit.size() - 1).split("\\.")[0];
             this.extension = pathSplit.get(pathSplit.size() - 1).split("\\.")[1];
@@ -284,9 +281,20 @@ public class JacocoUtil {
                 i++;
             }
             this.jacocoCSVFile = new File(jacocoPath + shortJacocoCSVPath.substring(2));
-            jacocoPath.append(shortJacocoPath.substring(2)).append(this.packageName).append("/");
+            if (!this.jacocoCSVFile.exists()) {
+                listener.getLogger().println("[Gamekins] JaCoCoCSVPath: " + this.jacocoCSVFile.getAbsolutePath());
+            }
+            jacocoPath.append(shortJacocoPath.substring(2));
+            if (!jacocoPath.toString().endsWith("/")) jacocoPath.append("/");
+            jacocoPath.append(this.packageName).append("/");
             this.jacocoMethodFile = new File(jacocoPath + this.className + ".html");
+            if (!this.jacocoMethodFile.exists()) {
+                listener.getLogger().println("[Gamekins] JaCoCoMethodPath: " + this.jacocoMethodFile.getAbsolutePath());
+            }
             this.jacocoSourceFile = new File(jacocoPath + this.className + "." + this.extension + ".html");
+            if (!this.jacocoSourceFile.exists()) {
+                listener.getLogger().println("[Gamekins] JaCoCoSourcePath: " + this.jacocoSourceFile.getAbsolutePath());
+            }
             this.file = new File(workspace + shortFilePath);
             this.coverage = getCoverageInPercentageFromJacoco(this.className, this.jacocoCSVFile);
             this.changedByUsers = new ArrayList<>();

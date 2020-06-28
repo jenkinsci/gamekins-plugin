@@ -94,18 +94,20 @@ public class Statistics {
         return entries;
     }
 
-    public void addRunEntry(AbstractItem job, String branch, RunEntry entry) {
-        addPreviousEntries(job, branch, entry.getRunNumber() - 1);
+    public void addRunEntry(AbstractItem job, String branch, RunEntry entry, TaskListener listener) {
+        addPreviousEntries(job, branch, entry.getRunNumber() - 1, listener);
         this.runEntries.add(entry);
+        listener.getLogger().println(entry.printToXML(""));
         this.runEntries.sort(RunEntry::compareTo);
     }
 
-    private void addPreviousEntries(AbstractItem job, String branch, int number) {
+    private void addPreviousEntries(AbstractItem job, String branch, int number, TaskListener listener) {
         if (number <= 0) return;
         for (RunEntry entry : this.runEntries) {
             if (entry.getBranch().equals(branch) && entry.getRunNumber() == number) return;
         }
-        addPreviousEntries(job, branch, number - 1);
+        addPreviousEntries(job, branch, number - 1, listener);
+        listener.getLogger().println(this.runEntries.get(this.runEntries.size() - 1).printToXML(""));
         if (job instanceof WorkflowMultiBranchProject) {
             for (WorkflowJob workflowJob : ((WorkflowMultiBranchProject) job).getItems()) {
                 if (workflowJob.getName().equals(branch)) {
@@ -218,7 +220,7 @@ public class Statistics {
 
         public String printToXML(String indentation) {
             return indentation + "<Run number=\"" + this.runNumber + "\" branch=\"" + this.branch +
-                    "\" result=\"" + this.result.toString() + "\" startTime=\"" +
+                    "\" result=\"" + (this.result == null ? "NULL" : this.result.toString()) + "\" startTime=\"" +
                     this.startTime + "\" generatedChallenges=\"" + this.generatedChallenges +
                     "\" solvedChallenges=\"" + this.solvedChallenges + "\" tests=\"" + this.testCount
                     + "\" coverage=\"" + this.coverage + "\"/>";

@@ -1,5 +1,6 @@
 package io.jenkins.plugins.gamekins.util;
 
+import hudson.model.TaskListener;
 import hudson.model.User;
 import hudson.tasks.Mailer;
 import org.eclipse.jgit.api.Git;
@@ -175,15 +176,19 @@ public class GitUtil {
         String[] split = ident.getName().split(" ");
         for (User user : User.getAll()) {
             if ((user.getFullName().contains(split[0]) && user.getFullName().contains(split[split.length - 1]))
-                    || ident.getEmailAddress().equals(user.getProperty(Mailer.UserProperty.class).getAddress())) {
+                    || (user.getProperty(Mailer.UserProperty.class) != null
+                    && ident.getEmailAddress().equals(user.getProperty(Mailer.UserProperty.class).getAddress()))) {
                 return user;
             }
         }
         return null;
     }
 
-    public static ArrayList<JacocoUtil.ClassDetails> getLastChangedFiles(int count, HashMap<String, String> constants)
-            throws IOException {
+    //TODO: Not performant - maybe JGit starts to search from the HEAD every time?
+    //TODO: Looking at the time it seems random...
+    //TODO: Maybe some commits have many parents?
+    public static ArrayList<JacocoUtil.ClassDetails> getLastChangedFiles(int count, HashMap<String, String> constants,
+                                                                         TaskListener listener) throws IOException {
         FileRepositoryBuilder builder = new FileRepositoryBuilder();
         Repository repo = builder.setGitDir(new File(constants.get("workspace") + "/.git"))
                 .setMustExist(true).build();
@@ -193,6 +198,7 @@ public class GitUtil {
         Git git = new Git(repo);
 
         int totalCount = 0;
+        //TODO: Change to Set
         ArrayList<RevCommit> currentCommits = new ArrayList<>();
         currentCommits.add(headCommit);
 
@@ -200,6 +206,8 @@ public class GitUtil {
         HashMap<PersonIdent, User> authorMapping = new HashMap<>();
 
         while (totalCount < count) {
+            if (totalCount % 10 == 0) listener.getLogger().println("[Gamekins] Searched through "
+                    + totalCount + " Commits");
             if (currentCommits.isEmpty()) break;
             ArrayList<RevCommit> newCommits = new ArrayList<>();
             for (RevCommit commit : currentCommits) {
@@ -231,7 +239,7 @@ public class GitUtil {
                         }
                         if (!found) {
                             JacocoUtil.ClassDetails details = new JacocoUtil.ClassDetails(constants.get("workspace"),
-                                    path, constants.get("jacocoResultsPath"), constants.get("jacocoCSVPath"));
+                                    path, constants.get("jacocoResultsPath"), constants.get("jacocoCSVPath"), listener);
                             User user = authorMapping.get(commit.getAuthorIdent());
                             if (user == null) {
                                 user = mapUser(commit.getAuthorIdent());
@@ -250,6 +258,7 @@ public class GitUtil {
             }
 
             currentCommits = new ArrayList<>(newCommits);
+            //TODO: Update inside for loop of current commits
             totalCount++;
         }
 

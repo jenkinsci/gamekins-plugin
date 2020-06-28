@@ -35,7 +35,7 @@ import java.util.*;
 
 public class GamePublisher extends Notifier implements SimpleBuildStep {
 
-    private final int SEARCH_COMMIT_COUNT = 200;
+    private final int SEARCH_COMMIT_COUNT = 50;
 
     private String jacocoResultsPath;
     private String jacocoCSVPath;
@@ -231,7 +231,7 @@ public class GamePublisher extends Notifier implements SimpleBuildStep {
 
         ArrayList<JacocoUtil.ClassDetails> classes;
         try {
-            classes = GitUtil.getLastChangedFiles(SEARCH_COMMIT_COUNT, constants);
+            classes = GitUtil.getLastChangedFiles(SEARCH_COMMIT_COUNT, constants, listener);
             listener.getLogger().println("[Gamekins] Found " + classes.size() + " last changed files");
             classes.removeIf(classDetails -> classDetails.getCoverage() == 1.0);
             listener.getLogger().println("[Gamekins] Found " + classes.size()
@@ -239,7 +239,7 @@ public class GamePublisher extends Notifier implements SimpleBuildStep {
             classes.sort(Comparator.comparingDouble(JacocoUtil.ClassDetails::getCoverage));
             Collections.reverse(classes);
         } catch (IOException e) {
-            e.printStackTrace();
+            e.printStackTrace(listener.getLogger());
             return;
         }
 
@@ -256,8 +256,9 @@ public class GamePublisher extends Notifier implements SimpleBuildStep {
                         RevCommit head = GitUtil.getHead(repo);
                         BuildChallenge challenge = new BuildChallenge();
                         if ((GitUtil.userEquals(head.getAuthorIdent().getName(), user.getFullName())
-                                || head.getAuthorIdent().getEmailAddress()
-                                .equals(user.getProperty(Mailer.UserProperty.class).getAddress()))
+                                || (user.getProperty(Mailer.UserProperty.class) != null
+                                && head.getAuthorIdent().getEmailAddress()
+                                .equals(user.getProperty(Mailer.UserProperty.class).getAddress())))
                                 && !property.getCurrentChallenges(constants.get("projectName")).contains(challenge)) {
                             property.newChallenge(constants.get("projectName"), challenge);
                             listener.getLogger().println("[Gamekins] Generated new BuildChallenge");
@@ -265,7 +266,9 @@ public class GamePublisher extends Notifier implements SimpleBuildStep {
                             user.save();
                         }
                     }
-                } catch (IOException ignored){}
+                } catch (IOException e){
+                    e.printStackTrace(listener.getLogger());
+                }
 
                 listener.getLogger().println("[Gamekins] Start checking solved status of challenges for user "
                         + user.getFullName());
@@ -330,13 +333,13 @@ public class GamePublisher extends Notifier implements SimpleBuildStep {
                             listener.getLogger().println("[Gamekins] Added challenge " + challenge.toString());
                             generated++;
                         } catch (IOException e) {
-                            e.printStackTrace();
+                            e.printStackTrace(listener.getLogger());
                         }
                     }
                     try {
                         user.save();
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        e.printStackTrace(listener.getLogger());
                     }
                 }
             }
@@ -367,12 +370,12 @@ public class GamePublisher extends Notifier implements SimpleBuildStep {
                 JacocoUtil.getProjectCoverage(constants.get("workspace"),
                         constants.get("jacocoCSVPath").split("/")
                                 [constants.get("jacocoCSVPath").split("/").length - 1])
-        ));
+        ), listener);
 
         try {
             property.getOwner().save();
         } catch (IOException e) {
-            e.printStackTrace();
+            e.printStackTrace(listener.getLogger());
         }
 
         listener.getLogger().println("[Gamekins] Finished");
