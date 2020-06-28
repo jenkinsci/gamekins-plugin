@@ -255,10 +255,8 @@ public class GamePublisher extends Notifier implements SimpleBuildStep {
                                 new File(constants.get("workspace") + "/.git")).setMustExist(true).build();
                         RevCommit head = GitUtil.getHead(repo);
                         BuildChallenge challenge = new BuildChallenge();
-                        if ((GitUtil.userEquals(head.getAuthorIdent().getName(), user.getFullName())
-                                || (user.getProperty(Mailer.UserProperty.class) != null
-                                && head.getAuthorIdent().getEmailAddress()
-                                .equals(user.getProperty(Mailer.UserProperty.class).getAddress())))
+                        User mapUser = GitUtil.mapUser(head.getAuthorIdent());
+                        if (mapUser != null && mapUser.equals(user)
                                 && !property.getCurrentChallenges(constants.get("projectName")).contains(challenge)) {
                             property.newChallenge(constants.get("projectName"), challenge);
                             listener.getLogger().println("[Gamekins] Generated new BuildChallenge");

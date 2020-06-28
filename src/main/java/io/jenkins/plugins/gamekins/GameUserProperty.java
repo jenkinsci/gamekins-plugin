@@ -62,6 +62,10 @@ public class GameUserProperty extends UserProperty {
         this.gitNames = new HashSet<>(Arrays.asList(split));
     }
 
+    public HashSet<String> getGitNames() {
+        return gitNames;
+    }
+
     public String getPseudonym() {
         return pseudonym.toString();
     }

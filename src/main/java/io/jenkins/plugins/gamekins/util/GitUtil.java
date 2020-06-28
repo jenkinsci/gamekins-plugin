@@ -3,6 +3,7 @@ package io.jenkins.plugins.gamekins.util;
 import hudson.model.TaskListener;
 import hudson.model.User;
 import hudson.tasks.Mailer;
+import io.jenkins.plugins.gamekins.GameUserProperty;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.diff.DiffFormatter;
 import org.eclipse.jgit.lib.*;
@@ -84,9 +85,8 @@ public class GitUtil {
             if (currentCommits.isEmpty()) break;
             ArrayList<RevCommit> newCommits = new ArrayList<>();
             for (RevCommit commit : currentCommits) {
-                if (GitUtil.userEquals(commit.getAuthorIdent().getName(), user.getFullName())
-                        || commit.getAuthorIdent().getEmailAddress()
-                        .equals(user.getProperty(Mailer.UserProperty.class).getAddress())) {
+                User mapUser = mapUser(commit.getAuthorIdent());
+                if (mapUser != null &&  mapUser.equals(user)) {
                     String diff = getDiffOfCommit(git, repo, commit);
 
                     String[] lines = diff.split("\n");
@@ -166,18 +166,16 @@ public class GitUtil {
         return "";
     }
 
-    public static boolean userEquals(String commitUsername, String jenkinsUserName) {
-        if (commitUsername.equals(jenkinsUserName)) return true;
-        String[] split = commitUsername.split(" ");
-        return jenkinsUserName.contains(split[0]) && jenkinsUserName.contains(split[split.length - 1]);
-    }
-
     public static User mapUser(PersonIdent ident) {
         String[] split = ident.getName().split(" ");
         for (User user : User.getAll()) {
-            if ((user.getFullName().contains(split[0]) && user.getFullName().contains(split[split.length - 1]))
+            GameUserProperty property = user.getProperty(GameUserProperty.class);
+            if (
+                    (property != null && property.getGitNames().contains(ident.getName()))
+                    || (user.getFullName().contains(split[0]) && user.getFullName().contains(split[split.length - 1]))
                     || (user.getProperty(Mailer.UserProperty.class) != null
-                    && ident.getEmailAddress().equals(user.getProperty(Mailer.UserProperty.class).getAddress()))) {
+                    && ident.getEmailAddress().equals(user.getProperty(Mailer.UserProperty.class).getAddress()))
+            ) {
                 return user;
             }
         }
