@@ -10,6 +10,7 @@ import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Objects;
 
 public class Statistics {
 
@@ -34,6 +35,7 @@ public class Statistics {
             }
         }
         print.append("    </Users>\n");
+        this.runEntries.removeIf(Objects::isNull);
         print.append("    <Runs count=\"").append(this.runEntries.size()).append("\">\n");
         for (RunEntry entry : this.runEntries) {
             print.append(entry.printToXML("        ")).append("\n");
