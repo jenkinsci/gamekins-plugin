@@ -413,7 +413,7 @@ public class GamePublisher extends Notifier implements SimpleBuildStep {
             if (project == null) {
                 return FormValidation.ok();
             }
-            return PublisherUtil.doCheckJacocoCSVPath(project.getSomeWorkspace().getRemote(), jacocoResultsPath)
+            return PublisherUtil.doCheckJacocoResultsPath(project.getSomeWorkspace().getRemote(), jacocoResultsPath)
                     ? FormValidation.ok() : FormValidation.error("The folder is not correct");
         }
 
