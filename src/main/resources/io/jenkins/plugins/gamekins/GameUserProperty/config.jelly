@@ -4,4 +4,7 @@
     <f:entry title="ID" field="id">
         ${instance.pseudonym}
     </f:entry>
+    <f:entry title="Git Names" field="names" description="The names the user is using for committing in git (call 'git show -s' in the git folder), divided by a Semicolon ';'">
+        <f:textbox field="names" name="names"/>
+    </f:entry>
 </j:jelly>

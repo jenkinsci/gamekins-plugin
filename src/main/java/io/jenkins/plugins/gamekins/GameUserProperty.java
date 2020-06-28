@@ -7,9 +7,14 @@ import hudson.model.UserPropertyDescriptor;
 import io.jenkins.plugins.gamekins.challenge.Challenge;
 import io.jenkins.plugins.gamekins.challenge.DummyChallenge;
 import io.jenkins.plugins.gamekins.util.Pair;
+import net.sf.json.JSONObject;
+import org.kohsuke.stapler.DataBoundSetter;
+import org.kohsuke.stapler.StaplerRequest;
 
 import javax.annotation.Nonnull;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -21,6 +26,7 @@ public class GameUserProperty extends UserProperty {
     private final HashMap<String, String> participation;
     private final HashMap<String, Integer> score;
     private final UUID pseudonym;
+    private HashSet<String> gitNames;
 
     public GameUserProperty() {
         this.completedChallenges = new HashMap<>();
@@ -29,10 +35,31 @@ public class GameUserProperty extends UserProperty {
         this.participation = new HashMap<>();
         this.score = new HashMap<>();
         this.pseudonym = UUID.randomUUID();
+        this.gitNames = getInitialGitNames();
     }
 
     public User getUser() {
         return this.user;
+    }
+
+    @Override
+    protected void setUser(User u) {
+        super.setUser(u);
+        if (this.gitNames == null) this.gitNames = getInitialGitNames();
+    }
+
+    public String getNames() {
+        StringBuilder builder = new StringBuilder();
+        for (String name : this.gitNames) {
+            builder.append(name).append(";");
+        }
+        return builder.substring(0, builder.length() - 1);
+    }
+
+    @DataBoundSetter
+    public void setNames(String names) {
+        String[] split = names.split(";");
+        this.gitNames = new HashSet<>(Arrays.asList(split));
     }
 
     public String getPseudonym() {
@@ -161,6 +188,20 @@ public class GameUserProperty extends UserProperty {
         print.append(indentation).append("    </RejectedChallenges>\n");
         print.append(indentation).append("</User>");
         return print.toString();
+    }
+
+    private HashSet<String> getInitialGitNames() {
+        HashSet<String> set = new HashSet<>();
+        set.add(this.user.getFullName());
+        set.add(this.user.getDisplayName());
+        set.add(this.user.getId());
+        return set;
+    }
+
+    @Override
+    public UserProperty reconfigure(StaplerRequest req, JSONObject form) {
+        this.setNames(form.getString("names"));
+        return this;
     }
 
     @Extension
