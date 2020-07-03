@@ -10,9 +10,9 @@ public interface GameProperty {
 
     ArrayList<String> getTeams();
 
-    boolean addTeam(String teamName) throws IOException;
+    void addTeam(String teamName) throws IOException;
 
-    boolean removeTeam(String teamName) throws IOException;
+    void removeTeam(String teamName) throws IOException;
 
     Statistics getStatistics();
 

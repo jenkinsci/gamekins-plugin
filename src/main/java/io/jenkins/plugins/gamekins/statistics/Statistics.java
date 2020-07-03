@@ -204,14 +204,6 @@ public class Statistics {
             return startTime;
         }
 
-        public int getGeneratedChallenges() {
-            return generatedChallenges;
-        }
-
-        public int getSolvedChallenges() {
-            return solvedChallenges;
-        }
-
         public int getTestCount() {
             return testCount;
         }

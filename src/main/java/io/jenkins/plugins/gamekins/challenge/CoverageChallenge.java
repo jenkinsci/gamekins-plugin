@@ -28,18 +28,6 @@ public abstract class CoverageChallenge implements Challenge {
         this.coverage = classDetails.getCoverage();
     }
 
-    public int getFullyCoveredLines() {
-        return fullyCoveredLines;
-    }
-
-    public int getPartiallyCoveredLines() {
-        return partiallyCoveredLines;
-    }
-
-    public int getNotCoveredLines() {
-        return notCoveredLines;
-    }
-
     @Override
     public long getCreated() {
         return this.created;

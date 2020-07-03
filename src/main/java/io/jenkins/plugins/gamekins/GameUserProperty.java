@@ -79,10 +79,6 @@ public class GameUserProperty extends UserProperty {
         return this.score.get(projectName);
     }
 
-    public void setScore(String projectName, int score) {
-        this.score.put(projectName, score);
-    }
-
     public void addScore(String projectName, int score) {
         this.score.put(projectName, this.score.get(projectName) + score);
     }
@@ -136,16 +132,6 @@ public class GameUserProperty extends UserProperty {
         challenges = this.currentChallenges.get(projectName);
         challenges.remove(challenge);
         this.currentChallenges.put(projectName, challenges);
-    }
-
-    /**
-     * Only for debugging purposes
-     * @param projectName the name of the project
-     */
-    public void removeChallenges(String projectName) {
-        this.currentChallenges.put(projectName, new CopyOnWriteArrayList<>());
-        this.completedChallenges.put(projectName, new CopyOnWriteArrayList<>());
-        this.rejectedChallenges.put(projectName, new CopyOnWriteArrayList<>());
     }
 
     public void newChallenge(String projectName, Challenge challenge) {
@@ -208,7 +194,7 @@ public class GameUserProperty extends UserProperty {
 
     @Override
     public UserProperty reconfigure(StaplerRequest req, JSONObject form) {
-        this.setNames(form.getString("names"));
+        if (form != null) this.setNames(form.getString("names"));
         return this;
     }
 

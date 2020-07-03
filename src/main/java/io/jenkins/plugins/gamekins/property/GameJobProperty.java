@@ -62,24 +62,14 @@ public class GameJobProperty extends hudson.model.JobProperty<Job<?, ?>> impleme
         return this.owner;
     }
 
-    public boolean addTeam(String teamName) throws IOException {
-        if (this.teams.contains(teamName)) {
-            return false;
-        } else {
-            this.teams.add(teamName);
-            owner.save();
-            return true;
-        }
+    public void addTeam(String teamName) throws IOException {
+        this.teams.add(teamName);
+        owner.save();
     }
 
-    public boolean removeTeam(String teamName) throws IOException {
-        if (!this.teams.contains(teamName)) {
-            return false;
-        } else {
-            this.teams.remove(teamName);
-            owner.save();
-            return true;
-        }
+    public void removeTeam(String teamName) throws IOException {
+        this.teams.remove(teamName);
+        owner.save();
     }
 
     @Override
