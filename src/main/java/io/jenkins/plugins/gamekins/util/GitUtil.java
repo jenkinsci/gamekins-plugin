@@ -196,8 +196,7 @@ public class GitUtil {
         Git git = new Git(repo);
 
         int totalCount = 0;
-        //TODO: Change to Set
-        ArrayList<RevCommit> currentCommits = new ArrayList<>();
+        HashSet<RevCommit> currentCommits = new HashSet<>();
         currentCommits.add(headCommit);
 
         ArrayList<JacocoUtil.ClassDetails> classes = new ArrayList<>();
@@ -207,7 +206,7 @@ public class GitUtil {
             if (totalCount % 10 == 0) listener.getLogger().println("[Gamekins] Searched through "
                     + totalCount + " Commits");
             if (currentCommits.isEmpty()) break;
-            ArrayList<RevCommit> newCommits = new ArrayList<>();
+            HashSet<RevCommit> newCommits = new HashSet<>();
             for (RevCommit commit : currentCommits) {
                 String diff = getDiffOfCommit(git, repo, commit);
 
@@ -258,11 +257,10 @@ public class GitUtil {
                     newCommits.add(walk.parseCommit(repo.resolve(parent.getName())));
                     walk.dispose();
                 }
+                totalCount++;
             }
 
-            currentCommits = new ArrayList<>(newCommits);
-            //TODO: Update inside for loop of current commits
-            totalCount++;
+            currentCommits = new HashSet<>(newCommits);
         }
 
         return classes;

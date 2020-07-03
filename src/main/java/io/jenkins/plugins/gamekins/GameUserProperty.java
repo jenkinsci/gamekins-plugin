@@ -35,7 +35,6 @@ public class GameUserProperty extends UserProperty {
         this.participation = new HashMap<>();
         this.score = new HashMap<>();
         this.pseudonym = UUID.randomUUID();
-        this.gitNames = getInitialGitNames();
     }
 
     public User getUser() {
@@ -44,11 +43,13 @@ public class GameUserProperty extends UserProperty {
 
     @Override
     protected void setUser(User u) {
-        super.setUser(u);
+        this.user = u;
         if (this.gitNames == null) this.gitNames = getInitialGitNames();
     }
 
     public String getNames() {
+        if (this.user == null) return "";
+        if (this.gitNames == null) this.gitNames = getInitialGitNames();
         StringBuilder builder = new StringBuilder();
         for (String name : this.gitNames) {
             builder.append(name).append(";");
@@ -63,6 +64,7 @@ public class GameUserProperty extends UserProperty {
     }
 
     public HashSet<String> getGitNames() {
+        if (this.gitNames == null) return new HashSet<>();
         return gitNames;
     }
 
@@ -196,9 +198,11 @@ public class GameUserProperty extends UserProperty {
 
     private HashSet<String> getInitialGitNames() {
         HashSet<String> set = new HashSet<>();
-        set.add(this.user.getFullName());
-        set.add(this.user.getDisplayName());
-        set.add(this.user.getId());
+        if (this.user != null) {
+            set.add(this.user.getFullName());
+            set.add(this.user.getDisplayName());
+            set.add(this.user.getId());
+        }
         return set;
     }
 
