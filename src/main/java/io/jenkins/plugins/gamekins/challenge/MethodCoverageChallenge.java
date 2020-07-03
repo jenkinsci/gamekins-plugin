@@ -1,6 +1,7 @@
 package io.jenkins.plugins.gamekins.challenge;
 
 import hudson.model.Run;
+import hudson.model.TaskListener;
 import io.jenkins.plugins.gamekins.util.JacocoUtil;
 
 import java.io.File;
@@ -27,14 +28,20 @@ public class MethodCoverageChallenge extends CoverageChallenge {
     }
 
     @Override
-    public boolean isSolved(HashMap<String, String> constants, Run<?, ?> run) {
+    public boolean isSolved(HashMap<String, String> constants, Run<?, ?> run, TaskListener listener) {
         File jacocoMethodFile = JacocoUtil.getJacocoFileInMultiBranchProject(run, constants,
                 classDetails.getJacocoMethodFile(), this.branch);
         File jacocoCSVFile = JacocoUtil.getJacocoFileInMultiBranchProject(run, constants,
                 classDetails.getJacocoCSVFile(), this.branch);
+        if (!jacocoMethodFile.exists() || !jacocoCSVFile.exists()) {
+            listener.getLogger().println("[Gamekins] JaCoCo method file " + jacocoMethodFile.getAbsolutePath()
+                    + " exists " + jacocoMethodFile.exists());
+            listener.getLogger().println("[Gamekins] JaCoCo csv file " + jacocoCSVFile.getAbsolutePath()
+                    + " exists " + jacocoCSVFile.exists());
+            return false;
+        }
         try {
-            ArrayList<JacocoUtil.CoverageMethod> methods =
-                    JacocoUtil.getMethodEntries(jacocoMethodFile);
+            ArrayList<JacocoUtil.CoverageMethod> methods = JacocoUtil.getMethodEntries(jacocoMethodFile);
             for (JacocoUtil.CoverageMethod method : methods) {
                 if (method.getMethodName().equals(this.methodName)) {
                     if (method.getMissedLines() < this.missedLines) {
@@ -45,13 +52,21 @@ public class MethodCoverageChallenge extends CoverageChallenge {
                     }
                 }
             }
-        } catch (IOException ignored) { }
+        } catch (IOException e) {
+            e.printStackTrace(listener.getLogger());
+        }
         return false;
     }
 
     @Override
-    public boolean isSolvable(HashMap<String, String> constants, Run<?, ?> run) {
+    public boolean isSolvable(HashMap<String, String> constants, Run<?, ?> run, TaskListener listener) {
         if (!this.branch.equals(constants.get("branch"))) return true;
+        if (!this.classDetails.getJacocoMethodFile().exists()) {
+            listener.getLogger().println("[Gamekins] JaCoCo method file "
+                    + this.classDetails.getJacocoMethodFile().getAbsolutePath()
+                    + " exists " + this.classDetails.getJacocoMethodFile().exists());
+            return true;
+        }
         try {
             ArrayList<JacocoUtil.CoverageMethod> methods =
                     JacocoUtil.getMethodEntries(classDetails.getJacocoMethodFile());
@@ -61,6 +76,7 @@ public class MethodCoverageChallenge extends CoverageChallenge {
                 }
             }
         } catch (IOException e) {
+            e.printStackTrace(listener.getLogger());
             return false;
         }
         return false;

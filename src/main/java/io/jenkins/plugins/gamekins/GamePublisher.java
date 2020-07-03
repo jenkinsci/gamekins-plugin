@@ -271,10 +271,10 @@ public class GamePublisher extends Notifier implements SimpleBuildStep {
                 listener.getLogger().println("[Gamekins] Start checking solved status of challenges for user "
                         + user.getFullName());
                 for (Challenge challenge : property.getCurrentChallenges(constants.get("projectName"))) {
-                    if (challenge.isSolved(constants, run)) {
+                    if (challenge.isSolved(constants, run, listener)) {
                         property.completeChallenge(constants.get("projectName"), challenge);
                         property.addScore(constants.get("projectName"), challenge.getScore());
-                        listener.getLogger().println("[Gamekins] Solved challenges " + challenge.toString());
+                        listener.getLogger().println("[Gamekins] Solved challenge " + challenge.toString());
                         solved++;
                     }
                 }
@@ -282,7 +282,7 @@ public class GamePublisher extends Notifier implements SimpleBuildStep {
                 listener.getLogger().println("[Gamekins] Start checking solvable state of challenges for user "
                         + user.getFullName());
                 for (Challenge challenge : property.getCurrentChallenges(constants.get("projectName"))) {
-                    if (!challenge.isSolvable(constants, run)) {
+                    if (!challenge.isSolvable(constants, run, listener)) {
                         property.rejectChallenge(constants.get("projectName"), challenge, "Not solvable");
                         listener.getLogger().println("[Gamekins] Challenge " + challenge.toString()
                                 + " can not be solved anymore");

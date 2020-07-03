@@ -1,18 +1,19 @@
 package io.jenkins.plugins.gamekins.challenge;
 
 import hudson.model.Run;
+import hudson.model.TaskListener;
 
 import java.util.HashMap;
 
 //TODO: Add text why the DummyChallenge has been created
 public class DummyChallenge implements Challenge {
     @Override
-    public boolean isSolved(HashMap<String, String> constants, Run<?, ?> run) {
+    public boolean isSolved(HashMap<String, String> constants, Run<?, ?> run, TaskListener listener) {
         return true;
     }
 
     @Override
-    public boolean isSolvable(HashMap<String, String> constants, Run<?, ?> run) {
+    public boolean isSolvable(HashMap<String, String> constants, Run<?, ?> run, TaskListener listener) {
         return true;
     }
 

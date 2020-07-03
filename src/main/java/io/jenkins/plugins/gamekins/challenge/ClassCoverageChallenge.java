@@ -1,6 +1,7 @@
 package io.jenkins.plugins.gamekins.challenge;
 
 import hudson.model.Run;
+import hudson.model.TaskListener;
 import io.jenkins.plugins.gamekins.util.JacocoUtil;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -16,16 +17,23 @@ public class ClassCoverageChallenge extends CoverageChallenge {
     }
 
     @Override
-    public boolean isSolved(HashMap<String, String> constants, Run<?, ?> run) {
+    public boolean isSolved(HashMap<String, String> constants, Run<?, ?> run, TaskListener listener) {
         File jacocoSourceFile = JacocoUtil.getJacocoFileInMultiBranchProject(run, constants,
                 classDetails.getJacocoSourceFile(), this.branch);
         File jacocoCSVFile = JacocoUtil.getJacocoFileInMultiBranchProject(run, constants,
                 classDetails.getJacocoCSVFile(), this.branch);
+        if (!jacocoSourceFile.exists() || !jacocoCSVFile.exists()) {
+            listener.getLogger().println("[Gamekins] JaCoCo source file " + jacocoSourceFile.getAbsolutePath()
+                    + " exists " + jacocoSourceFile.exists());
+            listener.getLogger().println("[Gamekins] JaCoCo csv file " + jacocoCSVFile.getAbsolutePath()
+                    + " exists " + jacocoCSVFile.exists());
+            return false;
+        }
         Document document;
         try {
             document = Jsoup.parse(jacocoSourceFile, "UTF-8");
         } catch (IOException e) {
-            e.printStackTrace();
+            e.printStackTrace(listener.getLogger());
             return false;
         }
         int fullyCoveredLines = JacocoUtil.calculateCoveredLines(document, "fc");
@@ -35,22 +43,27 @@ public class ClassCoverageChallenge extends CoverageChallenge {
                 / (double) (fullyCoveredLines + partiallyCoveredLines + notCoveredLines);
         if (fullyCoveredLines > this.fullyCoveredLines && newCoverage > this.coverage) {
             this.solved = System.currentTimeMillis();
-            this.solvedCoverage = JacocoUtil.
-                    getCoverageInPercentageFromJacoco(this.classDetails.getClassName(),
-                            jacocoCSVFile);
+            this.solvedCoverage = JacocoUtil.getCoverageInPercentageFromJacoco(
+                    this.classDetails.getClassName(), jacocoCSVFile);
             return true;
         }
         return false;
     }
 
     @Override
-    public boolean isSolvable(HashMap<String, String> constants, Run<?, ?> run) {
+    public boolean isSolvable(HashMap<String, String> constants, Run<?, ?> run, TaskListener listener) {
         if (!this.branch.equals(constants.get("branch"))) return true;
+        if (!this.classDetails.getJacocoSourceFile().exists()) {
+            listener.getLogger().println("[Gamekins] JaCoCo source file "
+                    + this.classDetails.getJacocoSourceFile().getAbsolutePath()
+                    + " exists " + this.classDetails.getJacocoSourceFile().exists());
+            return true;
+        }
         Document document;
         try {
             document = Jsoup.parse(classDetails.getJacocoSourceFile(), "UTF-8");
         } catch (IOException e) {
-            e.printStackTrace();
+            e.printStackTrace(listener.getLogger());
             return false;
         }
         return !(JacocoUtil.calculateCoveredLines(document, "pc") == 0

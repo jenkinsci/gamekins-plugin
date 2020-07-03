@@ -2,6 +2,7 @@ package io.jenkins.plugins.gamekins.challenge;
 
 import hudson.model.Result;
 import hudson.model.Run;
+import hudson.model.TaskListener;
 
 import java.util.HashMap;
 
@@ -11,7 +12,7 @@ public class BuildChallenge implements Challenge {
     private long solved = 0;
 
     @Override
-    public boolean isSolved(HashMap<String, String> constants, Run<?, ?> run) {
+    public boolean isSolved(HashMap<String, String> constants, Run<?, ?> run, TaskListener listener) {
         if (run.getResult() == Result.SUCCESS) {
             solved = System.currentTimeMillis();
             return true;
@@ -20,7 +21,7 @@ public class BuildChallenge implements Challenge {
     }
 
     @Override
-    public boolean isSolvable(HashMap<String, String> constants, Run<?, ?> run) {
+    public boolean isSolvable(HashMap<String, String> constants, Run<?, ?> run, TaskListener listener) {
         return true;
     }
 

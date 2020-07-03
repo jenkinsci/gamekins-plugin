@@ -1,6 +1,7 @@
 package io.jenkins.plugins.gamekins.challenge;
 
 import hudson.model.Run;
+import hudson.model.TaskListener;
 import hudson.model.User;
 import io.jenkins.plugins.gamekins.util.GitUtil;
 import io.jenkins.plugins.gamekins.util.JacocoUtil;
@@ -29,7 +30,7 @@ public class TestChallenge implements Challenge {
     }
 
     @Override
-    public boolean isSolved(HashMap<String, String> constants, Run<?, ?> run) {
+    public boolean isSolved(HashMap<String, String> constants, Run<?, ?> run, TaskListener listener) {
         if (!this.branch.equals(constants.get("branch"))) return false;
         try {
             int testCountSolved = JacocoUtil.getTestCount(constants, run);
@@ -44,12 +45,14 @@ public class TestChallenge implements Challenge {
                 this.testCountSolved = testCountSolved;
                 return true;
             }
-        } catch (IOException ignored) { }
+        } catch (IOException e) {
+            e.printStackTrace(listener.getLogger());
+        }
         return false;
     }
 
     @Override
-    public boolean isSolvable(HashMap<String, String> constants, Run<?, ?> run) {
+    public boolean isSolvable(HashMap<String, String> constants, Run<?, ?> run, TaskListener listener) {
         if (run.getParent().getParent() instanceof WorkflowMultiBranchProject) {
             for (WorkflowJob workflowJob : ((WorkflowMultiBranchProject) run.getParent().getParent()).getItems()) {
                 if (workflowJob.getName().equals(this.branch)) return true;
