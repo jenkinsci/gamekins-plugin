@@ -52,14 +52,14 @@ public class GameUserProperty extends UserProperty {
         if (this.gitNames == null) this.gitNames = getInitialGitNames();
         StringBuilder builder = new StringBuilder();
         for (String name : this.gitNames) {
-            builder.append(name).append(";");
+            builder.append(name).append("\n");
         }
         return builder.substring(0, builder.length() - 1);
     }
 
     @DataBoundSetter
     public void setNames(String names) {
-        String[] split = names.split(";");
+        String[] split = names.split("\n");
         this.gitNames = new HashSet<>(Arrays.asList(split));
     }
 
