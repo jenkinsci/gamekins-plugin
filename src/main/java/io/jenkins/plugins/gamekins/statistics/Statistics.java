@@ -97,18 +97,18 @@ public class Statistics {
     }
 
     public void addRunEntry(AbstractItem job, String branch, RunEntry entry, TaskListener listener) {
-        addPreviousEntries(job, branch, entry.getRunNumber() - 1, listener);
+        addPreviousEntries(job, branch, entry.getRunNumber() - 1, listener, 200);
         this.runEntries.add(entry);
         listener.getLogger().println(entry.printToXML(""));
         this.runEntries.sort(RunEntry::compareTo);
     }
 
-    private void addPreviousEntries(AbstractItem job, String branch, int number, TaskListener listener) {
-        if (number <= 0) return;
+    private void addPreviousEntries(AbstractItem job, String branch, int number, TaskListener listener, int count) {
+        if (number <= 0 || count == 0) return;
         for (RunEntry entry : this.runEntries) {
             if (entry.getBranch().equals(branch) && entry.getRunNumber() == number) return;
         }
-        addPreviousEntries(job, branch, number - 1, listener);
+        addPreviousEntries(job, branch, number - 1, listener, count - 1);
         listener.getLogger().println(this.runEntries.get(this.runEntries.size() - 1).printToXML(""));
         if (job instanceof WorkflowMultiBranchProject) {
             for (WorkflowJob workflowJob : ((WorkflowMultiBranchProject) job).getItems()) {
