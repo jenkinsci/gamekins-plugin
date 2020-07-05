@@ -22,7 +22,7 @@ public class GameMultiBranchProperty extends AbstractFolderProperty<AbstractFold
     private boolean activated;
     private boolean showStatistics;
     private final ArrayList<String> teams;
-    private final Statistics statistics;
+    private Statistics statistics;
 
     @DataBoundConstructor
     public GameMultiBranchProperty(AbstractItem job, boolean activated, boolean showStatistics) {
@@ -56,6 +56,9 @@ public class GameMultiBranchProperty extends AbstractFolderProperty<AbstractFold
 
     @Override
     public Statistics getStatistics() {
+        if (this.statistics == null || this.statistics.isNotFullyInitialized()) {
+            this.statistics = new Statistics(this.owner);
+        }
         return this.statistics;
     }
 

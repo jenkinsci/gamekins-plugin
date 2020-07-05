@@ -16,10 +16,17 @@ public class Statistics {
 
     private final String projectName;
     private final ArrayList<RunEntry> runEntries;
+    private boolean fullyInitialized;
 
     public Statistics(AbstractItem job) {
         this.projectName = job.getName();
+        this.fullyInitialized = false;
         this.runEntries = generateRunEntries(job);
+        this.fullyInitialized = true;
+    }
+
+    public boolean isNotFullyInitialized() {
+        return !this.fullyInitialized || this.runEntries == null;
     }
 
     public String printToXML() {
@@ -97,18 +104,18 @@ public class Statistics {
     }
 
     public void addRunEntry(AbstractItem job, String branch, RunEntry entry, TaskListener listener) {
-        addPreviousEntries(job, branch, entry.getRunNumber() - 1, listener, 200);
+        addPreviousEntries(job, branch, entry.getRunNumber() - 1, listener);
         this.runEntries.add(entry);
         listener.getLogger().println(entry.printToXML(""));
         this.runEntries.sort(RunEntry::compareTo);
     }
 
-    private void addPreviousEntries(AbstractItem job, String branch, int number, TaskListener listener, int count) {
-        if (number <= 0 || count == 0) return;
+    private void addPreviousEntries(AbstractItem job, String branch, int number, TaskListener listener) {
+        if (number <= 0) return;
         for (RunEntry entry : this.runEntries) {
             if (entry.getBranch().equals(branch) && entry.getRunNumber() == number) return;
         }
-        addPreviousEntries(job, branch, number - 1, listener, count - 1);
+        addPreviousEntries(job, branch, number - 1, listener);
         listener.getLogger().println(this.runEntries.get(this.runEntries.size() - 1).printToXML(""));
         if (job instanceof WorkflowMultiBranchProject) {
             for (WorkflowJob workflowJob : ((WorkflowMultiBranchProject) job).getItems()) {

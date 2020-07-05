@@ -20,7 +20,7 @@ public class GameJobProperty extends hudson.model.JobProperty<Job<?, ?>> impleme
     private boolean activated;
     private boolean showStatistics;
     private final ArrayList<String> teams;
-    private final Statistics statistics;
+    private Statistics statistics;
 
     @DataBoundConstructor
     public GameJobProperty(AbstractItem job, boolean activated, boolean showStatistics) {
@@ -54,6 +54,9 @@ public class GameJobProperty extends hudson.model.JobProperty<Job<?, ?>> impleme
 
     @Override
     public Statistics getStatistics() {
+        if (this.statistics == null || this.statistics.isNotFullyInitialized()) {
+            this.statistics = new Statistics(this.owner);
+        }
         return this.statistics;
     }
 
