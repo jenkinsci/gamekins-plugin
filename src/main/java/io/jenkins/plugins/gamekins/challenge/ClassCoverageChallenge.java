@@ -76,6 +76,11 @@ public class ClassCoverageChallenge extends CoverageChallenge {
     }
 
     @Override
+    String getName() {
+        return "ClassCoverageChallenge";
+    }
+
+    @Override
     public String toString() {
         return "Write a test to cover more lines in class " + classDetails.getClassName()
                 + " in package " + classDetails.getPackageName() + " (created for branch " + branch + ")";

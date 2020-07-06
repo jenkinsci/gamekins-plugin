@@ -94,6 +94,11 @@ public class LineCoverageChallenge extends CoverageChallenge {
     }
 
     @Override
+    String getName() {
+        return "LineCoverageChallenge";
+    }
+
+    @Override
     public String toString() {
         //TODO: Add content of line
         return "Write a test to cover line " + this.lineNumber + " in class " + classDetails.getClassName()

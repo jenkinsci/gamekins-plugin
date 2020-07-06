@@ -38,9 +38,11 @@ public abstract class CoverageChallenge implements Challenge {
         return this.solved;
     }
 
+    abstract String getName();
+
     @Override
     public String printToXML(String reason, String indentation) {
-        String print = indentation + "<CoverageChallenge created=\"" + this.created + "\" solved=\"" + this.solved
+        String print = indentation + "<" + getName() + " created=\"" + this.created + "\" solved=\"" + this.solved
                 + "\" class=\"" + classDetails.getClassName() + "\" coverage=\"" + this.coverage
                 + "\" coverageAtSolved=\"" + this.solvedCoverage;
         if (!reason.isEmpty()) {

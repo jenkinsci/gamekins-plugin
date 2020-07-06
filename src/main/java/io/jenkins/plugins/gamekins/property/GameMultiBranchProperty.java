@@ -30,6 +30,7 @@ public class GameMultiBranchProperty extends AbstractFolderProperty<AbstractFold
         this.showStatistics = showStatistics;
         this.teams = new ArrayList<>();
         this.statistics = new Statistics(job);
+        PropertyUtil.reconfigure(job, this.activated, this.showStatistics);
     }
 
     public boolean getActivated() {
@@ -96,17 +97,19 @@ public class GameMultiBranchProperty extends AbstractFolderProperty<AbstractFold
 
         @Override
         public boolean isApplicable(Class<? extends AbstractFolder> containerType) {
-            return containerType == WorkflowMultiBranchProject.class || super.isApplicable(containerType);
+            return containerType == WorkflowMultiBranchProject.class;
         }
 
         @Override
         public AbstractFolderProperty<?> newInstance(StaplerRequest req, JSONObject formData) {
+            if (req == null || formData == null) return null;
             return new GameMultiBranchProperty((AbstractItem) req.findAncestor(AbstractItem.class).getObject(),
                     formData.getBoolean("activated"), formData.getBoolean("showStatistics"));
         }
 
         public FormValidation doAddTeam(@AncestorInPath WorkflowMultiBranchProject job,
                                         @QueryParameter String teamName) {
+            if (job == null) return FormValidation.error("Unexpected error: Parent job is null");
             if (teamName.isEmpty()) return FormValidation.error("Insert a name for the team");
             GameMultiBranchProperty property = (GameMultiBranchProperty) job.getProperties().get(this);
             FormValidation validation = PropertyUtil.doAddTeam( property, teamName);
@@ -136,6 +139,7 @@ public class GameMultiBranchProperty extends AbstractFolderProperty<AbstractFold
 
         public FormValidation doDeleteTeam(@AncestorInPath WorkflowMultiBranchProject job,
                                            @QueryParameter String teamsBox) {
+            if (job == null) return FormValidation.error("Unexpected error: Parent job is null");
             String projectName = job.getName();
             GameMultiBranchProperty property = (GameMultiBranchProperty) job.getProperties().get(this);
             FormValidation validation = PropertyUtil.doDeleteTeam(projectName, property, teamsBox);

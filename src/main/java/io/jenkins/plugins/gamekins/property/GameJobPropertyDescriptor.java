@@ -33,7 +33,8 @@ public class GameJobPropertyDescriptor extends JobPropertyDescriptor {
     }
 
     @Override
-    public JobProperty<?> newInstance(StaplerRequest req, JSONObject formData) throws FormException {
+    public JobProperty<?> newInstance(StaplerRequest req, JSONObject formData) {
+        if (req == null || formData == null) return null;
         return new GameJobProperty((AbstractItem) req.findAncestor(AbstractItem.class).getObject(),
                 formData.getBoolean("activated"), formData.getBoolean("showStatistics"));
     }
@@ -52,6 +53,7 @@ public class GameJobPropertyDescriptor extends JobPropertyDescriptor {
     }
 
     public ListBoxModel doFillUsersBoxItems(@AncestorInPath Job<?, ?> job) {
+        if (job == null) return new ListBoxModel();
         return PropertyUtil.doFillUsersBoxItems(job.getName());
     }
 
@@ -66,6 +68,7 @@ public class GameJobPropertyDescriptor extends JobPropertyDescriptor {
     }
 
     public FormValidation doDeleteTeam(@AncestorInPath Job<?, ?> job, @QueryParameter String teamsBox) {
+        if (job == null) return FormValidation.error("Unexpected error: Parent job is null");
         String projectName = job.getName();
         GameJobProperty property = (GameJobProperty) job.getProperties().get(this);
         FormValidation validation = PropertyUtil.doDeleteTeam(projectName, property, teamsBox);

@@ -65,7 +65,7 @@ public class ChallengeFactory {
                 challengeClass = LineCoverageChallenge.class;
             }
             listener.getLogger().println("[Gamekins] Try class " + selectedClass.getClassName() + " and type "
-                    + challengeClass.getName());
+                    + challengeClass.getSimpleName());
             challenge = generateCoverageChallenge(selectedClass, challengeClass, constants.get("branch"), listener);
             worklist.remove(selectedClass);
             count ++;

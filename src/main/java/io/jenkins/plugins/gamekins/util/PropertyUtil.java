@@ -41,9 +41,11 @@ public class PropertyUtil {
             }
         } else if (owner instanceof WorkflowMultiBranchProject) {
             //TODO: Without reflection (Trigger)
+            //TODO: Replace newInstance() with constructor call
             try {
                 Field actionField = Actionable.class.getDeclaredField("actions");
                 actionField.setAccessible(true);
+                if (actionField.get(owner) == null) actionField.set(owner, actionField.getType().newInstance());
                 if (activated) {
                     ((List<Action>) actionField.get(owner)).removeIf(action -> action instanceof LeaderboardAction);
                     ((List<Action>) actionField.get(owner)).add(new LeaderboardAction(owner));
@@ -56,7 +58,7 @@ public class PropertyUtil {
                 } else {
                     ((List<Action>) actionField.get(owner)).removeIf(action -> action instanceof StatisticsAction);
                 }
-            } catch (NoSuchFieldException | IllegalAccessException e) {
+            } catch (NoSuchFieldException | IllegalAccessException | InstantiationException e) {
                 e.printStackTrace();
             }
             try {
@@ -96,6 +98,8 @@ public class PropertyUtil {
     }
 
     public static FormValidation doAddUserToTeam(AbstractItem job, String teamsBox, String usersBox) {
+        if (teamsBox.trim().isEmpty()) return FormValidation.error("No team specified");
+        if (job == null) return FormValidation.error("Unexpected error: Parent job is null");
         for (User user : User.getAll()) {
             if (user.getFullName().equals(usersBox)) {
                 String projectName = job.getName();
@@ -117,6 +121,8 @@ public class PropertyUtil {
     }
 
     public static FormValidation doRemoveUserFromTeam(AbstractItem job, String teamsBox, String usersBox) {
+        if (teamsBox.trim().isEmpty()) return FormValidation.error("No team specified");
+        if (job == null) return FormValidation.error("Unexpected error: Parent job is null");
         for (User user : User.getAll()) {
             if (user.getFullName().equals(usersBox)) {
                 String projectName = job.getName();
@@ -138,6 +144,7 @@ public class PropertyUtil {
     }
 
     public static FormValidation doDeleteTeam(String projectName, GameProperty property, String teamsBox) {
+        if (teamsBox.trim().isEmpty()) return FormValidation.error("No team specified");
         if (property == null || property.getTeams() == null) return FormValidation.error("Unexpected Error");
         if (!property.getTeams().contains(teamsBox))
             return FormValidation.error("The specified team does not exist");
@@ -162,6 +169,7 @@ public class PropertyUtil {
     }
 
     public static FormValidation doAddTeam(GameProperty property, String teamName) {
+        if (teamName.trim().isEmpty()) return FormValidation.error("No team specified");
         if (property == null || property.getTeams() == null) return FormValidation.error("Unexpected Error");
         if (property.getTeams().contains(teamName))
             return FormValidation.error("The team already exists - please use another name for your team");

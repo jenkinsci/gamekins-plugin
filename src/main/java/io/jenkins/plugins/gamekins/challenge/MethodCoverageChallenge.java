@@ -88,6 +88,11 @@ public class MethodCoverageChallenge extends CoverageChallenge {
     }
 
     @Override
+    String getName() {
+        return "MethodCoverageChallenge";
+    }
+
+    @Override
     public String toString() {
         return "Write a test to cover more lines of method " + this.methodName + " in class "
                 + classDetails.getClassName() + " in package " + classDetails.getPackageName()
