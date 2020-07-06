@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form">
+    <f:section title="Gamekins">
+        <f:entry title="Activate Gamekins" field="activated">
+            <f:checkbox />
+        </f:entry>
+        <f:entry title="Activated Project">
+            <f:select field="project" />
+        </f:entry>
+        <f:entry title="Show Statistics" field="showStatistics">
+            <f:checkbox />
+        </f:entry>
+    </f:section>
+</j:jelly>
