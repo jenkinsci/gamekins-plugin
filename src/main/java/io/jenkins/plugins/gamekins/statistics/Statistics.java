@@ -11,8 +11,11 @@ import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Objects;
+import java.util.Optional;
 
 public class Statistics {
+
+    private final int RUN_TOTAL_COUNT = 200;
 
     private final String projectName;
     private final ArrayList<RunEntry> runEntries;
@@ -55,19 +58,41 @@ public class Statistics {
     private ArrayList<RunEntry> generateRunEntries(AbstractItem job) {
         ArrayList<RunEntry> entries = new ArrayList<>();
         if (job instanceof WorkflowMultiBranchProject) {
-            for (WorkflowJob workflowJob : ((WorkflowMultiBranchProject) job).getItems()) {
-                ArrayList<WorkflowRun> list = new ArrayList<>(workflowJob.getBuilds());
+            Optional<WorkflowJob> master = ((WorkflowMultiBranchProject) job).getItems().stream()
+                    .filter(item -> item.getName().equals("master")).findFirst();
+            if (master.isPresent()) {
+                ArrayList<WorkflowRun> list = new ArrayList<>(master.get().getBuilds());
                 Collections.reverse(list);
                 for (WorkflowRun workflowRun : list) {
                     entries.add(new RunEntry(
                             workflowRun.getNumber(),
-                            workflowJob.getName(),
+                            "master",
                             workflowRun.getResult(),
                             workflowRun.getStartTimeInMillis(),
                             0,
                             0,
                             JacocoUtil.getTestCount(null, workflowRun),
                             0.0));
+                }
+            } else {
+                int count = 0;
+                for (WorkflowJob workflowJob : ((WorkflowMultiBranchProject) job).getItems()) {
+                    if (count >= RUN_TOTAL_COUNT) break;
+                    ArrayList<WorkflowRun> list = new ArrayList<>(workflowJob.getBuilds());
+                    Collections.reverse(list);
+                    for (WorkflowRun workflowRun : list) {
+                        if (count >= RUN_TOTAL_COUNT) break;
+                        entries.add(new RunEntry(
+                                workflowRun.getNumber(),
+                                workflowJob.getName(),
+                                workflowRun.getResult(),
+                                workflowRun.getStartTimeInMillis(),
+                                0,
+                                0,
+                                JacocoUtil.getTestCount(null, workflowRun),
+                                0.0));
+                        count++;
+                    }
                 }
             }
         } else if (job instanceof WorkflowJob) {
