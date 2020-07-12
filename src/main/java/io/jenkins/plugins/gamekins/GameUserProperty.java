@@ -14,9 +14,9 @@ import org.kohsuke.stapler.StaplerRequest;
 import javax.annotation.Nonnull;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 public class GameUserProperty extends UserProperty {
 
@@ -26,7 +26,7 @@ public class GameUserProperty extends UserProperty {
     private final HashMap<String, String> participation;
     private final HashMap<String, Integer> score;
     private final UUID pseudonym;
-    private HashSet<String> gitNames;
+    private CopyOnWriteArraySet<String> gitNames;
 
     public GameUserProperty() {
         this.completedChallenges = new HashMap<>();
@@ -60,11 +60,11 @@ public class GameUserProperty extends UserProperty {
     @DataBoundSetter
     public void setNames(String names) {
         String[] split = names.split("\n");
-        this.gitNames = new HashSet<>(Arrays.asList(split));
+        this.gitNames = new CopyOnWriteArraySet<>(Arrays.asList(split));
     }
 
-    public HashSet<String> getGitNames() {
-        if (this.gitNames == null) return new HashSet<>();
+    public CopyOnWriteArraySet<String> getGitNames() {
+        if (this.gitNames == null) return new CopyOnWriteArraySet<>();
         return gitNames;
     }
 
@@ -182,8 +182,8 @@ public class GameUserProperty extends UserProperty {
         return print.toString();
     }
 
-    private HashSet<String> getInitialGitNames() {
-        HashSet<String> set = new HashSet<>();
+    private CopyOnWriteArraySet<String> getInitialGitNames() {
+        CopyOnWriteArraySet<String> set = new CopyOnWriteArraySet<>();
         if (this.user != null) {
             set.add(this.user.getFullName());
             set.add(this.user.getDisplayName());
