@@ -5,7 +5,6 @@ import com.cloudbees.hudson.plugins.folder.AbstractFolderProperty;
 import com.cloudbees.hudson.plugins.folder.AbstractFolderPropertyDescriptor;
 import hudson.Extension;
 import hudson.model.AbstractItem;
-import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import jenkins.branch.MultiBranchProject;
 import jenkins.branch.OrganizationFolder;
