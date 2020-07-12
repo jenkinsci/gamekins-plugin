@@ -1,14 +1,13 @@
 package io.jenkins.plugins.gamekins.challenge;
 
+import hudson.FilePath;
 import hudson.model.TaskListener;
 import hudson.model.User;
 import io.jenkins.plugins.gamekins.util.GitUtil;
 import io.jenkins.plugins.gamekins.util.JacocoUtil;
-import org.eclipse.jgit.lib.Repository;
-import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.jsoup.nodes.Document;
 
-import java.io.*;
+import java.io.IOException;
 import java.util.*;
 
 public class ChallengeFactory {
@@ -18,14 +17,12 @@ public class ChallengeFactory {
     }
 
     public static Challenge generateChallenge(User user, HashMap<String, String> constants, TaskListener listener,
-                                              ArrayList<JacocoUtil.ClassDetails> classes) throws IOException {
+                                              ArrayList<JacocoUtil.ClassDetails> classes, FilePath workspace)
+            throws IOException, InterruptedException {
         if (Math.random() > 0.9) {
-            FileRepositoryBuilder builder = new FileRepositoryBuilder();
-            Repository repo = builder.setGitDir(
-                    new File(constants.get("workspace") + "/.git")).setMustExist(true).build();
             listener.getLogger().println("[Gamekins] Generated new TestChallenge");
-            return new TestChallenge(GitUtil.getHead(repo).getName(), JacocoUtil.getTestCount(constants),
-                    user, constants.get("branch"));
+            return new TestChallenge(workspace.act(new GitUtil.HeadCommitCallable(workspace.getRemote())).getName(),
+                    JacocoUtil.getTestCount(workspace), user, constants.get("branch"));
         }
 
 
@@ -66,7 +63,8 @@ public class ChallengeFactory {
             }
             listener.getLogger().println("[Gamekins] Try class " + selectedClass.getClassName() + " and type "
                     + challengeClass.getSimpleName());
-            challenge = generateCoverageChallenge(selectedClass, challengeClass, constants.get("branch"), listener);
+            challenge = generateCoverageChallenge(selectedClass, challengeClass, constants.get("branch"),
+                    listener, workspace);
             worklist.remove(selectedClass);
             count ++;
         } while (challenge == null);
@@ -77,12 +75,13 @@ public class ChallengeFactory {
     //TODO: Create Enum
     private static CoverageChallenge generateCoverageChallenge(JacocoUtil.ClassDetails classDetails,
                                                                Class challengeClass, String branch,
-                                                               TaskListener listener)
-            throws IOException {
+                                                               TaskListener listener, FilePath workspace)
+            throws IOException, InterruptedException {
         Document document;
         try {
-            document = JacocoUtil.generateDocument(classDetails.getJacocoSourceFile(), "UTF-8");
-        } catch (IOException e) {
+            document = JacocoUtil.generateDocument(JacocoUtil.calculateCurrentFilePath(workspace,
+                    classDetails.getJacocoSourceFile(), classDetails.getWorkspace()));
+        } catch (IOException | InterruptedException e) {
             listener.getLogger().println("[Gamekins] IOException with JaCoCoSourceFile "
                     + classDetails.getJacocoSourceFile().getAbsolutePath());
             e.printStackTrace(listener.getLogger());
@@ -91,11 +90,11 @@ public class ChallengeFactory {
         if (JacocoUtil.calculateCoveredLines(document, "pc") > 0
                 || JacocoUtil.calculateCoveredLines(document, "nc") > 0) {
             if (challengeClass == ClassCoverageChallenge.class) {
-                return new ClassCoverageChallenge(classDetails, branch);
+                return new ClassCoverageChallenge(classDetails, branch, workspace);
             } else if (challengeClass == MethodCoverageChallenge.class) {
-                return new MethodCoverageChallenge(classDetails, branch);
+                return new MethodCoverageChallenge(classDetails, branch, workspace);
             } else {
-                return new LineCoverageChallenge(classDetails, branch);
+                return new LineCoverageChallenge(classDetails, branch, workspace);
             }
         }
         return null;

@@ -1,5 +1,6 @@
 package io.jenkins.plugins.gamekins.challenge;
 
+import hudson.FilePath;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.model.User;
@@ -9,8 +10,8 @@ import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Set;
 
 public class TestChallenge implements Challenge {
 
@@ -30,29 +31,31 @@ public class TestChallenge implements Challenge {
     }
 
     @Override
-    public boolean isSolved(HashMap<String, String> constants, Run<?, ?> run, TaskListener listener) {
+    public boolean isSolved(HashMap<String, String> constants, Run<?, ?> run, TaskListener listener,
+                            FilePath workspace) {
         if (!this.branch.equals(constants.get("branch"))) return false;
         try {
-            int testCountSolved = JacocoUtil.getTestCount(constants, run);
+            int testCountSolved = JacocoUtil.getTestCount(workspace, run);
             if (testCountSolved <= this.testCount) {
                 return false;
             }
-            ArrayList<String> lastChangedFilesOfUser =
-                    new ArrayList<>(GitUtil.getLastChangedTestFilesOfUser(
-                            constants.get("workspace"), user, 0, currentCommit));
+
+            Set<String> lastChangedFilesOfUser = GitUtil.getLastChangedTestFilesOfUser(
+                            workspace, user, 0, currentCommit, User.getAll());
             if (lastChangedFilesOfUser.size() > 0) {
                 this.solved = System.currentTimeMillis();
                 this.testCountSolved = testCountSolved;
                 return true;
             }
-        } catch (IOException e) {
+        } catch (IOException | InterruptedException e) {
             e.printStackTrace(listener.getLogger());
         }
         return false;
     }
 
     @Override
-    public boolean isSolvable(HashMap<String, String> constants, Run<?, ?> run, TaskListener listener) {
+    public boolean isSolvable(HashMap<String, String> constants, Run<?, ?> run, TaskListener listener,
+                              FilePath workspace) {
         if (run.getParent().getParent() instanceof WorkflowMultiBranchProject) {
             for (WorkflowJob workflowJob : ((WorkflowMultiBranchProject) run.getParent().getParent()).getItems()) {
                 if (workflowJob.getName().equals(this.branch)) return true;

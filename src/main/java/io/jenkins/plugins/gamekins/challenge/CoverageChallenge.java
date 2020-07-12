@@ -1,7 +1,7 @@
 package io.jenkins.plugins.gamekins.challenge;
 
+import hudson.FilePath;
 import io.jenkins.plugins.gamekins.util.JacocoUtil;
-import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
 import java.io.IOException;
@@ -18,10 +18,12 @@ public abstract class CoverageChallenge implements Challenge {
     final long created = System.currentTimeMillis();
     long solved = 0;
 
-    public CoverageChallenge(JacocoUtil.ClassDetails classDetails, String branch) throws IOException {
+    public CoverageChallenge(JacocoUtil.ClassDetails classDetails, String branch, FilePath workspace)
+            throws IOException, InterruptedException {
         this.classDetails = classDetails;
         this.branch = branch;
-        Document document = Jsoup.parse(this.classDetails.getJacocoSourceFile(), "UTF-8");
+        Document document = JacocoUtil.generateDocument(JacocoUtil.calculateCurrentFilePath(workspace,
+                this.classDetails.getJacocoSourceFile(), classDetails.getWorkspace()));
         this.fullyCoveredLines = JacocoUtil.calculateCoveredLines(document, "fc");
         this.partiallyCoveredLines = JacocoUtil.calculateCoveredLines(document, "pc");
         this.notCoveredLines = JacocoUtil.calculateCoveredLines(document, "nc");

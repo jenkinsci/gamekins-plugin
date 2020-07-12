@@ -1,14 +1,13 @@
 package io.jenkins.plugins.gamekins.challenge;
 
+import hudson.FilePath;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import io.jenkins.plugins.gamekins.util.JacocoUtil;
-import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Random;
@@ -19,9 +18,11 @@ public class LineCoverageChallenge extends CoverageChallenge {
     private final String lineContent;
     private final String coverageType;
 
-    public LineCoverageChallenge(JacocoUtil.ClassDetails classDetails, String branch) throws IOException {
-        super(classDetails, branch);
-        Elements elements = JacocoUtil.getLines(classDetails.getJacocoSourceFile());
+    public LineCoverageChallenge(JacocoUtil.ClassDetails classDetails, String branch, FilePath workspace)
+            throws IOException, InterruptedException {
+        super(classDetails, branch, workspace);
+        Elements elements = JacocoUtil.getLines(JacocoUtil.calculateCurrentFilePath(workspace,
+                classDetails.getJacocoSourceFile(), classDetails.getWorkspace()));
         Random random = new Random();
         Element element = elements.get(random.nextInt(elements.size()));
         this.lineNumber = Integer.parseInt(element.attr("id").substring(1));
@@ -30,25 +31,31 @@ public class LineCoverageChallenge extends CoverageChallenge {
     }
 
     @Override
-    public boolean isSolved(HashMap<String, String> constants, Run<?, ?> run, TaskListener listener) {
-        File jacocoSourceFile = JacocoUtil.getJacocoFileInMultiBranchProject(run, constants,
-                classDetails.getJacocoSourceFile(), this.branch);
-        File jacocoCSVFile = JacocoUtil.getJacocoFileInMultiBranchProject(run, constants,
-                classDetails.getJacocoCSVFile(), this.branch);
-        if (!jacocoSourceFile.exists() || !jacocoCSVFile.exists()) {
-            listener.getLogger().println("[Gamekins] JaCoCo source file " + jacocoSourceFile.getAbsolutePath()
-                    + " exists " + jacocoSourceFile.exists());
-            listener.getLogger().println("[Gamekins] JaCoCo csv file " + jacocoCSVFile.getAbsolutePath()
-                    + " exists " + jacocoCSVFile.exists());
-            return false;
-        }
+    public boolean isSolved(HashMap<String, String> constants, Run<?, ?> run, TaskListener listener,
+                            FilePath workspace) {
+        FilePath jacocoSourceFile = JacocoUtil.getJacocoFileInMultiBranchProject(run, constants,
+                JacocoUtil.calculateCurrentFilePath(workspace, classDetails.getJacocoSourceFile(),
+                        classDetails.getWorkspace()), this.branch);
+        FilePath jacocoCSVFile = JacocoUtil.getJacocoFileInMultiBranchProject(run, constants,
+                JacocoUtil.calculateCurrentFilePath(workspace, classDetails.getJacocoCSVFile(),
+                        classDetails.getWorkspace()), this.branch);
+
         Document document;
         try {
-            document = Jsoup.parse(jacocoSourceFile, "UTF-8");
-        } catch (IOException e) {
+            if (!jacocoSourceFile.exists() || !jacocoCSVFile.exists()) {
+                listener.getLogger().println("[Gamekins] JaCoCo source file " + jacocoSourceFile.getRemote()
+                        + " exists " + jacocoSourceFile.exists());
+                listener.getLogger().println("[Gamekins] JaCoCo csv file " + jacocoCSVFile.getRemote()
+                        + " exists " + jacocoCSVFile.exists());
+                return false;
+            }
+
+            document = JacocoUtil.generateDocument(jacocoSourceFile);
+        } catch (IOException | InterruptedException e) {
             e.printStackTrace(listener.getLogger());
             return false;
         }
+
         Elements elements = document.select("span." + "fc");
         if (coverageType.equals("nc")) elements.addAll(document.select("span." + "pc"));
         for (Element element : elements) {
@@ -63,18 +70,22 @@ public class LineCoverageChallenge extends CoverageChallenge {
     }
 
     @Override
-    public boolean isSolvable(HashMap<String, String> constants, Run<?, ?> run, TaskListener listener) {
+    public boolean isSolvable(HashMap<String, String> constants, Run<?, ?> run, TaskListener listener,
+                              FilePath workspace) {
         if (!this.branch.equals(constants.get("branch"))) return true;
-        if (!this.classDetails.getJacocoSourceFile().exists()) {
-            listener.getLogger().println("[Gamekins] JaCoCo source file "
-                    + this.classDetails.getJacocoSourceFile().getAbsolutePath()
-                    + " exists " + this.classDetails.getJacocoSourceFile().exists());
-            return true;
-        }
+        FilePath jacocoSourceFile = JacocoUtil.calculateCurrentFilePath(workspace,
+                this.classDetails.getJacocoSourceFile(), classDetails.getWorkspace());
+
         Document document;
         try {
-            document = Jsoup.parse(this.classDetails.getJacocoSourceFile(), "UTF-8");
-        } catch (IOException e) {
+            if (!jacocoSourceFile.exists()) {
+                listener.getLogger().println("[Gamekins] JaCoCo source file "
+                        + jacocoSourceFile.getRemote() + " exists " + jacocoSourceFile.exists());
+                return true;
+            }
+
+            document = JacocoUtil.generateDocument(jacocoSourceFile);
+        } catch (IOException | InterruptedException e) {
             e.printStackTrace(listener.getLogger());
             return false;
         }

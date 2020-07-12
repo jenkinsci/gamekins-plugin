@@ -8,7 +8,7 @@ public class PublisherUtil {
 
     private PublisherUtil() { }
 
-    public static boolean doCheckJacocoResultsPath(String workspace, String jacocoResultsPath) {
+    public static boolean doCheckJacocoResultsPath(FilePath workspace, String jacocoResultsPath) {
         if (!jacocoResultsPath.endsWith("/")) jacocoResultsPath += "/";
         if (jacocoResultsPath.startsWith("**")) jacocoResultsPath = jacocoResultsPath.substring(2);
         List<FilePath> files = JacocoUtil.getFilesInAllSubDirectories(workspace, "index.html");
@@ -21,7 +21,7 @@ public class PublisherUtil {
         return false;
     }
 
-    public static boolean doCheckJacocoCSVPath(String workspace, String jacocoCSVPath) {
+    public static boolean doCheckJacocoCSVPath(FilePath workspace, String jacocoCSVPath) {
         if (jacocoCSVPath.startsWith("**")) jacocoCSVPath = jacocoCSVPath.substring(2);
         String[] split = jacocoCSVPath.split("/");
         List<FilePath> files = JacocoUtil.getFilesInAllSubDirectories(

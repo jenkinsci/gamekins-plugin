@@ -1,41 +1,47 @@
 package io.jenkins.plugins.gamekins.challenge;
 
+import hudson.FilePath;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import io.jenkins.plugins.gamekins.util.JacocoUtil;
-import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 
 public class ClassCoverageChallenge extends CoverageChallenge {
 
-    public ClassCoverageChallenge(JacocoUtil.ClassDetails classDetails, String branch) throws IOException {
-        super(classDetails, branch);
+    public ClassCoverageChallenge(JacocoUtil.ClassDetails classDetails, String branch, FilePath workspace)
+            throws IOException, InterruptedException {
+        super(classDetails, branch, workspace);
     }
 
     @Override
-    public boolean isSolved(HashMap<String, String> constants, Run<?, ?> run, TaskListener listener) {
-        File jacocoSourceFile = JacocoUtil.getJacocoFileInMultiBranchProject(run, constants,
-                classDetails.getJacocoSourceFile(), this.branch);
-        File jacocoCSVFile = JacocoUtil.getJacocoFileInMultiBranchProject(run, constants,
-                classDetails.getJacocoCSVFile(), this.branch);
-        if (!jacocoSourceFile.exists() || !jacocoCSVFile.exists()) {
-            listener.getLogger().println("[Gamekins] JaCoCo source file " + jacocoSourceFile.getAbsolutePath()
-                    + " exists " + jacocoSourceFile.exists());
-            listener.getLogger().println("[Gamekins] JaCoCo csv file " + jacocoCSVFile.getAbsolutePath()
-                    + " exists " + jacocoCSVFile.exists());
-            return false;
-        }
+    public boolean isSolved(HashMap<String, String> constants, Run<?, ?> run, TaskListener listener,
+                            FilePath workspace) {
+        FilePath jacocoSourceFile = JacocoUtil.getJacocoFileInMultiBranchProject(run, constants,
+                JacocoUtil.calculateCurrentFilePath(workspace, classDetails.getJacocoSourceFile(),
+                        classDetails.getWorkspace()), this.branch);
+        FilePath jacocoCSVFile = JacocoUtil.getJacocoFileInMultiBranchProject(run, constants,
+                JacocoUtil.calculateCurrentFilePath(workspace, classDetails.getJacocoCSVFile(),
+                        classDetails.getWorkspace()), this.branch);
+
         Document document;
         try {
-            document = Jsoup.parse(jacocoSourceFile, "UTF-8");
-        } catch (IOException e) {
+            if (!jacocoSourceFile.exists() || !jacocoCSVFile.exists()) {
+                listener.getLogger().println("[Gamekins] JaCoCo source file " + jacocoSourceFile.getRemote()
+                        + " exists " + jacocoSourceFile.exists());
+                listener.getLogger().println("[Gamekins] JaCoCo csv file " + jacocoCSVFile.getRemote()
+                        + " exists " + jacocoCSVFile.exists());
+                return false;
+            }
+
+            document = JacocoUtil.generateDocument(jacocoSourceFile);
+        } catch (IOException | InterruptedException e) {
             e.printStackTrace(listener.getLogger());
             return false;
         }
+
         int fullyCoveredLines = JacocoUtil.calculateCoveredLines(document, "fc");
         int partiallyCoveredLines = JacocoUtil.calculateCoveredLines(document, "pc");
         int notCoveredLines = JacocoUtil.calculateCoveredLines(document, "nc");
@@ -51,18 +57,22 @@ public class ClassCoverageChallenge extends CoverageChallenge {
     }
 
     @Override
-    public boolean isSolvable(HashMap<String, String> constants, Run<?, ?> run, TaskListener listener) {
+    public boolean isSolvable(HashMap<String, String> constants, Run<?, ?> run, TaskListener listener,
+                              FilePath workspace) {
         if (!this.branch.equals(constants.get("branch"))) return true;
-        if (!this.classDetails.getJacocoSourceFile().exists()) {
-            listener.getLogger().println("[Gamekins] JaCoCo source file "
-                    + this.classDetails.getJacocoSourceFile().getAbsolutePath()
-                    + " exists " + this.classDetails.getJacocoSourceFile().exists());
-            return true;
-        }
+        FilePath jacocoSourceFile = JacocoUtil.calculateCurrentFilePath(workspace,
+                this.classDetails.getJacocoSourceFile(), classDetails.getWorkspace());
+
         Document document;
         try {
-            document = Jsoup.parse(classDetails.getJacocoSourceFile(), "UTF-8");
-        } catch (IOException e) {
+            if (!jacocoSourceFile.exists()) {
+                listener.getLogger().println("[Gamekins] JaCoCo source file "
+                        + jacocoSourceFile.getRemote() + " exists " + jacocoSourceFile.exists());
+                return true;
+            }
+
+            document = JacocoUtil.generateDocument(jacocoSourceFile);
+        } catch (IOException | InterruptedException e) {
             e.printStackTrace(listener.getLogger());
             return false;
         }

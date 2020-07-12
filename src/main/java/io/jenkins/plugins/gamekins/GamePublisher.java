@@ -18,9 +18,6 @@ import io.jenkins.plugins.gamekins.util.GitUtil;
 import io.jenkins.plugins.gamekins.util.JacocoUtil;
 import io.jenkins.plugins.gamekins.util.PublisherUtil;
 import jenkins.tasks.SimpleBuildStep;
-import org.eclipse.jgit.lib.Repository;
-import org.eclipse.jgit.revwalk.RevCommit;
-import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.jenkinsci.Symbol;
 import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject;
 import org.kohsuke.stapler.AncestorInPath;
@@ -29,7 +26,6 @@ import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 
 import javax.annotation.Nonnull;
-import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
@@ -104,9 +100,8 @@ public class GamePublisher extends Notifier implements SimpleBuildStep {
                 || !build.getProject().getProperty(GameJobProperty.class).getActivated())
             return true;
         HashMap<String, String> constants = new HashMap<>();
-        constants.put("workspace", build.getWorkspace().getRemote());
         constants.put("projectName", build.getProject().getName());
-        executePublisher(build, constants, build.getResult(), listener);
+        executePublisher(build, constants, build.getResult(), listener, build.getWorkspace());
         return true;
     }
 
@@ -204,17 +199,18 @@ public class GamePublisher extends Notifier implements SimpleBuildStep {
                 return;
             constants.put("projectName", run.getParent().getName());
         }
-        constants.put("workspace", workspace.getRemote());
-        executePublisher(run, constants, run.getResult(), listener);
+        constants.put("jacocoResultsPath", getJacocoResultsPath());
+        constants.put("jacocoCSVPath", getJacocoCSVPath());
+        executePublisher(run, constants, run.getResult(), listener, workspace);
     }
 
     private void executePublisher(Run<?, ?> run, HashMap<String, String> constants, Result result,
-                                  TaskListener listener) {
-        if (!PublisherUtil.doCheckJacocoResultsPath(constants.get("workspace"), this.jacocoResultsPath)) {
+                                  TaskListener listener, FilePath workspace) {
+        if (!PublisherUtil.doCheckJacocoResultsPath(workspace, this.jacocoResultsPath)) {
             listener.getLogger().println("[Gamekins] JaCoCo folder is not correct");
             return;
         }
-        if (!PublisherUtil.doCheckJacocoCSVPath(constants.get("workspace"), this.jacocoCSVPath)) {
+        if (!PublisherUtil.doCheckJacocoCSVPath(workspace, this.jacocoCSVPath)) {
             listener.getLogger().println("[Gamekins] JaCoCo csv file could not be found");
             return;
         }
@@ -223,7 +219,7 @@ public class GamePublisher extends Notifier implements SimpleBuildStep {
         if (run.getParent().getParent() instanceof WorkflowMultiBranchProject) {
             constants.put("branch", run.getParent().getName());
         } else {
-            constants.put("branch", GitUtil.getBranch(constants.get("workspace")));
+            constants.put("branch", GitUtil.getBranch(workspace));
         }
 
         listener.getLogger().println("[Gamekins] Start");
@@ -231,14 +227,15 @@ public class GamePublisher extends Notifier implements SimpleBuildStep {
 
         ArrayList<JacocoUtil.ClassDetails> classes;
         try {
-            classes = GitUtil.getLastChangedFiles(SEARCH_COMMIT_COUNT, constants, listener);
+            classes = workspace.act(new GitUtil.LastChangedClassesCallable(SEARCH_COMMIT_COUNT, constants, listener,
+                            GitUtil.mapUsersToGameUsers(User.getAll()), workspace));
             listener.getLogger().println("[Gamekins] Found " + classes.size() + " last changed files");
             classes.removeIf(classDetails -> classDetails.getCoverage() == 1.0);
             listener.getLogger().println("[Gamekins] Found " + classes.size()
                     + " last changed files without 100% coverage");
             classes.sort(Comparator.comparingDouble(JacocoUtil.ClassDetails::getCoverage));
             Collections.reverse(classes);
-        } catch (IOException e) {
+        } catch (IOException | InterruptedException e) {
             e.printStackTrace(listener.getLogger());
             return;
         }
@@ -250,12 +247,10 @@ public class GamePublisher extends Notifier implements SimpleBuildStep {
             if (property != null && property.isParticipating(constants.get("projectName"))) {
                 try {
                     if (result != Result.SUCCESS) {
-                        FileRepositoryBuilder builder = new FileRepositoryBuilder();
-                        Repository repo = builder.setGitDir(
-                                new File(constants.get("workspace") + "/.git")).setMustExist(true).build();
-                        RevCommit head = GitUtil.getHead(repo);
                         BuildChallenge challenge = new BuildChallenge();
-                        User mapUser = GitUtil.mapUser(head.getAuthorIdent());
+                        User mapUser = GitUtil.mapUser(
+                                workspace.act(new GitUtil.HeadCommitCallable(workspace.getRemote()))
+                                        .getAuthorIdent(), User.getAll());
                         if (mapUser != null && mapUser.equals(user)
                                 && !property.getCurrentChallenges(constants.get("projectName")).contains(challenge)) {
                             property.newChallenge(constants.get("projectName"), challenge);
@@ -264,14 +259,14 @@ public class GamePublisher extends Notifier implements SimpleBuildStep {
                             user.save();
                         }
                     }
-                } catch (IOException e){
+                } catch (IOException | InterruptedException e){
                     e.printStackTrace(listener.getLogger());
                 }
 
                 listener.getLogger().println("[Gamekins] Start checking solved status of challenges for user "
                         + user.getFullName());
                 for (Challenge challenge : property.getCurrentChallenges(constants.get("projectName"))) {
-                    if (challenge.isSolved(constants, run, listener)) {
+                    if (challenge.isSolved(constants, run, listener, workspace)) {
                         property.completeChallenge(constants.get("projectName"), challenge);
                         property.addScore(constants.get("projectName"), challenge.getScore());
                         listener.getLogger().println("[Gamekins] Solved challenge " + challenge.toString());
@@ -282,7 +277,7 @@ public class GamePublisher extends Notifier implements SimpleBuildStep {
                 listener.getLogger().println("[Gamekins] Start checking solvable state of challenges for user "
                         + user.getFullName());
                 for (Challenge challenge : property.getCurrentChallenges(constants.get("projectName"))) {
-                    if (!challenge.isSolvable(constants, run, listener)) {
+                    if (!challenge.isSolvable(constants, run, listener, workspace)) {
                         property.rejectChallenge(constants.get("projectName"), challenge, "Not solvable");
                         listener.getLogger().println("[Gamekins] Challenge " + challenge.toString()
                                 + " can not be solved anymore");
@@ -294,7 +289,8 @@ public class GamePublisher extends Notifier implements SimpleBuildStep {
                             + user.getFullName());
 
                     ArrayList<JacocoUtil.ClassDetails> userClasses = new ArrayList<>(classes);
-                    userClasses.removeIf(classDetails -> !classDetails.getChangedByUsers().contains(user));
+                    userClasses.removeIf(classDetails -> !classDetails.getChangedByUsers()
+                            .contains(new GitUtil.GameUser(user)));
                     listener.getLogger().println("[Gamekins] Found " + userClasses.size()
                             + " last changed files of user " + user.getFullName());
 
@@ -314,7 +310,8 @@ public class GamePublisher extends Notifier implements SimpleBuildStep {
                                 }
                                 isChallengeUnique = true;
                                 listener.getLogger().println("[Gamekins] Started to generate challenge");
-                                challenge = ChallengeFactory.generateChallenge(user, constants, listener, userClasses);
+                                challenge = ChallengeFactory.generateChallenge(user, constants, listener, userClasses,
+                                        workspace);
                                 listener.getLogger().println("[Gamekins] Generated challenge " + challenge.toString());
                                 if (challenge instanceof DummyChallenge) break;
                                 for (Challenge currentChallenge
@@ -330,7 +327,7 @@ public class GamePublisher extends Notifier implements SimpleBuildStep {
                             property.newChallenge(constants.get("projectName"), challenge);
                             listener.getLogger().println("[Gamekins] Added challenge " + challenge.toString());
                             generated++;
-                        } catch (IOException e) {
+                        } catch (IOException | InterruptedException e) {
                             e.printStackTrace(listener.getLogger());
                         }
                     }
@@ -364,8 +361,8 @@ public class GamePublisher extends Notifier implements SimpleBuildStep {
                 run.getStartTimeInMillis(),
                 generated,
                 solved,
-                JacocoUtil.getTestCount(constants, run),
-                JacocoUtil.getProjectCoverage(constants.get("workspace"),
+                JacocoUtil.getTestCount(workspace, run),
+                JacocoUtil.getProjectCoverage(workspace,
                         constants.get("jacocoCSVPath").split("/")
                                 [constants.get("jacocoCSVPath").split("/").length - 1])
         ), listener);
@@ -411,7 +408,7 @@ public class GamePublisher extends Notifier implements SimpleBuildStep {
             if (project == null) {
                 return FormValidation.ok();
             }
-            return PublisherUtil.doCheckJacocoResultsPath(project.getSomeWorkspace().getRemote(), jacocoResultsPath)
+            return PublisherUtil.doCheckJacocoResultsPath(project.getSomeWorkspace(), jacocoResultsPath)
                     ? FormValidation.ok() : FormValidation.error("The folder is not correct");
         }
 
@@ -420,7 +417,7 @@ public class GamePublisher extends Notifier implements SimpleBuildStep {
             if (project == null) {
                 return FormValidation.ok();
             }
-            return PublisherUtil.doCheckJacocoCSVPath(project.getSomeWorkspace().getRemote(), jacocoCSVPath)
+            return PublisherUtil.doCheckJacocoCSVPath(project.getSomeWorkspace(), jacocoCSVPath)
                     ? FormValidation.ok() : FormValidation.error("The file could not be found");
         }
     }

@@ -1,9 +1,11 @@
 package io.jenkins.plugins.gamekins.util;
 
+import hudson.FilePath;
 import hudson.model.TaskListener;
 import hudson.model.User;
 import hudson.tasks.Mailer;
 import io.jenkins.plugins.gamekins.GameUserProperty;
+import jenkins.security.MasterToSlaveCallable;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.diff.DiffFormatter;
 import org.eclipse.jgit.lib.*;
@@ -18,6 +20,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.Serializable;
 import java.util.*;
 
 public class GitUtil {
@@ -38,9 +41,13 @@ public class GitUtil {
         return commit;
     }
 
-    public static Set<String> getLastChangedSourceFilesOfUser(String workspace, User user, int commitCount,
-                                                              String commitHash) throws IOException {
-        Set<String> pathsToFiles = getLastChangedFilesOfUser(workspace, user, commitCount, commitHash);
+    public static Set<String> getLastChangedSourceFilesOfUser(FilePath workspace, User user, int commitCount,
+                                                              String commitHash, Collection<User> users)
+            throws IOException, InterruptedException {
+        Set<String> pathsToFiles = workspace.act(
+                new LastChangedFilesCallable(
+                        workspace.getRemote(), new GameUser(user), commitCount, commitHash, mapUsersToGameUsers(users)
+                ));
         if (!pathsToFiles.isEmpty()) {
             pathsToFiles.removeIf(path -> Arrays.asList(path.split("/")).contains("test"));
             pathsToFiles.removeIf(path -> !(path.contains(".java") || path.contains(".kt")));
@@ -48,9 +55,13 @@ public class GitUtil {
         return pathsToFiles;
     }
 
-    public static Set<String> getLastChangedTestFilesOfUser(String workspace, User user, int commitCount,
-                                                            String commitHash) throws IOException {
-        Set<String> pathsToFiles = getLastChangedFilesOfUser(workspace, user, commitCount, commitHash);
+    public static Set<String> getLastChangedTestFilesOfUser(FilePath workspace, User user, int commitCount,
+                                                            String commitHash, Collection<User> users)
+            throws IOException, InterruptedException {
+        Set<String> pathsToFiles = workspace.act(
+                new LastChangedFilesCallable(
+                        workspace.getRemote(), new GameUser(user), commitCount, commitHash, mapUsersToGameUsers(users)
+                ));
         if (!pathsToFiles.isEmpty()) {
             pathsToFiles.removeIf(path -> !Arrays.asList(path.split("/")).contains("test"));
             pathsToFiles.removeIf(path -> !(path.contains(".java") || path.contains(".kt")));
@@ -58,8 +69,9 @@ public class GitUtil {
         return pathsToFiles;
     }
 
-    private static Set<String> getLastChangedFilesOfUser(String workspace, User user, int commitCount,
-                                                         String commitHash) throws IOException {
+    private static Set<String> getLastChangedFilesOfUser(String workspace, GameUser user, int commitCount,
+                                                         String commitHash, ArrayList<GameUser> users)
+            throws IOException {
         if (commitCount <= 0) commitCount = Integer.MAX_VALUE;
 
         FileRepositoryBuilder builder = new FileRepositoryBuilder();
@@ -85,7 +97,7 @@ public class GitUtil {
             if (currentCommits.isEmpty()) break;
             ArrayList<RevCommit> newCommits = new ArrayList<>();
             for (RevCommit commit : currentCommits) {
-                User mapUser = mapUser(commit.getAuthorIdent());
+                GameUser mapUser = mapUser(commit.getAuthorIdent(), users);
                 if (mapUser != null &&  mapUser.equals(user)) {
                     String diff = getDiffOfCommit(git, repo, commit);
 
@@ -155,20 +167,18 @@ public class GitUtil {
         }
     }
 
-    public static String getBranch(String workspace) {
-        FileRepositoryBuilder builder = new FileRepositoryBuilder();
+    public static String getBranch(FilePath workspace) {
         try {
-            Repository repo = builder.setGitDir(new File(workspace + "/.git")).setMustExist(true).build();
-            return repo.getBranch();
-        } catch (IOException e) {
+            return workspace.act(new BranchCallable(workspace.getRemote()));
+        } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
         return "";
     }
 
-    public static User mapUser(PersonIdent ident) {
+    public static User mapUser(PersonIdent ident, Collection<User> users) {
         String[] split = ident.getName().split(" ");
-        for (User user : User.getAll()) {
+        for (User user : users) {
             GameUserProperty property = user.getProperty(GameUserProperty.class);
             if (
                     (property != null && property.getGitNames().contains(ident.getName()))
@@ -182,13 +192,26 @@ public class GitUtil {
         return null;
     }
 
+    public static GameUser mapUser(PersonIdent ident, ArrayList<GameUser> users) {
+        String[] split = ident.getName().split(" ");
+        for (GameUser user : users) {
+            if (user.getGitNames().contains(ident.getName())
+                    || (user.getFullName().contains(split[0]) && user.getFullName().contains(split[split.length - 1]))
+                    || ident.getEmailAddress().equals(user.getMail())) {
+                return user;
+            }
+        }
+        return null;
+    }
+
     //TODO: Not performant - maybe JGit starts to search from the HEAD every time?
     //TODO: Looking at the time it seems random...
     //TODO: Maybe some commits have many parents?
-    public static ArrayList<JacocoUtil.ClassDetails> getLastChangedFiles(int count, HashMap<String, String> constants,
-                                                                         TaskListener listener) throws IOException {
+    public static ArrayList<JacocoUtil.ClassDetails> getLastChangedClasses(int count, HashMap<String,
+            String> constants, TaskListener listener, ArrayList<GameUser> users, FilePath workspace)
+            throws IOException {
         FileRepositoryBuilder builder = new FileRepositoryBuilder();
-        Repository repo = builder.setGitDir(new File(constants.get("workspace") + "/.git"))
+        Repository repo = builder.setGitDir(new File(workspace.getRemote() + "/.git"))
                 .setMustExist(true).build();
         RevWalk walk = new RevWalk(repo);
 
@@ -200,7 +223,7 @@ public class GitUtil {
         currentCommits.add(headCommit);
 
         ArrayList<JacocoUtil.ClassDetails> classes = new ArrayList<>();
-        HashMap<PersonIdent, User> authorMapping = new HashMap<>();
+        HashMap<PersonIdent, GameUser> authorMapping = new HashMap<>();
 
         while (totalCount < count) {
             if (totalCount % 10 == 0) listener.getLogger().println("[Gamekins] Searched through "
@@ -224,9 +247,9 @@ public class GitUtil {
                         boolean found = false;
                         for (JacocoUtil.ClassDetails details : classes) {
                             if (details.getClassName().equals(classname)) {
-                                User user = authorMapping.get(commit.getAuthorIdent());
+                                GameUser user = authorMapping.get(commit.getAuthorIdent());
                                 if (user == null) {
-                                    user = mapUser(commit.getAuthorIdent());
+                                    user = mapUser(commit.getAuthorIdent(), users);
                                     if (user == null) {
                                         found = true;
                                         break;
@@ -239,11 +262,11 @@ public class GitUtil {
                             }
                         }
                         if (!found) {
-                            JacocoUtil.ClassDetails details = new JacocoUtil.ClassDetails(constants.get("workspace"),
-                                    path, constants.get("jacocoResultsPath"), constants.get("jacocoCSVPath"), listener);
-                            User user = authorMapping.get(commit.getAuthorIdent());
+                            JacocoUtil.ClassDetails details = new JacocoUtil.ClassDetails(workspace, path,
+                                    constants.get("jacocoResultsPath"), constants.get("jacocoCSVPath"), listener);
+                            GameUser user = authorMapping.get(commit.getAuthorIdent());
                             if (user == null) {
-                                user = mapUser(commit.getAuthorIdent());
+                                user = mapUser(commit.getAuthorIdent(), users);
                                 if (user == null) continue;
                                 authorMapping.put(commit.getAuthorIdent(), user);
                             }
@@ -264,5 +287,172 @@ public class GitUtil {
         }
 
         return classes;
+    }
+
+    public static ArrayList<GameUser> mapUsersToGameUsers(Collection<User> users) {
+        ArrayList<GameUser> gameUsers = new ArrayList<>();
+        for (User user : users) {
+            gameUsers.add(new GameUser(user));
+        }
+        return gameUsers;
+    }
+
+    private static class BranchCallable extends MasterToSlaveCallable<String, IOException> {
+
+        private final String workspace;
+
+        private BranchCallable(String workspace) {
+            this.workspace = workspace;
+        }
+
+        /**
+         * Performs computation and returns the result,
+         * or throws some exception.
+         */
+        @Override
+        public String call() {
+            FileRepositoryBuilder builder = new FileRepositoryBuilder();
+            try {
+                Repository repo = builder.setGitDir(new File(workspace + "/.git")).setMustExist(true).build();
+                return repo.getBranch();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return "";
+        }
+    }
+
+    private static class LastChangedFilesCallable extends MasterToSlaveCallable<Set<String>, IOException> {
+
+
+        private final String workspace;
+        private final GameUser user;
+        private final int commitCount;
+        private final String commitHash;
+        private final ArrayList<GameUser> users;
+
+        private LastChangedFilesCallable(String workspace, GameUser user, int commitCount,
+                                         String commitHash, ArrayList<GameUser> users) {
+            this.workspace = workspace;
+            this.user = user;
+            this.commitCount = commitCount;
+            this.commitHash = commitHash;
+            this.users = users;
+        }
+
+        /**
+         * Performs computation and returns the result,
+         * or throws some exception.
+         */
+        @Override
+        public Set<String> call() throws IOException {
+            return getLastChangedFilesOfUser(this.workspace, this.user, this.commitCount, this.commitHash, this.users);
+        }
+    }
+
+    public static class LastChangedClassesCallable
+            extends MasterToSlaveCallable<ArrayList<JacocoUtil.ClassDetails>, IOException> {
+
+        private final int count;
+        private  final HashMap<String, String> constants;
+        private final TaskListener listener;
+        private final ArrayList<GitUtil.GameUser> users;
+        private final FilePath workspace;
+
+        public LastChangedClassesCallable(int count, HashMap<String, String> constants, TaskListener listener,
+                                          ArrayList<GitUtil.GameUser> users, FilePath workspace) {
+            this.count = count;
+            this.constants = constants;
+            this.listener = listener;
+            this.users = users;
+            this.workspace = workspace;
+        }
+
+        /**
+         * Performs computation and returns the result,
+         * or throws some exception.
+         */
+        @Override
+        public ArrayList<JacocoUtil.ClassDetails> call() throws IOException {
+            return GitUtil.getLastChangedClasses(this.count, this.constants, this.listener, this.users,
+                    this.workspace);
+        }
+    }
+
+    public static class HeadCommitCallable extends MasterToSlaveCallable<RevCommit, IOException> {
+
+        private final String workspace;
+
+        public HeadCommitCallable(String workspace) {
+            this.workspace = workspace;
+        }
+
+        /**
+         * Performs computation and returns the result,
+         * or throws some exception.
+         */
+        @Override
+        public RevCommit call() throws IOException {
+            FileRepositoryBuilder builder = new FileRepositoryBuilder();
+            Repository repo = builder.setGitDir(new File(workspace + "/.git")).setMustExist(true).build();
+            return GitUtil.getHead(repo);
+        }
+    }
+
+    public static class GameUser implements Serializable {
+
+        private final String id;
+        private final String fullName;
+        private final String mail;
+        private final HashSet<String> gitNames;
+
+        public GameUser(User user) {
+            this.id = user.getId();
+            this.fullName = user.getFullName();
+            this.mail = user.getProperty(Mailer.UserProperty.class) == null ? ""
+                    : user.getProperty(Mailer.UserProperty.class).getAddress();
+            this.gitNames = user.getProperty(GameUserProperty.class) == null ? new HashSet<>()
+                    : new HashSet<>(user.getProperty(GameUserProperty.class).getGitNames());
+        }
+
+        public String getId() {
+            return id;
+        }
+
+        public String getFullName() {
+            return fullName;
+        }
+
+        public String getMail() {
+            return mail;
+        }
+
+        public HashSet<String> getGitNames() {
+            return gitNames;
+        }
+
+        //TODO: Not callable on remote machines
+        public User getUser() {
+            for (User user : User.getAll()) {
+                if (user.getId().equals(this.id)) return user;
+            }
+            return null;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            GameUser gameUser = (GameUser) o;
+            return id.equals(gameUser.id) &&
+                    fullName.equals(gameUser.fullName) &&
+                    mail.equals(gameUser.mail) &&
+                    gitNames.equals(gameUser.gitNames);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(id, fullName, mail, gitNames);
+        }
     }
 }
