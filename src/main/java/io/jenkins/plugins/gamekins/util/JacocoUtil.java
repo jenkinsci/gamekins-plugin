@@ -308,7 +308,8 @@ public class JacocoUtil {
             }
             this.jacocoCSVFile = new File(jacocoPath + shortJacocoCSVPath.substring(2));
             if (!this.jacocoCSVFile.exists()) {
-                listener.getLogger().println("[Gamekins] JaCoCoCSVPath: " + this.jacocoCSVFile.getAbsolutePath());
+                listener.getLogger().println("[Gamekins] JaCoCoCSVPath: " + this.jacocoCSVFile.getAbsolutePath()
+                        + " exists " + this.jacocoCSVFile.exists());
             }
             jacocoPath.append(shortJacocoPath.substring(2));
             if (!jacocoPath.toString().endsWith("/")) jacocoPath.append("/");
@@ -316,12 +317,12 @@ public class JacocoUtil {
             this.jacocoMethodFile = new File(jacocoPath + this.className + ".html");
             if (!this.jacocoMethodFile.exists()) {
                 listener.getLogger().println("[Gamekins] JaCoCoMethodPath: "
-                        + this.jacocoMethodFile.getAbsolutePath());
+                        + this.jacocoMethodFile.getAbsolutePath()+ " exists " + this.getJacocoMethodFile().exists());
             }
             this.jacocoSourceFile = new File(jacocoPath + this.className + "." + this.extension + ".html");
             if (!this.jacocoSourceFile.exists()) {
                 listener.getLogger().println("[Gamekins] JaCoCoSourcePath: "
-                        + this.jacocoSourceFile.getAbsolutePath());
+                        + this.jacocoSourceFile.getAbsolutePath()+ " exists " + this.getJacocoSourceFile().exists());
             }
             this.coverage = getCoverageInPercentageFromJacoco(this.className,
                     calculateCurrentFilePath(workspace, this.jacocoCSVFile));
