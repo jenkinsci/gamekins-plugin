@@ -220,17 +220,18 @@ public class GitUtil {
 
         int totalCount = 0;
         HashSet<RevCommit> currentCommits = new HashSet<>();
+        HashSet<RevCommit> searchedCommits = new HashSet<>();
         currentCommits.add(headCommit);
 
         ArrayList<JacocoUtil.ClassDetails> classes = new ArrayList<>();
         HashMap<PersonIdent, GameUser> authorMapping = new HashMap<>();
 
         while (totalCount < count) {
-            if (totalCount % 10 == 0) listener.getLogger().println("[Gamekins] Searched through "
-                    + totalCount + " Commits");
+            listener.getLogger().println("[Gamekins] Searched through " + totalCount + " Commits");
             if (currentCommits.isEmpty()) break;
             HashSet<RevCommit> newCommits = new HashSet<>();
             for (RevCommit commit : currentCommits) {
+                searchedCommits.add(commit);
                 String diff = getDiffOfCommit(git, repo, commit);
 
                 String[] lines = diff.split("\n");
@@ -277,7 +278,9 @@ public class GitUtil {
                 }
 
                 for (RevCommit parent : commit.getParents()) {
-                    newCommits.add(walk.parseCommit(repo.resolve(parent.getName())));
+                    if (!searchedCommits.contains(parent)) {
+                        newCommits.add(walk.parseCommit(repo.resolve(parent.getName())));
+                    }
                     walk.dispose();
                 }
                 totalCount++;
