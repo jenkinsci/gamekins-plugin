@@ -353,24 +353,36 @@ public class GamePublisher extends Notifier implements SimpleBuildStep {
         } else {
             job = run.getParent();
             property = (GameProperty) run.getParent().getProperty(GameProperty.class.getName());
+            if (property == null) {
+                property = (GameJobProperty) run.getParent().getProperty(GameJobProperty.class.getName());
+            }
         }
-        property.getStatistics().addRunEntry(job, constants.get("branch"), new Statistics.RunEntry(
-                run.getNumber(),
-                constants.get("branch"),
-                run.getResult(),
-                run.getStartTimeInMillis(),
-                generated,
-                solved,
-                JacocoUtil.getTestCount(workspace, run),
-                JacocoUtil.getProjectCoverage(workspace,
-                        constants.get("jacocoCSVPath").split("/")
-                                [constants.get("jacocoCSVPath").split("/").length - 1])
-        ), listener);
 
-        try {
-            property.getOwner().save();
-        } catch (IOException e) {
-            e.printStackTrace(listener.getLogger());
+        if (property != null) {
+            property.getStatistics()
+                    .addRunEntry(
+                            job,
+                            constants.get("branch"),
+                            new Statistics.RunEntry(
+                                    run.getNumber(),
+                                    constants.get("branch"),
+                                    run.getResult(),
+                                    run.getStartTimeInMillis(),
+                                    generated,
+                                    solved,
+                                    JacocoUtil.getTestCount(workspace, run),
+                                    JacocoUtil.getProjectCoverage(workspace,
+                                            constants.get("jacocoCSVPath").split("/")
+                                                    [constants.get("jacocoCSVPath").split("/").length - 1])
+                            ), listener);
+
+            try {
+                property.getOwner().save();
+            } catch (IOException e) {
+                e.printStackTrace(listener.getLogger());
+            }
+        } else {
+            listener.getLogger().println("[Gamekins] No entry for Statistics added");
         }
 
         listener.getLogger().println("[Gamekins] Finished");
