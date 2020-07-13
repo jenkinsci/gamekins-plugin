@@ -4,6 +4,7 @@ import hudson.FilePath;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.tasks.junit.TestResultAction;
+import jenkins.security.MasterToSlaveCallable;
 import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Attribute;
@@ -23,7 +24,14 @@ public class JacocoUtil {
     private JacocoUtil() {}
 
     public static double getProjectCoverage(FilePath workspace, String csvName) {
-        ArrayList<FilePath> files = getFilesInAllSubDirectories(workspace, csvName);
+        ArrayList<FilePath> files;
+        try {
+            files = workspace.act(new FilesOfAllSubDirectoriesCallable(workspace, csvName));
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+            return 0.0;
+        }
+
         int instructionCount = 0;
         int coveredInstructionCount = 0;
         for (FilePath file : files) {
@@ -78,7 +86,8 @@ public class JacocoUtil {
 
     public static int getTestCount(FilePath workspace) {
         try {
-            List<FilePath> files = getFilesInAllSubDirectories(workspace, "TEST-.+\\.xml");
+            List<FilePath> files = workspace.act(
+                    new JacocoUtil.FilesOfAllSubDirectoriesCallable(workspace, "TEST-.+\\.xml"));
             int testCount = 0;
             for (FilePath file : files) {
                 Document document = Jsoup.parse(file.readToString(), "", Parser.xmlParser());
@@ -86,7 +95,9 @@ public class JacocoUtil {
                 testCount += Integer.parseInt(elements.first().attr("tests"));
             }
             return testCount;
-        } catch (IOException | InterruptedException ignored) { }
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
 
         return 0;
     }
@@ -213,6 +224,26 @@ public class JacocoUtil {
 
     public static FilePath calculateCurrentFilePath(FilePath workspace, File file) {
         return new FilePath(workspace.getChannel(), file.getAbsolutePath());
+    }
+
+    public static class FilesOfAllSubDirectoriesCallable extends MasterToSlaveCallable<ArrayList<FilePath>, IOException> {
+
+        private final FilePath directory;
+        private final String regex;
+
+        public FilesOfAllSubDirectoriesCallable(FilePath directory, String regex) {
+            this.directory = directory;
+            this.regex = regex;
+        }
+
+        /**
+         * Performs computation and returns the result,
+         * or throws some exception.
+         */
+        @Override
+        public ArrayList<FilePath> call() {
+            return getFilesInAllSubDirectories(this.directory, this.regex);
+        }
     }
 
     public static class CoverageMethod {
