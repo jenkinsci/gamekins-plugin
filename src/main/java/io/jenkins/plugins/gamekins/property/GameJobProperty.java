@@ -2,6 +2,7 @@ package io.jenkins.plugins.gamekins.property;
 
 import hudson.model.*;
 import io.jenkins.plugins.gamekins.LeaderboardAction;
+import io.jenkins.plugins.gamekins.StatisticsAction;
 import io.jenkins.plugins.gamekins.statistics.Statistics;
 import io.jenkins.plugins.gamekins.util.PropertyUtil;
 import net.sf.json.JSONObject;
@@ -11,9 +12,7 @@ import org.kohsuke.stapler.StaplerRequest;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 public class GameJobProperty extends hudson.model.JobProperty<Job<?, ?>> implements GameProperty {
 
@@ -104,17 +103,15 @@ public class GameJobProperty extends hudson.model.JobProperty<Job<?, ?>> impleme
     @Nonnull
     @Override
     public Collection<? extends Action> getJobActions(Job<?, ?> job) {
-        List<Action> actions = new ArrayList<>(job.getActions());
-        if (activated) {
-            for (Action a : actions) {
-                if (a instanceof LeaderboardAction) {
-                    return actions;
-                }
-            }
-            actions.add(new LeaderboardAction(job));
-        } else {
-            actions.removeIf(a -> a instanceof LeaderboardAction);
+        List<Action> newActions = new ArrayList<>();
+
+        if (activated && job.getAction(LeaderboardAction.class) == null) {
+            newActions.add(new LeaderboardAction(job));
         }
-        return actions;
+        if (showStatistics && job.getAction(StatisticsAction.class) == null) {
+            newActions.add(new StatisticsAction(job));
+        }
+
+        return newActions;
     }
 }

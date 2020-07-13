@@ -1,5 +1,6 @@
 package io.jenkins.plugins.gamekins.util;
 
+import hudson.maven.AbstractMavenProject;
 import hudson.model.AbstractItem;
 import hudson.model.Action;
 import hudson.model.Actionable;
@@ -39,7 +40,7 @@ public class PropertyUtil {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        } else if (owner instanceof WorkflowMultiBranchProject) {
+        } else if (owner instanceof WorkflowMultiBranchProject || owner instanceof  AbstractMavenProject) {
             //TODO: Without reflection (Trigger)
             //TODO: Replace newInstance() with constructor call
             try {
@@ -61,11 +62,11 @@ public class PropertyUtil {
             } catch (NoSuchFieldException | IllegalAccessException | InstantiationException e) {
                 e.printStackTrace();
             }
-            try {
+            /*try {
                 owner.save();
             } catch (IOException e) {
                 e.printStackTrace();
-            }
+            }*/
         }
     }
 
