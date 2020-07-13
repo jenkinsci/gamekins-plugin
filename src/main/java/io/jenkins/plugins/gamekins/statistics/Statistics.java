@@ -141,7 +141,9 @@ public class Statistics {
             if (entry.getBranch().equals(branch) && entry.getRunNumber() == number) return;
         }
         addPreviousEntries(job, branch, number - 1, listener);
-        listener.getLogger().println(this.runEntries.get(this.runEntries.size() - 1).printToXML(""));
+        if (this.runEntries.size() > 0) {
+            listener.getLogger().println(this.runEntries.get(this.runEntries.size() - 1).printToXML(""));
+        }
         if (job instanceof WorkflowMultiBranchProject) {
             for (WorkflowJob workflowJob : ((WorkflowMultiBranchProject) job).getItems()) {
                 if (workflowJob.getName().equals(branch)) {
