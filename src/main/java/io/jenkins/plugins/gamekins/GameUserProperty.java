@@ -88,6 +88,7 @@ public class GameUserProperty extends UserProperty {
     }
 
     public boolean isParticipating(String projectName, String teamName) {
+        if (this.participation.get(projectName) == null) return false;
         return this.participation.get(projectName).equals(teamName);
     }
 
