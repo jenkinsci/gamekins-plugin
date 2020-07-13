@@ -1,6 +1,7 @@
 package io.jenkins.plugins.gamekins.property;
 
 import hudson.Extension;
+import hudson.maven.AbstractMavenProject;
 import hudson.model.*;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
@@ -29,7 +30,8 @@ public class GameJobPropertyDescriptor extends JobPropertyDescriptor {
 
     @Override
     public boolean isApplicable(Class<? extends Job> jobType) {
-        return jobType == FreeStyleProject.class || jobType == WorkflowJob.class;
+        return jobType == FreeStyleProject.class || jobType == WorkflowJob.class
+                || AbstractMavenProject.class.isAssignableFrom(jobType);
     }
 
     @Override
