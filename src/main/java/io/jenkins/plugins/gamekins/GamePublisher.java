@@ -239,6 +239,9 @@ public class GamePublisher extends Notifier implements SimpleBuildStep {
             classes.removeIf(classDetails -> classDetails.getCoverage() == 1.0);
             listener.getLogger().println("[Gamekins] Found " + classes.size()
                     + " last changed files without 100% coverage");
+            classes.removeIf(classDetails -> !classDetails.filesExists());
+            listener.getLogger().println("[Gamekins] Found " + classes.size()
+                    + " last changed files with existing coverage reports");
             classes.sort(Comparator.comparingDouble(JacocoUtil.ClassDetails::getCoverage));
             Collections.reverse(classes);
         } catch (IOException | InterruptedException e) {

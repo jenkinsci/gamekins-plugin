@@ -271,6 +271,7 @@ public class JacocoUtil {
         }
     }
 
+    //TODO: If files do not exist
     public static class ClassDetails implements Serializable {
 
         final String className;
@@ -367,6 +368,10 @@ public class JacocoUtil {
 
         public String getWorkspace() {
             return this.workspace;
+        }
+
+        public boolean filesExists() {
+            return this.jacocoCSVFile.exists() && this.jacocoSourceFile.exists() && this.jacocoMethodFile.exists();
         }
     }
 }
