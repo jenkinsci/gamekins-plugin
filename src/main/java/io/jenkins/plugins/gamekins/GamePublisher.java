@@ -97,8 +97,10 @@ public class GamePublisher extends Notifier implements SimpleBuildStep {
     @Override
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) {
         if (build.getProject() == null || build.getProject().getProperty(GameJobProperty.class) == null
-                || !build.getProject().getProperty(GameJobProperty.class).getActivated())
+                || !build.getProject().getProperty(GameJobProperty.class).getActivated()) {
+            listener.getLogger().println("[Gamekins] Not activated");
             return true;
+        }
         HashMap<String, String> constants = new HashMap<>();
         constants.put("projectName", build.getProject().getName());
         executePublisher(build, constants, build.getResult(), listener, build.getWorkspace());
@@ -190,13 +192,17 @@ public class GamePublisher extends Notifier implements SimpleBuildStep {
         if (run.getParent().getParent() instanceof WorkflowMultiBranchProject) {
             WorkflowMultiBranchProject project = (WorkflowMultiBranchProject) run.getParent().getParent();
             if (project.getProperties().get(GameMultiBranchProperty.class) == null
-                    || !project.getProperties().get(GameMultiBranchProperty.class).getActivated())
+                    || !project.getProperties().get(GameMultiBranchProperty.class).getActivated()) {
+                listener.getLogger().println("[Gamekins] Not activated");
                 return;
+            }
             constants.put("projectName", project.getName());
         } else {
             if (run.getParent().getProperty(GameJobProperty.class) == null
-                    || !run.getParent().getProperty(GameJobProperty.class).getActivated())
+                    || !run.getParent().getProperty(GameJobProperty.class).getActivated()) {
+                listener.getLogger().println("[Gamekins] Not activated");
                 return;
+            }
             constants.put("projectName", run.getParent().getName());
         }
         constants.put("jacocoResultsPath", getJacocoResultsPath());
