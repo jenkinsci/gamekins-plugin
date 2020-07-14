@@ -252,7 +252,7 @@ public class GamePublisher extends Notifier implements SimpleBuildStep {
             GameUserProperty property = user.getProperty(GameUserProperty.class);
             if (property != null && property.isParticipating(constants.get("projectName"))) {
                 try {
-                    if (result != Result.SUCCESS) {
+                    if (result != null &&  result != Result.SUCCESS) {
                         BuildChallenge challenge = new BuildChallenge();
                         User mapUser = GitUtil.mapUser(
                                 workspace.act(new GitUtil.HeadCommitCallable(workspace.getRemote()))
