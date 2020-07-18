@@ -236,6 +236,8 @@ public class GitUtil {
 
                 String[] lines = diff.split("\n");
                 for (String line : lines) {
+                    if (commit.getShortMessage().toLowerCase().contains("merge")) break;
+                    //TODO: Shows diff of some merge requests, but not all
                     if (line.contains("diff --git")) {
                         String path = line.split(" ")[2].substring(1);
                         String[] pathSplit = path.split("/");
@@ -278,7 +280,8 @@ public class GitUtil {
                 }
 
                 for (RevCommit parent : commit.getParents()) {
-                    if (!searchedCommits.contains(parent)) {
+                    if (!searchedCommits.contains(parent) && !newCommits.contains(parent)
+                            && !currentCommits.contains(parent)) {
                         newCommits.add(walk.parseCommit(repo.resolve(parent.getName())));
                     }
                     walk.dispose();
