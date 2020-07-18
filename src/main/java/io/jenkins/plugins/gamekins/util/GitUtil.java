@@ -110,15 +110,17 @@ public class GitUtil {
 
                     countUserCommit++;
                 }
-
-                //TODO: Adjustment to git branches necessary?
+                
                 for (RevCommit parent : commit.getParents()) {
                     newCommits.add(walk.parseCommit(repo.resolve(parent.getName())));
                     walk.dispose();
                 }
             }
 
-            if (targetCommit != null && newCommits.contains(targetCommit)) break;
+            if (targetCommit != null) {
+                newCommits.remove(targetCommit);
+                newCommits.removeAll(Arrays.asList(targetCommit.getParents()));
+            }
 
             currentCommits = new ArrayList<>(newCommits);
             totalCount++;
