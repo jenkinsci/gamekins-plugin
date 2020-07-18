@@ -35,8 +35,7 @@ public class PublisherUtil {
         try {
             files = workspace.act(
                     new JacocoUtil.FilesOfAllSubDirectoriesCallable(workspace, split[split.length - 1]));
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
+        } catch (IOException | InterruptedException ignored) {
             return false;
         }
         for (FilePath file : files) {
