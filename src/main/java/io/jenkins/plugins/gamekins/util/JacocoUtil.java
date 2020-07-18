@@ -281,7 +281,7 @@ public class JacocoUtil {
         final File jacocoSourceFile;
         final File jacocoCSVFile;
         final double coverage;
-        final ArrayList<GitUtil.GameUser> changedByUsers;
+        final HashSet<GitUtil.GameUser> changedByUsers;
         final String workspace;
 
         /**
@@ -327,7 +327,7 @@ public class JacocoUtil {
             }
             this.coverage = getCoverageInPercentageFromJacoco(this.className,
                     calculateCurrentFilePath(workspace, this.jacocoCSVFile));
-            this.changedByUsers = new ArrayList<>();
+            this.changedByUsers = new HashSet<>();
         }
 
         public String getClassName() {
@@ -358,7 +358,7 @@ public class JacocoUtil {
             return coverage;
         }
 
-        public ArrayList<GitUtil.GameUser> getChangedByUsers() {
+        public HashSet<GitUtil.GameUser> getChangedByUsers() {
             return this.changedByUsers;
         }
 
