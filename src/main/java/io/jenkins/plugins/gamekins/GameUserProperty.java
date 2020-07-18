@@ -162,7 +162,7 @@ public class GameUserProperty extends UserProperty {
         print.append(indentation).append("<User id=\"").append(this.pseudonym).append("\" project=\"")
                 .append(projectName).append("\" score=\"").append(getScore(projectName)).append("\">\n");
         print.append(indentation).append("    <CurrentChallenges count=\"")
-                .append(getCompletedChallenges(projectName).size()).append("\">\n");
+                .append(getCurrentChallenges(projectName).size()).append("\">\n");
         for (Challenge challenge : getCurrentChallenges(projectName)) {
             print.append(challenge.printToXML("", indentation + "        ")).append("\n");
         }
