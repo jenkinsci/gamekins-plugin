@@ -43,10 +43,10 @@ public class ClassCoverageChallenge extends CoverageChallenge {
         }
 
         int fullyCoveredLines = JacocoUtil.calculateCoveredLines(document, "fc");
-        double newCoverage = JacocoUtil.getCoverageInPercentageFromJacoco(this.classDetails.getClassName(), jacocoCSVFile);
-        if (fullyCoveredLines > this.fullyCoveredLines && newCoverage > this.coverage) {
+        if (fullyCoveredLines > this.fullyCoveredLines) {
             this.solved = System.currentTimeMillis();
-            this.solvedCoverage = newCoverage;
+            this.solvedCoverage = JacocoUtil.getCoverageInPercentageFromJacoco(
+                    this.classDetails.getClassName(), jacocoCSVFile);
             return true;
         }
         return false;
