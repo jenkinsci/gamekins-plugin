@@ -23,10 +23,16 @@ public class MethodCoverageChallenge extends CoverageChallenge {
         ArrayList<JacocoUtil.CoverageMethod> methods =
                 JacocoUtil.getNotFullyCoveredMethodEntries(JacocoUtil.calculateCurrentFilePath(workspace,
                         classDetails.getJacocoMethodFile(), classDetails.getWorkspace()));
-        JacocoUtil.CoverageMethod method = methods.get(random.nextInt(methods.size()));
-        this.methodName = method.getMethodName();
-        this.lines = method.getLines();
-        this.missedLines = method.getMissedLines();
+        if (methods.size() != 0) {
+            JacocoUtil.CoverageMethod method = methods.get(random.nextInt(methods.size()));
+            this.methodName = method.getMethodName();
+            this.lines = method.getLines();
+            this.missedLines = method.getMissedLines();
+        } else {
+            this.methodName = null;
+            this.lines = 0;
+            this.missedLines = 0;
+        }
     }
 
     @Override
@@ -111,4 +117,7 @@ public class MethodCoverageChallenge extends CoverageChallenge {
                 + " (created for branch " + branch + ")";
     }
 
+    public String getMethodName() {
+        return this.methodName;
+    }
 }

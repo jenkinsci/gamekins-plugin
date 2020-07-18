@@ -65,6 +65,10 @@ public class ChallengeFactory {
                     + challengeClass.getSimpleName());
             challenge = generateCoverageChallenge(selectedClass, challengeClass, constants.get("branch"),
                     listener, workspace);
+            if (challenge instanceof MethodCoverageChallenge
+                    && ((MethodCoverageChallenge) challenge).getMethodName() == null) {
+                challenge = null;
+            }
             worklist.remove(selectedClass);
             count ++;
         } while (challenge == null);
