@@ -105,10 +105,10 @@ public class GameJobProperty extends hudson.model.JobProperty<Job<?, ?>> impleme
     public Collection<? extends Action> getJobActions(Job<?, ?> job) {
         List<Action> newActions = new ArrayList<>();
 
-        if (activated && job.getAction(LeaderboardAction.class) == null) {
+        if (activated && (job.getAction(LeaderboardAction.class) == null || job instanceof FreeStyleProject)) {
             newActions.add(new LeaderboardAction(job));
         }
-        if (showStatistics && job.getAction(StatisticsAction.class) == null) {
+        if (showStatistics && (job.getAction(StatisticsAction.class) == null || job instanceof FreeStyleProject)) {
             newActions.add(new StatisticsAction(job));
         }
 
