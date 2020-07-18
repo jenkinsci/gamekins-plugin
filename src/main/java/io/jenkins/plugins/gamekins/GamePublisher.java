@@ -340,11 +340,12 @@ public class GamePublisher extends Notifier implements SimpleBuildStep {
                             e.printStackTrace(listener.getLogger());
                         }
                     }
-                    try {
-                        user.save();
-                    } catch (IOException e) {
-                        e.printStackTrace(listener.getLogger());
-                    }
+                }
+
+                try {
+                    user.save();
+                } catch (IOException e) {
+                    e.printStackTrace(listener.getLogger());
                 }
             }
         }
