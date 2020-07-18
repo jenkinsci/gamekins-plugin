@@ -58,6 +58,7 @@ public class LeaderboardAction implements ProminentProjectAction, Describable<Le
             }
         }
         details.sort(Comparator.comparingInt(UserDetails::getScore));
+        Collections.reverse(details);
         return details;
     }
 
@@ -88,6 +89,7 @@ public class LeaderboardAction implements ProminentProjectAction, Describable<Le
             }
         }
         details.sort(Comparator.comparingInt(TeamDetails::getScore));
+        Collections.reverse(details);
         return details;
     }
 
