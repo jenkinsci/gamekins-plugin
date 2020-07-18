@@ -24,10 +24,16 @@ public class LineCoverageChallenge extends CoverageChallenge {
         Elements elements = JacocoUtil.getLines(JacocoUtil.calculateCurrentFilePath(workspace,
                 classDetails.getJacocoSourceFile(), classDetails.getWorkspace()));
         Random random = new Random();
-        Element element = elements.get(random.nextInt(elements.size()));
-        this.lineNumber = Integer.parseInt(element.attr("id").substring(1));
-        this.coverageType = element.attr("class");
-        this.lineContent = element.text();
+        if (elements.size() != 0) {
+            Element element = elements.get(random.nextInt(elements.size()));
+            this.lineNumber = Integer.parseInt(element.attr("id").substring(1));
+            this.coverageType = element.attr("class");
+            this.lineContent = element.text();
+        } else {
+            this.lineNumber = 0;
+            this.coverageType = null;
+            this.lineContent = null;
+        }
     }
 
     @Override
@@ -114,5 +120,9 @@ public class LineCoverageChallenge extends CoverageChallenge {
         //TODO: Add content of line
         return "Write a test to cover line " + this.lineNumber + " in class " + classDetails.getClassName()
                 + " in package " + classDetails.getPackageName() + " (created for branch " + branch + ")";
+    }
+
+    public String getLineContent() {
+        return this.lineContent;
     }
 }
