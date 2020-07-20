@@ -25,6 +25,8 @@ import java.util.*;
 
 public class GitUtil {
 
+    public final static int SEARCH_COMMIT_COUNT = 50;
+
     private GitUtil() {}
 
     public static RevCommit getHead(Repository repo) throws IOException {
@@ -72,7 +74,7 @@ public class GitUtil {
     private static Set<String> getLastChangedFilesOfUser(String workspace, GameUser user, int commitCount,
                                                          String commitHash, ArrayList<GameUser> users)
             throws IOException {
-        if (commitCount <= 0) commitCount = Integer.MAX_VALUE;
+        if (commitCount <= 0) commitCount = SEARCH_COMMIT_COUNT;
 
         FileRepositoryBuilder builder = new FileRepositoryBuilder();
         Repository repo = builder.setGitDir(new File(workspace + "/.git")).setMustExist(true).build();
@@ -85,11 +87,22 @@ public class GitUtil {
         RevCommit headCommit = getHead(repo);
         Git git = new Git(repo);
 
-        if (targetCommit == headCommit) return new LinkedHashSet<>();
+        if (targetCommit == headCommit || targetCommit == null) return new LinkedHashSet<>();
 
         int countUserCommit = 0;
         int totalCount = 0;
-        ArrayList<RevCommit> currentCommits = new ArrayList<>();
+        HashSet<RevCommit> currentCommits = new HashSet<>();
+        HashSet<RevCommit> searchedCommits = new HashSet<>();
+        searchedCommits.add(targetCommit);
+        searchedCommits.addAll(Arrays.asList(targetCommit.getParents()));
+        boolean nearToLeaf = true;
+        for (RevCommit revCommit : targetCommit.getParents()) {
+            RevCommit[] parents = revCommit.getParents();
+            if (parents != null && parents.length != 0) {
+                nearToLeaf = false;
+                searchedCommits.addAll(Arrays.asList(parents));
+            }
+        }
         currentCommits.add(headCommit);
         LinkedHashSet<String> pathsToFiles = new LinkedHashSet<>();
 
@@ -97,6 +110,7 @@ public class GitUtil {
             if (currentCommits.isEmpty()) break;
             ArrayList<RevCommit> newCommits = new ArrayList<>();
             for (RevCommit commit : currentCommits) {
+                searchedCommits.add(commit);
                 GameUser mapUser = mapUser(commit.getAuthorIdent(), users);
                 if (mapUser != null &&  mapUser.equals(user)) {
                     String diff = getDiffOfCommit(git, repo, commit);
@@ -117,12 +131,11 @@ public class GitUtil {
                 }
             }
 
-            if (targetCommit != null) {
-                newCommits.remove(targetCommit);
-                newCommits.removeAll(Arrays.asList(targetCommit.getParents()));
-            }
+            if (nearToLeaf && newCommits.contains(targetCommit)) break;
 
-            currentCommits = new ArrayList<>(newCommits);
+            newCommits.removeAll(searchedCommits);
+
+            currentCommits = new HashSet<>(newCommits);
             totalCount++;
         }
 
