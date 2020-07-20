@@ -37,7 +37,7 @@ public class DummyChallenge implements Challenge {
 
     @Override
     public String printToXML(String reason, String indentation) {
-        return "";
+        return "<DummyChallenge>";
     }
 
     @Override
