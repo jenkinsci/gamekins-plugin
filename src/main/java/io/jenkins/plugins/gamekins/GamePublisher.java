@@ -277,7 +277,7 @@ public class GamePublisher extends Notifier implements SimpleBuildStep {
                         property.completeChallenge(constants.get("projectName"), challenge);
                         property.addScore(constants.get("projectName"), challenge.getScore());
                         listener.getLogger().println("[Gamekins] Solved challenge " + challenge.toString());
-                        solved++;
+                        if (!(challenge instanceof DummyChallenge)) solved++;
                     }
                 }
 
