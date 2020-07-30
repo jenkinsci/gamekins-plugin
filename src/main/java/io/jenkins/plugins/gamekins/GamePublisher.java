@@ -33,11 +33,13 @@ public class GamePublisher extends Notifier implements SimpleBuildStep {
 
     private String jacocoResultsPath;
     private String jacocoCSVPath;
+    private int searchCommitCount;
 
     @DataBoundConstructor
-    public GamePublisher(String jacocoResultsPath, String jacocoCSVPath) {
+    public GamePublisher(String jacocoResultsPath, String jacocoCSVPath, int searchCommitCount) {
         this.jacocoResultsPath = jacocoResultsPath;
         this.jacocoCSVPath = jacocoCSVPath;
+        this.searchCommitCount = searchCommitCount > 0 ? searchCommitCount : GitUtil.DEFAULT_SEARCH_COMMIT_COUNT;
     }
 
     @DataBoundSetter
@@ -48,6 +50,11 @@ public class GamePublisher extends Notifier implements SimpleBuildStep {
     @DataBoundSetter
     public void setJacocoCSVPath(String jacocoCSVPath) {
         this.jacocoCSVPath = jacocoCSVPath;
+    }
+
+    @DataBoundSetter
+    public void setSearchCommitCount(int searchCommitCount) {
+        this.searchCommitCount = searchCommitCount;
     }
 
     @Override
@@ -175,6 +182,10 @@ public class GamePublisher extends Notifier implements SimpleBuildStep {
         return jacocoCSVPath;
     }
 
+    public int getSearchCommitCount() {
+        return searchCommitCount;
+    }
+
     /**
      * Run this step.
      *
@@ -231,7 +242,7 @@ public class GamePublisher extends Notifier implements SimpleBuildStep {
 
         ArrayList<JacocoUtil.ClassDetails> classes;
         try {
-            classes = workspace.act(new GitUtil.LastChangedClassesCallable(GitUtil.SEARCH_COMMIT_COUNT, constants,
+            classes = workspace.act(new GitUtil.LastChangedClassesCallable(this.searchCommitCount, constants,
                     listener, GitUtil.mapUsersToGameUsers(User.getAll()), workspace));
             listener.getLogger().println("[Gamekins] Found " + classes.size() + " last changed files");
             classes.removeIf(classDetails -> classDetails.getCoverage() == 1.0);

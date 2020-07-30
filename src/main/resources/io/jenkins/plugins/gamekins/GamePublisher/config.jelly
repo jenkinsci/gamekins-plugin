@@ -9,4 +9,7 @@
              (Note: include also the file name since it can be different from 'jacoco.csv')">
         <f:textbox />
     </f:entry>
+    <f:entry title="Commits to be searched" field="searchCommitCount">
+        <f:number />
+    </f:entry>
 </j:jelly>

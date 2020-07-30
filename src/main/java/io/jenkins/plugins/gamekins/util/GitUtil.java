@@ -25,7 +25,7 @@ import java.util.*;
 
 public class GitUtil {
 
-    public final static int SEARCH_COMMIT_COUNT = 50;
+    public final static int DEFAULT_SEARCH_COMMIT_COUNT = 50;
 
     private GitUtil() {}
 
@@ -74,7 +74,7 @@ public class GitUtil {
     private static Set<String> getLastChangedFilesOfUser(String workspace, GameUser user, int commitCount,
                                                          String commitHash, ArrayList<GameUser> users)
             throws IOException {
-        if (commitCount <= 0) commitCount = SEARCH_COMMIT_COUNT;
+        if (commitCount <= 0) commitCount = DEFAULT_SEARCH_COMMIT_COUNT;
 
         FileRepositoryBuilder builder = new FileRepositoryBuilder();
         Repository repo = builder.setGitDir(new File(workspace + "/.git")).setMustExist(true).build();
@@ -250,10 +250,11 @@ public class GitUtil {
                 String diff = getDiffOfCommit(git, repo, commit);
 
                 String[] lines = diff.split("\n");
-                for (String line : lines) {
+                for (int i = 0; i < lines.length; i++) {
+                    String line = lines[i];
                     if (commit.getShortMessage().toLowerCase().contains("merge")) break;
                     //TODO: Shows diff of some merge requests, but not all
-                    if (line.contains("diff --git")) {
+                    if (line.contains("diff --git") && i + 1 < lines.length && !lines[i + 1].contains("deleted")) {
                         String path = line.split(" ")[2].substring(1);
                         String[] pathSplit = path.split("/");
                         if (Arrays.asList(path.split("/")).contains("test")
