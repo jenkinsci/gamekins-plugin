@@ -22,4 +22,6 @@ public interface Challenge {
 
     @Override
     String toString();
+
+    //TODO: Override equals()
 }

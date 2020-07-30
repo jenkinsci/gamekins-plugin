@@ -62,6 +62,7 @@ public class LineCoverageChallenge extends CoverageChallenge {
             return false;
         }
 
+        //TODO: Case with more than two branches
         Elements elements = document.select("span." + "fc");
         if (coverageType.equals("nc")) elements.addAll(document.select("span." + "pc"));
         for (Element element : elements) {
@@ -118,6 +119,7 @@ public class LineCoverageChallenge extends CoverageChallenge {
     @Override
     public String toString() {
         //TODO: Add content of line
+        //TODO: Fully cover / cover more branches
         return "Write a test to cover line " + this.lineNumber + " in class " + classDetails.getClassName()
                 + " in package " + classDetails.getPackageName() + " (created for branch " + branch + ")";
     }
