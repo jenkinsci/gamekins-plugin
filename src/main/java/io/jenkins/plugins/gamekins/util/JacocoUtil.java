@@ -194,7 +194,8 @@ public class JacocoUtil {
         ArrayList<String> pathSplit = new ArrayList<>(Arrays.asList(shortFilePath.split("/")));
         StringBuilder packageName = new StringBuilder();
         for (int i = pathSplit.size() - 2; i >= 0; i--) {
-            if (pathSplit.get(i).equals("src") || pathSplit.get(i).equals("main") || pathSplit.get(i).equals("java")) {
+            if ((pathSplit.get(i).equals("src") || pathSplit.get(i).equals("main") || pathSplit.get(i).equals("java"))
+                    && packageName.length() > 0) {
                 packageName = new StringBuilder(packageName.substring(1));
                 break;
             }
