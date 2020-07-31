@@ -5,6 +5,7 @@ import hudson.model.AbstractItem;
 import hudson.model.Action;
 import hudson.model.Actionable;
 import hudson.model.User;
+import hudson.security.HudsonPrivateSecurityRealm;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import io.jenkins.plugins.gamekins.StatisticsAction;
@@ -80,6 +81,7 @@ public class PropertyUtil {
         ArrayList<String> participatingUser = new ArrayList<>();
         ArrayList<String> otherUsers = new ArrayList<>();
         for (User user : User.getAll()) {
+            if (user.getProperty(HudsonPrivateSecurityRealm.Details.class) == null) continue;
             GameUserProperty property = user.getProperty(GameUserProperty.class);
             if (property != null) {
                 if (property.isParticipating(projectName)) {
@@ -102,6 +104,7 @@ public class PropertyUtil {
         if (teamsBox.trim().isEmpty()) return FormValidation.error("No team specified");
         if (job == null) return FormValidation.error("Unexpected error: Parent job is null");
         for (User user : User.getAll()) {
+            if (user.getProperty(HudsonPrivateSecurityRealm.Details.class) == null) continue;
             if (user.getFullName().equals(usersBox)) {
                 String projectName = job.getName();
                 GameUserProperty property = user.getProperty(GameUserProperty.class);
@@ -125,6 +128,7 @@ public class PropertyUtil {
         if (teamsBox.trim().isEmpty()) return FormValidation.error("No team specified");
         if (job == null) return FormValidation.error("Unexpected error: Parent job is null");
         for (User user : User.getAll()) {
+            if (user.getProperty(HudsonPrivateSecurityRealm.Details.class) == null) continue;
             if (user.getFullName().equals(usersBox)) {
                 String projectName = job.getName();
                 GameUserProperty property = user.getProperty(GameUserProperty.class);
@@ -150,6 +154,7 @@ public class PropertyUtil {
         if (!property.getTeams().contains(teamsBox))
             return FormValidation.error("The specified team does not exist");
         for (User user : User.getAll()) {
+            if (user.getProperty(HudsonPrivateSecurityRealm.Details.class) == null) continue;
             GameUserProperty userProperty = user.getProperty(GameUserProperty.class);
             if (userProperty != null && userProperty.isParticipating(projectName, teamsBox)) {
                 userProperty.removeParticipation(projectName);

@@ -3,6 +3,7 @@ package io.jenkins.plugins.gamekins.util;
 import hudson.FilePath;
 import hudson.model.TaskListener;
 import hudson.model.User;
+import hudson.security.HudsonPrivateSecurityRealm;
 import hudson.tasks.Mailer;
 import io.jenkins.plugins.gamekins.GameUserProperty;
 import jenkins.security.MasterToSlaveCallable;
@@ -194,6 +195,7 @@ public class GitUtil {
     public static User mapUser(PersonIdent ident, Collection<User> users) {
         String[] split = ident.getName().split(" ");
         for (User user : users) {
+            if (user.getProperty(HudsonPrivateSecurityRealm.Details.class) == null) continue;
             GameUserProperty property = user.getProperty(GameUserProperty.class);
             if (
                     (property != null && property.getGitNames().contains(ident.getName()))
@@ -314,6 +316,7 @@ public class GitUtil {
     public static ArrayList<GameUser> mapUsersToGameUsers(Collection<User> users) {
         ArrayList<GameUser> gameUsers = new ArrayList<>();
         for (User user : users) {
+            if (user.getProperty(HudsonPrivateSecurityRealm.Details.class) == null) continue;
             gameUsers.add(new GameUser(user));
         }
         return gameUsers;

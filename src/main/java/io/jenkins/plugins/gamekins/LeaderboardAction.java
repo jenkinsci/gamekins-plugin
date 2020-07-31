@@ -2,6 +2,7 @@ package io.jenkins.plugins.gamekins;
 
 import hudson.Extension;
 import hudson.model.*;
+import hudson.security.HudsonPrivateSecurityRealm;
 import hudson.util.FormValidation;
 import io.jenkins.plugins.gamekins.challenge.Challenge;
 import jenkins.model.Jenkins;
@@ -45,6 +46,7 @@ public class LeaderboardAction implements ProminentProjectAction, Describable<Le
     public List<UserDetails> getUserDetails() {
         ArrayList<UserDetails> details = new ArrayList<>();
         for (User user : User.getAll()) {
+            if (user.getProperty(HudsonPrivateSecurityRealm.Details.class) == null) continue;
             GameUserProperty property = user.getProperty(GameUserProperty.class);
             if (property != null && property.isParticipating(job.getName())) {
                 details.add(
@@ -65,6 +67,7 @@ public class LeaderboardAction implements ProminentProjectAction, Describable<Le
     public List<TeamDetails> getTeamDetails() {
         ArrayList<TeamDetails> details = new ArrayList<>();
         for (User user : User.getAll()) {
+            if (user.getProperty(HudsonPrivateSecurityRealm.Details.class) == null) continue;
             GameUserProperty property = user.getProperty(GameUserProperty.class);
             if (property != null && property.isParticipating(job.getName())) {
                 int index = -1;

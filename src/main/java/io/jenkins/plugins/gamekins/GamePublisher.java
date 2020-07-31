@@ -4,6 +4,7 @@ import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.*;
+import hudson.security.HudsonPrivateSecurityRealm;
 import hudson.tasks.*;
 import hudson.util.FormValidation;
 import io.jenkins.plugins.gamekins.challenge.BuildChallenge;
@@ -261,6 +262,7 @@ public class GamePublisher extends Notifier implements SimpleBuildStep {
         int solved = 0;
         int generated = 0;
         for (User user : User.getAll()) {
+            if (user.getProperty(HudsonPrivateSecurityRealm.Details.class) == null) continue;
             GameUserProperty property = user.getProperty(GameUserProperty.class);
             if (property != null && property.isParticipating(constants.get("projectName"))) {
                 try {
