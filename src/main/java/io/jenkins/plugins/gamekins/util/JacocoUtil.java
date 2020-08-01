@@ -374,5 +374,20 @@ public class JacocoUtil {
         public boolean filesExists() {
             return this.jacocoCSVFile.exists() && this.jacocoSourceFile.exists() && this.jacocoMethodFile.exists();
         }
+
+        @Override
+        public String toString() {
+            StringBuilder value = new StringBuilder("ClassDetails{" +
+                    "className='" + className + '\'' +
+                    ", extension='" + extension + '\'' +
+                    ", packageName='" + packageName + '\'' +
+                    ", changedByUsers=");
+            for (GitUtil.GameUser user : changedByUsers){
+                value.append(user.getFullName()).append(",");
+            }
+            value = new StringBuilder(value.substring(0, value.length() - 1));
+            value.append('}');
+            return value.toString();
+        }
     }
 }

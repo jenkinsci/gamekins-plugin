@@ -459,6 +459,7 @@ public class GitUtil {
         //TODO: Not callable on remote machines
         public User getUser() {
             for (User user : User.getAll()) {
+                if (user.getProperty(HudsonPrivateSecurityRealm.Details.class) == null) continue;
                 if (user.getId().equals(this.id)) return user;
             }
             return null;
