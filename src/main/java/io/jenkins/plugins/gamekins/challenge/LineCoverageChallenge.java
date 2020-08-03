@@ -62,10 +62,11 @@ public class LineCoverageChallenge extends CoverageChallenge {
             return false;
         }
 
-        //TODO: Case with more than two branches
+        //TODO: Case with more than two branches (bnc/bpc/bfc)
         Elements elements = document.select("span." + "fc");
-        if (coverageType.equals("nc")) elements.addAll(document.select("span." + "pc"));
+        if (coverageType.startsWith("nc")) elements.addAll(document.select("span." + "pc"));
         for (Element element : elements) {
+            //TODO: Some content in multiple lines in one class
             if (element.text().equals(this.lineContent)) {
                 this.solved = System.currentTimeMillis();
                 this.solvedCoverage = JacocoUtil.getCoverageInPercentageFromJacoco(this.classDetails.getClassName(),
@@ -120,7 +121,10 @@ public class LineCoverageChallenge extends CoverageChallenge {
     public String toString() {
         //TODO: Add content of line
         //TODO: Fully cover / cover more branches
-        return "Write a test to cover line " + this.lineNumber + " in class " + classDetails.getClassName()
+        String prefix = this.coverageType.startsWith("nc")
+                ? "Write a test to cover more branches of line "
+                : "Write a test to fully cover line ";
+        return prefix + this.lineNumber + " in class " + classDetails.getClassName()
                 + " in package " + classDetails.getPackageName() + " (created for branch " + branch + ")";
     }
 
