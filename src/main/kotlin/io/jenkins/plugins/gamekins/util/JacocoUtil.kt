@@ -18,6 +18,7 @@ import java.io.Serializable
 import java.util.*
 
 object JacocoUtil {
+
     @JvmStatic
     fun getProjectCoverage(workspace: FilePath, csvName: String): Double {
         val files: ArrayList<FilePath>
@@ -35,21 +36,20 @@ object JacocoUtil {
         for (file in files) {
             try {
                 val content = file.readToString()
-                val lines = content.split("\n".toRegex()).toTypedArray()
+                val lines = content.split("\n".toRegex()).filter { line -> line.isNotEmpty() }
                 for (coverageLine in lines) {
                     //TODO: Improve
-                    val entries = listOf(*coverageLine.split(",".toRegex()).toTypedArray())
+                    val entries = coverageLine.split(",".toRegex())
                     if (entries[2] != "CLASS") {
                         coveredInstructionCount += entries[4].toDouble().toInt()
                         instructionCount += (entries[3].toDouble() + entries[4].toDouble()).toInt()
                     }
                 }
-            } catch (e: IOException) {
-                e.printStackTrace()
-            } catch (e: InterruptedException) {
+            } catch (e: Exception) {
                 e.printStackTrace()
             }
         }
+
         return coveredInstructionCount / instructionCount.toDouble()
     }
 
@@ -57,19 +57,18 @@ object JacocoUtil {
     fun getCoverageInPercentageFromJacoco(className: String, csv: FilePath): Double {
         try {
             val content = csv.readToString()
-            val lines = content.split("\n".toRegex()).toTypedArray()
+            val lines = content.split("\n".toRegex()).filter { line -> line.isNotEmpty() }
             for (coverageLine in lines) {
                 //TODO: Improve
-                val entries = listOf(*coverageLine.split(",".toRegex()).toTypedArray())
+                val entries = coverageLine.split(",".toRegex())
                 if (className.contains(entries[2])) {
                     return entries[4].toDouble() / (entries[3].toDouble() + entries[4].toDouble())
                 }
             }
-        } catch (e: IOException) {
-            e.printStackTrace()
-        } catch (e: InterruptedException) {
+        } catch (e: Exception) {
             e.printStackTrace()
         }
+
         return 0.0
     }
 
