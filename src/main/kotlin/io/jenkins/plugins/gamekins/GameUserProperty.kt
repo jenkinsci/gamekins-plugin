@@ -6,7 +6,6 @@ import hudson.model.UserProperty
 import hudson.model.UserPropertyDescriptor
 import io.jenkins.plugins.gamekins.challenge.Challenge
 import io.jenkins.plugins.gamekins.challenge.DummyChallenge
-import io.jenkins.plugins.gamekins.util.Pair
 import net.sf.json.JSONObject
 import org.kohsuke.stapler.DataBoundSetter
 import org.kohsuke.stapler.StaplerRequest
