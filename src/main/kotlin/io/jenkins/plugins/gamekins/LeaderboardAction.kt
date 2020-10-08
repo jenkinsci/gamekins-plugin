@@ -166,9 +166,9 @@ class LeaderboardAction(val job: AbstractItem) : ProminentProjectAction, Describ
 
         fun doRejectChallenge(@AncestorInPath job: AbstractItem, @QueryParameter reject: String,
                               @QueryParameter reason: String): FormValidation {
-            var reason = reason
-            if (reason.isEmpty()) return FormValidation.error("Please insert your reason for rejection")
-            if (reason.matches(Regex("\\s+"))) reason = "No reason provided"
+            var rejectReason = reason
+            if (rejectReason.isEmpty()) return FormValidation.error("Please insert your reason for rejection")
+            if (rejectReason.matches(Regex("\\s+"))) rejectReason = "No reason provided"
             val user: User = User.current()
                     ?: return FormValidation.error("There is no user signed in")
             val property = user.getProperty(GameUserProperty::class.java)
@@ -182,7 +182,7 @@ class LeaderboardAction(val job: AbstractItem) : ProminentProjectAction, Describ
                 }
             }
             if (challenge == null) return FormValidation.error("The challenge does not exist")
-            property.rejectChallenge(projectName, challenge, reason)
+            property.rejectChallenge(projectName, challenge, rejectReason)
             try {
                 user.save()
             } catch (e: IOException) {

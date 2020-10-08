@@ -61,11 +61,11 @@ class Statistics(job: AbstractItem) {
                 } else {
                     var count = 0
                     for (workflowJob in job.items) {
-                        if (count >= Companion.RUN_TOTAL_COUNT) break
+                        if (count >= RUN_TOTAL_COUNT) break
                         val list = workflowJob.builds
                         list.reverse()
                         for (workflowRun in list) {
-                            if (count >= Companion.RUN_TOTAL_COUNT) break
+                            if (count >= RUN_TOTAL_COUNT) break
                             entries.add(RunEntry(
                                     workflowRun!!.getNumber(),
                                     workflowJob.name,
@@ -197,9 +197,9 @@ class Statistics(job: AbstractItem) {
                     + "\" coverage=\"" + coverage + "\"/>")
         }
 
-        override fun compareTo(o: RunEntry): Int {
-            val result = Collator.getInstance().compare(branch, o.branch)
-            return if (result == 0) runNumber.compareTo(o.runNumber) else result
+        override fun compareTo(other: RunEntry): Int {
+            val result = Collator.getInstance().compare(branch, other.branch)
+            return if (result == 0) runNumber.compareTo(other.runNumber) else result
         }
     }
 

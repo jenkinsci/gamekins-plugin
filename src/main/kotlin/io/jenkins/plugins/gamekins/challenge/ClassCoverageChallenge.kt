@@ -10,7 +10,6 @@ import io.jenkins.plugins.gamekins.util.JacocoUtil.generateDocument
 import io.jenkins.plugins.gamekins.util.JacocoUtil.getCoverageInPercentageFromJacoco
 import io.jenkins.plugins.gamekins.util.JacocoUtil.getJacocoFileInMultiBranchProject
 import org.jsoup.nodes.Document
-import java.io.IOException
 import java.util.*
 
 class ClassCoverageChallenge(classDetails: ClassDetails, branch: String, workspace: FilePath?)

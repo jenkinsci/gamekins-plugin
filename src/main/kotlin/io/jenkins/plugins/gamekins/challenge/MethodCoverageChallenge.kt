@@ -9,7 +9,6 @@ import io.jenkins.plugins.gamekins.util.JacocoUtil.getCoverageInPercentageFromJa
 import io.jenkins.plugins.gamekins.util.JacocoUtil.getJacocoFileInMultiBranchProject
 import io.jenkins.plugins.gamekins.util.JacocoUtil.getMethodEntries
 import io.jenkins.plugins.gamekins.util.JacocoUtil.getNotFullyCoveredMethodEntries
-import java.io.IOException
 import java.util.*
 
 class MethodCoverageChallenge(classDetails: ClassDetails, branch: String, workspace: FilePath?)

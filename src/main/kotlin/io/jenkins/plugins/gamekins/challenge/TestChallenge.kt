@@ -7,7 +7,6 @@ import hudson.model.User
 import io.jenkins.plugins.gamekins.util.GitUtil.getLastChangedTestFilesOfUser
 import io.jenkins.plugins.gamekins.util.JacocoUtil.getTestCount
 import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject
-import java.io.IOException
 import java.util.*
 
 class TestChallenge(private val currentCommit: String, private val testCount: Int, private val user: User,

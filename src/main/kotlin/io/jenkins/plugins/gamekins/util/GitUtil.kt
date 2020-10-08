@@ -76,8 +76,8 @@ object GitUtil {
     @Throws(IOException::class)
     private fun getLastChangedFilesOfUser(workspace: String, user: GameUser, commitCount: Int,
                                           commitHash: String, users: ArrayList<GameUser>): Set<String> {
-        var commitCount = commitCount
-        if (commitCount <= 0) commitCount = DEFAULT_SEARCH_COMMIT_COUNT
+        var commitSearchCount = commitCount
+        if (commitSearchCount <= 0) commitSearchCount = DEFAULT_SEARCH_COMMIT_COUNT
         val builder = FileRepositoryBuilder()
         val repo = builder.setGitDir(File("$workspace/.git")).setMustExist(true).build()
         val walk = RevWalk(repo)
@@ -104,7 +104,7 @@ object GitUtil {
         }
         currentCommits.add(headCommit)
         val pathsToFiles = LinkedHashSet<String>()
-        while (countUserCommit < commitCount && totalCount < commitCount * 5) {
+        while (countUserCommit < commitSearchCount && totalCount < commitSearchCount * 5) {
             if (currentCommits.isEmpty()) break
             val newCommits = ArrayList<RevCommit>()
             for (commit in currentCommits) {

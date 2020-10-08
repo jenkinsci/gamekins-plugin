@@ -45,16 +45,16 @@ object PropertyUtil {
                 actionField.isAccessible = true
                 if (actionField[owner] == null) actionField[owner] = actionField.type.newInstance()
                 if (activated) {
-                    (actionField[owner] as MutableList<Action?>).removeIf { action: Action? -> action is LeaderboardAction }
+                    (actionField[owner] as MutableList<*>).removeIf { action -> action is LeaderboardAction }
                     (actionField[owner] as MutableList<Action?>).add(LeaderboardAction(owner))
                 } else {
-                    (actionField[owner] as MutableList<Action?>).removeIf { action: Action? -> action is LeaderboardAction }
+                    (actionField[owner] as MutableList<*>).removeIf { action -> action is LeaderboardAction }
                 }
                 if (showStatistics) {
-                    (actionField[owner] as MutableList<Action?>).removeIf { action: Action? -> action is StatisticsAction }
+                    (actionField[owner] as MutableList<*>).removeIf { action -> action is StatisticsAction }
                     (actionField[owner] as MutableList<Action?>).add(StatisticsAction(owner))
                 } else {
-                    (actionField[owner] as MutableList<Action?>).removeIf { action: Action? -> action is StatisticsAction }
+                    (actionField[owner] as MutableList<*>).removeIf { action -> action is StatisticsAction }
                 }
             } catch (e: Exception) {
                 e.printStackTrace()

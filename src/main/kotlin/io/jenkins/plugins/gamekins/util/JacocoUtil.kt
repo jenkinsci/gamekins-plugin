@@ -227,11 +227,11 @@ object JacocoUtil {
 
     @JvmStatic
     fun calculateCurrentFilePath(workspace: FilePath, file: File, oldWorkspace: String): FilePath {
-        var oldWorkspace = oldWorkspace
-        if (!oldWorkspace.endsWith("/")) oldWorkspace += "/"
+        var oldWorkspacePath = oldWorkspace
+        if (!oldWorkspacePath.endsWith("/")) oldWorkspacePath += "/"
         var remote = workspace.remote
         if (!remote.endsWith("/")) remote += "/"
-        return FilePath(workspace.channel, file.absolutePath.replace(oldWorkspace, remote))
+        return FilePath(workspace.channel, file.absolutePath.replace(oldWorkspacePath, remote))
     }
 
     @JvmStatic
