@@ -185,6 +185,7 @@ class GameUserProperty : UserProperty() {
         return this
     }
 
+    @Extension
     class GameUserPropertyDescriptor : UserPropertyDescriptor(GameUserProperty::class.java) {
 
         /**
@@ -215,7 +216,6 @@ class GameUserProperty : UserProperty() {
     }
 
     companion object {
-        @Extension
         val DESCRIPTOR = GameUserPropertyDescriptor()
     }
 
