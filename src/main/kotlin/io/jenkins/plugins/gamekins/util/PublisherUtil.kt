@@ -13,10 +13,7 @@ object PublisherUtil {
         val files: List<FilePath>
         files = try {
             workspace.act(FilesOfAllSubDirectoriesCallable(workspace, "index.html"))
-        } catch (e: IOException) {
-            e.printStackTrace()
-            return false
-        } catch (e: InterruptedException) {
+        } catch (e: Exception) {
             e.printStackTrace()
             return false
         }
@@ -33,14 +30,12 @@ object PublisherUtil {
     fun doCheckJacocoCSVPath(workspace: FilePath, jacocoCSVPath: String): Boolean {
         var jacocoCSVPath = jacocoCSVPath
         if (jacocoCSVPath.startsWith("**")) jacocoCSVPath = jacocoCSVPath.substring(2)
-        val split = jacocoCSVPath.split("/".toRegex()).toTypedArray()
+        val split = jacocoCSVPath.split("/".toRegex())
         val files: List<FilePath>
         files = try {
             workspace.act(
                     FilesOfAllSubDirectoriesCallable(workspace, split[split.size - 1]))
-        } catch (ignored: IOException) {
-            return false
-        } catch (ignored: InterruptedException) {
+        } catch (ignored: Exception) {
             return false
         }
         for (file in files) {

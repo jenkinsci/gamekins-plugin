@@ -47,9 +47,7 @@ class MethodCoverageChallenge(classDetails: ClassDetails, branch: String, worksp
                     break
                 }
             }
-        } catch (e: IOException) {
-            e.printStackTrace(listener.logger)
-        } catch (e: InterruptedException) {
+        } catch (e: Exception) {
             e.printStackTrace(listener.logger)
         }
         return false
@@ -72,10 +70,7 @@ class MethodCoverageChallenge(classDetails: ClassDetails, branch: String, worksp
                     return method.missedLines > 0
                 }
             }
-        } catch (e: IOException) {
-            e.printStackTrace(listener.logger)
-            return false
-        } catch (e: InterruptedException) {
+        } catch (e: Exception) {
             e.printStackTrace(listener.logger)
             return false
         }

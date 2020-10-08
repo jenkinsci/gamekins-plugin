@@ -51,7 +51,7 @@ object GitUtil {
                         workspace.remote, GameUser(user), commitCount, commitHash, mapUsersToGameUsers(users)
                 )) as MutableSet<String>
         if (pathsToFiles.isNotEmpty()) {
-            pathsToFiles.removeIf { path: String -> listOf(*path.split("/".toRegex()).toTypedArray()).contains("test") }
+            pathsToFiles.removeIf { path: String -> path.split("/".toRegex()).contains("test") }
             pathsToFiles.removeIf { path: String -> !(path.contains(".java") || path.contains(".kt")) }
         }
         return pathsToFiles
@@ -66,7 +66,7 @@ object GitUtil {
                         workspace.remote, GameUser(user), commitCount, commitHash, mapUsersToGameUsers(users)
                 )) as MutableSet<String>
         if (pathsToFiles.isNotEmpty()) {
-            pathsToFiles.removeIf { path: String -> !listOf(*path.split("/".toRegex()).toTypedArray()).contains("test") }
+            pathsToFiles.removeIf { path: String -> !path.split("/".toRegex()).contains("test") }
             pathsToFiles.removeIf { path: String -> !(path.contains(".java") || path.contains(".kt")) }
         }
         return pathsToFiles
@@ -93,13 +93,13 @@ object GitUtil {
         var currentCommits = HashSet<RevCommit>()
         val searchedCommits = HashSet<RevCommit>()
         searchedCommits.add(targetCommit)
-        searchedCommits.addAll(listOf(*targetCommit.parents))
+        searchedCommits.addAll(targetCommit.parents)
         var nearToLeaf = true
         for (revCommit in targetCommit.parents) {
             val parents = revCommit.parents
             if (parents != null && parents.isNotEmpty()) {
                 nearToLeaf = false
-                searchedCommits.addAll(listOf(*parents))
+                searchedCommits.addAll(parents)
             }
         }
         currentCommits.add(headCommit)
@@ -112,10 +112,10 @@ object GitUtil {
                 val mapUser = mapUser(commit.authorIdent, users)
                 if (mapUser != null && mapUser == user) {
                     val diff = getDiffOfCommit(git, repo, commit)
-                    val lines = diff.split("\n".toRegex()).toTypedArray()
+                    val lines = diff.split("\n".toRegex())
                     for (line in lines) {
                         if (line.contains("diff --git")) {
-                            pathsToFiles.add(line.split(" ".toRegex()).toTypedArray()[2].substring(1))
+                            pathsToFiles.add(line.split(" ".toRegex())[2].substring(1))
                         }
                     }
                     countUserCommit++
@@ -177,9 +177,7 @@ object GitUtil {
     fun getBranch(workspace: FilePath): String {
         try {
             return workspace.act(BranchCallable(workspace.remote))
-        } catch (e: IOException) {
-            e.printStackTrace()
-        } catch (e: InterruptedException) {
+        } catch (e: Exception) {
             e.printStackTrace()
         }
         return ""
@@ -187,7 +185,7 @@ object GitUtil {
 
     @JvmStatic
     fun mapUser(ident: PersonIdent, users: Collection<User>): User? {
-        val split = ident.name.split(" ".toRegex()).toTypedArray()
+        val split = ident.name.split(" ".toRegex())
         for (user in users) {
             if (user.getProperty(Details::class.java) == null) continue
             val property = user.getProperty(GameUserProperty::class.java)
@@ -203,7 +201,7 @@ object GitUtil {
 
     @JvmStatic
     fun mapUser(ident: PersonIdent, users: ArrayList<GameUser>): GameUser? {
-        val split = ident.name.split(" ".toRegex()).toTypedArray()
+        val split = ident.name.split(" ".toRegex())
         for (user in users) {
             if (user.gitNames.contains(ident.name)
                     || user.fullName.contains(split[0]) && user.fullName.contains(split[split.size - 1])
@@ -240,19 +238,19 @@ object GitUtil {
             for (commit in currentCommits) {
                 searchedCommits.add(commit)
                 val diff = getDiffOfCommit(git, repo, commit)
-                val lines = diff.split("\n".toRegex()).toTypedArray()
+                val lines = diff.split("\n".toRegex())
                 for (i in lines.indices) {
                     val line = lines[i]
                     if (commit.shortMessage.toLowerCase().contains("merge")) break
                     //TODO: Shows diff of some merge requests, but not all
                     if (line.contains("diff --git") && i + 1 < lines.size && !lines[i + 1].contains("deleted")) {
-                        val path = line.split(" ".toRegex()).toTypedArray()[2].substring(1)
-                        val pathSplit = path.split("/".toRegex()).toTypedArray()
-                        if (listOf(*path.split("/".toRegex()).toTypedArray()).contains("test")
+                        val path = line.split(" ".toRegex())[2].substring(1)
+                        val pathSplit = path.split("/".toRegex())
+                        if (path.split("/".toRegex()).contains("test")
                                 || !(path.contains(".java") || path.contains(".kt"))) {
                             continue
                         }
-                        val classname = pathSplit[pathSplit.size - 1].split("\\.".toRegex()).toTypedArray()[0]
+                        val classname = pathSplit[pathSplit.size - 1].split("\\.".toRegex())[0]
                         var found = false
                         for (details in classes) {
                             if (details.className == classname) {

@@ -45,7 +45,7 @@ class Statistics(job: AbstractItem) {
                 val master = job.items.stream()
                         .filter { item: WorkflowJob -> item.name == "master" }.findFirst()
                 if (master.isPresent) {
-                    val list = ArrayList(master.get().builds)
+                    val list = master.get().builds
                     list.reverse()
                     for (workflowRun in list) {
                         entries.add(RunEntry(
@@ -62,7 +62,7 @@ class Statistics(job: AbstractItem) {
                     var count = 0
                     for (workflowJob in job.items) {
                         if (count >= Companion.RUN_TOTAL_COUNT) break
-                        val list = ArrayList(workflowJob.builds)
+                        val list = workflowJob.builds
                         list.reverse()
                         for (workflowRun in list) {
                             if (count >= Companion.RUN_TOTAL_COUNT) break
@@ -81,7 +81,7 @@ class Statistics(job: AbstractItem) {
                 }
             }
             is WorkflowJob -> {
-                val list = ArrayList(job.builds)
+                val list = job.builds
                 list.reverse()
                 for (workflowRun in list) {
                     entries.add(RunEntry(
@@ -96,7 +96,7 @@ class Statistics(job: AbstractItem) {
                 }
             }
             is AbstractProject<*, *> -> {
-                val list = ArrayList(job.builds)
+                val list = job.builds
                 list.reverse()
                 for (abstractBuild in list) {
                     entries.add(RunEntry(
@@ -135,8 +135,7 @@ class Statistics(job: AbstractItem) {
             is WorkflowMultiBranchProject -> {
                 for (workflowJob in job.items) {
                     if (workflowJob.name == branch) {
-                        val list = ArrayList(workflowJob.builds)
-                        for (workflowRun in list) {
+                        for (workflowRun in workflowJob.builds) {
                             if (workflowRun.getNumber() == number) {
                                 runEntries.add(RunEntry(
                                         workflowRun.getNumber(),
@@ -154,8 +153,7 @@ class Statistics(job: AbstractItem) {
                 }
             }
             is WorkflowJob -> {
-                val list = ArrayList(job.builds)
-                for (workflowRun in list) {
+                for (workflowRun in job.builds) {
                     if (workflowRun.getNumber() == number) {
                         runEntries.add(RunEntry(
                                 workflowRun.getNumber(),
@@ -171,8 +169,7 @@ class Statistics(job: AbstractItem) {
                 }
             }
             is AbstractProject<*, *> -> {
-                val list = ArrayList(job.builds)
-                for (abstractBuild in list) {
+                for (abstractBuild in job.builds) {
                     if (abstractBuild.getNumber() == number) {
                         runEntries.add(RunEntry(
                                 abstractBuild.getNumber(),

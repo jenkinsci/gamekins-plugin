@@ -86,13 +86,8 @@ object ChallengeFactory {
         document = try {
             generateDocument(calculateCurrentFilePath(workspace,
                     classDetails.jacocoSourceFile, classDetails.workspace))
-        } catch (e: IOException) {
-            listener.logger.println("[Gamekins] IOException with JaCoCoSourceFile "
-                    + classDetails.jacocoSourceFile.absolutePath)
-            e.printStackTrace(listener.logger)
-            throw e
-        } catch (e: InterruptedException) {
-            listener.logger.println("[Gamekins] IOException with JaCoCoSourceFile "
+        } catch (e: Exception) {
+            listener.logger.println("[Gamekins] Exception with JaCoCoSourceFile "
                     + classDetails.jacocoSourceFile.absolutePath)
             e.printStackTrace(listener.logger)
             throw e

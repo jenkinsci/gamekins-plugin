@@ -34,10 +34,7 @@ class ClassCoverageChallenge(classDetails: ClassDetails, branch: String, workspa
                 return false
             }
             generateDocument(jacocoSourceFile)
-        } catch (e: IOException) {
-            e.printStackTrace(listener.logger)
-            return false
-        } catch (e: InterruptedException) {
+        } catch (e: Exception) {
             e.printStackTrace(listener.logger)
             return false
         }
@@ -64,10 +61,7 @@ class ClassCoverageChallenge(classDetails: ClassDetails, branch: String, workspa
                 return true
             }
             generateDocument(jacocoSourceFile)
-        } catch (e: IOException) {
-            e.printStackTrace(listener.logger)
-            return false
-        } catch (e: InterruptedException) {
+        } catch (e: Exception) {
             e.printStackTrace(listener.logger)
             return false
         }

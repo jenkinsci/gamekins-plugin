@@ -32,9 +32,7 @@ class TestChallenge(private val currentCommit: String, private val testCount: In
                 this.testCountSolved = testCountSolved
                 return true
             }
-        } catch (e: IOException) {
-            e.printStackTrace(listener.logger)
-        } catch (e: InterruptedException) {
+        } catch (e: Exception) {
             e.printStackTrace(listener.logger)
         }
         return false

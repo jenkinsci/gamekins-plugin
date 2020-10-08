@@ -56,11 +56,7 @@ object PropertyUtil {
                 } else {
                     (actionField[owner] as MutableList<Action?>).removeIf { action: Action? -> action is StatisticsAction }
                 }
-            } catch (e: NoSuchFieldException) {
-                e.printStackTrace()
-            } catch (e: IllegalAccessException) {
-                e.printStackTrace()
-            } catch (e: InstantiationException) {
+            } catch (e: Exception) {
                 e.printStackTrace()
             }
             /*try {

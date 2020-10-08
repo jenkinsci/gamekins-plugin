@@ -46,8 +46,8 @@ class GameUserProperty : UserProperty() {
             return builder.substring(0, builder.length - 1)
         }
         set(names) {
-            val split = names.split("\n".toRegex()).toTypedArray()
-            gitNames = CopyOnWriteArraySet(listOf(*split))
+            val split = names.split("\n".toRegex())
+            gitNames = CopyOnWriteArraySet(split)
         }
 
     fun getGitNames(): CopyOnWriteArraySet<String> {

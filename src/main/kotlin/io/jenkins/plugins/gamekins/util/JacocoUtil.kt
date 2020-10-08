@@ -24,10 +24,7 @@ object JacocoUtil {
         val files: ArrayList<FilePath>
         files = try {
             workspace.act(FilesOfAllSubDirectoriesCallable(workspace, csvName))
-        } catch (e: IOException) {
-            e.printStackTrace()
-            return 0.0
-        } catch (e: InterruptedException) {
+        } catch (e: Exception) {
             e.printStackTrace()
             return 0.0
         }
@@ -95,9 +92,7 @@ object JacocoUtil {
                 testCount += elements.first().attr("tests").toInt()
             }
             return testCount
-        } catch (e: IOException) {
-            e.printStackTrace()
-        } catch (e: InterruptedException) {
+        } catch (e: Exception) {
             e.printStackTrace()
         }
         return 0
@@ -113,9 +108,7 @@ object JacocoUtil {
                     if (path.name.matches(Regex(regex))) files.add(path)
                 }
             }
-        } catch (ignored: IOException) {
-            return ArrayList()
-        } catch (ignored: InterruptedException) {
+        } catch (ignored: Exception) {
             return ArrayList()
         }
         return files
@@ -206,7 +199,7 @@ object JacocoUtil {
     }
 
     fun computePackageName(shortFilePath: String): String {
-        val pathSplit = ArrayList(listOf(*shortFilePath.split("/".toRegex()).toTypedArray()))
+        val pathSplit = shortFilePath.split("/".toRegex())
         var packageName = StringBuilder()
         for (i in pathSplit.size - 2 downTo 0) {
             if ((pathSplit[i] == "src" || pathSplit[i] == "main" || pathSplit[i] == "java")
@@ -304,9 +297,9 @@ object JacocoUtil {
         }
 
         init {
-            val pathSplit = ArrayList(listOf(*shortFilePath.split("/".toRegex()).toTypedArray()))
-            className = pathSplit[pathSplit.size - 1].split("\\.".toRegex()).toTypedArray()[0]
-            this.extension = pathSplit[pathSplit.size - 1].split("\\.".toRegex()).toTypedArray()[1]
+            val pathSplit = shortFilePath.split("/".toRegex())
+            className = pathSplit[pathSplit.size - 1].split("\\.".toRegex())[0]
+            this.extension = pathSplit[pathSplit.size - 1].split("\\.".toRegex())[1]
             packageName = computePackageName(shortFilePath)
             val jacocoPath = StringBuilder(workspace.remote)
             var i = 0

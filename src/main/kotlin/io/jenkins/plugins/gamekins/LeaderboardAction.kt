@@ -16,6 +16,7 @@ import java.util.concurrent.CopyOnWriteArrayList
 import javax.annotation.Nonnull
 
 class LeaderboardAction(val job: AbstractItem) : ProminentProjectAction, Describable<LeaderboardAction> {
+
     override fun getIconFileName(): String {
         return "document.png"
     }

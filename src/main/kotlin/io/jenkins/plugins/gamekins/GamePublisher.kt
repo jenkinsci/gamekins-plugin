@@ -233,10 +233,7 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
                     + " last changed files with existing coverage reports")
             classes.sortWith(Comparator.comparingDouble(ClassDetails::coverage))
             classes.reverse()
-        } catch (e: IOException) {
-            e.printStackTrace(listener.logger)
-            return
-        } catch (e: InterruptedException) {
+        } catch (e: Exception) {
             e.printStackTrace(listener.logger)
             return
         }
@@ -260,9 +257,7 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
                             user.save()
                         }
                     }
-                } catch (e: IOException) {
-                    e.printStackTrace(listener.logger)
-                } catch (e: InterruptedException) {
+                } catch (e: Exception) {
                     e.printStackTrace(listener.logger)
                 }
                 listener.logger.println("[Gamekins] Start checking solved status of challenges for user "
@@ -327,9 +322,7 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
                             property.newChallenge(constants["projectName"]!!, challenge)
                             listener.logger.println("[Gamekins] Added challenge $challenge")
                             generated++
-                        } catch (e: IOException) {
-                            e.printStackTrace(listener.logger)
-                        } catch (e: InterruptedException) {
+                        } catch (e: Exception) {
                             e.printStackTrace(listener.logger)
                         }
                     }
@@ -370,9 +363,9 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
                                     getProjectCoverage(workspace,
                                             constants["jacocoCSVPath"]!!
                                                     .split("/".toRegex())
-                                                    .toTypedArray()[constants["jacocoCSVPath"]!!
+                                                    [constants["jacocoCSVPath"]!!
                                                     .split("/".toRegex())
-                                                    .toTypedArray().size - 1])
+                                                    .size - 1])
                             ), listener)
             try {
                 property.getOwner().save()
