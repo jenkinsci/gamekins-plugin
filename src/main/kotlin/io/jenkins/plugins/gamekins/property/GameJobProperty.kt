@@ -66,7 +66,7 @@ class GameJobProperty
     }
 
     override fun getStatistics(): Statistics {
-        if (statistics.isNotFullyInitialized) {
+        if (statistics.isNotFullyInitialized()) {
             statistics = Statistics(owner)
         }
         return statistics
