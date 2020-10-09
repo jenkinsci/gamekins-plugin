@@ -9,10 +9,10 @@ import io.jenkins.plugins.gamekins.util.JacocoUtil.generateDocument
 abstract class CoverageChallenge(val classDetails: ClassDetails, val branch: String, workspace: FilePath?)
     : Challenge {
 
-    val fullyCoveredLines: Int
-    val partiallyCoveredLines: Int
-    val notCoveredLines: Int
     val coverage: Double
+    val fullyCoveredLines: Int
+    val notCoveredLines: Int
+    val partiallyCoveredLines: Int
     var solvedCoverage = 0.0
     //TODO: Fix
     @get:JvmName("getCreated_") val created = System.currentTimeMillis()
@@ -22,11 +22,12 @@ abstract class CoverageChallenge(val classDetails: ClassDetails, val branch: Str
         return created
     }
 
+    abstract fun getName(): String
+
     override fun getSolved(): Long {
         return solved
     }
 
-    abstract fun getName(): String
 
     override fun printToXML(reason: String, indentation: String): String {
         var print = (indentation + "<" + getName() + " created=\"" + created + "\" solved=\"" + solved

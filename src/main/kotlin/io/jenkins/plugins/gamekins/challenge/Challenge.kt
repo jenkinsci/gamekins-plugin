@@ -7,15 +7,15 @@ import java.util.*
 
 interface Challenge {
 
-    fun isSolved(constants: HashMap<String, String>, run: Run<*, *>, listener: TaskListener, workspace: FilePath): Boolean
-
-    fun isSolvable(constants: HashMap<String, String>, run: Run<*, *>, listener: TaskListener, workspace: FilePath): Boolean
+    fun getCreated(): Long
 
     fun getScore(): Int
 
-    fun getCreated(): Long
-
     fun getSolved(): Long
+
+    fun isSolvable(constants: HashMap<String, String>, run: Run<*, *>, listener: TaskListener, workspace: FilePath): Boolean
+
+    fun isSolved(constants: HashMap<String, String>, run: Run<*, *>, listener: TaskListener, workspace: FilePath): Boolean
 
     fun printToXML(reason: String, indentation: String): String?
 

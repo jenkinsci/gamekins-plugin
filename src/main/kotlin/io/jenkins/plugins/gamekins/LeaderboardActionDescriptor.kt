@@ -13,18 +13,6 @@ import javax.annotation.Nonnull
 
 @Extension
 class LeaderboardActionDescriptor : Descriptor<LeaderboardAction>(LeaderboardAction::class.java) {
-    /**
-     * Human readable name of this kind of configurable object.
-     * Should be overridden for most descriptors, if the display name is visible somehow.
-     * As a fallback it uses [Class.getSimpleName] on [.clazz], so for example `MyThing`
-     * from `some.pkg.MyThing.DescriptorImpl`.
-     * Historically some implementations returned null as a way of hiding the descriptor from the UI,
-     * but this is generally managed by an explicit method such as `isEnabled` or `isApplicable`.
-     */
-    @Nonnull
-    override fun getDisplayName(): String {
-        return super.getDisplayName()
-    }
 
     fun doRejectChallenge(@AncestorInPath job: AbstractItem, @QueryParameter reject: String,
                           @QueryParameter reason: String): FormValidation {
@@ -52,6 +40,19 @@ class LeaderboardActionDescriptor : Descriptor<LeaderboardAction>(LeaderboardAct
             return FormValidation.error("Unexpected error")
         }
         return FormValidation.ok("Challenge rejected")
+    }
+
+    /**
+     * Human readable name of this kind of configurable object.
+     * Should be overridden for most descriptors, if the display name is visible somehow.
+     * As a fallback it uses [Class.getSimpleName] on [.clazz], so for example `MyThing`
+     * from `some.pkg.MyThing.DescriptorImpl`.
+     * Historically some implementations returned null as a way of hiding the descriptor from the UI,
+     * but this is generally managed by an explicit method such as `isEnabled` or `isApplicable`.
+     */
+    @Nonnull
+    override fun getDisplayName(): String {
+        return super.getDisplayName()
     }
 
     init {

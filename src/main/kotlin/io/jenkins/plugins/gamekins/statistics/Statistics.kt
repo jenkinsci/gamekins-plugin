@@ -9,33 +9,81 @@ import java.text.Collator
 import java.util.*
 
 class Statistics(job: AbstractItem) {
+
+    private var fullyInitialized: Boolean = false
     private val projectName: String = job.name
     private val runEntries: ArrayList<RunEntry>?
-    private var fullyInitialized: Boolean = false
-    val isNotFullyInitialized: Boolean
-        get() = !fullyInitialized || runEntries == null
 
-    fun printToXML(): String {
-        val print = StringBuilder()
-        print.append("<Statistics project=\"").append(projectName).append("\">\n")
-        val users: ArrayList<User> = ArrayList<User>(User.getAll())
-        users.removeIf { user: User -> !user.getProperty(GameUserProperty::class.java).isParticipating(projectName) }
-        print.append("    <Users count=\"").append(users.size).append("\">\n")
-        for (user in users) {
-            val property = user.getProperty(GameUserProperty::class.java)
-            if (property != null && property.isParticipating(projectName)) {
-                print.append(property.printToXML(projectName, "        ")).append("\n")
+    private fun addPreviousEntries(job: AbstractItem, branch: String, number: Int, listener: TaskListener) {
+        if (number <= 0) return
+        for (entry in runEntries!!) {
+            if (entry.branch == branch && entry.runNumber == number) return
+        }
+        addPreviousEntries(job, branch, number - 1, listener)
+        if (runEntries.size > 0) {
+            listener.logger.println(runEntries[runEntries.size - 1].printToXML(""))
+        }
+        when (job) {
+            is WorkflowMultiBranchProject -> {
+                for (workflowJob in job.items) {
+                    if (workflowJob.name == branch) {
+                        for (workflowRun in workflowJob.builds) {
+                            if (workflowRun.getNumber() == number) {
+                                runEntries.add(RunEntry(
+                                        workflowRun.getNumber(),
+                                        workflowJob.name,
+                                        workflowRun.result,
+                                        workflowRun.startTimeInMillis,
+                                        0,
+                                        0,
+                                        JacocoUtil.getTestCount(null, workflowRun),
+                                        0.0))
+                                return
+                            }
+                        }
+                    }
+                }
+            }
+            is WorkflowJob -> {
+                for (workflowRun in job.builds) {
+                    if (workflowRun.getNumber() == number) {
+                        runEntries.add(RunEntry(
+                                workflowRun.getNumber(),
+                                "",
+                                workflowRun.result,
+                                workflowRun.startTimeInMillis,
+                                0,
+                                0,
+                                JacocoUtil.getTestCount(null, workflowRun),
+                                0.0))
+                        return
+                    }
+                }
+            }
+            is AbstractProject<*, *> -> {
+                for (abstractBuild in job.builds) {
+                    if (abstractBuild.getNumber() == number) {
+                        runEntries.add(RunEntry(
+                                abstractBuild.getNumber(),
+                                "",
+                                abstractBuild.result,
+                                abstractBuild.startTimeInMillis,
+                                0,
+                                0,
+                                JacocoUtil.getTestCount(null, abstractBuild),
+                                0.0))
+                        return
+                    }
+                }
             }
         }
-        print.append("    </Users>\n")
-        runEntries!!.removeIf { obj: RunEntry? -> Objects.isNull(obj) }
-        print.append("    <Runs count=\"").append(runEntries.size).append("\">\n")
-        for (entry in runEntries) {
-            print.append(entry.printToXML("        ")).append("\n")
-        }
-        print.append("    </Runs>\n")
-        print.append("</Statistics>")
-        return print.toString()
+    }
+
+    fun addRunEntry(job: AbstractItem, branch: String, entry: RunEntry, listener: TaskListener) {
+        addPreviousEntries(job, branch, entry.runNumber - 1, listener)
+        runEntries!!.add(entry)
+        listener.logger.println(entry.printToXML(""))
+        runEntries.sortWith(Comparator { obj: RunEntry, o: RunEntry -> obj.compareTo(o) })
     }
 
     private fun generateRunEntries(job: AbstractItem): ArrayList<RunEntry> {
@@ -115,76 +163,31 @@ class Statistics(job: AbstractItem) {
         return entries
     }
 
-    fun addRunEntry(job: AbstractItem, branch: String, entry: RunEntry, listener: TaskListener) {
-        addPreviousEntries(job, branch, entry.runNumber - 1, listener)
-        runEntries!!.add(entry)
-        listener.logger.println(entry.printToXML(""))
-        runEntries.sortWith(Comparator { obj: RunEntry, o: RunEntry -> obj.compareTo(o) })
+    fun isNotFullyInitialized(): Boolean {
+        return !fullyInitialized || runEntries == null
     }
 
-    private fun addPreviousEntries(job: AbstractItem, branch: String, number: Int, listener: TaskListener) {
-        if (number <= 0) return
-        for (entry in runEntries!!) {
-            if (entry.branch == branch && entry.runNumber == number) return
-        }
-        addPreviousEntries(job, branch, number - 1, listener)
-        if (runEntries.size > 0) {
-            listener.logger.println(runEntries[runEntries.size - 1].printToXML(""))
-        }
-        when (job) {
-            is WorkflowMultiBranchProject -> {
-                for (workflowJob in job.items) {
-                    if (workflowJob.name == branch) {
-                        for (workflowRun in workflowJob.builds) {
-                            if (workflowRun.getNumber() == number) {
-                                runEntries.add(RunEntry(
-                                        workflowRun.getNumber(),
-                                        workflowJob.name,
-                                        workflowRun.result,
-                                        workflowRun.startTimeInMillis,
-                                        0,
-                                        0,
-                                        JacocoUtil.getTestCount(null, workflowRun),
-                                        0.0))
-                                return
-                            }
-                        }
-                    }
-                }
-            }
-            is WorkflowJob -> {
-                for (workflowRun in job.builds) {
-                    if (workflowRun.getNumber() == number) {
-                        runEntries.add(RunEntry(
-                                workflowRun.getNumber(),
-                                "",
-                                workflowRun.result,
-                                workflowRun.startTimeInMillis,
-                                0,
-                                0,
-                                JacocoUtil.getTestCount(null, workflowRun),
-                                0.0))
-                        return
-                    }
-                }
-            }
-            is AbstractProject<*, *> -> {
-                for (abstractBuild in job.builds) {
-                    if (abstractBuild.getNumber() == number) {
-                        runEntries.add(RunEntry(
-                                abstractBuild.getNumber(),
-                                "",
-                                abstractBuild.result,
-                                abstractBuild.startTimeInMillis,
-                                0,
-                                0,
-                                JacocoUtil.getTestCount(null, abstractBuild),
-                                0.0))
-                        return
-                    }
-                }
+    fun printToXML(): String {
+        val print = StringBuilder()
+        print.append("<Statistics project=\"").append(projectName).append("\">\n")
+        val users: ArrayList<User> = ArrayList<User>(User.getAll())
+        users.removeIf { user: User -> !user.getProperty(GameUserProperty::class.java).isParticipating(projectName) }
+        print.append("    <Users count=\"").append(users.size).append("\">\n")
+        for (user in users) {
+            val property = user.getProperty(GameUserProperty::class.java)
+            if (property != null && property.isParticipating(projectName)) {
+                print.append(property.printToXML(projectName, "        ")).append("\n")
             }
         }
+        print.append("    </Users>\n")
+        runEntries!!.removeIf { obj: RunEntry? -> Objects.isNull(obj) }
+        print.append("    <Runs count=\"").append(runEntries.size).append("\">\n")
+        for (entry in runEntries) {
+            print.append(entry.printToXML("        ")).append("\n")
+        }
+        print.append("    </Runs>\n")
+        print.append("</Statistics>")
+        return print.toString()
     }
 
     class RunEntry(val runNumber: Int, val branch: String, val result: Result?, val startTime: Long,

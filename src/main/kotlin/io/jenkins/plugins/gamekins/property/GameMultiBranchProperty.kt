@@ -26,11 +26,13 @@ class GameMultiBranchProperty
                                   @set:DataBoundSetter var showStatistics: Boolean)
     : AbstractFolderProperty<AbstractFolder<*>?>(), GameProperty {
 
-    private val teams: ArrayList<String> = ArrayList()
     private var statistics: Statistics
+    private val teams: ArrayList<String> = ArrayList()
 
-    override fun getTeams(): ArrayList<String> {
-        return teams
+    @Throws(IOException::class)
+    override fun addTeam(teamName: String) {
+        teams.add(teamName)
+        owner!!.save()
     }
 
     override fun getStatistics(): Statistics {
@@ -40,16 +42,8 @@ class GameMultiBranchProperty
         return statistics
     }
 
-    @Throws(IOException::class)
-    override fun addTeam(teamName: String) {
-        teams.add(teamName)
-        owner!!.save()
-    }
-
-    @Throws(IOException::class)
-    override fun removeTeam(teamName: String) {
-        teams.remove(teamName)
-        owner!!.save()
+    override fun getTeams(): ArrayList<String> {
+        return teams
     }
 
     override fun reconfigure(req: StaplerRequest, form: JSONObject?): AbstractFolderProperty<*> {
@@ -59,6 +53,12 @@ class GameMultiBranchProperty
         return this
     }
 
+    @Throws(IOException::class)
+    override fun removeTeam(teamName: String) {
+        teams.remove(teamName)
+        owner!!.save()
+    }
+
     /**
      * Cannot be outsourced in separate class, because the constructor of [AbstractFolderPropertyDescriptor]
      * does not take the base class.
@@ -66,27 +66,27 @@ class GameMultiBranchProperty
     @Extension
     class GameMultiBranchPropertyDescriptor : AbstractFolderPropertyDescriptor() {
 
-        @Nonnull
-        override fun getDisplayName(): String {
-            return "Set the activation of the Gamekins plugin."
-        }
-
-        override fun isApplicable(containerType: Class<out AbstractFolder<*>?>): Boolean {
-            return containerType == WorkflowMultiBranchProject::class.java
-        }
-
-        override fun newInstance(req: StaplerRequest?, formData: JSONObject): AbstractFolderProperty<*>? {
-            return if (req == null || req.findAncestor(AbstractItem::class.java).getObject() == null) null
-            else GameMultiBranchProperty(req.findAncestor(AbstractItem::class.java).getObject() as AbstractItem,
-                    formData.getBoolean("activated"), formData.getBoolean("showStatistics"))
-        }
-
         fun doAddTeam(@AncestorInPath job: WorkflowMultiBranchProject?,
                       @QueryParameter teamName: String): FormValidation {
             if (job == null) return FormValidation.error("Unexpected error: Parent job is null")
             if (teamName.isEmpty()) return FormValidation.error("Insert a name for the team")
             val property = job.properties[this] as GameMultiBranchProperty
             val validation = doAddTeam(property, teamName)
+            save()
+            return validation
+        }
+
+        fun doAddUserToTeam(@AncestorInPath job: WorkflowMultiBranchProject?,
+                            @QueryParameter teamsBox: String?, @QueryParameter usersBox: String?): FormValidation {
+            return PropertyUtil.doAddUserToTeam(job, teamsBox!!, usersBox!!)
+        }
+
+        fun doDeleteTeam(@AncestorInPath job: WorkflowMultiBranchProject?,
+                         @QueryParameter teamsBox: String?): FormValidation {
+            if (job == null) return FormValidation.error("Unexpected error: Parent job is null")
+            val projectName = job.name
+            val property = job.properties[this] as GameMultiBranchProperty
+            val validation = doDeleteTeam(projectName, property, teamsBox!!)
             save()
             return validation
         }
@@ -102,24 +102,24 @@ class GameMultiBranchProperty
             return doFillUsersBoxItems(job.name)
         }
 
-        fun doAddUserToTeam(@AncestorInPath job: WorkflowMultiBranchProject?,
-                            @QueryParameter teamsBox: String?, @QueryParameter usersBox: String?): FormValidation {
-            return PropertyUtil.doAddUserToTeam(job, teamsBox!!, usersBox!!)
-        }
-
         fun doRemoveUserFromTeam(@AncestorInPath job: WorkflowMultiBranchProject?, @QueryParameter teamsBox: String?,
                                  @QueryParameter usersBox: String?): FormValidation {
             return PropertyUtil.doRemoveUserFromTeam(job, teamsBox!!, usersBox!!)
         }
 
-        fun doDeleteTeam(@AncestorInPath job: WorkflowMultiBranchProject?,
-                         @QueryParameter teamsBox: String?): FormValidation {
-            if (job == null) return FormValidation.error("Unexpected error: Parent job is null")
-            val projectName = job.name
-            val property = job.properties[this] as GameMultiBranchProperty
-            val validation = doDeleteTeam(projectName, property, teamsBox!!)
-            save()
-            return validation
+        @Nonnull
+        override fun getDisplayName(): String {
+            return "Set the activation of the Gamekins plugin."
+        }
+
+        override fun isApplicable(containerType: Class<out AbstractFolder<*>?>): Boolean {
+            return containerType == WorkflowMultiBranchProject::class.java
+        }
+
+        override fun newInstance(req: StaplerRequest?, formData: JSONObject): AbstractFolderProperty<*>? {
+            return if (req == null || req.findAncestor(AbstractItem::class.java).getObject() == null) null
+            else GameMultiBranchProperty(req.findAncestor(AbstractItem::class.java).getObject() as AbstractItem,
+                    formData.getBoolean("activated"), formData.getBoolean("showStatistics"))
         }
 
         init {

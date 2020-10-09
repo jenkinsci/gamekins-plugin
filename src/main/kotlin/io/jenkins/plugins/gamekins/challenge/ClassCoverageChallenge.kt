@@ -15,6 +15,35 @@ import java.util.*
 class ClassCoverageChallenge(classDetails: ClassDetails, branch: String, workspace: FilePath?)
     : CoverageChallenge(classDetails, branch, workspace) {
 
+    override fun getName(): String {
+        return "ClassCoverageChallenge"
+    }
+
+    override fun getScore(): Int {
+        return if (coverage >= 0.8) 2 else 1
+    }
+
+    override fun isSolvable(constants: HashMap<String, String>, run: Run<*, *>, listener: TaskListener,
+                            workspace: FilePath): Boolean {
+        if (branch != constants["branch"]) return true
+        val jacocoSourceFile = calculateCurrentFilePath(workspace,
+                classDetails.jacocoSourceFile, classDetails.workspace)
+        val document: Document
+        document = try {
+            if (!jacocoSourceFile.exists()) {
+                listener.logger.println("[Gamekins] JaCoCo source file "
+                        + jacocoSourceFile.remote + " exists " + jacocoSourceFile.exists())
+                return true
+            }
+            generateDocument(jacocoSourceFile)
+        } catch (e: Exception) {
+            e.printStackTrace(listener.logger)
+            return false
+        }
+        return !(calculateCoveredLines(document, "pc") == 0
+                && calculateCoveredLines(document, "nc") == 0)
+    }
+
     override fun isSolved(constants: HashMap<String, String>, run: Run<*, *>, listener: TaskListener,
                           workspace: FilePath): Boolean {
         val jacocoSourceFile = getJacocoFileInMultiBranchProject(run, constants,
@@ -45,35 +74,6 @@ class ClassCoverageChallenge(classDetails: ClassDetails, branch: String, workspa
             return true
         }
         return false
-    }
-
-    override fun isSolvable(constants: HashMap<String, String>, run: Run<*, *>, listener: TaskListener,
-                            workspace: FilePath): Boolean {
-        if (branch != constants["branch"]) return true
-        val jacocoSourceFile = calculateCurrentFilePath(workspace,
-                classDetails.jacocoSourceFile, classDetails.workspace)
-        val document: Document
-        document = try {
-            if (!jacocoSourceFile.exists()) {
-                listener.logger.println("[Gamekins] JaCoCo source file "
-                        + jacocoSourceFile.remote + " exists " + jacocoSourceFile.exists())
-                return true
-            }
-            generateDocument(jacocoSourceFile)
-        } catch (e: Exception) {
-            e.printStackTrace(listener.logger)
-            return false
-        }
-        return !(calculateCoveredLines(document, "pc") == 0
-                && calculateCoveredLines(document, "nc") == 0)
-    }
-
-    override fun getScore(): Int {
-        return if (coverage >= 0.8) 2 else 1
-    }
-
-    override fun getName(): String {
-        return "ClassCoverageChallenge"
     }
 
     override fun toString(): String {

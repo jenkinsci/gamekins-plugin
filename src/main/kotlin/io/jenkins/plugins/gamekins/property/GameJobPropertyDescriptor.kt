@@ -20,6 +20,44 @@ import javax.annotation.Nonnull
 @Extension
 class GameJobPropertyDescriptor : JobPropertyDescriptor(GameJobProperty::class.java) {
 
+    fun doAddTeam(@AncestorInPath job: Job<*, *>?, @QueryParameter teamName: String): FormValidation {
+        if (teamName.isEmpty()) return FormValidation.error("Insert a name for the team")
+        val property = if (job == null) null else job.properties[this] as GameJobProperty?
+        val validation = doAddTeam(property, teamName)
+        save()
+        return validation
+    }
+
+    fun doAddUserToTeam(@AncestorInPath job: Job<*, *>?, @QueryParameter teamsBox: String?,
+                        @QueryParameter usersBox: String?): FormValidation {
+        return PropertyUtil.doAddUserToTeam(job, teamsBox!!, usersBox!!)
+    }
+
+    fun doDeleteTeam(@AncestorInPath job: Job<*, *>?, @QueryParameter teamsBox: String?): FormValidation {
+        if (job == null) return FormValidation.error("Unexpected error: Parent job is null")
+        val projectName = job.name
+        val property = job.properties[this] as GameJobProperty
+        val validation = doDeleteTeam(projectName, property, teamsBox!!)
+        save()
+        return validation
+    }
+
+    fun doFillTeamsBoxItems(@AncestorInPath job: Job<*, *>?): ListBoxModel {
+        val property = if (job == null) null else job.properties[this] as GameJobProperty?
+        return doFillTeamsBoxItems(property)
+    }
+
+    fun doFillUsersBoxItems(@AncestorInPath job: Job<*, *>?): ListBoxModel {
+        return if (job == null) ListBoxModel() else doFillUsersBoxItems(job.name)
+    }
+
+
+
+    fun doRemoveUserFromTeam(@AncestorInPath job: Job<*, *>?, @QueryParameter teamsBox: String?,
+                             @QueryParameter usersBox: String?): FormValidation {
+        return PropertyUtil.doRemoveUserFromTeam(job, teamsBox!!, usersBox!!)
+    }
+
     @Nonnull
     override fun getDisplayName(): String {
         return "Set the activation of the Gamekins plugin."
@@ -34,42 +72,6 @@ class GameJobPropertyDescriptor : JobPropertyDescriptor(GameJobProperty::class.j
         return if (req == null || req.findAncestor(AbstractItem::class.java).getObject() == null) null
         else GameJobProperty(req.findAncestor(AbstractItem::class.java).getObject() as AbstractItem,
                 formData.getBoolean("activated"), formData.getBoolean("showStatistics"))
-    }
-
-    fun doAddTeam(@AncestorInPath job: Job<*, *>?, @QueryParameter teamName: String): FormValidation {
-        if (teamName.isEmpty()) return FormValidation.error("Insert a name for the team")
-        val property = if (job == null) null else job.properties[this] as GameJobProperty?
-        val validation = doAddTeam(property, teamName)
-        save()
-        return validation
-    }
-
-    fun doFillTeamsBoxItems(@AncestorInPath job: Job<*, *>?): ListBoxModel {
-        val property = if (job == null) null else job.properties[this] as GameJobProperty?
-        return doFillTeamsBoxItems(property)
-    }
-
-    fun doFillUsersBoxItems(@AncestorInPath job: Job<*, *>?): ListBoxModel {
-        return if (job == null) ListBoxModel() else doFillUsersBoxItems(job.name)
-    }
-
-    fun doAddUserToTeam(@AncestorInPath job: Job<*, *>?, @QueryParameter teamsBox: String?,
-                        @QueryParameter usersBox: String?): FormValidation {
-        return PropertyUtil.doAddUserToTeam(job, teamsBox!!, usersBox!!)
-    }
-
-    fun doRemoveUserFromTeam(@AncestorInPath job: Job<*, *>?, @QueryParameter teamsBox: String?,
-                             @QueryParameter usersBox: String?): FormValidation {
-        return PropertyUtil.doRemoveUserFromTeam(job, teamsBox!!, usersBox!!)
-    }
-
-    fun doDeleteTeam(@AncestorInPath job: Job<*, *>?, @QueryParameter teamsBox: String?): FormValidation {
-        if (job == null) return FormValidation.error("Unexpected error: Parent job is null")
-        val projectName = job.name
-        val property = job.properties[this] as GameJobProperty
-        val validation = doDeleteTeam(projectName, property, teamsBox!!)
-        save()
-        return validation
     }
 
     init {

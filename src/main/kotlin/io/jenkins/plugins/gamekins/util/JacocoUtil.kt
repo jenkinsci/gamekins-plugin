@@ -20,34 +20,43 @@ import java.util.*
 object JacocoUtil {
 
     @JvmStatic
-    fun getProjectCoverage(workspace: FilePath, csvName: String): Double {
-        val files: ArrayList<FilePath>
-        files = try {
-            workspace.act(FilesOfAllSubDirectoriesCallable(workspace, csvName))
-        } catch (e: Exception) {
-            e.printStackTrace()
-            return 0.0
-        }
-        var instructionCount = 0
-        var coveredInstructionCount = 0
-        for (file in files) {
-            try {
-                val content = file.readToString()
-                val lines = content.split("\n".toRegex()).filter { line -> line.isNotEmpty() }
-                for (coverageLine in lines) {
-                    //TODO: Improve
-                    val entries = coverageLine.split(",".toRegex())
-                    if (entries[2] != "CLASS") {
-                        coveredInstructionCount += entries[4].toDouble().toInt()
-                        instructionCount += (entries[3].toDouble() + entries[4].toDouble()).toInt()
-                    }
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }
+    fun calculateCoveredLines(document: Document, modifier: String): Int {
+        val elements = document.select("span.$modifier")
+        return elements.size
+    }
 
-        return coveredInstructionCount / instructionCount.toDouble()
+    @JvmStatic
+    fun calculateCurrentFilePath(workspace: FilePath, file: File): FilePath {
+        return FilePath(workspace.channel, file.absolutePath)
+    }
+
+    @JvmStatic
+    fun calculateCurrentFilePath(workspace: FilePath, file: File, oldWorkspace: String): FilePath {
+        var oldWorkspacePath = oldWorkspace
+        if (!oldWorkspacePath.endsWith("/")) oldWorkspacePath += "/"
+        var remote = workspace.remote
+        if (!remote.endsWith("/")) remote += "/"
+        return FilePath(workspace.channel, file.absolutePath.replace(oldWorkspacePath, remote))
+    }
+
+    fun computePackageName(shortFilePath: String): String {
+        val pathSplit = shortFilePath.split("/".toRegex())
+        var packageName = StringBuilder()
+        for (i in pathSplit.size - 2 downTo 0) {
+            if ((pathSplit[i] == "src" || pathSplit[i] == "main" || pathSplit[i] == "java")
+                    && packageName.isNotEmpty()) {
+                packageName = StringBuilder(packageName.substring(1))
+                break
+            }
+            packageName.insert(0, "." + pathSplit[i])
+        }
+        return packageName.toString()
+    }
+
+    @JvmStatic
+    @Throws(IOException::class, InterruptedException::class)
+    fun generateDocument(file: FilePath): Document {
+        return Jsoup.parse(file.readToString())
     }
 
     @JvmStatic
@@ -70,34 +79,6 @@ object JacocoUtil {
     }
 
     @JvmStatic
-    fun getTestCount(workspace: FilePath?, run: Run<*, *>?): Int {
-        if (run != null) {
-            val action = run.getAction(TestResultAction::class.java)
-            if (action != null) {
-                return action.totalCount
-            }
-        }
-        return if (workspace == null) 0 else getTestCount(workspace)
-    }
-
-    @JvmStatic
-    fun getTestCount(workspace: FilePath): Int {
-        try {
-            val files: List<FilePath> = workspace.act(
-                    FilesOfAllSubDirectoriesCallable(workspace, "TEST-.+\\.xml"))
-            var testCount = 0
-            for (file in files) {
-                val document = Jsoup.parse(file.readToString(), "", Parser.xmlParser())
-                val elements = document.select("testsuite")
-                testCount += elements.first().attr("tests").toInt()
-            }
-            return testCount
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-        return 0
-    }
-
     fun getFilesInAllSubDirectories(directory: FilePath, regex: String): ArrayList<FilePath> {
         val files = ArrayList<FilePath>()
         try {
@@ -115,15 +96,16 @@ object JacocoUtil {
     }
 
     @JvmStatic
-    fun calculateCoveredLines(document: Document, modifier: String): Int {
-        val elements = document.select("span.$modifier")
-        return elements.size
-    }
-
-    @JvmStatic
-    @Throws(IOException::class, InterruptedException::class)
-    fun generateDocument(file: FilePath): Document {
-        return Jsoup.parse(file.readToString())
+    fun getJacocoFileInMultiBranchProject(run: Run<*, *>, constants: HashMap<String, String>,
+                                          jacocoFile: FilePath, oldBranch: String): FilePath {
+        return if (run.parent.parent is WorkflowMultiBranchProject
+                && constants["branch"] == oldBranch) {
+            FilePath(jacocoFile.channel, jacocoFile.remote.replace(
+                    constants["projectName"].toString() + "_" + oldBranch,
+                    constants["projectName"].toString() + "_" + constants["branch"]))
+        } else {
+            jacocoFile
+        }
     }
 
     @JvmStatic
@@ -144,14 +126,6 @@ object JacocoUtil {
                     || e.text() == "(" || e.text() == ")")
         }
         return elements
-    }
-
-    @JvmStatic
-    @Throws(IOException::class, InterruptedException::class)
-    fun getNotFullyCoveredMethodEntries(jacocoMethodFile: FilePath): ArrayList<CoverageMethod> {
-        val methods = getMethodEntries(jacocoMethodFile)
-        methods.removeIf { method: CoverageMethod -> method.missedLines == 0 }
-        return methods
     }
 
     @JvmStatic
@@ -198,49 +172,77 @@ object JacocoUtil {
         return methods
     }
 
-    fun computePackageName(shortFilePath: String): String {
-        val pathSplit = shortFilePath.split("/".toRegex())
-        var packageName = StringBuilder()
-        for (i in pathSplit.size - 2 downTo 0) {
-            if ((pathSplit[i] == "src" || pathSplit[i] == "main" || pathSplit[i] == "java")
-                    && packageName.isNotEmpty()) {
-                packageName = StringBuilder(packageName.substring(1))
-                break
+    @JvmStatic
+    @Throws(IOException::class, InterruptedException::class)
+    fun getNotFullyCoveredMethodEntries(jacocoMethodFile: FilePath): ArrayList<CoverageMethod> {
+        val methods = getMethodEntries(jacocoMethodFile)
+        methods.removeIf { method: CoverageMethod -> method.missedLines == 0 }
+        return methods
+    }
+
+    @JvmStatic
+    fun getProjectCoverage(workspace: FilePath, csvName: String): Double {
+        val files: ArrayList<FilePath>
+        files = try {
+            workspace.act(FilesOfAllSubDirectoriesCallable(workspace, csvName))
+        } catch (e: Exception) {
+            e.printStackTrace()
+            return 0.0
+        }
+        var instructionCount = 0
+        var coveredInstructionCount = 0
+        for (file in files) {
+            try {
+                val content = file.readToString()
+                val lines = content.split("\n".toRegex()).filter { line -> line.isNotEmpty() }
+                for (coverageLine in lines) {
+                    //TODO: Improve
+                    val entries = coverageLine.split(",".toRegex())
+                    if (entries[2] != "CLASS") {
+                        coveredInstructionCount += entries[4].toDouble().toInt()
+                        instructionCount += (entries[3].toDouble() + entries[4].toDouble()).toInt()
+                    }
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
-            packageName.insert(0, "." + pathSplit[i])
         }
-        return packageName.toString()
+
+        return coveredInstructionCount / instructionCount.toDouble()
     }
 
     @JvmStatic
-    fun getJacocoFileInMultiBranchProject(run: Run<*, *>, constants: HashMap<String, String>,
-                                          jacocoFile: FilePath, oldBranch: String): FilePath {
-        return if (run.parent.parent is WorkflowMultiBranchProject
-                && constants["branch"] == oldBranch) {
-            FilePath(jacocoFile.channel, jacocoFile.remote.replace(
-                    constants["projectName"].toString() + "_" + oldBranch,
-                    constants["projectName"].toString() + "_" + constants["branch"]))
-        } else {
-            jacocoFile
+    fun getTestCount(workspace: FilePath): Int {
+        try {
+            val files: List<FilePath> = workspace.act(
+                    FilesOfAllSubDirectoriesCallable(workspace, "TEST-.+\\.xml"))
+            var testCount = 0
+            for (file in files) {
+                val document = Jsoup.parse(file.readToString(), "", Parser.xmlParser())
+                val elements = document.select("testsuite")
+                testCount += elements.first().attr("tests").toInt()
+            }
+            return testCount
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
+        return 0
     }
 
     @JvmStatic
-    fun calculateCurrentFilePath(workspace: FilePath, file: File, oldWorkspace: String): FilePath {
-        var oldWorkspacePath = oldWorkspace
-        if (!oldWorkspacePath.endsWith("/")) oldWorkspacePath += "/"
-        var remote = workspace.remote
-        if (!remote.endsWith("/")) remote += "/"
-        return FilePath(workspace.channel, file.absolutePath.replace(oldWorkspacePath, remote))
-    }
-
-    @JvmStatic
-    fun calculateCurrentFilePath(workspace: FilePath, file: File): FilePath {
-        return FilePath(workspace.channel, file.absolutePath)
+    fun getTestCount(workspace: FilePath?, run: Run<*, *>?): Int {
+        if (run != null) {
+            val action = run.getAction(TestResultAction::class.java)
+            if (action != null) {
+                return action.totalCount
+            }
+        }
+        return if (workspace == null) 0 else getTestCount(workspace)
     }
 
     class FilesOfAllSubDirectoriesCallable(private val directory: FilePath, private val regex: String)
         : MasterToSlaveCallable<ArrayList<FilePath>, IOException?>() {
+
         /**
          * Performs computation and returns the result,
          * or throws some exception.
@@ -252,7 +254,6 @@ object JacocoUtil {
 
     class CoverageMethod internal constructor(val methodName: String?, val lines: Int, val missedLines: Int)
 
-    //TODO: If files do not exist
     /**
      *
      * @param workspace Workspace of the project
@@ -265,6 +266,7 @@ object JacocoUtil {
                        shortJacocoPath: String,
                        shortJacocoCSVPath: String,
                        listener: TaskListener) : Serializable {
+
         val className: String
         val extension: String
         val packageName: String
@@ -274,6 +276,7 @@ object JacocoUtil {
         val coverage: Double
         val changedByUsers: HashSet<GameUser>
         val workspace: String = workspace.remote
+
         fun addUser(user: GameUser) {
             changedByUsers.add(user)
         }

@@ -11,103 +11,19 @@ import java.util.concurrent.CopyOnWriteArrayList
 
 class LeaderboardAction(val job: AbstractItem) : ProminentProjectAction, Describable<LeaderboardAction> {
 
-    override fun getIconFileName(): String {
-        return "document.png"
+    fun getCompletedChallenges(): CopyOnWriteArrayList<Challenge> {
+        val user: User = User.current() ?: return CopyOnWriteArrayList()
+        val property = user.getProperty(GameUserProperty::class.java)
+                ?: return CopyOnWriteArrayList()
+        return property.getCompletedChallenges(job.name)
     }
 
-    override fun getDisplayName(): String {
-        return "Leaderboard"
+    fun getCurrentChallenges(): CopyOnWriteArrayList<Challenge> {
+        val user: User = User.current() ?: return CopyOnWriteArrayList()
+        val property = user.getProperty(GameUserProperty::class.java)
+                ?: return CopyOnWriteArrayList()
+        return property.getCurrentChallenges(job.name)
     }
-
-    override fun getUrlName(): String {
-        return "leaderboard"
-    }
-
-    val userDetails: List<UserDetails>
-        get() {
-            val details = ArrayList<UserDetails>()
-            for (user in User.getAll()) {
-                if (user.getProperty(Details::class.java) == null) continue
-                val property = user.getProperty(GameUserProperty::class.java)
-                if (property != null && property.isParticipating(job.name)) {
-                    details.add(
-                            UserDetails(
-                                    user.fullName,
-                                    property.getTeamName(job.name),
-                                    property.getScore(job.name),
-                                    property.getCompletedChallenges(job.name).size
-                            )
-                    )
-                }
-            }
-            details.sortWith(Comparator.comparingInt { obj: UserDetails -> obj.score })
-            details.reverse()
-            return details
-        }
-
-    val teamDetails: List<TeamDetails>
-        get() {
-            val details = ArrayList<TeamDetails>()
-            for (user in User.getAll()) {
-                if (user.getProperty(Details::class.java) == null) continue
-                val property = user.getProperty(GameUserProperty::class.java)
-                if (property != null && property.isParticipating(job.name)) {
-                    var index = -1
-                    for (i in details.indices) {
-                        val teamDetail = details[i]
-                        if (teamDetail.teamName == property.getTeamName(job.name)) {
-                            index = i
-                        }
-                    }
-                    if (index != -1) {
-                        details[index].addCompletedChallenges(property.getCompletedChallenges(job.name).size)
-                        details[index].addScore(property.getScore(job.name))
-                    } else {
-                        details.add(
-                                TeamDetails(
-                                        property.getTeamName(job.name),
-                                        property.getScore(job.name),
-                                        property.getCompletedChallenges(job.name).size
-                                )
-                        )
-                    }
-                }
-            }
-            details.sortWith(Comparator.comparingInt { obj: TeamDetails -> obj.score })
-            details.reverse()
-            return details
-        }
-
-    val completedChallenges: CopyOnWriteArrayList<Challenge>
-        get() {
-            val user: User = User.current() ?: return CopyOnWriteArrayList()
-            val property = user.getProperty(GameUserProperty::class.java)
-                    ?: return CopyOnWriteArrayList()
-            return property.getCompletedChallenges(job.name)
-        }
-
-    val currentChallenges: CopyOnWriteArrayList<Challenge>
-        get() {
-            val user: User = User.current() ?: return CopyOnWriteArrayList()
-            val property = user.getProperty(GameUserProperty::class.java)
-                    ?: return CopyOnWriteArrayList()
-            return property.getCurrentChallenges(job.name)
-        }
-
-    val rejectedChallenges: CopyOnWriteArrayList<Challenge>
-        get() {
-            val user: User = User.current() ?: return CopyOnWriteArrayList()
-            val property = user.getProperty(GameUserProperty::class.java)
-                    ?: return CopyOnWriteArrayList()
-            return property.getRejectedChallenges(job.name)
-        }
-
-    val isParticipating: Boolean
-        get() {
-            val user: User = User.current() ?: return false
-            val property = user.getProperty(GameUserProperty::class.java) ?: return false
-            return property.isParticipating(job.name)
-        }
 
     /**
      * Gets the descriptor for this instance.
@@ -123,6 +39,84 @@ class LeaderboardAction(val job: AbstractItem) : ProminentProjectAction, Describ
         return Jenkins.get().getDescriptorOrDie(javaClass) as Descriptor<LeaderboardAction>
     }
 
+    override fun getDisplayName(): String {
+        return "Leaderboard"
+    }
+
+    override fun getIconFileName(): String {
+        return "document.png"
+    }
+
+    fun getRejectedChallenges(): CopyOnWriteArrayList<Challenge> {
+        val user: User = User.current() ?: return CopyOnWriteArrayList()
+        val property = user.getProperty(GameUserProperty::class.java)
+                ?: return CopyOnWriteArrayList()
+        return property.getRejectedChallenges(job.name)
+    }
+
+    fun getTeamDetails(): List<TeamDetails> {
+        val details = ArrayList<TeamDetails>()
+        for (user in User.getAll()) {
+            if (user.getProperty(Details::class.java) == null) continue
+            val property = user.getProperty(GameUserProperty::class.java)
+            if (property != null && property.isParticipating(job.name)) {
+                var index = -1
+                for (i in details.indices) {
+                    val teamDetail = details[i]
+                    if (teamDetail.teamName == property.getTeamName(job.name)) {
+                        index = i
+                    }
+                }
+                if (index != -1) {
+                    details[index].addCompletedChallenges(property.getCompletedChallenges(job.name).size)
+                    details[index].addScore(property.getScore(job.name))
+                } else {
+                    details.add(
+                            TeamDetails(
+                                    property.getTeamName(job.name),
+                                    property.getScore(job.name),
+                                    property.getCompletedChallenges(job.name).size
+                            )
+                    )
+                }
+            }
+        }
+        details.sortWith(Comparator.comparingInt { obj: TeamDetails -> obj.score })
+        details.reverse()
+        return details
+    }
+
+    override fun getUrlName(): String {
+        return "leaderboard"
+    }
+
+    fun getUserDetails(): List<UserDetails> {
+        val details = ArrayList<UserDetails>()
+        for (user in User.getAll()) {
+            if (user.getProperty(Details::class.java) == null) continue
+            val property = user.getProperty(GameUserProperty::class.java)
+            if (property != null && property.isParticipating(job.name)) {
+                details.add(
+                        UserDetails(
+                                user.fullName,
+                                property.getTeamName(job.name),
+                                property.getScore(job.name),
+                                property.getCompletedChallenges(job.name).size
+                        )
+                )
+            }
+        }
+        details.sortWith(Comparator.comparingInt { obj: UserDetails -> obj.score })
+        details.reverse()
+        return details
+    }
+
+    fun isParticipating(): Boolean {
+        val user: User = User.current() ?: return false
+        val property = user.getProperty(GameUserProperty::class.java) ?: return false
+        return property.isParticipating(job.name)
+    }
+
     @ExportedBean(defaultVisibility = 999)
     class UserDetails(@get:Exported val userName: String, @get:Exported val teamName: String,
                       @get:Exported val score: Int, @get:Exported val completedChallenges: Int)
@@ -132,13 +126,13 @@ class LeaderboardAction(val job: AbstractItem) : ProminentProjectAction, Describ
                       @get:Exported var completedChallenges: Int) {
 
         @Exported
-        fun addScore(score: Int) {
-            this.score += score
+        fun addCompletedChallenges(completedChallenges: Int) {
+            this.completedChallenges += completedChallenges
         }
 
         @Exported
-        fun addCompletedChallenges(completedChallenges: Int) {
-            this.completedChallenges += completedChallenges
+        fun addScore(score: Int) {
+            this.score += score
         }
     }
 }

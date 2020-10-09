@@ -15,9 +15,44 @@ import java.util.*
 class LineCoverageChallenge(classDetails: ClassDetails, branch: String, workspace: FilePath?)
     : CoverageChallenge(classDetails, branch, workspace) {
 
-    private var lineNumber = 0
-    var lineContent: String? = null
     private var coverageType: String? = null
+    internal var lineContent: String? = null
+    private var lineNumber = 0
+
+    override fun getName(): String {
+        return "LineCoverageChallenge"
+    }
+
+    override fun getScore(): Int {
+        return if (coverage >= 0.8 || coverageType == "pc") 3 else 2
+    }
+
+    override fun isSolvable(constants: HashMap<String, String>, run: Run<*, *>, listener: TaskListener,
+                            workspace: FilePath): Boolean {
+        if (branch != constants["branch"]) return true
+        val jacocoSourceFile = calculateCurrentFilePath(workspace,
+                classDetails.jacocoSourceFile, classDetails.workspace)
+        val document: Document
+        document = try {
+            if (!jacocoSourceFile.exists()) {
+                listener.logger.println("[Gamekins] JaCoCo source file "
+                        + jacocoSourceFile.remote + " exists " + jacocoSourceFile.exists())
+                return true
+            }
+            generateDocument(jacocoSourceFile)
+        } catch (e: Exception) {
+            e.printStackTrace(listener.logger)
+            return false
+        }
+        val elements = document.select("span." + "pc")
+        elements.addAll(document.select("span." + "nc"))
+        for (element in elements) {
+            if (element.text() == lineContent) {
+                return true
+            }
+        }
+        return false
+    }
 
     override fun isSolved(constants: HashMap<String, String>, run: Run<*, *>, listener: TaskListener,
                           workspace: FilePath): Boolean {
@@ -55,41 +90,6 @@ class LineCoverageChallenge(classDetails: ClassDetails, branch: String, workspac
             }
         }
         return false
-    }
-
-    override fun isSolvable(constants: HashMap<String, String>, run: Run<*, *>, listener: TaskListener,
-                            workspace: FilePath): Boolean {
-        if (branch != constants["branch"]) return true
-        val jacocoSourceFile = calculateCurrentFilePath(workspace,
-                classDetails.jacocoSourceFile, classDetails.workspace)
-        val document: Document
-        document = try {
-            if (!jacocoSourceFile.exists()) {
-                listener.logger.println("[Gamekins] JaCoCo source file "
-                        + jacocoSourceFile.remote + " exists " + jacocoSourceFile.exists())
-                return true
-            }
-            generateDocument(jacocoSourceFile)
-        } catch (e: Exception) {
-            e.printStackTrace(listener.logger)
-            return false
-        }
-        val elements = document.select("span." + "pc")
-        elements.addAll(document.select("span." + "nc"))
-        for (element in elements) {
-            if (element.text() == lineContent) {
-                return true
-            }
-        }
-        return false
-    }
-
-    override fun getScore(): Int {
-        return if (coverage >= 0.8 || coverageType == "pc") 3 else 2
-    }
-
-    override fun getName(): String {
-        return "LineCoverageChallenge"
     }
 
     override fun toString(): String {

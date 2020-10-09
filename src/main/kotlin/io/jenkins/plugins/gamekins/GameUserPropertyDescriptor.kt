@@ -9,6 +9,11 @@ import javax.annotation.Nonnull
 @Extension
 class GameUserPropertyDescriptor : UserPropertyDescriptor(GameUserProperty::class.java) {
 
+    @Nonnull
+    override fun getDisplayName(): String {
+        return "Gamekins"
+    }
+
     /**
      * Creates a default instance of [UserProperty] to be associated
      * with [User] object that wasn't created from a persisted XML data.
@@ -24,11 +29,6 @@ class GameUserPropertyDescriptor : UserPropertyDescriptor(GameUserProperty::clas
      */
     override fun newInstance(user: User): UserProperty {
         return GameUserProperty()
-    }
-
-    @Nonnull
-    override fun getDisplayName(): String {
-        return "Gamekins"
     }
 
     init {

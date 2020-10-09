@@ -15,94 +15,14 @@ class GameUserProperty : UserProperty() {
 
     private val completedChallenges: HashMap<String, CopyOnWriteArrayList<Challenge>> = HashMap()
     private val currentChallenges: HashMap<String, CopyOnWriteArrayList<Challenge>> = HashMap()
-    private val rejectedChallenges: HashMap<String, CopyOnWriteArrayList<Pair<Challenge, String>>> = HashMap()
-    private val participation: HashMap<String, String> = HashMap()
-    private val score: HashMap<String, Int> = HashMap()
-    private val pseudonym: UUID = UUID.randomUUID()
     private var gitNames: CopyOnWriteArraySet<String>? = null
-
-    fun getUser(): User {
-        return user
-    }
-
-    override fun setUser(u: User) {
-        user = u
-        if (gitNames == null) gitNames = initialGitNames
-    }
-
-    @set:DataBoundSetter
-    var names: String
-        get() {
-            if (user == null) return ""
-            if (gitNames == null) gitNames = initialGitNames
-            val builder = StringBuilder()
-            for (name in gitNames!!) {
-                builder.append(name).append("\n")
-            }
-            return builder.substring(0, builder.length - 1)
-        }
-        set(names) {
-            val split = names.split("\n".toRegex())
-            gitNames = CopyOnWriteArraySet(split)
-        }
-
-    fun getGitNames(): CopyOnWriteArraySet<String> {
-        return gitNames ?: CopyOnWriteArraySet()
-    }
-
-    fun getPseudonym(): String {
-        return pseudonym.toString()
-    }
-
-    fun getScore(projectName: String): Int {
-        if (isParticipating(projectName) && score[projectName] == null) {
-            score[projectName] = 0
-        }
-        return score[projectName]!!
-    }
+    private val participation: HashMap<String, String> = HashMap()
+    private val pseudonym: UUID = UUID.randomUUID()
+    private val rejectedChallenges: HashMap<String, CopyOnWriteArrayList<Pair<Challenge, String>>> = HashMap()
+    private val score: HashMap<String, Int> = HashMap()
 
     fun addScore(projectName: String, score: Int) {
         this.score[projectName] = this.score[projectName]!! + score
-    }
-
-    fun isParticipating(projectName: String): Boolean {
-        return participation.containsKey(projectName)
-    }
-
-    fun isParticipating(projectName: String, teamName: String): Boolean {
-        return if (participation[projectName] == null) false else participation[projectName] == teamName
-    }
-
-    fun setParticipating(projectName: String, teamName: String) {
-        participation[projectName] = teamName
-        score.putIfAbsent(projectName, 0)
-        completedChallenges.putIfAbsent(projectName, CopyOnWriteArrayList())
-        currentChallenges.putIfAbsent(projectName, CopyOnWriteArrayList())
-        rejectedChallenges.putIfAbsent(projectName, CopyOnWriteArrayList())
-    }
-
-    fun removeParticipation(projectName: String) {
-        participation.remove(projectName)
-    }
-
-    fun getTeamName(projectName: String): String {
-        val name: String? = participation[projectName]
-        //Should not happen since each call is of getTeamName() is surrounded with a call to isParticipating()
-        return name ?: "null"
-    }
-
-    fun getCompletedChallenges(projectName: String?): CopyOnWriteArrayList<Challenge> {
-        return completedChallenges[projectName]!!
-    }
-
-    fun getCurrentChallenges(projectName: String?): CopyOnWriteArrayList<Challenge> {
-        return currentChallenges[projectName]!!
-    }
-
-    fun getRejectedChallenges(projectName: String?): CopyOnWriteArrayList<Challenge> {
-        val list = CopyOnWriteArrayList<Challenge>()
-        rejectedChallenges[projectName]!!.stream().map { obj: Pair<Challenge, String> -> obj.first }.forEach { e: Challenge -> list.add(e) }
-        return list
     }
 
     fun completeChallenge(projectName: String, challenge: Challenge) {
@@ -118,21 +38,78 @@ class GameUserProperty : UserProperty() {
         currentChallenges[projectName] = challenges
     }
 
+    private fun computeInitialGitNames(): CopyOnWriteArraySet<String> {
+        val set = CopyOnWriteArraySet<String>()
+        if (user != null) {
+            set.add(user.fullName)
+            set.add(user.displayName)
+            set.add(user.id)
+        }
+        return set
+    }
+
+    fun getCompletedChallenges(projectName: String?): CopyOnWriteArrayList<Challenge> {
+        return completedChallenges[projectName]!!
+    }
+
+    fun getCurrentChallenges(projectName: String?): CopyOnWriteArrayList<Challenge> {
+        return currentChallenges[projectName]!!
+    }
+
+    fun getGitNames(): CopyOnWriteArraySet<String> {
+        return gitNames ?: CopyOnWriteArraySet()
+    }
+
+    fun getNames(): String {
+        if (user == null) return ""
+        if (gitNames == null) gitNames = computeInitialGitNames()
+        val builder = StringBuilder()
+        for (name in gitNames!!) {
+            builder.append(name).append("\n")
+        }
+        return builder.substring(0, builder.length - 1)
+    }
+
+    fun getPseudonym(): String {
+        return pseudonym.toString()
+    }
+
+    fun getRejectedChallenges(projectName: String?): CopyOnWriteArrayList<Challenge> {
+        val list = CopyOnWriteArrayList<Challenge>()
+        rejectedChallenges[projectName]!!.stream().map { obj: Pair<Challenge, String> -> obj.first }.forEach { e: Challenge -> list.add(e) }
+        return list
+    }
+
+    fun getScore(projectName: String): Int {
+        if (isParticipating(projectName) && score[projectName] == null) {
+            score[projectName] = 0
+        }
+        return score[projectName]!!
+    }
+
+    fun getTeamName(projectName: String): String {
+        val name: String? = participation[projectName]
+        //Should not happen since each call is of getTeamName() is surrounded with a call to isParticipating()
+        return name ?: "null"
+    }
+
+    fun getUser(): User {
+        return user
+    }
+
+    fun isParticipating(projectName: String): Boolean {
+        return participation.containsKey(projectName)
+    }
+
+    fun isParticipating(projectName: String, teamName: String): Boolean {
+        return if (participation[projectName] == null) false else participation[projectName] == teamName
+    }
+
     fun newChallenge(projectName: String, challenge: Challenge) {
         currentChallenges.computeIfAbsent(projectName) { CopyOnWriteArrayList() }
         val challenges = currentChallenges[projectName]!!
         challenges.add(challenge)
         currentChallenges[projectName] = challenges
-    }
-
-    fun rejectChallenge(projectName: String, challenge: Challenge, reason: String) {
-        rejectedChallenges.computeIfAbsent(projectName) { CopyOnWriteArrayList() }
-        val challenges = rejectedChallenges[projectName]!!
-        challenges.add(Pair(challenge, reason))
-        rejectedChallenges[projectName] = challenges
-        val currentChallenges = currentChallenges[projectName]!!
-        currentChallenges.remove(challenge)
-        this.currentChallenges[projectName] = currentChallenges
     }
 
     fun printToXML(projectName: String, indentation: String): String {
@@ -161,19 +138,41 @@ class GameUserProperty : UserProperty() {
         return print.toString()
     }
 
-    private val initialGitNames: CopyOnWriteArraySet<String>
-        get() {
-            val set = CopyOnWriteArraySet<String>()
-            if (user != null) {
-                set.add(user.fullName)
-                set.add(user.displayName)
-                set.add(user.id)
-            }
-            return set
-        }
-
     override fun reconfigure(req: StaplerRequest, form: JSONObject?): UserProperty? {
-        if (form != null) names = form.getString("names")
+        if (form != null) setNames(form.getString("names"))
         return this
+    }
+
+    fun rejectChallenge(projectName: String, challenge: Challenge, reason: String) {
+        rejectedChallenges.computeIfAbsent(projectName) { CopyOnWriteArrayList() }
+        val challenges = rejectedChallenges[projectName]!!
+        challenges.add(Pair(challenge, reason))
+        rejectedChallenges[projectName] = challenges
+        val currentChallenges = currentChallenges[projectName]!!
+        currentChallenges.remove(challenge)
+        this.currentChallenges[projectName] = currentChallenges
+    }
+
+    fun removeParticipation(projectName: String) {
+        participation.remove(projectName)
+    }
+
+    @DataBoundSetter
+    fun setNames(names: String) {
+        val split = names.split("\n".toRegex())
+        gitNames = CopyOnWriteArraySet(split)
+    }
+
+    fun setParticipating(projectName: String, teamName: String) {
+        participation[projectName] = teamName
+        score.putIfAbsent(projectName, 0)
+        completedChallenges.putIfAbsent(projectName, CopyOnWriteArrayList())
+        currentChallenges.putIfAbsent(projectName, CopyOnWriteArrayList())
+        rejectedChallenges.putIfAbsent(projectName, CopyOnWriteArrayList())
+    }
+
+    override fun setUser(u: User) {
+        user = u
+        if (gitNames == null) gitNames = computeInitialGitNames()
     }
 }

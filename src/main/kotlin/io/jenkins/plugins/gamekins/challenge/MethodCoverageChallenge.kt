@@ -14,9 +14,41 @@ import java.util.*
 class MethodCoverageChallenge(classDetails: ClassDetails, branch: String, workspace: FilePath?)
     : CoverageChallenge(classDetails, branch, workspace) {
 
-    var methodName: String? = null
-    var lines = 0
-    var missedLines = 0
+    private var lines = 0
+    internal var methodName: String? = null
+    private var missedLines = 0
+
+    override fun getName(): String {
+        return "MethodCoverageChallenge"
+    }
+
+    override fun getScore(): Int {
+        return if ((lines - missedLines) / lines.toDouble() > 0.8) 3 else 2
+    }
+
+    override fun isSolvable(constants: HashMap<String, String>, run: Run<*, *>, listener: TaskListener,
+                            workspace: FilePath): Boolean {
+        if (branch != constants["branch"]) return true
+        val jacocoMethodFile = calculateCurrentFilePath(workspace,
+                classDetails.jacocoMethodFile, classDetails.workspace)
+        try {
+            if (!jacocoMethodFile.exists()) {
+                listener.logger.println("[Gamekins] JaCoCo method file "
+                        + jacocoMethodFile.remote + " exists " + jacocoMethodFile.exists())
+                return true
+            }
+            val methods = getMethodEntries(jacocoMethodFile)
+            for (method in methods) {
+                if (method.methodName == methodName) {
+                    return method.missedLines > 0
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace(listener.logger)
+            return false
+        }
+        return false
+    }
 
     override fun isSolved(constants: HashMap<String, String>, run: Run<*, *>, listener: TaskListener,
                           workspace: FilePath): Boolean {
@@ -50,38 +82,6 @@ class MethodCoverageChallenge(classDetails: ClassDetails, branch: String, worksp
             e.printStackTrace(listener.logger)
         }
         return false
-    }
-
-    override fun isSolvable(constants: HashMap<String, String>, run: Run<*, *>, listener: TaskListener,
-                            workspace: FilePath): Boolean {
-        if (branch != constants["branch"]) return true
-        val jacocoMethodFile = calculateCurrentFilePath(workspace,
-                classDetails.jacocoMethodFile, classDetails.workspace)
-        try {
-            if (!jacocoMethodFile.exists()) {
-                listener.logger.println("[Gamekins] JaCoCo method file "
-                        + jacocoMethodFile.remote + " exists " + jacocoMethodFile.exists())
-                return true
-            }
-            val methods = getMethodEntries(jacocoMethodFile)
-            for (method in methods) {
-                if (method.methodName == methodName) {
-                    return method.missedLines > 0
-                }
-            }
-        } catch (e: Exception) {
-            e.printStackTrace(listener.logger)
-            return false
-        }
-        return false
-    }
-
-    override fun getScore(): Int {
-        return if ((lines - missedLines) / lines.toDouble() > 0.8) 3 else 2
-    }
-
-    override fun getName(): String {
-        return "MethodCoverageChallenge"
     }
 
     override fun toString(): String {

@@ -44,153 +44,6 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
     @set:DataBoundSetter
     var searchCommitCount: Int = if (searchCommitCount > 0) searchCommitCount else GitUtil.DEFAULT_SEARCH_COMMIT_COUNT
 
-    /**
-     * Return true if this [Publisher] needs to run after the build result is
-     * fully finalized.
-     *
-     *
-     *
-     * The execution of normal [Publisher]s are considered within a part
-     * of the build. This allows publishers to mark the build as a failure, or
-     * to include their execution time in the total build time.
-     *
-     *
-     *
-     * So normally, that is the preferable behavior, but in a few cases
-     * this is problematic. One of such cases is when a publisher needs to
-     * trigger other builds, which in turn need to see this build as a
-     * completed build. Those plugins that need to do this can return true
-     * from this method, so that the [.perform]
-     * method is called after the build is marked as completed.
-     *
-     *
-     *
-     * When [Publisher] behaves this way, note that they can no longer
-     * change the build status anymore.
-     *
-     * @since 1.153
-     */
-    override fun needsToRunAfterFinalized(): Boolean {
-        return true
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @param build
-     * @param launcher
-     * @param listener
-     * @return Delegates to [SimpleBuildStep.perform]
-     * if possible, always returning true or throwing an error.
-     */
-    override fun perform(build: AbstractBuild<*, *>, launcher: Launcher, listener: BuildListener): Boolean {
-        if (build.project == null || build.project.getProperty(GameJobProperty::class.java) == null
-                || !build.project.getProperty(GameJobProperty::class.java).activated) {
-            listener.logger.println("[Gamekins] Not activated")
-            return true
-        }
-        val constants = HashMap<String, String>()
-        constants["projectName"] = build.project.name
-        executePublisher(build, constants, build.result, listener, build.workspace)
-        return true
-    }
-
-    /**
-     * Declares the scope of the synchronization monitor this [BuildStep] expects from outside.
-     *
-     *
-     *
-     * This method is introduced for preserving compatibility with plugins written for earlier versions of Hudson,
-     * which never run multiple builds of the same job in parallel. Such plugins often assume that the outcome
-     * of the previous build is completely available, which is no longer true when we do concurrent builds.
-     *
-     *
-     *
-     * To minimize the necessary code change for such plugins, [BuildStep] implementations can request
-     * Hudson to externally perform synchronization before executing them. This behavior is as follows:
-     *
-     * <dl>
-     * <dt>[BuildStepMonitor.BUILD]
-    </dt> * <dd>
-     * This [BuildStep] is only executed after the previous build is fully
-     * completed (thus fully restoring the earlier semantics of one build at a time.)
-     *
-    </dd> * <dt>[BuildStepMonitor.STEP]
-    </dt> * <dd>
-     * This [BuildStep] is only executed after the same step in the previous build is completed.
-     * For build steps that use a weaker assumption and only rely on the output from the same build step of
-     * the early builds, this improves the concurrency.
-     *
-    </dd> * <dt>[BuildStepMonitor.NONE]
-    </dt> * <dd>
-     * No external synchronization is performed on this build step. This is the most efficient, and thus
-     * **the recommended value for newer plugins**. Wherever necessary, you can directly use [CheckPoint]s
-     * to perform necessary synchronizations.
-    </dd></dl> *
-     *
-     * <h2>Migrating Older Implementation</h2>
-     *
-     *
-     * If you are migrating [BuildStep] implementations written for earlier versions of Hudson,
-     * here's what you can do:
-     *
-     *
-     *  *
-     * To demand the backward compatible behavior from Jenkins, leave this method unoverridden,
-     * and make no other changes to the code. This will prevent users from reaping the benefits of concurrent
-     * builds, but at least your plugin will work correctly, and therefore this is a good easy first step.
-     *  *
-     * If your build step doesn't use anything from a previous build (for example, if you don't even call
-     * [Run.getPreviousBuild]), then you can return [BuildStepMonitor.NONE] without making further
-     * code changes and you are done with migration.
-     *  *
-     * If your build step only depends on [Action]s that you added in the previous build by yourself,
-     * then you only need [BuildStepMonitor.STEP] scope synchronization. Return it from this method
-     * ,and you are done with migration without any further code changes.
-     *  *
-     * If your build step makes more complex assumptions, return [BuildStepMonitor.NONE] and use
-     * [CheckPoint]s directly in your code. The general idea is to call [CheckPoint.block] before
-     * you try to access the state from the previous build.
-     *
-     *
-     * @since 1.319
-     */
-    override fun getRequiredMonitorService(): BuildStepMonitor {
-        return BuildStepMonitor.STEP
-    }
-
-    /**
-     * Run this step.
-     *
-     * @param run       a build this is running as a part of
-     * @param workspace a workspace to use for any file operations
-     * @param launcher  a way to start processes
-     * @param listener  a place to send output
-     */
-    override fun perform(@Nonnull run: Run<*, *>, @Nonnull workspace: FilePath,
-                         @Nonnull launcher: Launcher, @Nonnull listener: TaskListener) {
-        val constants = HashMap<String, String>()
-        if (run.parent.parent is WorkflowMultiBranchProject) {
-            val project = run.parent.parent as WorkflowMultiBranchProject
-            if (project.properties.get(GameMultiBranchProperty::class.java) == null
-                    || !project.properties.get(GameMultiBranchProperty::class.java).activated) {
-                listener.logger.println("[Gamekins] Not activated")
-                return
-            }
-            constants["projectName"] = project.name
-        } else {
-            if (run.parent.getProperty(GameJobProperty::class.java) == null
-                    || !run.parent.getProperty(GameJobProperty::class.java).activated) {
-                listener.logger.println("[Gamekins] Not activated")
-                return
-            }
-            constants["projectName"] = run.parent.name
-        }
-        constants["jacocoResultsPath"] = jacocoResultsPath
-        constants["jacocoCSVPath"] = jacocoCSVPath
-        executePublisher(run, constants, run.result, listener, workspace)
-    }
-
     private fun executePublisher(run: Run<*, *>, constants: HashMap<String, String>, result: Result?,
                                  listener: TaskListener, workspace: FilePath?) {
         if (!doCheckJacocoResultsPath(workspace!!, jacocoResultsPath)) {
@@ -366,5 +219,152 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
             listener.logger.println("[Gamekins] No entry for Statistics added")
         }
         listener.logger.println("[Gamekins] Finished")
+    }
+
+    /**
+     * Declares the scope of the synchronization monitor this [BuildStep] expects from outside.
+     *
+     *
+     *
+     * This method is introduced for preserving compatibility with plugins written for earlier versions of Hudson,
+     * which never run multiple builds of the same job in parallel. Such plugins often assume that the outcome
+     * of the previous build is completely available, which is no longer true when we do concurrent builds.
+     *
+     *
+     *
+     * To minimize the necessary code change for such plugins, [BuildStep] implementations can request
+     * Hudson to externally perform synchronization before executing them. This behavior is as follows:
+     *
+     * <dl>
+     * <dt>[BuildStepMonitor.BUILD]
+    </dt> * <dd>
+     * This [BuildStep] is only executed after the previous build is fully
+     * completed (thus fully restoring the earlier semantics of one build at a time.)
+     *
+    </dd> * <dt>[BuildStepMonitor.STEP]
+    </dt> * <dd>
+     * This [BuildStep] is only executed after the same step in the previous build is completed.
+     * For build steps that use a weaker assumption and only rely on the output from the same build step of
+     * the early builds, this improves the concurrency.
+     *
+    </dd> * <dt>[BuildStepMonitor.NONE]
+    </dt> * <dd>
+     * No external synchronization is performed on this build step. This is the most efficient, and thus
+     * **the recommended value for newer plugins**. Wherever necessary, you can directly use [CheckPoint]s
+     * to perform necessary synchronizations.
+    </dd></dl> *
+     *
+     * <h2>Migrating Older Implementation</h2>
+     *
+     *
+     * If you are migrating [BuildStep] implementations written for earlier versions of Hudson,
+     * here's what you can do:
+     *
+     *
+     *  *
+     * To demand the backward compatible behavior from Jenkins, leave this method unoverridden,
+     * and make no other changes to the code. This will prevent users from reaping the benefits of concurrent
+     * builds, but at least your plugin will work correctly, and therefore this is a good easy first step.
+     *  *
+     * If your build step doesn't use anything from a previous build (for example, if you don't even call
+     * [Run.getPreviousBuild]), then you can return [BuildStepMonitor.NONE] without making further
+     * code changes and you are done with migration.
+     *  *
+     * If your build step only depends on [Action]s that you added in the previous build by yourself,
+     * then you only need [BuildStepMonitor.STEP] scope synchronization. Return it from this method
+     * ,and you are done with migration without any further code changes.
+     *  *
+     * If your build step makes more complex assumptions, return [BuildStepMonitor.NONE] and use
+     * [CheckPoint]s directly in your code. The general idea is to call [CheckPoint.block] before
+     * you try to access the state from the previous build.
+     *
+     *
+     * @since 1.319
+     */
+    override fun getRequiredMonitorService(): BuildStepMonitor {
+        return BuildStepMonitor.STEP
+    }
+
+    /**
+     * Return true if this [Publisher] needs to run after the build result is
+     * fully finalized.
+     *
+     *
+     *
+     * The execution of normal [Publisher]s are considered within a part
+     * of the build. This allows publishers to mark the build as a failure, or
+     * to include their execution time in the total build time.
+     *
+     *
+     *
+     * So normally, that is the preferable behavior, but in a few cases
+     * this is problematic. One of such cases is when a publisher needs to
+     * trigger other builds, which in turn need to see this build as a
+     * completed build. Those plugins that need to do this can return true
+     * from this method, so that the [.perform]
+     * method is called after the build is marked as completed.
+     *
+     *
+     *
+     * When [Publisher] behaves this way, note that they can no longer
+     * change the build status anymore.
+     *
+     * @since 1.153
+     */
+    override fun needsToRunAfterFinalized(): Boolean {
+        return true
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @param build
+     * @param launcher
+     * @param listener
+     * @return Delegates to [SimpleBuildStep.perform]
+     * if possible, always returning true or throwing an error.
+     */
+    override fun perform(build: AbstractBuild<*, *>, launcher: Launcher, listener: BuildListener): Boolean {
+        if (build.project == null || build.project.getProperty(GameJobProperty::class.java) == null
+                || !build.project.getProperty(GameJobProperty::class.java).activated) {
+            listener.logger.println("[Gamekins] Not activated")
+            return true
+        }
+        val constants = HashMap<String, String>()
+        constants["projectName"] = build.project.name
+        executePublisher(build, constants, build.result, listener, build.workspace)
+        return true
+    }
+
+    /**
+     * Run this step.
+     *
+     * @param run       a build this is running as a part of
+     * @param workspace a workspace to use for any file operations
+     * @param launcher  a way to start processes
+     * @param listener  a place to send output
+     */
+    override fun perform(@Nonnull run: Run<*, *>, @Nonnull workspace: FilePath,
+                         @Nonnull launcher: Launcher, @Nonnull listener: TaskListener) {
+        val constants = HashMap<String, String>()
+        if (run.parent.parent is WorkflowMultiBranchProject) {
+            val project = run.parent.parent as WorkflowMultiBranchProject
+            if (project.properties.get(GameMultiBranchProperty::class.java) == null
+                    || !project.properties.get(GameMultiBranchProperty::class.java).activated) {
+                listener.logger.println("[Gamekins] Not activated")
+                return
+            }
+            constants["projectName"] = project.name
+        } else {
+            if (run.parent.getProperty(GameJobProperty::class.java) == null
+                    || !run.parent.getProperty(GameJobProperty::class.java).activated) {
+                listener.logger.println("[Gamekins] Not activated")
+                return
+            }
+            constants["projectName"] = run.parent.name
+        }
+        constants["jacocoResultsPath"] = jacocoResultsPath
+        constants["jacocoCSVPath"] = jacocoCSVPath
+        executePublisher(run, constants, run.result, listener, workspace)
     }
 }

@@ -7,15 +7,17 @@ import java.util.*
 
 interface GameProperty {
 
-    fun getTeams(): ArrayList<String>
-
     @Throws(IOException::class)
     fun addTeam(teamName: String)
+
+    fun getOwner(): AbstractItem
+
+    fun getStatistics(): Statistics
+
+    fun getTeams(): ArrayList<String>
 
     @Throws(IOException::class)
     fun removeTeam(teamName: String)
 
-    fun getStatistics(): Statistics
 
-    fun getOwner(): AbstractItem
 }

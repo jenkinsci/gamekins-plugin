@@ -18,41 +18,13 @@ class GameJobProperty
                                   @set:DataBoundSetter var showStatistics: Boolean)
     : JobProperty<Job<*, *>>(), GameProperty {
 
-    private val teams: ArrayList<String> = ArrayList()
     private var statistics: Statistics
-
-    override fun getTeams(): ArrayList<String> {
-        return teams
-    }
-
-    override fun getStatistics(): Statistics {
-        if (statistics.isNotFullyInitialized) {
-            statistics = Statistics(owner)
-        }
-        return statistics
-    }
-
-    override fun getOwner(): AbstractItem {
-        return owner
-    }
+    private val teams: ArrayList<String> = ArrayList()
 
     @Throws(IOException::class)
     override fun addTeam(teamName: String) {
         teams.add(teamName)
         owner.save()
-    }
-
-    @Throws(IOException::class)
-    override fun removeTeam(teamName: String) {
-        teams.remove(teamName)
-        owner.save()
-    }
-
-    override fun reconfigure(req: StaplerRequest, form: JSONObject?): JobProperty<*> {
-        if (form != null) activated = form.getBoolean("activated")
-        if (form != null) showStatistics = form.getBoolean("showStatistics")
-        reconfigure(owner, activated, showStatistics)
-        return this
     }
 
     /**
@@ -87,6 +59,34 @@ class GameJobProperty
             newActions.add(StatisticsAction(job))
         }
         return newActions
+    }
+
+    override fun getOwner(): AbstractItem {
+        return owner
+    }
+
+    override fun getStatistics(): Statistics {
+        if (statistics.isNotFullyInitialized) {
+            statistics = Statistics(owner)
+        }
+        return statistics
+    }
+
+    override fun getTeams(): ArrayList<String> {
+        return teams
+    }
+
+    override fun reconfigure(req: StaplerRequest, form: JSONObject?): JobProperty<*> {
+        if (form != null) activated = form.getBoolean("activated")
+        if (form != null) showStatistics = form.getBoolean("showStatistics")
+        reconfigure(owner, activated, showStatistics)
+        return this
+    }
+
+    @Throws(IOException::class)
+    override fun removeTeam(teamName: String) {
+        teams.remove(teamName)
+        owner.save()
     }
 
     init {

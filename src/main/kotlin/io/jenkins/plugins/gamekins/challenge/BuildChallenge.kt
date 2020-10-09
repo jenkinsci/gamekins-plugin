@@ -11,13 +11,16 @@ class BuildChallenge : Challenge {
     private val created = System.currentTimeMillis()
     private var solved: Long = 0
 
-    override fun isSolved(constants: HashMap<String, String>, run: Run<*, *>, listener: TaskListener,
-                          workspace: FilePath): Boolean {
-        if (run.result == Result.SUCCESS) {
-            solved = System.currentTimeMillis()
-            return true
-        }
-        return false
+    override fun getCreated(): Long {
+        return created
+    }
+
+    override fun getScore(): Int {
+        return 1
+    }
+
+    override fun getSolved(): Long {
+        return solved
     }
 
     override fun isSolvable(constants: HashMap<String, String>, run: Run<*, *>, listener: TaskListener,
@@ -25,16 +28,13 @@ class BuildChallenge : Challenge {
         return true
     }
 
-    override fun getScore(): Int {
-        return 1
-    }
-
-    override fun getCreated(): Long {
-        return created
-    }
-
-    override fun getSolved(): Long {
-        return solved
+    override fun isSolved(constants: HashMap<String, String>, run: Run<*, *>, listener: TaskListener,
+                          workspace: FilePath): Boolean {
+        if (run.result == Result.SUCCESS) {
+            solved = System.currentTimeMillis()
+            return true
+        }
+        return false
     }
 
     override fun printToXML(reason: String, indentation: String): String {

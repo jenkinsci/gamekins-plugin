@@ -21,6 +21,15 @@ class GameOrganizationFolderProperty private constructor() : AbstractFolderPrope
      */
     @Extension
     class GameOrganizationFolderPropertyDescriptor : AbstractFolderPropertyDescriptor() {
+
+        fun doFillProjectItems(@AncestorInPath job: OrganizationFolder?): ListBoxModel {
+            if (job == null) return ListBoxModel()
+            val listBoxModel = ListBoxModel()
+            job.items.stream().map { obj: MultiBranchProject<*, *> -> obj.name }
+                    .forEach { nameAndValue: String? -> listBoxModel.add(nameAndValue) }
+            return listBoxModel
+        }
+
         @Nonnull
         override fun getDisplayName(): String {
             return "Set the activation of the Gamekins plugin."
@@ -48,14 +57,6 @@ class GameOrganizationFolderProperty private constructor() : AbstractFolderPrope
                 }
             }
             return null
-        }
-
-        fun doFillProjectItems(@AncestorInPath job: OrganizationFolder?): ListBoxModel {
-            if (job == null) return ListBoxModel()
-            val listBoxModel = ListBoxModel()
-            job.items.stream().map { obj: MultiBranchProject<*, *> -> obj.name }
-                    .forEach { nameAndValue: String? -> listBoxModel.add(nameAndValue) }
-            return listBoxModel
         }
 
         init {

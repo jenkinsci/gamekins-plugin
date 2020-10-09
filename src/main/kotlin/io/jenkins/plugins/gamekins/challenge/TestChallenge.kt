@@ -16,6 +16,30 @@ class TestChallenge(private val currentCommit: String, private val testCount: In
     private var solved: Long = 0
     private var testCountSolved = 0
 
+    override fun getCreated(): Long {
+        return created
+    }
+
+    override fun getScore(): Int {
+        return 1
+    }
+
+    override fun getSolved(): Long {
+        return solved
+    }
+
+    override fun isSolvable(constants: HashMap<String, String>, run: Run<*, *>, listener: TaskListener,
+                            workspace: FilePath): Boolean {
+        if (run.parent.parent is WorkflowMultiBranchProject) {
+            for (workflowJob in (run.parent.parent as WorkflowMultiBranchProject).items) {
+                if (workflowJob.name == branch) return true
+            }
+        } else {
+            return true
+        }
+        return false
+    }
+
     override fun isSolved(constants: HashMap<String, String>, run: Run<*, *>, listener: TaskListener,
                           workspace: FilePath): Boolean {
         if (branch != constants["branch"]) return false
@@ -35,30 +59,6 @@ class TestChallenge(private val currentCommit: String, private val testCount: In
             e.printStackTrace(listener.logger)
         }
         return false
-    }
-
-    override fun isSolvable(constants: HashMap<String, String>, run: Run<*, *>, listener: TaskListener,
-                            workspace: FilePath): Boolean {
-        if (run.parent.parent is WorkflowMultiBranchProject) {
-            for (workflowJob in (run.parent.parent as WorkflowMultiBranchProject).items) {
-                if (workflowJob.name == branch) return true
-            }
-        } else {
-            return true
-        }
-        return false
-    }
-
-    override fun getScore(): Int {
-        return 1
-    }
-
-    override fun getCreated(): Long {
-        return created
-    }
-
-    override fun getSolved(): Long {
-        return solved
     }
 
     override fun printToXML(reason: String, indentation: String): String {
