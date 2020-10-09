@@ -6,6 +6,12 @@ import hudson.model.Run
 import hudson.model.TaskListener
 import java.util.*
 
+/**
+ * Specific [Challenge] to motivate the user to fix a failing build in Jenkins.
+ *
+ * @author Philipp Straubinger
+ * @since 1.0
+ */
 class BuildChallenge : Challenge {
 
     private val created = System.currentTimeMillis()
@@ -23,11 +29,17 @@ class BuildChallenge : Challenge {
         return solved
     }
 
+    /**
+     * A [BuildChallenge] is always solvable since it depends on the status of the Jenkins [run].
+     */
     override fun isSolvable(constants: HashMap<String, String>, run: Run<*, *>, listener: TaskListener,
                             workspace: FilePath): Boolean {
         return true
     }
 
+    /**
+     * A [BuildChallenge] is only solved if the status of the current [run] is [Result.SUCCESS].
+     */
     override fun isSolved(constants: HashMap<String, String>, run: Run<*, *>, listener: TaskListener,
                           workspace: FilePath): Boolean {
         if (run.result == Result.SUCCESS) {

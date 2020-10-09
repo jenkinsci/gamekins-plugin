@@ -13,8 +13,23 @@ import org.jsoup.nodes.Document
 import java.io.IOException
 import java.util.*
 
+/**
+ * Factory for generating [Challenge]s.
+ *
+ * @author Philipp Straubinger
+ * @since 1.0
+ */
 object ChallengeFactory {
 
+    /**
+     * Generates a new [Challenge] for the current [user].
+     *
+     * With a probability of 10% a new [TestChallenge] is generated to keep the user motivated. Otherwise a class
+     * is selected by the Rank Selection algorithm from the pool of [classes], where the [user] has changed something
+     * in his last commits. It is being attempted five times to generate a [CoverageChallenge]. If this fails or if
+     * the list of [classes] is empty, a new [DummyChallenge] is generated. The [workspace] is the folder with the
+     * code and execution rights, and the [listener] reports the events to the console output of Jenkins.
+     */
     @JvmStatic
     @Throws(IOException::class, InterruptedException::class)
     fun generateChallenge(user: User, constants: HashMap<String, String>, listener: TaskListener,
@@ -24,6 +39,7 @@ object ChallengeFactory {
             return TestChallenge(workspace.act(HeadCommitCallable(workspace.remote)).name,
                     getTestCount(workspace), user, constants["branch"]!!)
         }
+
         val worklist = ArrayList(classes)
         val c = 1.5
         val rankValues = DoubleArray(worklist.size)
@@ -31,6 +47,7 @@ object ChallengeFactory {
             rankValues[i] = (2 - c + 2 * (c - 1) * (i / (worklist.size - 1).toDouble())) / worklist.size.toDouble()
             if (i != 0) rankValues[i] += rankValues[i - 1]
         }
+
         var challenge: Challenge?
         val random = Random()
         var count = 0
@@ -39,6 +56,7 @@ object ChallengeFactory {
                 listener.logger.println("[Gamekins] No CoverageChallenge could be built")
                 return DummyChallenge()
             }
+
             val probability = Math.random()
             var selectedClass = worklist[worklist.size - 1]
             for (i in worklist.indices) {
@@ -47,6 +65,7 @@ object ChallengeFactory {
                     break
                 }
             }
+
             //TODO: Make more beautiful
             val challengeType = random.nextInt(4)
             var challengeClass: Class<*>
@@ -61,6 +80,7 @@ object ChallengeFactory {
                     LineCoverageChallenge::class.java
                 }
             }
+
             listener.logger.println("[Gamekins] Try class " + selectedClass.className + " and type "
                     + challengeClass.simpleName)
             challenge = generateCoverageChallenge(selectedClass, challengeClass, constants["branch"],
@@ -71,16 +91,22 @@ object ChallengeFactory {
                             && challenge.lineContent == null)) {
                 challenge = null
             }
+
             worklist.remove(selectedClass)
             count++
         } while (challenge == null)
+
         return challenge
     }
 
+    /**
+     * Generates a new [CoverageChallenge] of type [challengeClass] for the current class with details [classDetails]
+     * and the current [branch]. The [workspace] is the folder with the code and execution rights, and the [listener]
+     * reports the events to the console output of Jenkins.
+     */
     //TODO: Create Enum
     @Throws(IOException::class, InterruptedException::class)
-    private fun generateCoverageChallenge(classDetails: ClassDetails,
-                                          challengeClass: Class<*>, branch: String?,
+    private fun generateCoverageChallenge(classDetails: ClassDetails, challengeClass: Class<*>, branch: String?,
                                           listener: TaskListener, workspace: FilePath): CoverageChallenge? {
         val document: Document
         document = try {
@@ -92,6 +118,7 @@ object ChallengeFactory {
             e.printStackTrace(listener.logger)
             throw e
         }
+
         return if (calculateCoveredLines(document, "pc") > 0
                 || calculateCoveredLines(document, "nc") > 0) {
             when (challengeClass) {

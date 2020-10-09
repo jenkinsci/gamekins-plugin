@@ -9,6 +9,12 @@ import io.jenkins.plugins.gamekins.util.JacocoUtil.getTestCount
 import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject
 import java.util.*
 
+/**
+ * Specific [Challenge] to motivate the user to write a new test.
+ *
+ * @author Philipp Straubinger
+ * @since 1.0
+ */
 class TestChallenge(private val currentCommit: String, private val testCount: Int, private val user: User,
                     private val branch: String) : Challenge {
 
@@ -28,6 +34,10 @@ class TestChallenge(private val currentCommit: String, private val testCount: In
         return solved
     }
 
+    /**
+     * A [TestChallenge] is always solvable if the branch (taken form the [constants]), where it has been generated,
+     * still exists in the project.
+     */
     override fun isSolvable(constants: HashMap<String, String>, run: Run<*, *>, listener: TaskListener,
                             workspace: FilePath): Boolean {
         if (run.parent.parent is WorkflowMultiBranchProject) {
@@ -40,6 +50,12 @@ class TestChallenge(private val currentCommit: String, private val testCount: In
         return false
     }
 
+    /**
+     * A [TestChallenge] can only be solved in the branch (taken form the [constants]) where it has been generated,
+     * because there can be different amounts of tests in different branches. The [TestChallenge] is solved if the
+     * [testCount] during generation was less than the current amount of tests and the [user] has written a test since
+     * the last commit ([currentCommit]).
+     */
     override fun isSolved(constants: HashMap<String, String>, run: Run<*, *>, listener: TaskListener,
                           workspace: FilePath): Boolean {
         if (branch != constants["branch"]) return false
