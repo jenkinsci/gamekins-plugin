@@ -59,8 +59,13 @@ class GameMultiBranchProperty
         return this
     }
 
+    /**
+     * Cannot be outsourced in separate class, because the constructor of [AbstractFolderPropertyDescriptor]
+     * does not take the base class.
+     */
     @Extension
-    class DescriptorImpl : AbstractFolderPropertyDescriptor() {
+    class GameMultiBranchPropertyDescriptor : AbstractFolderPropertyDescriptor() {
+
         @Nonnull
         override fun getDisplayName(): String {
             return "Set the activation of the Gamekins plugin."

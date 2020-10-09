@@ -1,9 +1,7 @@
 package io.jenkins.plugins.gamekins
 
-import hudson.Extension
 import hudson.model.User
 import hudson.model.UserProperty
-import hudson.model.UserPropertyDescriptor
 import io.jenkins.plugins.gamekins.challenge.Challenge
 import io.jenkins.plugins.gamekins.challenge.DummyChallenge
 import net.sf.json.JSONObject
@@ -12,7 +10,6 @@ import org.kohsuke.stapler.StaplerRequest
 import java.util.*
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.CopyOnWriteArraySet
-import javax.annotation.Nonnull
 
 class GameUserProperty : UserProperty() {
 
@@ -138,10 +135,6 @@ class GameUserProperty : UserProperty() {
         this.currentChallenges[projectName] = currentChallenges
     }
 
-    override fun getDescriptor(): UserPropertyDescriptor {
-        return DESCRIPTOR
-    }
-
     fun printToXML(projectName: String, indentation: String): String {
         val print = StringBuilder()
         print.append(indentation).append("<User id=\"").append(pseudonym).append("\" project=\"")
@@ -183,39 +176,4 @@ class GameUserProperty : UserProperty() {
         if (form != null) names = form.getString("names")
         return this
     }
-
-    @Extension
-    class GameUserPropertyDescriptor : UserPropertyDescriptor(GameUserProperty::class.java) {
-
-        /**
-         * Creates a default instance of [UserProperty] to be associated
-         * with [User] object that wasn't created from a persisted XML data.
-         *
-         *
-         *
-         * See [User] class javadoc for more details about the life cycle
-         * of [User] and when this method is invoked.
-         *
-         * @param user the user who needs the GameUserProperty
-         * @return null
-         * if the implementation choose not to add any property object for such user.
-         */
-        override fun newInstance(user: User): UserProperty {
-            return GameUserProperty()
-        }
-
-        @Nonnull
-        override fun getDisplayName(): String {
-            return "Gamekins"
-        }
-
-        init {
-            load()
-        }
-    }
-
-    companion object {
-        val DESCRIPTOR = GameUserPropertyDescriptor()
-    }
-
 }

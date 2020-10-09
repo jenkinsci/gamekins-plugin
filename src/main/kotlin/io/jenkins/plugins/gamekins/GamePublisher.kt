@@ -1,16 +1,13 @@
 package io.jenkins.plugins.gamekins
 
-import hudson.Extension
 import hudson.FilePath
 import hudson.Launcher
 import hudson.model.*
 import hudson.security.HudsonPrivateSecurityRealm.Details
 import hudson.tasks.BuildStep
-import hudson.tasks.BuildStepDescriptor
 import hudson.tasks.BuildStepMonitor
 import hudson.tasks.Notifier
 import hudson.tasks.Publisher
-import hudson.util.FormValidation
 import io.jenkins.plugins.gamekins.challenge.BuildChallenge
 import io.jenkins.plugins.gamekins.challenge.Challenge
 import io.jenkins.plugins.gamekins.challenge.ChallengeFactory.generateChallenge
@@ -32,12 +29,9 @@ import io.jenkins.plugins.gamekins.util.JacocoUtil.getTestCount
 import io.jenkins.plugins.gamekins.util.PublisherUtil.doCheckJacocoCSVPath
 import io.jenkins.plugins.gamekins.util.PublisherUtil.doCheckJacocoResultsPath
 import jenkins.tasks.SimpleBuildStep
-import org.jenkinsci.Symbol
 import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject
-import org.kohsuke.stapler.AncestorInPath
 import org.kohsuke.stapler.DataBoundConstructor
 import org.kohsuke.stapler.DataBoundSetter
-import org.kohsuke.stapler.QueryParameter
 import java.io.IOException
 import java.util.*
 import javax.annotation.Nonnull
@@ -49,10 +43,6 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
 
     @set:DataBoundSetter
     var searchCommitCount: Int = if (searchCommitCount > 0) searchCommitCount else GitUtil.DEFAULT_SEARCH_COMMIT_COUNT
-
-    override fun getDescriptor(): GameDescriptor {
-        return DESCRIPTOR
-    }
 
     /**
      * Return true if this [Publisher] needs to run after the build result is
@@ -310,7 +300,7 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
                                 listener.logger.println("[Gamekins] Generated challenge $challenge")
                                 if (challenge is DummyChallenge) break
                                 for (currentChallenge
-                                     in property.getCurrentChallenges(constants["projectName"])) {
+                                in property.getCurrentChallenges(constants["projectName"])) {
                                     if (currentChallenge.toString() == challenge.toString()) {
                                         isChallengeUnique = false
                                         listener.logger.println("[Gamekins] Challenge is not unique")
@@ -377,50 +367,4 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
         }
         listener.logger.println("[Gamekins] Finished")
     }
-
-    @Extension
-    @Symbol("gamekins")
-    class GameDescriptor : BuildStepDescriptor<Publisher?>(GamePublisher::class.java) {
-        @Nonnull
-        override fun getDisplayName(): String {
-            return "Publisher for Gamekins plugin."
-        }
-
-        /**
-         * Returns true if this task is applicable to the given project.
-         *
-         * @param jobType the type of job
-         * @return true to allow user to configure this post-promotion task for the given project.
-         * @see AbstractProject.AbstractProjectDescriptor.isApplicable
-         */
-        override fun isApplicable(jobType: Class<out AbstractProject<*, *>?>): Boolean {
-            return AbstractProject::class.java.isAssignableFrom(jobType)
-        }
-
-        fun doCheckJacocoResultsPath(@AncestorInPath project: AbstractProject<*, *>?,
-                                     @QueryParameter jacocoResultsPath: String?): FormValidation {
-            if (project == null) {
-                return FormValidation.ok()
-            }
-            return if (doCheckJacocoResultsPath(project.someWorkspace!!, jacocoResultsPath!!)) FormValidation.ok()
-                   else FormValidation.error("The folder is not correct")
-        }
-
-        fun doCheckJacocoCSVPath(@AncestorInPath project: AbstractProject<*, *>?,
-                                 @QueryParameter jacocoCSVPath: String?): FormValidation {
-            if (project == null) {
-                return FormValidation.ok()
-            }
-            return if (doCheckJacocoCSVPath(project.someWorkspace!!, jacocoCSVPath!!)) FormValidation.ok() else FormValidation.error("The file could not be found")
-        }
-
-        init {
-            load()
-        }
-    }
-
-    companion object {
-        val DESCRIPTOR = GameDescriptor()
-    }
-
 }

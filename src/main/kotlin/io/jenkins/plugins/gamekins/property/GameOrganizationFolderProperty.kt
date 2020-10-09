@@ -15,8 +15,12 @@ import javax.annotation.Nonnull
 
 class GameOrganizationFolderProperty private constructor() : AbstractFolderProperty<AbstractFolder<*>?>() {
 
+    /**
+     * Cannot be outsourced in separate class, because the constructor of [AbstractFolderPropertyDescriptor]
+     * does not take the base class.
+     */
     @Extension
-    class DescriptorFolderImpl : AbstractFolderPropertyDescriptor() {
+    class GameOrganizationFolderPropertyDescriptor : AbstractFolderPropertyDescriptor() {
         @Nonnull
         override fun getDisplayName(): String {
             return "Set the activation of the Gamekins plugin."
