@@ -12,6 +12,7 @@ import io.jenkins.plugins.gamekins.util.JacocoUtil.getTestCount
 import org.jsoup.nodes.Document
 import java.io.IOException
 import java.util.*
+import kotlin.jvm.Throws
 
 /**
  * Factory for generating [Challenge]s.

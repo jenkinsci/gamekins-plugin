@@ -25,7 +25,7 @@ class GameOrganizationFolderProperty private constructor() : AbstractFolderPrope
         fun doFillProjectItems(@AncestorInPath job: OrganizationFolder?): ListBoxModel {
             if (job == null) return ListBoxModel()
             val listBoxModel = ListBoxModel()
-            job.items.stream().map { obj: MultiBranchProject<*, *> -> obj.name }
+            job.items.stream().map { obj: MultiBranchProject<*, *> -> obj.getName() }
                     .forEach { nameAndValue: String? -> listBoxModel.add(nameAndValue) }
             return listBoxModel
         }
@@ -43,9 +43,9 @@ class GameOrganizationFolderProperty private constructor() : AbstractFolderPrope
             if (req == null) return null
             val folder = req.findAncestor(OrganizationFolder::class.java).getObject() as OrganizationFolder
             for (project in folder.items) {
-                if (project.name == formData.getString("project")) {
+                if (project.getName() == formData.getString("project")) {
                     try {
-                        val property = project.properties.get(GameMultiBranchProperty::class.java)
+                        val property = project.getProperties().get(GameMultiBranchProperty::class.java)
                         property?.reconfigure(req, formData)
                                 ?: project.addProperty(GameMultiBranchProperty(project,
                                         formData.getBoolean("activated"), formData.getBoolean("showStatistics")))

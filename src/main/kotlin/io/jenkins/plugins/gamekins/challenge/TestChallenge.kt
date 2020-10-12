@@ -40,8 +40,8 @@ class TestChallenge(private val currentCommit: String, private val testCount: In
      */
     override fun isSolvable(constants: HashMap<String, String>, run: Run<*, *>, listener: TaskListener,
                             workspace: FilePath): Boolean {
-        if (run.parent.parent is WorkflowMultiBranchProject) {
-            for (workflowJob in (run.parent.parent as WorkflowMultiBranchProject).items) {
+        if (run.getParent().getParent() is WorkflowMultiBranchProject) {
+            for (workflowJob in (run.getParent().getParent() as WorkflowMultiBranchProject).items) {
                 if (workflowJob.name == branch) return true
             }
         } else {

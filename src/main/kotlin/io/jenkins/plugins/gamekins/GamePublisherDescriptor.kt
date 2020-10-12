@@ -20,7 +20,8 @@ class GamePublisherDescriptor : BuildStepDescriptor<Publisher?>(GamePublisher::c
         if (project == null) {
             return FormValidation.ok()
         }
-        return if (PublisherUtil.doCheckJacocoCSVPath(project.someWorkspace!!, jacocoCSVPath!!)) FormValidation.ok()
+        return if (PublisherUtil.doCheckJacocoCSVPath(project.getSomeWorkspace()!!, jacocoCSVPath!!))
+            FormValidation.ok()
         else FormValidation.error("The file could not be found")
     }
 
@@ -29,7 +30,7 @@ class GamePublisherDescriptor : BuildStepDescriptor<Publisher?>(GamePublisher::c
         if (project == null) {
             return FormValidation.ok()
         }
-        return if (PublisherUtil.doCheckJacocoResultsPath(project.someWorkspace!!, jacocoResultsPath!!))
+        return if (PublisherUtil.doCheckJacocoResultsPath(project.getSomeWorkspace()!!, jacocoResultsPath!!))
             FormValidation.ok()
         else FormValidation.error("The folder is not correct")
     }

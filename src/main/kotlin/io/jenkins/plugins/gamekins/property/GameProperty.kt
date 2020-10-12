@@ -4,6 +4,7 @@ import hudson.model.AbstractItem
 import io.jenkins.plugins.gamekins.statistics.Statistics
 import java.io.IOException
 import java.util.*
+import kotlin.jvm.Throws
 
 interface GameProperty {
 

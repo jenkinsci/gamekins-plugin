@@ -16,6 +16,7 @@ import java.io.File
 import java.io.IOException
 import java.io.Serializable
 import java.util.*
+import kotlin.jvm.Throws
 
 object JacocoUtil {
 
@@ -98,7 +99,7 @@ object JacocoUtil {
     @JvmStatic
     fun getJacocoFileInMultiBranchProject(run: Run<*, *>, constants: HashMap<String, String>,
                                           jacocoFile: FilePath, oldBranch: String): FilePath {
-        return if (run.parent.parent is WorkflowMultiBranchProject
+        return if (run.getParent().getParent() is WorkflowMultiBranchProject
                 && constants["branch"] == oldBranch) {
             FilePath(jacocoFile.channel, jacocoFile.remote.replace(
                     constants["projectName"].toString() + "_" + oldBranch,

@@ -22,6 +22,7 @@ import org.eclipse.jgit.treewalk.CanonicalTreeParser
 import org.eclipse.jgit.treewalk.EmptyTreeIterator
 import java.io.*
 import java.util.*
+import kotlin.jvm.Throws
 
 object GitUtil {
 

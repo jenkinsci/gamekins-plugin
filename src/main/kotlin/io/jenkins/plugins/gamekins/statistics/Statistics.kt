@@ -61,13 +61,13 @@ class Statistics(job: AbstractItem) {
                 }
             }
             is AbstractProject<*, *> -> {
-                for (abstractBuild in job.builds) {
+                for (abstractBuild in job.getBuilds()) {
                     if (abstractBuild.getNumber() == number) {
                         runEntries.add(RunEntry(
                                 abstractBuild.getNumber(),
                                 "",
-                                abstractBuild.result,
-                                abstractBuild.startTimeInMillis,
+                                abstractBuild.getResult(),
+                                abstractBuild.getStartTimeInMillis(),
                                 0,
                                 0,
                                 JacocoUtil.getTestCount(null, abstractBuild),
@@ -144,14 +144,14 @@ class Statistics(job: AbstractItem) {
                 }
             }
             is AbstractProject<*, *> -> {
-                val list = job.builds
+                val list = job.getBuilds()
                 list.reverse()
                 for (abstractBuild in list) {
                     entries.add(RunEntry(
                             abstractBuild!!.getNumber(),
                             "",
-                            abstractBuild.result,
-                            abstractBuild.startTimeInMillis,
+                            abstractBuild.getResult(),
+                            abstractBuild.getStartTimeInMillis(),
                             0,
                             0,
                             JacocoUtil.getTestCount(null, abstractBuild),
@@ -159,7 +159,7 @@ class Statistics(job: AbstractItem) {
                 }
             }
         }
-        entries.sortWith { obj: RunEntry, o: RunEntry -> obj.compareTo(o) }
+        entries.sortedWith(compareBy({it.branch}, {it.runNumber}))
         return entries
     }
 
@@ -170,7 +170,7 @@ class Statistics(job: AbstractItem) {
     fun printToXML(): String {
         val print = StringBuilder()
         print.append("<Statistics project=\"").append(projectName).append("\">\n")
-        val users: ArrayList<User> = ArrayList<User>(User.getAll())
+        val users: ArrayList<User> = ArrayList(User.getAll())
         users.removeIf { user: User -> !user.getProperty(GameUserProperty::class.java).isParticipating(projectName) }
         print.append("    <Users count=\"").append(users.size).append("\">\n")
         for (user in users) {
@@ -191,7 +191,10 @@ class Statistics(job: AbstractItem) {
     }
 
     class RunEntry(val runNumber: Int, val branch: String, val result: Result?, val startTime: Long,
-                   private val generatedChallenges: Int, private val solvedChallenges: Int, val testCount: Int, val coverage: Double) : Comparable<RunEntry> {
+                   private val generatedChallenges: Int, private val solvedChallenges: Int, val testCount: Int,
+                   val coverage: Double)
+        : Comparable<RunEntry> {
+
         fun printToXML(indentation: String): String {
             return (indentation + "<Run number=\"" + runNumber + "\" branch=\"" + branch +
                     "\" result=\"" + (result?.toString() ?: "NULL") + "\" startTime=\"" +

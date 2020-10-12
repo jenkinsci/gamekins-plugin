@@ -12,6 +12,7 @@ import org.kohsuke.stapler.StaplerRequest
 import java.io.IOException
 import java.util.*
 import javax.annotation.Nonnull
+import kotlin.jvm.Throws
 
 class GameJobProperty
 @DataBoundConstructor constructor(job: AbstractItem, @set:DataBoundSetter var activated: Boolean,
