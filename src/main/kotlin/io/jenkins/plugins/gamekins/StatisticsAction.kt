@@ -6,9 +6,16 @@ import hudson.model.ProminentProjectAction
 import io.jenkins.plugins.gamekins.property.GameJobProperty
 import io.jenkins.plugins.gamekins.property.GameMultiBranchProperty
 import io.jenkins.plugins.gamekins.property.GameProperty
+import io.jenkins.plugins.gamekins.statistics.Statistics
 import org.jenkinsci.plugins.workflow.job.WorkflowJob
 import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject
 
+/**
+ * Action to display the [Statistics] XML representation on the left side panel of a job for evaluation purposes.
+ *
+ * @author Philipp Straubinger
+ * @since 1.0
+ */
 class StatisticsAction(val job: AbstractItem) : ProminentProjectAction {
 
     override fun getDisplayName(): String {
@@ -19,6 +26,9 @@ class StatisticsAction(val job: AbstractItem) : ProminentProjectAction {
         return "document.png"
     }
 
+    /**
+     * Returns the XML representation of the project.
+     */
     fun getStatistics(): String {
         val property: GameProperty = when (job) {
             is WorkflowMultiBranchProject -> {
