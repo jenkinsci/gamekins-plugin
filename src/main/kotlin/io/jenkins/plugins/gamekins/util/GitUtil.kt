@@ -24,10 +24,19 @@ import java.io.*
 import java.util.*
 import kotlin.jvm.Throws
 
+/**
+ * Util object for interaction with git and JGit.
+ *
+ * @author Philipp Straubinger
+ * @since 1.0
+ */
 object GitUtil {
 
     const val DEFAULT_SEARCH_COMMIT_COUNT = 50
 
+    /**
+     * Returns the current branch of the git repository in the [workspace].
+     */
     @JvmStatic
     fun getBranch(workspace: FilePath): String {
         try {
@@ -38,6 +47,9 @@ object GitUtil {
         return ""
     }
 
+    /**
+     * Returns the iterator of a commit [commitId] in a [git] repository according to the position in the history tree.
+     */
     @JvmStatic
     @Throws(IOException::class)
     private fun getCanonicalTreeParser(git: Git, commitId: ObjectId): AbstractTreeIterator {
@@ -48,6 +60,9 @@ object GitUtil {
         return CanonicalTreeParser(null, reader, treeId)
     }
 
+    /**
+     * Returns the commit information according to a [hash] in a [repo]sitory.
+     */
     @JvmStatic
     @Throws(IOException::class)
     private fun getCommit(repo: Repository, hash: String): RevCommit {
@@ -58,6 +73,9 @@ object GitUtil {
         return commit
     }
 
+    /**
+     * Returns the difference between the [newCommit] and its previous commit in the [repo]sitory and [git].
+     */
     @JvmStatic
     @Throws(IOException::class)
     private fun getDiffOfCommit(git: Git, repo: Repository, newCommit: RevCommit): String {
@@ -72,54 +90,74 @@ object GitUtil {
         return outputStream.toString()
     }
 
+    /**
+     * Returns the head information according to a [repo]sitory.
+     */
     @JvmStatic
     @Throws(IOException::class)
     fun getHead(repo: Repository): RevCommit {
         return getCommit(repo, Constants.HEAD)
     }
 
-    //TODO: Not performant - maybe JGit starts to search from the HEAD every time?
-    //TODO: Looking at the time it seems random...
-    //TODO: Maybe some commits have many parents?
+    /**
+     * Returns a list of last changed classes. It searches the last [count] of commits in the history in the
+     * [workspace] and assigns the classes changed in these commits to the according [users]. [constants] are needed
+     * for information about the JaCoCo paths and the [listener] reports the events to the console output of Jenkins.
+     */
+    //TODO: Not performant - JGit has to start to search from the HEAD every time, because the history is a tree
     @JvmStatic
     @Throws(IOException::class)
     fun getLastChangedClasses(count: Int, constants: HashMap<String, String>, listener: TaskListener,
                               users: ArrayList<GameUser>, workspace: FilePath): ArrayList<ClassDetails> {
         val builder = FileRepositoryBuilder()
-        val repo = builder.setGitDir(File(workspace.remote + "/.git"))
-                .setMustExist(true).build()
+        val repo = builder.setGitDir(File(workspace.remote + "/.git")).setMustExist(true).build()
         val walk = RevWalk(repo)
+
         val headCommit = getHead(repo)
         val git = Git(repo)
+
         var totalCount = 0
         var currentCommits = HashSet<RevCommit>()
         val searchedCommits = HashSet<RevCommit>()
         currentCommits.add(headCommit)
         val classes = ArrayList<ClassDetails>()
         val authorMapping = HashMap<PersonIdent, GameUser>()
+
         while (totalCount < count) {
             listener.logger.println("[Gamekins] Searched through $totalCount Commits")
             if (currentCommits.isEmpty()) break
+
             val newCommits = HashSet<RevCommit>()
             for (commit in currentCommits) {
                 searchedCommits.add(commit)
+
                 val diff = getDiffOfCommit(git, repo, commit)
                 val lines = diff.split("\n".toRegex())
                 for (i in lines.indices) {
                     val line = lines[i]
+
+                    //Not interested in merge commits
                     if (commit.shortMessage.toLowerCase().contains("merge")) break
-                    //TODO: Shows diff of some merge requests, but not all
-                    if (line.contains("diff --git") && i + 1 < lines.size && !lines[i + 1].contains("deleted")) {
+
+                    //Not interested in deleted classes
+                    if (line.contains("diff --git") && i + 1 < lines.size
+                            && !lines[i + 1].contains("deleted")) {
                         val path = line.split(" ".toRegex())[2].substring(1)
                         val pathSplit = path.split("/".toRegex())
-                        if (path.split("/".toRegex()).contains("test")
-                                || !(path.contains(".java") || path.contains(".kt"))) {
+
+                        //TODO: Other classes than Java and Kotlin
+                        //Not interested in tests and files written in languages other than Java and Kotlin
+                        if (path.split("/".toRegex()).contains("test") || !(path.contains(".java")
+                                        || path.contains(".kt"))) {
                             continue
                         }
+
+                        //Check whether the class was found before
                         val classname = pathSplit[pathSplit.size - 1].split("\\.".toRegex())[0]
                         var found = false
                         for (details in classes) {
                             if (details.className == classname) {
+                                //Map the author of the commit to the Jenkins user
                                 var user = authorMapping[commit.authorIdent]
                                 if (user == null) {
                                     user = mapUser(commit.authorIdent, users)
@@ -134,6 +172,8 @@ object GitUtil {
                                 break
                             }
                         }
+
+                        //Add a new class
                         if (!found) {
                             val details = ClassDetails(workspace, path,
                                     constants["jacocoResultsPath"]!!, constants["jacocoCSVPath"]!!, listener)
@@ -148,11 +188,14 @@ object GitUtil {
                         }
                     }
                 }
+
+                //Add the next commits if they have not been analysed before
                 for (parent in commit.parents) {
                     if (!searchedCommits.contains(parent) && !newCommits.contains(parent)
                             && !currentCommits.contains(parent)) {
                         newCommits.add(walk.parseCommit(repo.resolve(parent.name)))
                     }
+                    //Reset the tree
                     walk.dispose()
                 }
                 totalCount++
@@ -162,22 +205,31 @@ object GitUtil {
         return classes
     }
 
+    /**
+     * Returns a list of last changed files. It searches the last [commitCount] of commits in the history in the
+     * [workspace] or until a specific [commitHash] and assigns the classes changed in these commits to the
+     * according [user].
+     */
     @JvmStatic
     @Throws(IOException::class)
     private fun getLastChangedFilesOfUser(workspace: String, user: GameUser, commitCount: Int,
                                           commitHash: String, users: ArrayList<GameUser>): Set<String> {
         var commitSearchCount = commitCount
         if (commitSearchCount <= 0) commitSearchCount = DEFAULT_SEARCH_COMMIT_COUNT
+
         val builder = FileRepositoryBuilder()
         val repo = builder.setGitDir(File("$workspace/.git")).setMustExist(true).build()
         val walk = RevWalk(repo)
+
         var targetCommit: RevCommit? = null
         if (commitHash.isNotEmpty()) {
             targetCommit = getCommit(repo, commitHash)
         }
+
         val headCommit = getHead(repo)
         val git = Git(repo)
         if (targetCommit === headCommit || targetCommit == null) return LinkedHashSet()
+
         var countUserCommit = 0
         var totalCount = 0
         var currentCommits = HashSet<RevCommit>()
@@ -185,6 +237,7 @@ object GitUtil {
         searchedCommits.add(targetCommit)
         searchedCommits.addAll(targetCommit.parents)
         var nearToLeaf = true
+
         for (revCommit in targetCommit.parents) {
             val parents = revCommit.parents
             if (parents != null && parents.isNotEmpty()) {
@@ -193,12 +246,15 @@ object GitUtil {
             }
         }
         currentCommits.add(headCommit)
+
         val pathsToFiles = LinkedHashSet<String>()
         while (countUserCommit < commitSearchCount && totalCount < commitSearchCount * 5) {
             if (currentCommits.isEmpty()) break
+
             val newCommits = ArrayList<RevCommit>()
             for (commit in currentCommits) {
                 searchedCommits.add(commit)
+
                 val mapUser = mapUser(commit.authorIdent, users)
                 if (mapUser != null && mapUser == user) {
                     val diff = getDiffOfCommit(git, repo, commit)
@@ -210,11 +266,13 @@ object GitUtil {
                     }
                     countUserCommit++
                 }
+
                 for (parent in commit.parents) {
                     newCommits.add(walk.parseCommit(repo.resolve(parent.name)))
                     walk.dispose()
                 }
             }
+
             if (nearToLeaf && newCommits.contains(targetCommit)) break
             newCommits.removeAll(searchedCommits)
             currentCommits = HashSet(newCommits)
@@ -223,6 +281,9 @@ object GitUtil {
         return pathsToFiles
     }
 
+    /**
+     * Return the last changed source files of a [user] only without test classes.
+     */
     @JvmStatic
     @Throws(IOException::class, InterruptedException::class)
     fun getLastChangedSourceFilesOfUser(workspace: FilePath, user: User, commitCount: Int,
@@ -238,6 +299,9 @@ object GitUtil {
         return pathsToFiles
     }
 
+    /**
+     * Return the last changed tests of a [user] only without source files.
+     */
     @JvmStatic
     @Throws(IOException::class, InterruptedException::class)
     fun getLastChangedTestFilesOfUser(workspace: FilePath, user: User, commitCount: Int,
@@ -253,6 +317,9 @@ object GitUtil {
         return pathsToFiles
     }
 
+    /**
+     * Returns the commit information of the previous commit for a given [commit] and [repo]sitory.
+     */
     @JvmStatic
     @Throws(IOException::class)
     private fun getPrevHash(repo: Repository, commit: RevCommit): RevCommit? {
@@ -269,6 +336,10 @@ object GitUtil {
         return null
     }
 
+    /**
+     * Maps the author [ident] of a commit to their corresponding Jenkins user of [users]. Uses the full name, the git
+     * names and the mail address for identification.
+     */
     @JvmStatic
     fun mapUser(ident: PersonIdent, users: Collection<User>): User? {
         val split = ident.name.split(" ".toRegex())
@@ -285,6 +356,10 @@ object GitUtil {
         return null
     }
 
+    /**
+     * Maps the author [ident] of a commit to their corresponding Jenkins user of [users] in the class [GameUser].
+     * Uses the full name, the git names and the mail address for identification.
+     */
     @JvmStatic
     fun mapUser(ident: PersonIdent, users: ArrayList<GameUser>): GameUser? {
         val split = ident.name.split(" ".toRegex())
@@ -298,6 +373,9 @@ object GitUtil {
         return null
     }
 
+    /**
+     * Maps Jenkins [users] to their corresponding [GameUser].
+     */
     @JvmStatic
     fun mapUsersToGameUsers(users: Collection<User>): ArrayList<GameUser> {
         val gameUsers = ArrayList<GameUser>()
@@ -308,6 +386,12 @@ object GitUtil {
         return gameUsers
     }
 
+    /**
+     * Returns the branch of a repository on a remote machine.
+     *
+     * @author Philipp Straubinger
+     * @since 1.0
+     */
     private class BranchCallable(private val workspace: String) : MasterToSlaveCallable<String, IOException?>() {
 
         /**
@@ -326,6 +410,12 @@ object GitUtil {
         }
     }
 
+    /**
+     * Returns the head of a repository on a remote machine.
+     *
+     * @author Philipp Straubinger
+     * @since 1.0
+     */
     class HeadCommitCallable(private val workspace: String) : MasterToSlaveCallable<RevCommit, IOException?>() {
 
         /**
@@ -340,6 +430,12 @@ object GitUtil {
         }
     }
 
+    /**
+     * Returns the last changed files of a repository on a remote machine.
+     *
+     * @author Philipp Straubinger
+     * @since 1.0
+     */
     class LastChangedClassesCallable(private val count: Int, private val constants: HashMap<String, String>,
                                      private val listener: TaskListener, private val users: ArrayList<GameUser>,
                                      private val workspace: FilePath)
@@ -356,6 +452,12 @@ object GitUtil {
         }
     }
 
+    /**
+     * Returns the last changed files of a repository on a remote machine.
+     *
+     * @author Philipp Straubinger
+     * @since 1.0
+     */
     private class LastChangedFilesCallable constructor(private val workspace: String, private val user: GameUser,
                                                        private val commitCount: Int, private val commitHash: String,
                                                        private val users: ArrayList<GameUser>)
@@ -371,6 +473,12 @@ object GitUtil {
         }
     }
 
+    /**
+     * The internal representation of a [User] in Jenkins since it cannot be serialised and sent to a remote machine.
+     *
+     * @author Philipp Straubinger
+     * @since 1.0
+     */
     class GameUser(user: User) : Serializable {
 
         val id: String = user.id
@@ -386,9 +494,13 @@ object GitUtil {
             if (this === other) return true
             if (other == null || javaClass != other.javaClass) return false
             val gameUser = other as GameUser
-            return id == gameUser.id && fullName == gameUser.fullName && mail == gameUser.mail && gitNames == gameUser.gitNames
+            return id == gameUser.id && fullName == gameUser.fullName && mail == gameUser.mail
+                    && gitNames == gameUser.gitNames
         }
 
+        /**
+         * Returns the Jenkins [User] represented by this [GameUser].
+         */
         //TODO: Not callable on remote machines
         fun getUser(): User? {
             for (user in User.getAll()) {

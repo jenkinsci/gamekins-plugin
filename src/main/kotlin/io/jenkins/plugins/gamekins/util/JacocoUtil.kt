@@ -18,19 +18,38 @@ import java.io.Serializable
 import java.util.*
 import kotlin.jvm.Throws
 
+/**
+ * Util object for interaction with JaCoCo and Jsoup.
+ *
+ * @author Philipp Straubinger
+ * @since 1.0
+ */
 object JacocoUtil {
 
+    /**
+     * Calculates the number of covered lines in a JaCoCo class files [document] with a given [modifier].
+     *
+     * Available modifiers are fc (fully covered), pc (partially covered) and nc (not covered).
+     */
     @JvmStatic
     fun calculateCoveredLines(document: Document, modifier: String): Int {
         val elements = document.select("span.$modifier")
         return elements.size
     }
 
+    /**
+     * Returns the [FilePath] of a given [file] in the [workspace] for use on a remote machine.
+     */
     @JvmStatic
     fun calculateCurrentFilePath(workspace: FilePath, file: File): FilePath {
         return FilePath(workspace.channel, file.absolutePath)
     }
 
+    /**
+     * Returns the [FilePath] of a given [file] in the [workspace] for use on a remote machine. Replaces the
+     * [oldWorkspace] with a new one in causes where the branch in [WorkflowMultiBranchProject]s has changed and
+     * therefore the path to the [workspace].
+     */
     @JvmStatic
     fun calculateCurrentFilePath(workspace: FilePath, file: File, oldWorkspace: String): FilePath {
         var oldWorkspacePath = oldWorkspace
@@ -40,6 +59,9 @@ object JacocoUtil {
         return FilePath(workspace.channel, file.absolutePath.replace(oldWorkspacePath, remote))
     }
 
+    /**
+     * Extracts the package name according to the [shortFilePath] of the class.
+     */
     fun computePackageName(shortFilePath: String): String {
         val pathSplit = shortFilePath.split("/".toRegex())
         var packageName = StringBuilder()
@@ -54,12 +76,18 @@ object JacocoUtil {
         return packageName.toString()
     }
 
+    /**
+     * Generates the Jsoup document of a HTML [file].
+     */
     @JvmStatic
     @Throws(IOException::class, InterruptedException::class)
     fun generateDocument(file: FilePath): Document {
         return Jsoup.parse(file.readToString())
     }
 
+    /**
+     * Returns the coverage of a [className] according to the JaCoCo [csv] file of the project.
+     */
     @JvmStatic
     fun getCoverageInPercentageFromJacoco(className: String, csv: FilePath): Double {
         try {
@@ -79,6 +107,9 @@ object JacocoUtil {
         return 0.0
     }
 
+    /**
+     * Returns all files in a given [directory] including subdirectories that matches a specific [regex].
+     */
     @JvmStatic
     fun getFilesInAllSubDirectories(directory: FilePath, regex: String): ArrayList<FilePath> {
         val files = ArrayList<FilePath>()
@@ -96,6 +127,9 @@ object JacocoUtil {
         return files
     }
 
+    /**
+     * Similar to [JacocoUtil.calculateCurrentFilePath], only specific to JaCoCo files.
+     */
     @JvmStatic
     fun getJacocoFileInMultiBranchProject(run: Run<*, *>, constants: HashMap<String, String>,
                                           jacocoFile: FilePath, oldBranch: String): FilePath {
@@ -109,6 +143,9 @@ object JacocoUtil {
         }
     }
 
+    /**
+     * Returns all lines of the [jacocoSourceFile] that does not contain specific identifiers.
+     */
     @JvmStatic
     @Throws(IOException::class, InterruptedException::class)
     fun getLines(jacocoSourceFile: FilePath): Elements {
@@ -129,6 +166,9 @@ object JacocoUtil {
         return elements
     }
 
+    /**
+     * Returns all methods of a given class by their [jacocoMethodFile].
+     */
     @JvmStatic
     @Throws(IOException::class, InterruptedException::class)
     fun getMethodEntries(jacocoMethodFile: FilePath): ArrayList<CoverageMethod> {
@@ -145,6 +185,7 @@ object JacocoUtil {
                 }
                 if (matches) break
             }
+
             if (matches) {
                 var methodName = ""
                 var lines = 0
@@ -173,6 +214,9 @@ object JacocoUtil {
         return methods
     }
 
+    /**
+     * Returns all methods of a given class by their [jacocoMethodFile], which are not fully covered.
+     */
     @JvmStatic
     @Throws(IOException::class, InterruptedException::class)
     fun getNotFullyCoveredMethodEntries(jacocoMethodFile: FilePath): ArrayList<CoverageMethod> {
@@ -181,6 +225,9 @@ object JacocoUtil {
         return methods
     }
 
+    /**
+     * Returns the coverage of the project according to the csv file(s) [csvName] in the [workspace].
+     */
     @JvmStatic
     fun getProjectCoverage(workspace: FilePath, csvName: String): Double {
         val files: ArrayList<FilePath>
@@ -190,6 +237,7 @@ object JacocoUtil {
             e.printStackTrace()
             return 0.0
         }
+
         var instructionCount = 0
         var coveredInstructionCount = 0
         for (file in files) {
@@ -212,6 +260,9 @@ object JacocoUtil {
         return coveredInstructionCount / instructionCount.toDouble()
     }
 
+    /**
+     * Returns the number of tests of a project in the [workspace] according to the JUnit results.
+     */
     @JvmStatic
     fun getTestCount(workspace: FilePath): Int {
         try {
@@ -230,6 +281,9 @@ object JacocoUtil {
         return 0
     }
 
+    /**
+     * Returns the number of tests of a project run or according to the JUnit results.
+     */
     @JvmStatic
     fun getTestCount(workspace: FilePath?, run: Run<*, *>?): Int {
         if (run != null) {
@@ -241,6 +295,12 @@ object JacocoUtil {
         return if (workspace == null) 0 else getTestCount(workspace)
     }
 
+    /**
+     * Returns the last changed files of a repository on a remote machine.
+     *
+     * @author Philipp Straubinger
+     * @since 1.0
+     */
     class FilesOfAllSubDirectoriesCallable(private val directory: FilePath, private val regex: String)
         : MasterToSlaveCallable<ArrayList<FilePath>, IOException?>() {
 
@@ -253,20 +313,31 @@ object JacocoUtil {
         }
     }
 
+    /**
+     * The internal representation of a method from JaCoCo.
+     *
+     * @author Philipp Straubinger
+     * @since 1.0
+     */
     class CoverageMethod internal constructor(val methodName: String?, val lines: Int, val missedLines: Int)
 
     /**
+     * The internal representation of a class from JaCoCo.
      *
      * @param workspace Workspace of the project
      * @param shortFilePath Path of the file, starting in the workspace root directory
      * @param shortJacocoPath Path of the JaCoCo root directory, beginning with ** / (without space)
      * @param shortJacocoCSVPath Path of the JaCoCo csv file, beginning with ** / (without space)
+     *
+     * @author Philipp Straubinger
+     * @since 1.0
      */
     class ClassDetails(workspace: FilePath,
                        shortFilePath: String,
                        shortJacocoPath: String,
                        shortJacocoCSVPath: String,
-                       listener: TaskListener) : Serializable {
+                       listener: TaskListener)
+        : Serializable {
 
         val className: String
         val extension: String
@@ -278,10 +349,56 @@ object JacocoUtil {
         val changedByUsers: HashSet<GameUser>
         val workspace: String = workspace.remote
 
+        init {
+            val pathSplit = shortFilePath.split("/".toRegex())
+            //Compute class, package and extension name
+            className = pathSplit[pathSplit.size - 1].split("\\.".toRegex())[0]
+            this.extension = pathSplit[pathSplit.size - 1].split("\\.".toRegex())[1]
+            packageName = computePackageName(shortFilePath)
+
+            //Build the paths to the JaCoCo files
+            val jacocoPath = StringBuilder(workspace.remote)
+            var i = 0
+            while (pathSplit[i] != "src") {
+                if (pathSplit[i].isNotEmpty()) jacocoPath.append("/").append(pathSplit[i])
+                i++
+            }
+            jacocoCSVFile = File(jacocoPath.toString() + shortJacocoCSVPath.substring(2))
+            if (!jacocoCSVFile.exists()) {
+                listener.logger.println("[Gamekins] JaCoCoCSVPath: " + jacocoCSVFile.absolutePath
+                        + " exists " + jacocoCSVFile.exists())
+            }
+
+            jacocoPath.append(shortJacocoPath.substring(2))
+            if (!jacocoPath.toString().endsWith("/")) jacocoPath.append("/")
+            jacocoPath.append(packageName).append("/")
+            jacocoMethodFile = File("$jacocoPath$className.html")
+            if (!jacocoMethodFile.exists()) {
+                listener.logger.println("[Gamekins] JaCoCoMethodPath: "
+                        + jacocoMethodFile.absolutePath + " exists " + jacocoMethodFile.exists())
+            }
+
+            jacocoSourceFile = File(jacocoPath.toString() + className + "." + this.extension + ".html")
+            if (!jacocoSourceFile.exists()) {
+                listener.logger.println("[Gamekins] JaCoCoSourcePath: "
+                        + jacocoSourceFile.absolutePath + " exists " + jacocoSourceFile.exists())
+            }
+
+            coverage = getCoverageInPercentageFromJacoco(className,
+                    calculateCurrentFilePath(workspace, jacocoCSVFile))
+            changedByUsers = HashSet()
+        }
+
+        /**
+         * Adds a new [user], who has recently changed the class.
+         */
         fun addUser(user: GameUser) {
             changedByUsers.add(user)
         }
 
+        /**
+         * Check whether all JaCoCo files are existing, which is not always the case.
+         */
         fun filesExists(): Boolean {
             return jacocoCSVFile.exists() && jacocoSourceFile.exists() && jacocoMethodFile.exists()
         }
@@ -298,40 +415,6 @@ object JacocoUtil {
             value = StringBuilder(value.substring(0, value.length - 1))
             value.append('}')
             return value.toString()
-        }
-
-        init {
-            val pathSplit = shortFilePath.split("/".toRegex())
-            className = pathSplit[pathSplit.size - 1].split("\\.".toRegex())[0]
-            this.extension = pathSplit[pathSplit.size - 1].split("\\.".toRegex())[1]
-            packageName = computePackageName(shortFilePath)
-            val jacocoPath = StringBuilder(workspace.remote)
-            var i = 0
-            while (pathSplit[i] != "src") {
-                if (pathSplit[i].isNotEmpty()) jacocoPath.append("/").append(pathSplit[i])
-                i++
-            }
-            jacocoCSVFile = File(jacocoPath.toString() + shortJacocoCSVPath.substring(2))
-            if (!jacocoCSVFile.exists()) {
-                listener.logger.println("[Gamekins] JaCoCoCSVPath: " + jacocoCSVFile.absolutePath
-                        + " exists " + jacocoCSVFile.exists())
-            }
-            jacocoPath.append(shortJacocoPath.substring(2))
-            if (!jacocoPath.toString().endsWith("/")) jacocoPath.append("/")
-            jacocoPath.append(packageName).append("/")
-            jacocoMethodFile = File("$jacocoPath$className.html")
-            if (!jacocoMethodFile.exists()) {
-                listener.logger.println("[Gamekins] JaCoCoMethodPath: "
-                        + jacocoMethodFile.absolutePath + " exists " + jacocoMethodFile.exists())
-            }
-            jacocoSourceFile = File(jacocoPath.toString() + className + "." + this.extension + ".html")
-            if (!jacocoSourceFile.exists()) {
-                listener.logger.println("[Gamekins] JaCoCoSourcePath: "
-                        + jacocoSourceFile.absolutePath + " exists " + jacocoSourceFile.exists())
-            }
-            coverage = getCoverageInPercentageFromJacoco(className,
-                    calculateCurrentFilePath(workspace, jacocoCSVFile))
-            changedByUsers = HashSet()
         }
     }
 }

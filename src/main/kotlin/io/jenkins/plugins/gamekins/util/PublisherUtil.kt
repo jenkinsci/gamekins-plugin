@@ -3,8 +3,17 @@ package io.jenkins.plugins.gamekins.util
 import hudson.FilePath
 import io.jenkins.plugins.gamekins.util.JacocoUtil.FilesOfAllSubDirectoriesCallable
 
+/**
+ * Util object for interaction with publishers.
+ *
+ * @author Philipp Straubinger
+ * @since 1.0
+ */
 object PublisherUtil {
 
+    /**
+     * Checks whether the path of the JaCoCo csv file [jacocoCSVPath] exists in the [workspace].
+     */
     @JvmStatic
     fun doCheckJacocoCSVPath(workspace: FilePath, jacocoCSVPath: String): Boolean {
         var csvPath = jacocoCSVPath
@@ -25,6 +34,9 @@ object PublisherUtil {
         return false
     }
 
+    /**
+     * Checks whether the path of the JaCoCo index.html file [jacocoResultsPath] exists in the [workspace].
+     */
     @JvmStatic
     fun doCheckJacocoResultsPath(workspace: FilePath, jacocoResultsPath: String): Boolean {
         var resultsPath = jacocoResultsPath

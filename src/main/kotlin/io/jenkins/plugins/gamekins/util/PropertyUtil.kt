@@ -18,8 +18,18 @@ import java.io.IOException
 import java.util.*
 import java.util.function.Consumer
 
+/**
+ * Util object for interaction with properties.
+ *
+ * @author Philipp Straubinger
+ * @since 1.0
+ */
 object PropertyUtil {
 
+    /**
+     * Adds a new team [teamName]] to the [property]. Returns errors if the [teamName] is empty, the property is null,
+     * the [teamName] already exists or an Exception is thrown.
+     */
     @JvmStatic
     fun doAddTeam(property: GameProperty?, teamName: String): FormValidation {
         if (teamName.trim { it <= ' ' }.isEmpty()) return FormValidation.error("No team specified")
@@ -35,6 +45,10 @@ object PropertyUtil {
         return FormValidation.ok("Team successfully added")
     }
 
+    /**
+     * Adds a user [usersBox] to a team [teamsBox] for a [job]. Returns errors if the [job] is null, the user is
+     * already in a team, the user was not found or an Exception is thrown.
+     */
     @JvmStatic
     fun doAddUserToTeam(job: AbstractItem?, teamsBox: String, usersBox: String): FormValidation {
         if (teamsBox.trim { it <= ' ' }.isEmpty()) return FormValidation.error("No team specified")
@@ -60,6 +74,10 @@ object PropertyUtil {
         return FormValidation.error("No user with the specified name found")
     }
 
+    /**
+     * Deletes a team [teamsBox] in the [property] for the prject [projectName]. Throws an error if the [property] is
+     * null, the team does not exist or an Exception is thrown.
+     */
     @JvmStatic
     fun doDeleteTeam(projectName: String, property: GameProperty?, teamsBox: String): FormValidation {
         if (teamsBox.trim { it <= ' ' }.isEmpty()) return FormValidation.error("No team specified")
@@ -86,6 +104,9 @@ object PropertyUtil {
         return FormValidation.ok("Team successfully deleted")
     }
 
+    /**
+     * Returns the list of teams of a [property].
+     */
     @JvmStatic
     fun doFillTeamsBoxItems(property: GameProperty?): ListBoxModel {
         val listBoxModel = ListBoxModel()
@@ -93,6 +114,10 @@ object PropertyUtil {
         return listBoxModel
     }
 
+    /**
+     * Returns the list of users that can sign into Jenkins. Already participating users in the project [projectName]
+     * are listed first. System users are excluded.
+     */
     @JvmStatic
     fun doFillUsersBoxItems(projectName: String): ListBoxModel {
         val participatingUser = ArrayList<String>()
@@ -108,6 +133,7 @@ object PropertyUtil {
                 }
             }
         }
+
         participatingUser.addAll(otherUsers)
         participatingUser.remove("unknown")
         participatingUser.remove("root")
@@ -117,6 +143,10 @@ object PropertyUtil {
         return listBoxModel
     }
 
+    /**
+     * Removes a participant [usersBox] from a team [teamsBox]. Returns an error if the [job] is null, the user was
+     * not found or the suer is not in the team.
+     */
     @JvmStatic
     fun doRemoveUserFromTeam(job: AbstractItem?, teamsBox: String, usersBox: String): FormValidation {
         if (teamsBox.trim { it <= ' ' }.isEmpty()) return FormValidation.error("No team specified")
@@ -142,6 +172,11 @@ object PropertyUtil {
         return FormValidation.error("No user with the specified name found")
     }
 
+    /**
+     * Adds or removes a [LeaderboardAction] or [StatisticsAction] with the help of the according methods of the
+     * [owner]. [WorkflowMultiBranchProject]s and [AbstractMavenProject]s do not support this methods and the actions
+     * have to be added via reflection.
+     */
     @JvmStatic
     fun reconfigure(owner: AbstractItem, activated: Boolean, showStatistics: Boolean) {
         if (owner is WorkflowJob) {
