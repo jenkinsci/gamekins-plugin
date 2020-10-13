@@ -2,9 +2,9 @@ package io.jenkins.plugins.gamekins.property
 
 import hudson.model.*
 import io.jenkins.plugins.gamekins.LeaderboardAction
+import io.jenkins.plugins.gamekins.util.PropertyUtil
 import io.jenkins.plugins.gamekins.StatisticsAction
 import io.jenkins.plugins.gamekins.statistics.Statistics
-import io.jenkins.plugins.gamekins.util.PropertyUtil.reconfigure
 import net.sf.json.JSONObject
 import org.kohsuke.stapler.DataBoundConstructor
 import org.kohsuke.stapler.DataBoundSetter
@@ -14,6 +14,12 @@ import java.util.*
 import javax.annotation.Nonnull
 import kotlin.jvm.Throws
 
+/**
+ * Adds the configuration for Gamekins to the configuration page of a [FreeStyleProject].
+ *
+ * @author Philipp Straubinger
+ * @since 1.0
+ */
 class GameJobProperty
 @DataBoundConstructor constructor(job: AbstractItem, @set:DataBoundSetter var activated: Boolean,
                                   @set:DataBoundSetter var showStatistics: Boolean)
@@ -22,6 +28,10 @@ class GameJobProperty
     private var statistics: Statistics
     private val teams: ArrayList<String> = ArrayList()
 
+    init {
+        statistics = Statistics(job)
+    }
+
     @Throws(IOException::class)
     override fun addTeam(teamName: String) {
         teams.add(teamName)
@@ -29,26 +39,12 @@ class GameJobProperty
     }
 
     /**
-     * [Action]s to be displayed in the job page.
+     * Adds the [LeaderboardAction] and the [StatisticsAction] to the left panel if the corresponding checkboxes
+     * in the configuration are activated. Does only return a new action if there is no one already in the list of
+     * actions of the job. Only works for the addition of actions in a [FreeStyleProject], everything else has to be
+     * done with the help of [PropertyUtil.reconfigure].
      *
-     *
-     *
-     * Returning actions from this method allows a job property to add them
-     * to the left navigation bar in the job page.
-     *
-     *
-     *
-     * [Action] can implement additional marker interface to integrate
-     * with the UI in different ways.
-     *
-     * @param job Always the same as [.owner] but passed in anyway for backward compatibility (I guess.)
-     * You really need not use this value at all.
-     * @return can be empty but never null.
-     * @see ProminentProjectAction
-     *
-     * @see PermalinkProjectAction
-     *
-     * @since 1.341
+     * @see [JobProperty.getJobActions]
      */
     @Nonnull
     override fun getJobActions(job: Job<*, *>): Collection<Action> {
@@ -77,10 +73,16 @@ class GameJobProperty
         return teams
     }
 
+    /**
+     * Sets the new values of [activated] and [showStatistics], if the job configuration has been saved.
+     * Also calls [PropertyUtil.reconfigure] to update the [LeaderboardAction] and [StatisticsAction].
+     *
+     * @see [JobProperty.reconfigure]
+     */
     override fun reconfigure(req: StaplerRequest, form: JSONObject?): JobProperty<*> {
         if (form != null) activated = form.getBoolean("activated")
         if (form != null) showStatistics = form.getBoolean("showStatistics")
-        reconfigure(owner, activated, showStatistics)
+        PropertyUtil.reconfigure(owner, activated, showStatistics)
         return this
     }
 
@@ -88,9 +90,5 @@ class GameJobProperty
     override fun removeTeam(teamName: String) {
         teams.remove(teamName)
         owner.save()
-    }
-
-    init {
-        statistics = Statistics(job)
     }
 }

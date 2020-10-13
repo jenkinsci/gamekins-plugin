@@ -4,24 +4,48 @@ import com.cloudbees.hudson.plugins.folder.AbstractFolder
 import com.cloudbees.hudson.plugins.folder.AbstractFolderProperty
 import com.cloudbees.hudson.plugins.folder.AbstractFolderPropertyDescriptor
 import hudson.Extension
+import hudson.model.JobPropertyDescriptor
 import hudson.util.ListBoxModel
 import jenkins.branch.MultiBranchProject
 import jenkins.branch.OrganizationFolder
 import net.sf.json.JSONObject
+import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject
 import org.kohsuke.stapler.AncestorInPath
 import org.kohsuke.stapler.StaplerRequest
 import java.io.IOException
 import javax.annotation.Nonnull
 
+/**
+ * Adds the configuration for Gamekins to the configuration page of a [OrganizationFolder]. Since the
+ * [OrganizationFolder] contains multiple [WorkflowMultiBranchProject]s, there is no functionality in the class.
+ *
+ * @author Philipp Straubinger
+ * @since 1.0
+ */
 class GameOrganizationFolderProperty private constructor() : AbstractFolderProperty<AbstractFolder<*>?>() {
 
     /**
+     * Registers the [GameOrganizationFolderProperty] to Jenkins as an extension and also works as an communication
+     * point between the Jetty server and the [GameOrganizationFolderProperty]. Only to add the
+     * [GameMultiBranchProperty] to the subprojects.
+     *
      * Cannot be outsourced in separate class, because the constructor of [AbstractFolderPropertyDescriptor]
-     * does not take the base class.
+     * does not take the base class like the [JobPropertyDescriptor].
+     *
+     * @author Philipp Straubinger
+     * @since 1.0
      */
     @Extension
     class GameOrganizationFolderPropertyDescriptor : AbstractFolderPropertyDescriptor() {
 
+        init {
+            load()
+        }
+
+        /**
+         * Called from the Jetty server when the configuration page is displayed. Fills the combo box of subprojects
+         * of the [job].
+         */
         fun doFillProjectItems(@AncestorInPath job: OrganizationFolder?): ListBoxModel {
             if (job == null) return ListBoxModel()
             val listBoxModel = ListBoxModel()
@@ -35,10 +59,23 @@ class GameOrganizationFolderProperty private constructor() : AbstractFolderPrope
             return "Set the activation of the Gamekins plugin."
         }
 
+        /**
+         * The [GameOrganizationFolderProperty] can only be added to jobs with the [containerType]
+         * [OrganizationFolder]. For other [containerType]s have a look at [GameJobProperty] and
+         * [GameMultiBranchProperty].
+         *
+         * @see AbstractFolderPropertyDescriptor.isApplicable
+         */
         override fun isApplicable(containerType: Class<out AbstractFolder<*>?>): Boolean {
             return containerType == OrganizationFolder::class.java
         }
 
+        /**
+         * Returns a new instance of a [GameMultiBranchProperty] after saving the configuration page of the job.
+         * Adds the [GameMultiBranchProperty] to the specified subproject.
+         *
+         * @see AbstractFolderPropertyDescriptor.newInstance
+         */
         override fun newInstance(req: StaplerRequest?, formData: JSONObject): AbstractFolderProperty<*>? {
             if (req == null) return null
             val folder = req.findAncestor(OrganizationFolder::class.java).getObject() as OrganizationFolder
@@ -57,10 +94,6 @@ class GameOrganizationFolderProperty private constructor() : AbstractFolderPrope
                 }
             }
             return null
-        }
-
-        init {
-            load()
         }
     }
 }

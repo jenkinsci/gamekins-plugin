@@ -5,15 +5,13 @@ import com.cloudbees.hudson.plugins.folder.AbstractFolderProperty
 import com.cloudbees.hudson.plugins.folder.AbstractFolderPropertyDescriptor
 import hudson.Extension
 import hudson.model.AbstractItem
+import hudson.model.JobPropertyDescriptor
 import hudson.util.FormValidation
 import hudson.util.ListBoxModel
+import io.jenkins.plugins.gamekins.LeaderboardAction
+import io.jenkins.plugins.gamekins.StatisticsAction
 import io.jenkins.plugins.gamekins.statistics.Statistics
 import io.jenkins.plugins.gamekins.util.PropertyUtil
-import io.jenkins.plugins.gamekins.util.PropertyUtil.doAddTeam
-import io.jenkins.plugins.gamekins.util.PropertyUtil.doDeleteTeam
-import io.jenkins.plugins.gamekins.util.PropertyUtil.doFillTeamsBoxItems
-import io.jenkins.plugins.gamekins.util.PropertyUtil.doFillUsersBoxItems
-import io.jenkins.plugins.gamekins.util.PropertyUtil.reconfigure
 import net.sf.json.JSONObject
 import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject
 import org.kohsuke.stapler.*
@@ -22,6 +20,12 @@ import java.util.*
 import javax.annotation.Nonnull
 import kotlin.jvm.Throws
 
+/**
+ * Adds the configuration for Gamekins to the configuration page of a [WorkflowMultiBranchProject].
+ *
+ * @author Philipp Straubinger
+ * @since 1.0
+ */
 class GameMultiBranchProperty
 @DataBoundConstructor constructor(job: AbstractItem?, @set:DataBoundSetter var activated: Boolean,
                                   @set:DataBoundSetter var showStatistics: Boolean)
@@ -29,6 +33,14 @@ class GameMultiBranchProperty
 
     private var statistics: Statistics
     private val teams: ArrayList<String> = ArrayList()
+
+    /**
+     * Call the reconfigure needed to add the actions to the left panel.
+     */
+    init {
+        statistics = Statistics(job!!)
+        PropertyUtil.reconfigure(job, activated, showStatistics)
+    }
 
     @Throws(IOException::class)
     override fun addTeam(teamName: String) {
@@ -47,10 +59,16 @@ class GameMultiBranchProperty
         return teams
     }
 
+    /**
+     * Sets the new values of [activated] and [showStatistics], if the job configuration has been saved.
+     * Also calls [PropertyUtil.reconfigure] to update the [LeaderboardAction] and [StatisticsAction].
+     *
+     * @see [AbstractFolderProperty.reconfigure]
+     */
     override fun reconfigure(req: StaplerRequest, form: JSONObject?): AbstractFolderProperty<*> {
         if (form != null) activated = form.getBoolean("activated")
         if (form != null) showStatistics = form.getBoolean("showStatistics")
-        reconfigure(owner!!, activated, showStatistics)
+        PropertyUtil.reconfigure(owner!!, activated, showStatistics)
         return this
     }
 
@@ -61,48 +79,83 @@ class GameMultiBranchProperty
     }
 
     /**
+     * Registers the [GameMultiBranchProperty] to Jenkins as an extension and also works as an communication point
+     * between the Jetty server and the [GameMultiBranchProperty].
+     *
      * Cannot be outsourced in separate class, because the constructor of [AbstractFolderPropertyDescriptor]
-     * does not take the base class.
+     * does not take the base class like the [JobPropertyDescriptor].
+     *
+     * @author Philipp Straubinger
+     * @since 1.0
      */
     @Extension
     class GameMultiBranchPropertyDescriptor : AbstractFolderPropertyDescriptor() {
 
+        init {
+            load()
+        }
+
+        /**
+         * Called from the Jetty server if the button to add a new team is pressed. Only allows a non-empty [teamName]
+         * and adds them to the [job], from which the button has been clicked, via the method [PropertyUtil.doAddTeam].
+         */
         fun doAddTeam(@AncestorInPath job: WorkflowMultiBranchProject?,
                       @QueryParameter teamName: String): FormValidation {
             if (job == null) return FormValidation.error("Unexpected error: Parent job is null")
             if (teamName.isEmpty()) return FormValidation.error("Insert a name for the team")
             val property = job.properties[this] as GameMultiBranchProperty
-            val validation = doAddTeam(property, teamName)
+            val validation = PropertyUtil.doAddTeam(property, teamName)
             save()
             return validation
         }
 
+        /**
+         * Called from the Jetty server if the button to add a new participant to a team is pressed. Adds the
+         * participant [usersBox] to the team [teamsBox] via the method [PropertyUtil.doAddUserToTeam].
+         */
         fun doAddUserToTeam(@AncestorInPath job: WorkflowMultiBranchProject?,
                             @QueryParameter teamsBox: String?, @QueryParameter usersBox: String?): FormValidation {
             return PropertyUtil.doAddUserToTeam(job, teamsBox!!, usersBox!!)
         }
 
+        /**
+         * Called from the Jetty server if the button to delete a team is pressed. Deletes the team [teamsBox] of the
+         * [job] via the method [PropertyUtil.doDeleteTeam].
+         */
         fun doDeleteTeam(@AncestorInPath job: WorkflowMultiBranchProject?,
                          @QueryParameter teamsBox: String?): FormValidation {
             if (job == null) return FormValidation.error("Unexpected error: Parent job is null")
             val projectName = job.name
             val property = job.properties[this] as GameMultiBranchProperty
-            val validation = doDeleteTeam(projectName, property, teamsBox!!)
+            val validation = PropertyUtil.doDeleteTeam(projectName, property, teamsBox!!)
             save()
             return validation
         }
 
+        /**
+         * Called from the Jetty server when the configuration page is displayed. Fills the combo box with the names of
+         * all teams of the [job].
+         */
         fun doFillTeamsBoxItems(@AncestorInPath job: WorkflowMultiBranchProject?): ListBoxModel {
             val property =
                     if (job == null) null
                     else job.properties[this] as GameMultiBranchProperty
-            return doFillTeamsBoxItems(property)
+            return PropertyUtil.doFillTeamsBoxItems(property)
         }
 
+        /**
+         * Called from the Jetty server when the configuration page is displayed. Fills the combo box with the names of
+         * all users of the [job].
+         */
         fun doFillUsersBoxItems(@AncestorInPath job: WorkflowMultiBranchProject): ListBoxModel {
-            return doFillUsersBoxItems(job.name)
+            return PropertyUtil.doFillUsersBoxItems(job.name)
         }
 
+        /**
+         * Called from the Jetty server if the button to remove a participant from a team is pressed. Removes the
+         * participant [usersBox] from the team [teamsBox] of the [job] via the method
+         * [PropertyUtil.doRemoveUserFromTeam].
+         */
         fun doRemoveUserFromTeam(@AncestorInPath job: WorkflowMultiBranchProject?, @QueryParameter teamsBox: String?,
                                  @QueryParameter usersBox: String?): FormValidation {
             return PropertyUtil.doRemoveUserFromTeam(job, teamsBox!!, usersBox!!)
@@ -113,23 +166,26 @@ class GameMultiBranchProperty
             return "Set the activation of the Gamekins plugin."
         }
 
+        /**
+         * The [GameMultiBranchProperty] can only be added to jobs with the [containerType]
+         * [WorkflowMultiBranchProject]. For other [containerType]s have a look at [GameJobProperty] and
+         * [GameOrganizationFolderProperty].
+         *
+         * @see AbstractFolderPropertyDescriptor.isApplicable
+         */
         override fun isApplicable(containerType: Class<out AbstractFolder<*>?>): Boolean {
             return containerType == WorkflowMultiBranchProject::class.java
         }
 
+        /**
+         * Returns a new instance of a [GameMultiBranchProperty] during creation and saving of a job.
+         *
+         * @see AbstractFolderPropertyDescriptor.newInstance
+         */
         override fun newInstance(req: StaplerRequest?, formData: JSONObject): AbstractFolderProperty<*>? {
             return if (req == null || req.findAncestor(AbstractItem::class.java).getObject() == null) null
             else GameMultiBranchProperty(req.findAncestor(AbstractItem::class.java).getObject() as AbstractItem,
                     formData.getBoolean("activated"), formData.getBoolean("showStatistics"))
         }
-
-        init {
-            load()
-        }
-    }
-
-    init {
-        statistics = Statistics(job!!)
-        reconfigure(job, activated, showStatistics)
     }
 }
