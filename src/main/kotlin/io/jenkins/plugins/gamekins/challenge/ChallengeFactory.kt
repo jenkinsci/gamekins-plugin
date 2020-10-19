@@ -13,6 +13,7 @@ import org.jsoup.nodes.Document
 import java.io.IOException
 import java.util.*
 import kotlin.jvm.Throws
+import kotlin.random.Random
 
 /**
  * Factory for generating [Challenge]s.
@@ -35,7 +36,7 @@ object ChallengeFactory {
     @Throws(IOException::class, InterruptedException::class)
     fun generateChallenge(user: User, constants: HashMap<String, String>, listener: TaskListener,
                           classes: ArrayList<ClassDetails>, workspace: FilePath): Challenge {
-        if (Math.random() > 0.9) {
+        if (Random.nextDouble() > 0.9) {
             listener.logger.println("[Gamekins] Generated new TestChallenge")
             return TestChallenge(workspace.act(HeadCommitCallable(workspace.remote)).name,
                     getTestCount(workspace), user, constants["branch"]!!)
@@ -50,7 +51,6 @@ object ChallengeFactory {
         }
 
         var challenge: Challenge?
-        val random = Random()
         var count = 0
         do {
             if (count == 5 || worklist.isEmpty()) {
@@ -58,7 +58,7 @@ object ChallengeFactory {
                 return DummyChallenge()
             }
 
-            val probability = Math.random()
+            val probability = Random.nextDouble()
             var selectedClass = worklist[worklist.size - 1]
             for (i in worklist.indices) {
                 if (rankValues[i] > probability) {
@@ -68,7 +68,7 @@ object ChallengeFactory {
             }
 
             //TODO: Make more beautiful
-            val challengeType = random.nextInt(4)
+            val challengeType = Random.nextInt(4)
             var challengeClass: Class<*>
             challengeClass = when (challengeType) {
                 0 -> {
