@@ -13,9 +13,7 @@ import io.kotest.core.spec.style.AnnotationSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.string.shouldStartWith
-import io.mockk.every
-import io.mockk.mockkClass
-import io.mockk.mockkStatic
+import io.mockk.*
 import jenkins.branch.MultiBranchProject
 
 class TestChallengeTest : AnnotationSpec() {
@@ -31,6 +29,11 @@ class TestChallengeTest : AnnotationSpec() {
     @BeforeEach
     fun init() {
         challenge = TestChallenge("", testCount, user, "master")
+    }
+
+    @AfterAll
+    fun cleanUp() {
+        unmockkAll()
     }
 
     @Test

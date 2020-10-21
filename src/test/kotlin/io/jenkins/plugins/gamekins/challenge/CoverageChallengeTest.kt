@@ -6,9 +6,7 @@ import io.jenkins.plugins.gamekins.util.JacocoUtil
 import io.kotest.core.spec.style.AnnotationSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldStartWith
-import io.mockk.every
-import io.mockk.mockkClass
-import io.mockk.mockkStatic
+import io.mockk.*
 import org.jsoup.nodes.Document
 
 class CoverageChallengeTest : AnnotationSpec() {
@@ -21,6 +19,11 @@ class CoverageChallengeTest : AnnotationSpec() {
     private lateinit var details : JacocoUtil.ClassDetails
     private lateinit var challenge : ClassCoverageChallenge
     private val coverage = 0.0
+
+    @AfterAll
+    fun cleanUp() {
+        unmockkAll()
+    }
 
     @Test
     fun printToXML() {

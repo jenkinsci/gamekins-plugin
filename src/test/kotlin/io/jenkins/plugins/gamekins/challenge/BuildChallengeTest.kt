@@ -10,6 +10,7 @@ import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.string.shouldStartWith
 import io.mockk.every
 import io.mockk.mockkClass
+import io.mockk.unmockkAll
 
 class BuildChallengeTest : AnnotationSpec() {
 
@@ -18,6 +19,11 @@ class BuildChallengeTest : AnnotationSpec() {
     @BeforeEach
     fun init() {
         challenge = BuildChallenge()
+    }
+
+    @AfterAll
+    fun cleanUp() {
+        unmockkAll()
     }
 
     @Test

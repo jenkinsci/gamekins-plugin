@@ -52,6 +52,11 @@ class ChallengeFactoryTest : AnnotationSpec() {
         details = JacocoUtil.ClassDetails(path, shortFilePath, shortJacocoPath, shortJacocoCSVPath, listener)
     }
 
+    @AfterAll
+    fun cleanUp() {
+        unmockkAll()
+    }
+
     @Test
     fun generateClassCoverageChallenge() {
         mockkObject(Random)

@@ -10,9 +10,7 @@ import io.kotest.matchers.should
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.string.shouldEndWith
-import io.mockk.every
-import io.mockk.mockkClass
-import io.mockk.mockkStatic
+import io.mockk.*
 import org.eclipse.jgit.lib.PersonIdent
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder
 import java.io.*
@@ -47,6 +45,11 @@ class GitUtilTest : AnnotationSpec() {
         every { user.fullName } returns name
         every { user.mail } returns mail
         every { user.gitNames } returns hashSetOf(id, name)
+    }
+
+    @AfterAll
+    fun cleanUp() {
+        unmockkAll()
     }
 
     @Test

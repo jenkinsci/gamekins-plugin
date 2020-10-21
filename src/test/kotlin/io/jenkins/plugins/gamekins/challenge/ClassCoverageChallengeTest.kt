@@ -6,9 +6,7 @@ import hudson.model.TaskListener
 import io.jenkins.plugins.gamekins.util.JacocoUtil
 import io.kotest.core.spec.style.AnnotationSpec
 import io.kotest.matchers.shouldBe
-import io.mockk.every
-import io.mockk.mockkClass
-import io.mockk.mockkStatic
+import io.mockk.*
 import org.jsoup.nodes.Document
 
 class ClassCoverageChallengeTest : AnnotationSpec() {
@@ -37,6 +35,11 @@ class ClassCoverageChallengeTest : AnnotationSpec() {
         details = JacocoUtil.ClassDetails(path, shortFilePath, shortJacocoPath, shortJacocoCSVPath,
                 TaskListener.NULL)
         challenge = ClassCoverageChallenge(details, branch, path)
+    }
+
+    @AfterAll
+    fun cleanUp() {
+        unmockkAll()
     }
 
     @Test
