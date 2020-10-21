@@ -76,6 +76,7 @@ object GitUtil {
     /**
      * Returns the difference between the [newCommit] and its previous commit in the [repo]sitory and [git].
      */
+    //TODO: Initial commit returns empty String (but works with getLastChangedClasses()?)
     @JvmStatic
     @Throws(IOException::class)
     private fun getDiffOfCommit(git: Git, repo: Repository, newCommit: RevCommit): String {
