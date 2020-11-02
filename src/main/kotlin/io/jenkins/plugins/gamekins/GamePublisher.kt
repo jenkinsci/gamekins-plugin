@@ -20,6 +20,7 @@ import io.jenkins.plugins.gamekins.util.GitUtil.HeadCommitCallable
 import io.jenkins.plugins.gamekins.util.GitUtil.LastChangedClassesCallable
 import io.jenkins.plugins.gamekins.util.JacocoUtil
 import io.jenkins.plugins.gamekins.util.JacocoUtil.ClassDetails
+import io.jenkins.plugins.gamekins.util.PropertyUtil
 import io.jenkins.plugins.gamekins.util.PublisherUtil
 import jenkins.tasks.SimpleBuildStep
 import org.jenkinsci.plugins.workflow.job.WorkflowJob
@@ -97,7 +98,7 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
         var solved = 0
         var generated = 0
         for (user in User.getAll()) {
-            if (user.getProperty(Details::class.java) == null) continue
+            if (!PropertyUtil.realUser(user)) continue
 
             val property = user.getProperty(GameUserProperty::class.java)
             if (property != null && property.isParticipating(constants["projectName"]!!)) {

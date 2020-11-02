@@ -84,8 +84,10 @@ class GitUtilTest : AnnotationSpec() {
     @Test
     fun getLastChangedSourceFilesOfUser() {
         val user1 = mockkClass(hudson.model.User::class)
-        every { user1.getProperty(hudson.security.HudsonPrivateSecurityRealm.Details::class.java) } returns
-                mockkClass(hudson.security.HudsonPrivateSecurityRealm.Details::class)
+        every { user1.properties } returns mapOf(
+                mockkClass(hudson.security.HudsonPrivateSecurityRealm.Details.DescriptorImpl::class) to
+                        mockkClass(hudson.security.HudsonPrivateSecurityRealm.Details::class))
+
         val property1 = mockkClass(io.jenkins.plugins.gamekins.GameUserProperty::class)
         every { property1.getGitNames() } returns CopyOnWriteArraySet(listOf(name, id))
         every { user1.getProperty(io.jenkins.plugins.gamekins.GameUserProperty::class.java) } returns property1
@@ -109,8 +111,9 @@ class GitUtilTest : AnnotationSpec() {
     @Test
     fun getLastChangedTestFilesOfUser() {
         val user1 = mockkClass(hudson.model.User::class)
-        every { user1.getProperty(hudson.security.HudsonPrivateSecurityRealm.Details::class.java) } returns
-                mockkClass(hudson.security.HudsonPrivateSecurityRealm.Details::class)
+        every { user1.properties } returns mapOf(
+                mockkClass(hudson.security.HudsonPrivateSecurityRealm.Details.DescriptorImpl::class) to
+                        mockkClass(hudson.security.HudsonPrivateSecurityRealm.Details::class))
         val property1 = mockkClass(io.jenkins.plugins.gamekins.GameUserProperty::class)
         every { property1.getGitNames() } returns CopyOnWriteArraySet(listOf(name, id))
         every { user1.getProperty(io.jenkins.plugins.gamekins.GameUserProperty::class.java) } returns property1
@@ -128,81 +131,6 @@ class GitUtilTest : AnnotationSpec() {
 
         val commitHash = "da1e195773389f37ff5898b10e1708707e7208ac"
         GitUtil.getLastChangedTestFilesOfUser(path, user1, 50, commitHash, listOf(user1)).size shouldBe 3
-    }
-
-    @Test
-    fun mapUser() {
-        val ident = mockkClass(PersonIdent::class)
-        every { ident.name } returns name
-        every { ident.emailAddress } returns mail
-
-        GitUtil.mapUser(ident, listOf()) shouldBe null
-
-        val user1 = mockkClass(hudson.model.User::class)
-        every { user1.getProperty(hudson.security.HudsonPrivateSecurityRealm.Details::class.java) } returns null
-        GitUtil.mapUser(ident, listOf(user1)) shouldBe null
-
-        val user2 = mockkClass(hudson.model.User::class)
-        every { user2.getProperty(hudson.security.HudsonPrivateSecurityRealm.Details::class.java) } returns
-                mockkClass(hudson.security.HudsonPrivateSecurityRealm.Details::class)
-        every { user2.getProperty(io.jenkins.plugins.gamekins.GameUserProperty::class.java) } returns null
-        every { user2.fullName } returns ""
-        every { user2.getProperty(UserProperty::class.java) } returns null
-        GitUtil.mapUser(ident, listOf(user1, user2)) shouldBe null
-
-        val user3 = mockkClass(hudson.model.User::class)
-        every { user3.getProperty(hudson.security.HudsonPrivateSecurityRealm.Details::class.java) } returns
-                mockkClass(hudson.security.HudsonPrivateSecurityRealm.Details::class)
-        val property3 = mockkClass(io.jenkins.plugins.gamekins.GameUserProperty::class)
-        every { property3.getGitNames() } returns CopyOnWriteArraySet(listOf(name))
-        every { user3.getProperty(io.jenkins.plugins.gamekins.GameUserProperty::class.java) } returns property3
-        every { user3.fullName } returns ""
-        every { user3.getProperty(UserProperty::class.java) } returns null
-        GitUtil.mapUser(ident, listOf(user1, user3)) shouldBe user3
-
-        val user4 = mockkClass(hudson.model.User::class)
-        every { user4.getProperty(hudson.security.HudsonPrivateSecurityRealm.Details::class.java) } returns
-                mockkClass(hudson.security.HudsonPrivateSecurityRealm.Details::class)
-        val property4 = mockkClass(io.jenkins.plugins.gamekins.GameUserProperty::class)
-        every { property4.getGitNames() } returns CopyOnWriteArraySet(listOf())
-        every { user4.getProperty(io.jenkins.plugins.gamekins.GameUserProperty::class.java) } returns property4
-        every { user4.fullName } returns name
-        every { user4.getProperty(UserProperty::class.java) } returns null
-        GitUtil.mapUser(ident, listOf(user1, user4)) shouldBe user4
-
-        val user5 = mockkClass(hudson.model.User::class)
-        every { user5.getProperty(hudson.security.HudsonPrivateSecurityRealm.Details::class.java) } returns
-                mockkClass(hudson.security.HudsonPrivateSecurityRealm.Details::class)
-        val property5 = mockkClass(io.jenkins.plugins.gamekins.GameUserProperty::class)
-        every { property5.getGitNames() } returns CopyOnWriteArraySet(listOf())
-        every { user5.getProperty(io.jenkins.plugins.gamekins.GameUserProperty::class.java) } returns property5
-        every { user5.fullName } returns ""
-        every { user5.getProperty(UserProperty::class.java) } returns null
-        GitUtil.mapUser(ident, listOf(user1, user5)) shouldBe null
-
-        val user6 = mockkClass(hudson.model.User::class)
-        every { user6.getProperty(hudson.security.HudsonPrivateSecurityRealm.Details::class.java) } returns
-                mockkClass(hudson.security.HudsonPrivateSecurityRealm.Details::class)
-        val property6 = mockkClass(io.jenkins.plugins.gamekins.GameUserProperty::class)
-        every { property6.getGitNames() } returns CopyOnWriteArraySet(listOf())
-        every { user6.getProperty(io.jenkins.plugins.gamekins.GameUserProperty::class.java) } returns property6
-        every { user6.fullName } returns ""
-        val mailProperty6 = mockkClass(UserProperty::class)
-        every { mailProperty6.address } returns mail
-        every { user6.getProperty(UserProperty::class.java) } returns mailProperty6
-        GitUtil.mapUser(ident, listOf(user1, user6)) shouldBe user6
-
-        val user7 = mockkClass(hudson.model.User::class)
-        every { user7.getProperty(hudson.security.HudsonPrivateSecurityRealm.Details::class.java) } returns
-                mockkClass(hudson.security.HudsonPrivateSecurityRealm.Details::class)
-        val property7 = mockkClass(io.jenkins.plugins.gamekins.GameUserProperty::class)
-        every { property7.getGitNames() } returns CopyOnWriteArraySet(listOf())
-        every { user7.getProperty(io.jenkins.plugins.gamekins.GameUserProperty::class.java) } returns property7
-        every { user7.fullName } returns ""
-        val mailProperty7 = mockkClass(UserProperty::class)
-        every { mailProperty7.address } returns ""
-        every { user7.getProperty(UserProperty::class.java) } returns mailProperty7
-        GitUtil.mapUser(ident, listOf(user1, user7)) shouldBe null
     }
 
     @Test
@@ -239,14 +167,96 @@ class GitUtilTest : AnnotationSpec() {
     }
 
     @Test
+    fun mapUser() {
+        val ident = mockkClass(PersonIdent::class)
+        every { ident.name } returns name
+        every { ident.emailAddress } returns mail
+
+        GitUtil.mapUser(ident, listOf()) shouldBe null
+
+        val user1 = mockkClass(hudson.model.User::class)
+        every { user1.properties } returns mapOf()
+        GitUtil.mapUser(ident, listOf(user1)) shouldBe null
+
+        val user2 = mockkClass(hudson.model.User::class)
+        every { user2.properties } returns mapOf(
+                mockkClass(hudson.security.HudsonPrivateSecurityRealm.Details.DescriptorImpl::class) to
+                        mockkClass(hudson.security.HudsonPrivateSecurityRealm.Details::class))
+        every { user2.getProperty(io.jenkins.plugins.gamekins.GameUserProperty::class.java) } returns null
+        every { user2.fullName } returns ""
+        every { user2.getProperty(UserProperty::class.java) } returns null
+        GitUtil.mapUser(ident, listOf(user1, user2)) shouldBe null
+
+        val user3 = mockkClass(hudson.model.User::class)
+        every { user3.properties } returns mapOf(
+                mockkClass(hudson.security.HudsonPrivateSecurityRealm.Details.DescriptorImpl::class) to
+                        mockkClass(hudson.security.HudsonPrivateSecurityRealm.Details::class))
+        val property3 = mockkClass(io.jenkins.plugins.gamekins.GameUserProperty::class)
+        every { property3.getGitNames() } returns CopyOnWriteArraySet(listOf(name))
+        every { user3.getProperty(io.jenkins.plugins.gamekins.GameUserProperty::class.java) } returns property3
+        every { user3.fullName } returns ""
+        every { user3.getProperty(UserProperty::class.java) } returns null
+        GitUtil.mapUser(ident, listOf(user1, user3)) shouldBe user3
+
+        val user4 = mockkClass(hudson.model.User::class)
+        every { user4.properties } returns mapOf(
+                mockkClass(hudson.security.HudsonPrivateSecurityRealm.Details.DescriptorImpl::class) to
+                        mockkClass(hudson.security.HudsonPrivateSecurityRealm.Details::class))
+        val property4 = mockkClass(io.jenkins.plugins.gamekins.GameUserProperty::class)
+        every { property4.getGitNames() } returns CopyOnWriteArraySet(listOf())
+        every { user4.getProperty(io.jenkins.plugins.gamekins.GameUserProperty::class.java) } returns property4
+        every { user4.fullName } returns name
+        every { user4.getProperty(UserProperty::class.java) } returns null
+        GitUtil.mapUser(ident, listOf(user1, user4)) shouldBe user4
+
+        val user5 = mockkClass(hudson.model.User::class)
+        every { user5.properties } returns mapOf(
+                mockkClass(hudson.security.HudsonPrivateSecurityRealm.Details.DescriptorImpl::class) to
+                        mockkClass(hudson.security.HudsonPrivateSecurityRealm.Details::class))
+        val property5 = mockkClass(io.jenkins.plugins.gamekins.GameUserProperty::class)
+        every { property5.getGitNames() } returns CopyOnWriteArraySet(listOf())
+        every { user5.getProperty(io.jenkins.plugins.gamekins.GameUserProperty::class.java) } returns property5
+        every { user5.fullName } returns ""
+        every { user5.getProperty(UserProperty::class.java) } returns null
+        GitUtil.mapUser(ident, listOf(user1, user5)) shouldBe null
+
+        val user6 = mockkClass(hudson.model.User::class)
+        every { user6.properties } returns mapOf(
+                mockkClass(hudson.security.HudsonPrivateSecurityRealm.Details.DescriptorImpl::class) to
+                        mockkClass(hudson.security.HudsonPrivateSecurityRealm.Details::class))
+        val property6 = mockkClass(io.jenkins.plugins.gamekins.GameUserProperty::class)
+        every { property6.getGitNames() } returns CopyOnWriteArraySet(listOf())
+        every { user6.getProperty(io.jenkins.plugins.gamekins.GameUserProperty::class.java) } returns property6
+        every { user6.fullName } returns ""
+        val mailProperty6 = mockkClass(UserProperty::class)
+        every { mailProperty6.address } returns mail
+        every { user6.getProperty(UserProperty::class.java) } returns mailProperty6
+        GitUtil.mapUser(ident, listOf(user1, user6)) shouldBe user6
+
+        val user7 = mockkClass(hudson.model.User::class)
+        every { user7.properties } returns mapOf(
+                mockkClass(hudson.security.HudsonPrivateSecurityRealm.Details.DescriptorImpl::class) to
+                        mockkClass(hudson.security.HudsonPrivateSecurityRealm.Details::class))
+        val property7 = mockkClass(io.jenkins.plugins.gamekins.GameUserProperty::class)
+        every { property7.getGitNames() } returns CopyOnWriteArraySet(listOf())
+        every { user7.getProperty(io.jenkins.plugins.gamekins.GameUserProperty::class.java) } returns property7
+        every { user7.fullName } returns ""
+        val mailProperty7 = mockkClass(UserProperty::class)
+        every { mailProperty7.address } returns ""
+        every { user7.getProperty(UserProperty::class.java) } returns mailProperty7
+        GitUtil.mapUser(ident, listOf(user1, user7)) shouldBe null
+    }
+
+    @Test
     fun mapUsersToGameUsers() {
         val user1 = mockkClass(hudson.model.User::class)
-        every { user1.getProperty(hudson.security.HudsonPrivateSecurityRealm.Details::class.java) } returns null
+        every { user1.properties } returns mapOf()
         GitUtil.mapUsersToGameUsers(listOf(user1)) should beEmpty()
 
         val user2 = mockkClass(hudson.model.User::class)
-        every { user2.getProperty(hudson.security.HudsonPrivateSecurityRealm.Details::class.java) } returns
-                mockkClass(hudson.security.HudsonPrivateSecurityRealm.Details::class)
+        every { user2.properties } returns mapOf(
+                mockkClass(hudson.security.HudsonPrivateSecurityRealm.Details.DescriptorImpl::class) to
+                        mockkClass(hudson.security.HudsonPrivateSecurityRealm.Details::class))
         val property2 = mockkClass(io.jenkins.plugins.gamekins.GameUserProperty::class)
         every { property2.getGitNames() } returns CopyOnWriteArraySet(listOf(name, id))
         every { user2.getProperty(io.jenkins.plugins.gamekins.GameUserProperty::class.java) } returns property2
@@ -266,8 +276,9 @@ class GitUtilTest : AnnotationSpec() {
     @Test
     fun testGameUser() {
         val user1 = mockkClass(hudson.model.User::class)
-        every { user1.getProperty(hudson.security.HudsonPrivateSecurityRealm.Details::class.java) } returns
-                mockkClass(hudson.security.HudsonPrivateSecurityRealm.Details::class)
+        every { user1.properties } returns mapOf(
+                mockkClass(hudson.security.HudsonPrivateSecurityRealm.Details.DescriptorImpl::class) to
+                        mockkClass(hudson.security.HudsonPrivateSecurityRealm.Details::class))
         val property1 = mockkClass(io.jenkins.plugins.gamekins.GameUserProperty::class)
         every { property1.getGitNames() } returns CopyOnWriteArraySet(listOf(name, id))
         every { user1.getProperty(io.jenkins.plugins.gamekins.GameUserProperty::class.java) } returns property1
@@ -287,11 +298,12 @@ class GitUtilTest : AnnotationSpec() {
         every { User.getAll() } returns listOf(user1)
         gameUser1.getUser() shouldBe user1
 
-        every { user1.getProperty(hudson.security.HudsonPrivateSecurityRealm.Details::class.java) } returns null
+        every { user1.properties } returns mapOf()
         gameUser1.getUser() shouldBe null
 
-        every { user1.getProperty(hudson.security.HudsonPrivateSecurityRealm.Details::class.java) } returns
-                mockkClass(hudson.security.HudsonPrivateSecurityRealm.Details::class)
+        every { user1.properties } returns mapOf(
+                mockkClass(hudson.security.HudsonPrivateSecurityRealm.Details.DescriptorImpl::class) to
+                        mockkClass(hudson.security.HudsonPrivateSecurityRealm.Details::class))
         every { user1.id } returns "sample"
         gameUser1.getUser() shouldBe null
     }

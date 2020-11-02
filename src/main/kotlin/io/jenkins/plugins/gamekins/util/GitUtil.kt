@@ -345,7 +345,7 @@ object GitUtil {
     fun mapUser(ident: PersonIdent, users: Collection<User>): User? {
         val split = ident.name.split(" ".toRegex())
         for (user in users) {
-            if (user.getProperty(Details::class.java) == null) continue
+            if (!PropertyUtil.realUser(user)) continue
             val property = user.getProperty(GameUserProperty::class.java)
             if (property != null && property.getGitNames().contains(ident.name)
                     || user.fullName.contains(split[0]) && user.fullName.contains(split[split.size - 1])
@@ -381,7 +381,7 @@ object GitUtil {
     fun mapUsersToGameUsers(users: Collection<User>): ArrayList<GameUser> {
         val gameUsers = ArrayList<GameUser>()
         for (user in users) {
-            if (user.getProperty(Details::class.java) == null) continue
+            if (!PropertyUtil.realUser(user)) continue
             gameUsers.add(GameUser(user))
         }
         return gameUsers
@@ -505,7 +505,7 @@ object GitUtil {
         //TODO: Not callable on remote machines
         fun getUser(): User? {
             for (user in User.getAll()) {
-                if (user.getProperty(Details::class.java) == null) continue
+                if (!PropertyUtil.realUser(user)) continue
                 if (user.id == id) return user
             }
             return null

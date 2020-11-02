@@ -4,6 +4,7 @@ import hudson.model.Job
 import hudson.model.User
 import hudson.security.HudsonPrivateSecurityRealm.Details
 import hudson.util.FormValidation
+import io.jenkins.plugins.gamekins.GameUserPropertyDescriptor
 import io.kotest.core.spec.style.AnnotationSpec
 import io.kotest.matchers.shouldBe
 import io.mockk.every
@@ -51,6 +52,12 @@ class PropertyUtilTest : AnnotationSpec() {
         every { user2.getProperty(Details::class.java) } returns detailsProperty
         every { user3.getProperty(Details::class.java) } returns null
         every { user1.save() } returns Unit
+        every { user1.properties } returns mapOf(mockkClass(Details.DescriptorImpl::class)
+                to mockkClass(Details::class))
+        every { user2.properties } returns mapOf(mockkClass(Details.DescriptorImpl::class)
+                to mockkClass(Details::class))
+        every { user3.properties } returns mapOf(mockkClass(Details.DescriptorImpl::class)
+                to mockkClass(Details::class))
 
         every { userProperty1.isParticipating(projectName1) } returns false
         every { userProperty1.isParticipating(projectName2) } returns true
@@ -128,5 +135,15 @@ class PropertyUtilTest : AnnotationSpec() {
         PropertyUtil.doRemoveUserFromTeam(job1, team2, userName1).kind shouldBe FormValidation.Kind.OK
     }
 
-    //Does not make sense to test JacocoUtil.reconfigure(), since a real jenkins would be needed for it.
+    @Test
+    fun realUser() {
+        PropertyUtil.realUser(user1) shouldBe true
+
+        val user4 = mockkClass(User::class)
+        every { user4.properties } returns mapOf(mockkClass(GameUserPropertyDescriptor::class)
+                to mockkClass(io.jenkins.plugins.gamekins.GameUserProperty::class))
+        PropertyUtil.realUser(user4) shouldBe false
+    }
+
+    //Does not make sense to test JacocoUtil.reconfigure(), since a real Jenkins would be needed for it.
 }

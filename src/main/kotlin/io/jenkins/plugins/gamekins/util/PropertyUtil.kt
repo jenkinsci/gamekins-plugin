@@ -12,6 +12,7 @@ import io.jenkins.plugins.gamekins.GameUserProperty
 import io.jenkins.plugins.gamekins.LeaderboardAction
 import io.jenkins.plugins.gamekins.StatisticsAction
 import io.jenkins.plugins.gamekins.property.GameProperty
+import org.acegisecurity.userdetails.UserDetails
 import org.jenkinsci.plugins.workflow.job.WorkflowJob
 import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject
 import java.io.IOException
@@ -54,7 +55,7 @@ object PropertyUtil {
         if (teamsBox.trim { it <= ' ' }.isEmpty()) return FormValidation.error("No team specified")
         if (job == null) return FormValidation.error("Unexpected error: Parent job is null")
         for (user in User.getAll()) {
-            if (user.getProperty(Details::class.java) == null) continue
+            if (!realUser(user)) continue
             if (user.fullName == usersBox) {
                 val projectName = job.name
                 val property = user.getProperty(GameUserProperty::class.java)
@@ -84,7 +85,7 @@ object PropertyUtil {
         if (property == null) return FormValidation.error("Unexpected Error")
         if (!property.getTeams().contains(teamsBox)) return FormValidation.error("The specified team does not exist")
         for (user in User.getAll()) {
-            if (user.getProperty(Details::class.java) == null) continue
+            if (!realUser(user)) continue
             val userProperty = user.getProperty(GameUserProperty::class.java)
             if (userProperty != null && userProperty.isParticipating(projectName, teamsBox)) {
                 userProperty.removeParticipation(projectName)
@@ -123,7 +124,7 @@ object PropertyUtil {
         val participatingUser = ArrayList<String>()
         val otherUsers = ArrayList<String>()
         for (user in User.getAll()) {
-            if (user.getProperty(Details::class.java) == null) continue
+            if (!realUser(user)) continue
             val property = user.getProperty(GameUserProperty::class.java)
             if (property != null) {
                 if (property.isParticipating(projectName)) {
@@ -152,7 +153,7 @@ object PropertyUtil {
         if (teamsBox.trim { it <= ' ' }.isEmpty()) return FormValidation.error("No team specified")
         if (job == null) return FormValidation.error("Unexpected error: Parent job is null")
         for (user in User.getAll()) {
-            if (user.getProperty(Details::class.java) == null) continue
+            if (!realUser(user)) continue
             if (user.fullName == usersBox) {
                 val projectName = job.name
                 val property = user.getProperty(GameUserProperty::class.java)
@@ -170,6 +171,13 @@ object PropertyUtil {
             }
         }
         return FormValidation.error("No user with the specified name found")
+    }
+
+    /**
+     * Checks whether the provided user contains login information or not
+     */
+    fun realUser(user: User): Boolean {
+        return !user.properties.values.filter { it is UserDetails }.isNullOrEmpty()
     }
 
     /**
