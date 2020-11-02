@@ -120,8 +120,7 @@ class Statistics(job: AbstractItem) {
         val entries = ArrayList<RunEntry>()
         when (job) {
             is WorkflowMultiBranchProject -> {
-                val master = job.items.stream()
-                        .filter { item: WorkflowJob -> item.name == "master" }.findFirst()
+                val master = job.items.stream().filter { item: WorkflowJob -> item.name == "master" }.findFirst()
                 if (master.isPresent) {
                     val list = master.get().builds
                     list.reverse()

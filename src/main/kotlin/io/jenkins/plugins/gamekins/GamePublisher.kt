@@ -135,7 +135,7 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
                 listener.logger.println("[Gamekins] Start checking solvable state of challenges for user "
                         + user.fullName)
 
-                //CHeck if the Challenges are still solvable
+                //Check if the Challenges are still solvable
                 for (challenge in property.getCurrentChallenges(constants["projectName"])) {
                     if (!challenge.isSolvable(constants, run, listener, workspace)) {
                         property.rejectChallenge(constants["projectName"]!!, challenge, "Not solvable")
