@@ -96,11 +96,21 @@ class LineCoverageChallengeTest : AnnotationSpec() {
         every { pathMock.exists() } returns true
         every { document.select("span.pc") } returns Elements()
         every { document.select("span.fc") } returns Elements()
+        every { document.select("span.nc") } returns Elements()
         challenge.isSolved(map, run, listener, path) shouldBe false
         every { document.select("span.fc") } returns elements
         challenge.isSolved(map, run, listener, path) shouldBe true
         every { element.attr("class") } returns "pc"
         challenge = LineCoverageChallenge(details, branch, path)
+        challenge.isSolved(map, run, listener, path) shouldBe true
+        every { element.attr("class") } returns "nc"
+        every { document.select("span.fc") } returns Elements()
+        every { document.select("span.nc") } returns elements
+        challenge.isSolved(map, run, listener, path) shouldBe false
+        every { element.attr("class") } returns "fc"
+        every { element.attr("id") } returns "L6"
+        every { document.select("span.fc") } returns elements
+        every { document.select("span.nc") } returns Elements()
         challenge.isSolved(map, run, listener, path) shouldBe true
     }
 }

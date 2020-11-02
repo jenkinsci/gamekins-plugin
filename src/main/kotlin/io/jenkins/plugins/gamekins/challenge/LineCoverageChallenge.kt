@@ -10,7 +10,9 @@ import io.jenkins.plugins.gamekins.util.JacocoUtil.getCoverageInPercentageFromJa
 import io.jenkins.plugins.gamekins.util.JacocoUtil.getJacocoFileInMultiBranchProject
 import io.jenkins.plugins.gamekins.util.JacocoUtil.getLines
 import org.jsoup.nodes.Document
+import org.jsoup.nodes.Element
 import java.util.*
+import kotlin.math.abs
 
 /**
  * Specific [Challenge] to motivate the user to cover a random line of a specific class.
@@ -121,12 +123,23 @@ class LineCoverageChallenge(classDetails: ClassDetails, branch: String, workspac
         val elements = document.select("span." + "fc")
         if (coverageType!!.startsWith("nc")) elements.addAll(document.select("span." + "pc"))
         for (element in elements) {
-            //TODO: Some content in multiple lines in one class
-            if (element.text() == lineContent) {
+            if (element.text() == lineContent && element.attr("id").substring(1).toInt() == lineNumber) {
                 solved = System.currentTimeMillis()
                 solvedCoverage = getCoverageInPercentageFromJacoco(classDetails.className,
                         jacocoCSVFile)
                 return true
+            }
+        }
+
+        elements.addAll(document.select("span." + "nc"))
+        elements.removeIf { it.text() != lineContent }
+
+        if (elements.isNotEmpty()) {
+            if (elements.size == 1 && elements[0].attr("class") != "nc") {
+                return true
+            } else {
+                val nearestElement = elements.minByOrNull { abs(lineNumber - it.attr("id").substring(1).toInt()) }
+                if (nearestElement != null && nearestElement.attr("class") != "nc") return true
             }
         }
 
