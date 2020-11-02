@@ -65,8 +65,8 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
         constants["jacocoCSVPath"] = jacocoCSVPath
 
         //Extracts the branch
-        if (run.getParent().getParent() is WorkflowMultiBranchProject) {
-            constants["branch"] = run.getParent().getName()
+        if (run.parent.parent is WorkflowMultiBranchProject) {
+            constants["branch"] = run.parent.name
         } else {
             constants["branch"] = GitUtil.getBranch(workspace)
         }
@@ -216,13 +216,13 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
         //Get the current job and property
         val property: GameProperty?
         val job: AbstractItem
-        if (run.getParent().getParent() is WorkflowMultiBranchProject) {
-            job = run.getParent().getParent() as AbstractItem
-            property = (run.getParent().getParent() as WorkflowMultiBranchProject)
+        if (run.parent.parent is WorkflowMultiBranchProject) {
+            job = run.parent.parent as AbstractItem
+            property = (run.parent.parent as WorkflowMultiBranchProject)
                     .properties.get(GameMultiBranchProperty::class.java)
         } else {
-            job = run.getParent()
-            property = run.getParent().getProperty(GameProperty::class.java.name) as GameProperty
+            job = run.parent
+            property = run.parent.getProperty(GameProperty::class.java.name) as GameProperty
         }
 
         //Add a new entry to the Statistics
@@ -234,8 +234,8 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
                             RunEntry(
                                     run.getNumber(),
                                     constants["branch"]!!,
-                                    run.getResult(),
-                                    run.getStartTimeInMillis(),
+                                    run.result,
+                                    run.startTimeInMillis,
                                     generated,
                                     solved,
                                     JacocoUtil.getTestCount(workspace, run),
@@ -274,15 +274,15 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
      * @see Notifier.perform
      */
     override fun perform(build: AbstractBuild<*, *>, launcher: Launcher, listener: BuildListener): Boolean {
-        if (build.getProject() == null || build.getProject().getProperty(GameJobProperty::class.java) == null
-                || !build.getProject().getProperty(GameJobProperty::class.java).activated) {
+        if (build.project == null || build.project.getProperty(GameJobProperty::class.java) == null
+                || !build.project.getProperty(GameJobProperty::class.java).activated) {
             listener.logger.println("[Gamekins] Not activated")
             return true
         }
 
         val constants = HashMap<String, String>()
-        constants["projectName"] = build.getProject().getName()
-        executePublisher(build, constants, build.getResult(), listener, build.getWorkspace())
+        constants["projectName"] = build.project.name
+        executePublisher(build, constants, build.result, listener, build.workspace)
         return true
     }
 
@@ -295,8 +295,8 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
     override fun perform(@Nonnull run: Run<*, *>, @Nonnull workspace: FilePath,
                          @Nonnull launcher: Launcher, @Nonnull listener: TaskListener) {
         val constants = HashMap<String, String>()
-        if (run.getParent().getParent() is WorkflowMultiBranchProject) {
-            val project = run.getParent().getParent() as WorkflowMultiBranchProject
+        if (run.parent.parent is WorkflowMultiBranchProject) {
+            val project = run.parent.parent as WorkflowMultiBranchProject
             if (project.properties.get(GameMultiBranchProperty::class.java) == null
                     || !project.properties.get(GameMultiBranchProperty::class.java).activated) {
                 listener.logger.println("[Gamekins] Not activated")
@@ -304,16 +304,16 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
             }
             constants["projectName"] = project.name
         } else {
-            if (run.getParent().getProperty(GameJobProperty::class.java) == null
-                    || !run.getParent().getProperty(GameJobProperty::class.java).activated) {
+            if (run.parent.getProperty(GameJobProperty::class.java) == null
+                    || !run.parent.getProperty(GameJobProperty::class.java).activated) {
                 listener.logger.println("[Gamekins] Not activated")
                 return
             }
-            constants["projectName"] = run.getParent().getName()
+            constants["projectName"] = run.parent.name
         }
 
         constants["jacocoResultsPath"] = jacocoResultsPath
         constants["jacocoCSVPath"] = jacocoCSVPath
-        executePublisher(run, constants, run.getResult(), listener, workspace)
+        executePublisher(run, constants, run.result, listener, workspace)
     }
 }

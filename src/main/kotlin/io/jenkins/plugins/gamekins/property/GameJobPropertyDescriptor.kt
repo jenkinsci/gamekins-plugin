@@ -33,7 +33,7 @@ class GameJobPropertyDescriptor : JobPropertyDescriptor(GameJobProperty::class.j
      */
     fun doAddTeam(@AncestorInPath job: Job<*, *>?, @QueryParameter teamName: String): FormValidation {
         if (teamName.isEmpty()) return FormValidation.error("Insert a name for the team")
-        val property = if (job == null) null else job.getProperties()[this] as GameJobProperty?
+        val property = if (job == null) null else job.properties[this] as GameJobProperty?
         val validation = PropertyUtil.doAddTeam(property, teamName)
         save()
         return validation
@@ -54,8 +54,8 @@ class GameJobPropertyDescriptor : JobPropertyDescriptor(GameJobProperty::class.j
      */
     fun doDeleteTeam(@AncestorInPath job: Job<*, *>?, @QueryParameter teamsBox: String?): FormValidation {
         if (job == null) return FormValidation.error("Unexpected error: Parent job is null")
-        val projectName = job.getName()
-        val property = job.getProperties()[this] as GameJobProperty
+        val projectName = job.name
+        val property = job.properties[this] as GameJobProperty
         val validation = PropertyUtil.doDeleteTeam(projectName, property, teamsBox!!)
         save()
         return validation
@@ -66,7 +66,7 @@ class GameJobPropertyDescriptor : JobPropertyDescriptor(GameJobProperty::class.j
      * all teams of the [job].
      */
     fun doFillTeamsBoxItems(@AncestorInPath job: Job<*, *>?): ListBoxModel {
-        val property = if (job == null) null else job.getProperties()[this] as GameJobProperty?
+        val property = if (job == null) null else job.properties[this] as GameJobProperty?
         return PropertyUtil.doFillTeamsBoxItems(property)
     }
 
@@ -75,7 +75,7 @@ class GameJobPropertyDescriptor : JobPropertyDescriptor(GameJobProperty::class.j
      * all users of the [job].
      */
     fun doFillUsersBoxItems(@AncestorInPath job: Job<*, *>?): ListBoxModel {
-        return if (job == null) ListBoxModel() else PropertyUtil.doFillUsersBoxItems(job.getName())
+        return if (job == null) ListBoxModel() else PropertyUtil.doFillUsersBoxItems(job.name)
     }
 
     /**

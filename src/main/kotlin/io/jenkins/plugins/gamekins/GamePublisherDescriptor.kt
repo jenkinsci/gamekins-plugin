@@ -5,8 +5,6 @@ import hudson.model.AbstractProject
 import hudson.tasks.BuildStepDescriptor
 import hudson.tasks.Publisher
 import hudson.util.FormValidation
-import io.jenkins.plugins.gamekins.property.GameMultiBranchProperty
-import io.jenkins.plugins.gamekins.property.GameOrganizationFolderProperty
 import io.jenkins.plugins.gamekins.util.PublisherUtil
 import org.jenkinsci.Symbol
 import org.kohsuke.stapler.AncestorInPath
@@ -36,7 +34,7 @@ class GamePublisherDescriptor : BuildStepDescriptor<Publisher?>(GamePublisher::c
         if (project == null) {
             return FormValidation.ok()
         }
-        return if (PublisherUtil.doCheckJacocoCSVPath(project.getSomeWorkspace()!!, jacocoCSVPath!!))
+        return if (PublisherUtil.doCheckJacocoCSVPath(project.someWorkspace!!, jacocoCSVPath!!))
             FormValidation.ok()
         else FormValidation.error("The file could not be found")
     }
@@ -49,7 +47,7 @@ class GamePublisherDescriptor : BuildStepDescriptor<Publisher?>(GamePublisher::c
         if (project == null) {
             return FormValidation.ok()
         }
-        return if (PublisherUtil.doCheckJacocoResultsPath(project.getSomeWorkspace()!!, jacocoResultsPath!!))
+        return if (PublisherUtil.doCheckJacocoResultsPath(project.someWorkspace!!, jacocoResultsPath!!))
             FormValidation.ok()
         else FormValidation.error("The folder is not correct")
     }

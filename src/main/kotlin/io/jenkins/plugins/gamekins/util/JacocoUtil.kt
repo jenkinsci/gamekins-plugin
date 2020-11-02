@@ -133,7 +133,7 @@ object JacocoUtil {
     @JvmStatic
     fun getJacocoFileInMultiBranchProject(run: Run<*, *>, constants: HashMap<String, String>,
                                           jacocoFile: FilePath, oldBranch: String): FilePath {
-        return if (run.getParent().getParent() is WorkflowMultiBranchProject
+        return if (run.parent.parent is WorkflowMultiBranchProject
                 && constants["branch"] != oldBranch) {
             FilePath(jacocoFile.channel, jacocoFile.remote.replace(
                     constants["projectName"].toString() + "_" + oldBranch,

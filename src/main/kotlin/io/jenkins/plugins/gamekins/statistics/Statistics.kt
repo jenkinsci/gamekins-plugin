@@ -83,13 +83,13 @@ class Statistics(job: AbstractItem) {
                 }
             }
             is AbstractProject<*, *> -> {
-                for (abstractBuild in job.getBuilds()) {
+                for (abstractBuild in job.builds) {
                     if (abstractBuild.getNumber() == number) {
                         runEntries.add(RunEntry(
                                 abstractBuild.getNumber(),
                                 "",
-                                abstractBuild.getResult(),
-                                abstractBuild.getStartTimeInMillis(),
+                                abstractBuild.result,
+                                abstractBuild.startTimeInMillis,
                                 0,
                                 0,
                                 JacocoUtil.getTestCount(null, abstractBuild),
@@ -173,14 +173,14 @@ class Statistics(job: AbstractItem) {
                 }
             }
             is AbstractProject<*, *> -> {
-                val list = job.getBuilds()
+                val list = job.builds
                 list.reverse()
                 for (abstractBuild in list) {
                     entries.add(RunEntry(
                             abstractBuild!!.getNumber(),
                             "",
-                            abstractBuild.getResult(),
-                            abstractBuild.getStartTimeInMillis(),
+                            abstractBuild.result,
+                            abstractBuild.startTimeInMillis,
                             0,
                             0,
                             JacocoUtil.getTestCount(null, abstractBuild),

@@ -42,7 +42,7 @@ class BuildChallenge : Challenge {
      */
     override fun isSolved(constants: HashMap<String, String>, run: Run<*, *>, listener: TaskListener,
                           workspace: FilePath): Boolean {
-        if (run.getResult() == Result.SUCCESS) {
+        if (run.result == Result.SUCCESS) {
             solved = System.currentTimeMillis()
             return true
         }
