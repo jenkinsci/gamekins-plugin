@@ -39,6 +39,7 @@ class LineCoverageChallengeTest : AnnotationSpec() {
         every { JacocoUtil.getLines(any()) }  returns elements
         every { element.attr("id") } returns "L5"
         every { element.attr("class") } returns "nc"
+        every { element.attr("title") } returns ""
         every { element.text() } returns "toString();"
         details = JacocoUtil.ClassDetails(path, shortFilePath, shortJacocoPath, shortJacocoCSVPath,
                 TaskListener.NULL)
@@ -58,7 +59,7 @@ class LineCoverageChallengeTest : AnnotationSpec() {
                 TaskListener.NULL)
         challenge = LineCoverageChallenge(details, branch, path)
         challenge.getScore() shouldBe 3
-        challenge.toString() shouldBe "Write a test to cover more branches of line 5 in class $className in package " +
+        challenge.toString() shouldBe "Write a test to fully cover line 5 in class $className in package " +
                 "io.jenkins.plugins.gamekins.challenge (created for branch $branch)"
         every { element.attr("class") } returns "pc"
         every { JacocoUtil.getCoverageInPercentageFromJacoco(any(), any()) } returns coverage
@@ -69,6 +70,17 @@ class LineCoverageChallengeTest : AnnotationSpec() {
         challenge.toString() shouldBe "Write a test to fully cover line 5 in class $className in package " +
                 "io.jenkins.plugins.gamekins.challenge (created for branch $branch)"
         challenge.getName() shouldBe "LineCoverageChallenge"
+        every { element.attr("title") } returns "1 of 2 branches missed."
+        challenge = LineCoverageChallenge(details, branch, path)
+        challenge.getScore() shouldBe 3
+        challenge.toString() shouldBe "Write a test to cover more branches (currently 1 of 2 covered) of line 5 in " +
+                "class $className in package io.jenkins.plugins.gamekins.challenge (created for branch $branch)"
+        every { element.attr("title") } returns "All 2 branches missed."
+        every { element.attr("class") } returns "nc"
+        challenge = LineCoverageChallenge(details, branch, path)
+        challenge.getScore() shouldBe 2
+        challenge.toString() shouldBe "Write a test to cover more branches (currently 0 of 2 covered) of line 5 in " +
+                "class $className in package io.jenkins.plugins.gamekins.challenge (created for branch $branch)"
     }
 
     @Test
@@ -111,6 +123,12 @@ class LineCoverageChallengeTest : AnnotationSpec() {
         every { element.attr("id") } returns "L6"
         every { document.select("span.fc") } returns elements
         every { document.select("span.nc") } returns Elements()
+        challenge.isSolved(map, run, listener, path) shouldBe true
+        every { element.attr("title") } returns "2 of 3 branches missed."
+        every { element.attr("class") } returns "pc"
+        challenge = LineCoverageChallenge(details, branch, path)
+        challenge.isSolved(map, run, listener, path) shouldBe false
+        every { element.attr("title") } returns "1 of 3 branches missed."
         challenge.isSolved(map, run, listener, path) shouldBe true
     }
 }

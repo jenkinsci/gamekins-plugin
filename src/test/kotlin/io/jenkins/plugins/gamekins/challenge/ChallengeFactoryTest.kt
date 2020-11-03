@@ -86,6 +86,7 @@ class ChallengeFactoryTest : AnnotationSpec() {
         every { JacocoUtil.getLines(any()) }  returns elements
         every { element.attr("id") } returns "L5"
         every { element.attr("class") } returns "nc"
+        every { element.attr("title") } returns ""
         every { element.text() } returns "toString();"
         ChallengeFactory.generateChallenge(user, map, listener, arrayListOf(details), path) should
                 beOfType(LineCoverageChallenge::class)

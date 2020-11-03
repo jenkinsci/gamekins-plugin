@@ -24,8 +24,10 @@ class LineCoverageChallenge(classDetails: ClassDetails, branch: String, workspac
     : CoverageChallenge(classDetails, branch, workspace) {
 
     private var coverageType: String? = null
+    private var currentCoveredBranches = 0
     internal var lineContent: String? = null
     private var lineNumber = 0
+    private var maxCoveredBranches = 0
 
     /**
      * Chooses a random uncovered or partially covered line from the current class.
@@ -39,10 +41,21 @@ class LineCoverageChallenge(classDetails: ClassDetails, branch: String, workspac
             lineNumber = element.attr("id").substring(1).toInt()
             coverageType = element.attr("class")
             lineContent = element.text()
-        } else {
-            lineNumber = 0
-            coverageType = null
-            lineContent = null
+            val split = element.attr("title").split(" ".toRegex())
+            when {
+                split.isEmpty() || (split.size == 1 && split[0].isBlank()) -> {
+                    currentCoveredBranches = 0
+                    maxCoveredBranches = 1
+                }
+                element.attr("class").startsWith("pc") -> {
+                    currentCoveredBranches = split[2].toInt() - split[0].toInt()
+                    maxCoveredBranches = split[2].toInt()
+                }
+                else -> {
+                    currentCoveredBranches = 0
+                    maxCoveredBranches = split[1].toInt()
+                }
+            }
         }
     }
 
@@ -119,15 +132,11 @@ class LineCoverageChallenge(classDetails: ClassDetails, branch: String, workspac
             return false
         }
 
-        //TODO: Case with more than two branches (bnc/bpc/bfc)
         val elements = document.select("span." + "fc")
-        if (coverageType!!.startsWith("nc")) elements.addAll(document.select("span." + "pc"))
+        elements.addAll(document.select("span." + "pc"))
         for (element in elements) {
             if (element.text() == lineContent && element.attr("id").substring(1).toInt() == lineNumber) {
-                solved = System.currentTimeMillis()
-                solvedCoverage = getCoverageInPercentageFromJacoco(classDetails.className,
-                        jacocoCSVFile)
-                return true
+                return setSolved(elements[0], jacocoCSVFile)
             }
         }
 
@@ -136,21 +145,37 @@ class LineCoverageChallenge(classDetails: ClassDetails, branch: String, workspac
 
         if (elements.isNotEmpty()) {
             if (elements.size == 1 && elements[0].attr("class") != "nc") {
-                return true
+                return setSolved(elements[0], jacocoCSVFile)
             } else {
                 val nearestElement = elements.minByOrNull { abs(lineNumber - it.attr("id").substring(1).toInt()) }
-                if (nearestElement != null && nearestElement.attr("class") != "nc") return true
+                if (nearestElement != null && nearestElement.attr("class") != "nc") {
+                    return setSolved(elements[0], jacocoCSVFile)
+                }
             }
         }
 
         return false
     }
 
+    /**
+     * Checks whether the line [element] has more covered branches than during creation and sets the time and
+     * coverage if solved.
+     */
+    private fun setSolved(element: Element, jacocoCSVFile: FilePath): Boolean {
+        if (maxCoveredBranches > 1 && maxCoveredBranches - element.attr("title").split(" ".toRegex())[0].toInt()
+                <= currentCoveredBranches) {
+            return false
+        }
+        solved = System.currentTimeMillis()
+        solvedCoverage = getCoverageInPercentageFromJacoco(classDetails.className, jacocoCSVFile)
+        return true
+    }
+
     override fun toString(): String {
         //TODO: Add content of line
-        //TODO: Fully cover / cover more branches
         val prefix =
-                if (coverageType!!.startsWith("nc")) "Write a test to cover more branches of line "
+                if (maxCoveredBranches > 1) "Write a test to cover more branches (currently $currentCoveredBranches " +
+                        "of $maxCoveredBranches covered) of line "
                 else "Write a test to fully cover line "
         return (prefix + lineNumber + " in class " + classDetails.className
                 + " in package " + classDetails.packageName + " (created for branch " + branch + ")")
