@@ -153,16 +153,16 @@ object JacocoUtil {
         val elements = document.select("span." + "pc")
         elements.addAll(document.select("span." + "nc"))
         elements.removeIf { e: Element ->
-            (e.text().contains("{")
-                    || e.text().contains("}")
+            (e.text().trim() == "{" || e.text().trim() == "}"
+                    || e.text().trim() == "(" || e.text().trim() == ")"
                     || e.text().contains("class")
                     || e.text().contains("void")
                     || e.text().contains("public")
                     || e.text().contains("private")
                     || e.text().contains("protected")
-                    || e.text().contains("static")
-                    || e.text() == "(" || e.text() == ")")
+                    || e.text().contains("static"))
         }
+        elements.removeIf { isGetterOrSetter(jacocoSourceFile.readToString().split("\n"), it.text()) }
         return elements
     }
 
@@ -293,6 +293,35 @@ object JacocoUtil {
             }
         }
         return if (workspace == null) 0 else getTestCount(workspace)
+    }
+
+    /**
+     * Checks whether the given [line] is a getter or setter. The ordered list of [lines] must be JaCoCo *.java.html
+     * file splitted by \n. It searches in the list of [lines] for the correct [line] and then goes back in the ordered
+     * list one time (or multiple times if the previous line only contains white spaces or a {). If the line is a
+     * method declaration, it contains get/set/is and the name is equal to the call in the [line], it is a getter
+     * or setter.
+     */
+    fun isGetterOrSetter(lines: List<String>, line: String): Boolean {
+        val linesIterator = lines.listIterator()
+        while (linesIterator.hasNext()) {
+            //TODO: Improve
+            if (linesIterator.next().contains(line)) {
+                while (linesIterator.hasPrevious()) {
+                    val previous = linesIterator.previous()
+                    if (!previous.contains(line) && !previous.isBlank() && previous.trim() != "{")  {
+                        val regex = Regex("[a-zA-Z]+ +(get|set|is)([a-zA-Z_]+)\\(.*\\)")
+                        val result = regex.find(previous)
+                        if (result != null) {
+                            val variable = result.groupValues[2]
+                            if (line.contains(variable, ignoreCase = true)) return true
+                        }
+                        return false
+                    }
+                }
+            }
+        }
+        return false
     }
 
     /**

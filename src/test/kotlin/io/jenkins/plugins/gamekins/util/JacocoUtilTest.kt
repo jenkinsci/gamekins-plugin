@@ -111,7 +111,9 @@ class JacocoUtilTest : AnnotationSpec() {
 
     @Test
     fun getLines() {
-        JacocoUtil.getLines(jacocoSourceFile) shouldHaveSize 54
+        JacocoUtil.getLines(jacocoSourceFile) shouldHaveSize 55
+        val rationalPath = FilePath(null, path.remote + "/target/site/jacoco/com.example/Rational.java.html")
+        JacocoUtil.getLines(rationalPath) shouldHaveSize 91
     }
 
     @Test
@@ -145,6 +147,18 @@ class JacocoUtilTest : AnnotationSpec() {
         JacocoUtil.getTestCount(null, run) shouldBe 5
 
         JacocoUtil.getTestCount(path, null) shouldBe 5
+    }
+
+    @Test
+    fun isGetterOrSetter() {
+        val rationalPath = FilePath(null, path.remote + "/target/site/jacoco/com.example/Rational.java.html")
+        JacocoUtil.isGetterOrSetter(rationalPath.readToString().split("\n"), "    return num;") shouldBe true
+        JacocoUtil.isGetterOrSetter(rationalPath.readToString().split("\n"),
+                "    return den.equals(B_ONE);") shouldBe false
+        JacocoUtil.isGetterOrSetter(rationalPath.readToString().split("\n"),
+                "      BigInteger num = decimal.toBigInteger();") shouldBe false
+        JacocoUtil.isGetterOrSetter(rationalPath.readToString().split("\n"),
+                "not found") shouldBe false
     }
 
     @Test
