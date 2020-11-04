@@ -4,6 +4,7 @@ import hudson.FilePath
 import hudson.model.TaskListener
 import hudson.model.User
 import io.jenkins.plugins.gamekins.util.GitUtil.HeadCommitCallable
+import io.jenkins.plugins.gamekins.util.JacocoUtil
 import io.jenkins.plugins.gamekins.util.JacocoUtil.ClassDetails
 import io.jenkins.plugins.gamekins.util.JacocoUtil.calculateCoveredLines
 import io.jenkins.plugins.gamekins.util.JacocoUtil.calculateCurrentFilePath
@@ -86,12 +87,6 @@ object ChallengeFactory {
                     + challengeClass.simpleName)
             challenge = generateCoverageChallenge(selectedClass, challengeClass, constants["branch"],
                     listener, workspace)
-            if ((challenge is MethodCoverageChallenge
-                            && challenge.methodName == null)
-                    || (challenge is LineCoverageChallenge
-                            && challenge.lineContent == null)) {
-                challenge = null
-            }
 
             worklist.remove(selectedClass)
             count++
@@ -127,10 +122,12 @@ object ChallengeFactory {
                     ClassCoverageChallenge(classDetails, branch!!, workspace)
                 }
                 MethodCoverageChallenge::class.java -> {
-                    MethodCoverageChallenge(classDetails, branch!!, workspace)
+                    val method = JacocoUtil.chooseRandomMethod(classDetails, workspace)
+                    if (method == null) null else MethodCoverageChallenge(classDetails, branch!!, workspace, method)
                 }
                 else -> {
-                    LineCoverageChallenge(classDetails, branch!!, workspace)
+                    val line = JacocoUtil.chooseRandomLine(classDetails, workspace)
+                    if (line == null) null else LineCoverageChallenge(classDetails, branch!!, workspace, line)
                 }
             }
         } else null

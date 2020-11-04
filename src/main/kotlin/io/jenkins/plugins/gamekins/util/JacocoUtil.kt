@@ -60,6 +60,25 @@ object JacocoUtil {
     }
 
     /**
+     * Chooses a random not fully covered line of the given [classDetails]. Returns null if there are no such lines.
+     */
+    fun chooseRandomLine(classDetails: ClassDetails, workspace: FilePath): Element? {
+        val elements = getLines(calculateCurrentFilePath(
+                workspace, classDetails.jacocoSourceFile, classDetails.workspace))
+        return if (elements.isEmpty()) null else elements[Random().nextInt(elements.size)]
+    }
+
+    /**
+     * Chooses a random not fully covered method of the given [classDetails]. Returns null if there are no
+     * such methods.
+     */
+    fun chooseRandomMethod(classDetails: ClassDetails, workspace: FilePath): CoverageMethod? {
+        val methods = getNotFullyCoveredMethodEntries(calculateCurrentFilePath(
+                workspace, classDetails.jacocoMethodFile, classDetails.workspace))
+        return if (methods.isEmpty()) null else methods[Random().nextInt(methods.size)]
+    }
+
+    /**
      * Extracts the package name according to the [shortFilePath] of the class.
      */
     fun computePackageName(shortFilePath: String): String {
@@ -348,7 +367,7 @@ object JacocoUtil {
      * @author Philipp Straubinger
      * @since 1.0
      */
-    class CoverageMethod internal constructor(val methodName: String?, val lines: Int, val missedLines: Int)
+    class CoverageMethod internal constructor(val methodName: String, val lines: Int, val missedLines: Int)
 
     /**
      * The internal representation of a class from JaCoCo.

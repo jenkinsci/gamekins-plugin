@@ -17,6 +17,7 @@ import io.mockk.unmockkAll
 import org.eclipse.jgit.revwalk.RevCommit
 import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject
 import org.jsoup.nodes.Document
+import org.jsoup.select.Elements
 import java.io.File
 
 class JacocoUtilTest : AnnotationSpec() {
@@ -62,6 +63,29 @@ class JacocoUtilTest : AnnotationSpec() {
         JacocoUtil.calculateCurrentFilePath(path, File(path.remote)) shouldBe path
 
         JacocoUtil.calculateCurrentFilePath(path, File(jacocoSourceFile.remote), path.remote) shouldBe jacocoSourceFile
+    }
+
+    @Test
+    fun chooseRandomLine() {
+        val classDetails = mockkClass(JacocoUtil.ClassDetails::class)
+        every { classDetails.jacocoSourceFile } returns File(jacocoSourceFile.remote)
+        every { classDetails.workspace } returns path.remote
+        JacocoUtil.chooseRandomLine(classDetails, path) shouldNotBe null
+
+        every { JacocoUtil.getLines(any()) } returns Elements()
+        JacocoUtil.chooseRandomLine(classDetails, path) shouldBe null
+    }
+
+    @Test
+    fun chooseRandomMethod() {
+        mockkStatic(JacocoUtil::class)
+        val classDetails = mockkClass(JacocoUtil.ClassDetails::class)
+        every { classDetails.jacocoMethodFile } returns File(jacocoMethodFile.remote)
+        every { classDetails.workspace } returns path.remote
+        JacocoUtil.chooseRandomMethod(classDetails, path) shouldNotBe null
+
+        every { JacocoUtil.getNotFullyCoveredMethodEntries(any()) } returns arrayListOf()
+        JacocoUtil.chooseRandomMethod(classDetails, path) shouldBe null
     }
 
     @Test
@@ -111,6 +135,7 @@ class JacocoUtilTest : AnnotationSpec() {
 
     @Test
     fun getLines() {
+        mockkStatic(JacocoUtil::class)
         JacocoUtil.getLines(jacocoSourceFile) shouldHaveSize 55
         val rationalPath = FilePath(null, path.remote + "/target/site/jacoco/com.example/Rational.java.html")
         JacocoUtil.getLines(rationalPath) shouldHaveSize 91

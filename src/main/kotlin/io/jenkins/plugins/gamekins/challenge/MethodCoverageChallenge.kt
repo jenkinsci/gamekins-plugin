@@ -3,12 +3,9 @@ package io.jenkins.plugins.gamekins.challenge
 import hudson.FilePath
 import hudson.model.Run
 import hudson.model.TaskListener
+import io.jenkins.plugins.gamekins.util.JacocoUtil
 import io.jenkins.plugins.gamekins.util.JacocoUtil.ClassDetails
-import io.jenkins.plugins.gamekins.util.JacocoUtil.calculateCurrentFilePath
-import io.jenkins.plugins.gamekins.util.JacocoUtil.getCoverageInPercentageFromJacoco
-import io.jenkins.plugins.gamekins.util.JacocoUtil.getJacocoFileInMultiBranchProject
-import io.jenkins.plugins.gamekins.util.JacocoUtil.getMethodEntries
-import io.jenkins.plugins.gamekins.util.JacocoUtil.getNotFullyCoveredMethodEntries
+import io.jenkins.plugins.gamekins.util.JacocoUtil.CoverageMethod
 import java.util.*
 
 /**
@@ -17,31 +14,13 @@ import java.util.*
  * @author Philipp Straubinger
  * @since 1.0
  */
-class MethodCoverageChallenge(classDetails: ClassDetails, branch: String, workspace: FilePath?)
+class MethodCoverageChallenge(classDetails: ClassDetails, branch: String, workspace: FilePath,
+                              method: CoverageMethod)
     : CoverageChallenge(classDetails, branch, workspace) {
 
-    private var lines = 0
-    internal var methodName: String? = null
-    private var missedLines = 0
-
-    /**
-     * Chooses a random method of the class and calculates the number of total and missed lines.
-     */
-    init {
-        val random = Random()
-        val methods = getNotFullyCoveredMethodEntries(calculateCurrentFilePath(
-                workspace!!, classDetails.jacocoMethodFile, classDetails.workspace))
-        if (methods.size != 0) {
-            val method = methods[random.nextInt(methods.size)]
-            methodName = method.methodName
-            lines = method.lines
-            missedLines = method.missedLines
-        } else {
-            methodName = null
-            lines = 0
-            missedLines = 0
-        }
-    }
+    private val lines = method.lines
+    private val methodName = method.methodName
+    private val missedLines = method.missedLines
 
     override fun getName(): String {
         return "MethodCoverageChallenge"
@@ -61,7 +40,7 @@ class MethodCoverageChallenge(classDetails: ClassDetails, branch: String, worksp
                             workspace: FilePath): Boolean {
         if (branch != constants["branch"]) return true
 
-        val jacocoMethodFile = calculateCurrentFilePath(workspace,
+        val jacocoMethodFile = JacocoUtil.calculateCurrentFilePath(workspace,
                 classDetails.jacocoMethodFile, classDetails.workspace)
         try {
             if (!jacocoMethodFile.exists()) {
@@ -70,7 +49,7 @@ class MethodCoverageChallenge(classDetails: ClassDetails, branch: String, worksp
                 return true
             }
 
-            val methods = getMethodEntries(jacocoMethodFile)
+            val methods = JacocoUtil.getMethodEntries(jacocoMethodFile)
             for (method in methods) {
                 if (method.methodName == methodName) {
                     return method.missedLines > 0
@@ -91,11 +70,11 @@ class MethodCoverageChallenge(classDetails: ClassDetails, branch: String, worksp
      */
     override fun isSolved(constants: HashMap<String, String>, run: Run<*, *>, listener: TaskListener,
                           workspace: FilePath): Boolean {
-        val jacocoMethodFile = getJacocoFileInMultiBranchProject(run, constants,
-                calculateCurrentFilePath(workspace, classDetails.jacocoMethodFile,
+        val jacocoMethodFile = JacocoUtil.getJacocoFileInMultiBranchProject(run, constants,
+                JacocoUtil.calculateCurrentFilePath(workspace, classDetails.jacocoMethodFile,
                         classDetails.workspace), branch)
-        val jacocoCSVFile = getJacocoFileInMultiBranchProject(run, constants,
-                calculateCurrentFilePath(workspace, classDetails.jacocoCSVFile,
+        val jacocoCSVFile = JacocoUtil.getJacocoFileInMultiBranchProject(run, constants,
+                JacocoUtil.calculateCurrentFilePath(workspace, classDetails.jacocoCSVFile,
                         classDetails.workspace), branch)
 
         try {
@@ -107,12 +86,12 @@ class MethodCoverageChallenge(classDetails: ClassDetails, branch: String, worksp
                 return false
             }
 
-            val methods = getMethodEntries(jacocoMethodFile)
+            val methods = JacocoUtil.getMethodEntries(jacocoMethodFile)
             for (method in methods) {
                 if (method.methodName == methodName) {
                     if (method.missedLines < missedLines) {
                         solved = System.currentTimeMillis()
-                        solvedCoverage = getCoverageInPercentageFromJacoco(
+                        solvedCoverage = JacocoUtil.getCoverageInPercentageFromJacoco(
                                 classDetails.className, jacocoCSVFile)
                         return true
                     }
