@@ -24,6 +24,10 @@ import kotlin.random.Random
  */
 object ChallengeFactory {
 
+    enum class Challenges {
+        ClassCoverageChallenge, LineCoverageChallenge, MethodCoverageChallenge
+    }
+
     /**
      * Generates a new [Challenge] for the current [user].
      *
@@ -43,52 +47,48 @@ object ChallengeFactory {
                     getTestCount(workspace), user, constants["branch"]!!)
         }
 
-        val worklist = ArrayList(classes)
+        val workList = ArrayList(classes)
         val c = 1.5
-        val rankValues = DoubleArray(worklist.size)
-        for (i in worklist.indices) {
-            rankValues[i] = (2 - c + 2 * (c - 1) * (i / (worklist.size - 1).toDouble())) / worklist.size.toDouble()
+        val rankValues = DoubleArray(workList.size)
+        for (i in workList.indices) {
+            rankValues[i] = (2 - c + 2 * (c - 1) * (i / (workList.size - 1).toDouble())) / workList.size.toDouble()
             if (i != 0) rankValues[i] += rankValues[i - 1]
         }
 
         var challenge: Challenge?
         var count = 0
         do {
-            if (count == 5 || worklist.isEmpty()) {
+            if (count == 5 || workList.isEmpty()) {
                 listener.logger.println("[Gamekins] No CoverageChallenge could be built")
                 return DummyChallenge()
             }
 
             val probability = Random.nextDouble()
-            var selectedClass = worklist[worklist.size - 1]
-            for (i in worklist.indices) {
+            var selectedClass = workList[workList.size - 1]
+            for (i in workList.indices) {
                 if (rankValues[i] > probability) {
-                    selectedClass = worklist[i]
+                    selectedClass = workList[i]
                     break
                 }
             }
 
-            //TODO: Make more beautiful
-            val challengeType = Random.nextInt(4)
-            var challengeClass: Class<*>
-            challengeClass = when (challengeType) {
+            val challengeClass = when (Random.nextInt(4)) {
                 0 -> {
-                    ClassCoverageChallenge::class.java
+                    Challenges.ClassCoverageChallenge
                 }
                 1 -> {
-                    MethodCoverageChallenge::class.java
+                    Challenges.MethodCoverageChallenge
                 }
                 else -> {
-                    LineCoverageChallenge::class.java
+                    Challenges.LineCoverageChallenge
                 }
             }
 
-            listener.logger.println("[Gamekins] Try class " + selectedClass.className + " and type "
-                    + challengeClass.simpleName)
+            listener.logger.println("[Gamekins] Try class " + selectedClass.className + " and type " + challengeClass)
             challenge = generateCoverageChallenge(selectedClass, challengeClass, constants["branch"],
                     listener, workspace)
 
-            worklist.remove(selectedClass)
+            workList.remove(selectedClass)
             count++
         } while (challenge == null)
 
@@ -100,9 +100,8 @@ object ChallengeFactory {
      * and the current [branch]. The [workspace] is the folder with the code and execution rights, and the [listener]
      * reports the events to the console output of Jenkins.
      */
-    //TODO: Create Enum
     @Throws(IOException::class, InterruptedException::class)
-    private fun generateCoverageChallenge(classDetails: ClassDetails, challengeClass: Class<*>, branch: String?,
+    private fun generateCoverageChallenge(classDetails: ClassDetails, challengeClass: Challenges, branch: String?,
                                           listener: TaskListener, workspace: FilePath): CoverageChallenge? {
         val document: Document
         document = try {
@@ -118,10 +117,10 @@ object ChallengeFactory {
         return if (calculateCoveredLines(document, "pc") > 0
                 || calculateCoveredLines(document, "nc") > 0) {
             when (challengeClass) {
-                ClassCoverageChallenge::class.java -> {
+                Challenges.ClassCoverageChallenge -> {
                     ClassCoverageChallenge(classDetails, branch!!, workspace)
                 }
-                MethodCoverageChallenge::class.java -> {
+                Challenges.MethodCoverageChallenge -> {
                     val method = JacocoUtil.chooseRandomMethod(classDetails, workspace)
                     if (method == null) null else MethodCoverageChallenge(classDetails, branch!!, workspace, method)
                 }
