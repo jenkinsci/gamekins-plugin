@@ -1,7 +1,6 @@
 package io.jenkins.plugins.gamekins.challenge
 
 import hudson.FilePath
-import hudson.model.Run
 import hudson.model.TaskListener
 import hudson.model.User
 import io.jenkins.plugins.gamekins.util.GitUtil
@@ -14,13 +13,14 @@ import org.eclipse.jgit.revwalk.RevCommit
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import org.jsoup.select.Elements
+import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.collections.HashMap
 import kotlin.random.Random
 
 class ChallengeFactoryTest : AnnotationSpec() {
 
     private val user = mockkClass(User::class)
-    private val run = mockkClass(Run::class)
+    private val property = mockkClass(io.jenkins.plugins.gamekins.GameUserProperty::class)
     private val map = HashMap<String, String>()
     private val branch = "master"
     private val listener = TaskListener.NULL
@@ -38,6 +38,8 @@ class ChallengeFactoryTest : AnnotationSpec() {
         map["branch"] = branch
         mockkStatic(JacocoUtil::class)
         val document = mockkClass(Document::class)
+        every { user.getProperty(io.jenkins.plugins.gamekins.GameUserProperty::class.java) } returns property
+        every { property.getRejectedChallenges(any()) } returns CopyOnWriteArrayList()
         every { JacocoUtil.calculateCurrentFilePath(any(), any()) } returns path
         every { JacocoUtil.getCoverageInPercentageFromJacoco(any(), any()) } returns coverage
         every { JacocoUtil.generateDocument(any()) } returns document

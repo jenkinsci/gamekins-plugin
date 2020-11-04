@@ -3,13 +3,10 @@ package io.jenkins.plugins.gamekins.challenge
 import hudson.FilePath
 import hudson.model.TaskListener
 import hudson.model.User
+import io.jenkins.plugins.gamekins.GameUserProperty
 import io.jenkins.plugins.gamekins.util.GitUtil.HeadCommitCallable
 import io.jenkins.plugins.gamekins.util.JacocoUtil
 import io.jenkins.plugins.gamekins.util.JacocoUtil.ClassDetails
-import io.jenkins.plugins.gamekins.util.JacocoUtil.calculateCoveredLines
-import io.jenkins.plugins.gamekins.util.JacocoUtil.calculateCurrentFilePath
-import io.jenkins.plugins.gamekins.util.JacocoUtil.generateDocument
-import io.jenkins.plugins.gamekins.util.JacocoUtil.getTestCount
 import org.jsoup.nodes.Document
 import java.io.IOException
 import java.util.*
@@ -44,7 +41,7 @@ object ChallengeFactory {
         if (Random.nextDouble() > 0.9) {
             listener.logger.println("[Gamekins] Generated new TestChallenge")
             return TestChallenge(workspace.act(HeadCommitCallable(workspace.remote)).name,
-                    getTestCount(workspace), user, constants["branch"]!!)
+                    JacocoUtil.getTestCount(workspace), user, constants["branch"]!!)
         }
 
         val workList = ArrayList(classes)
@@ -72,6 +69,24 @@ object ChallengeFactory {
                 }
             }
 
+            workList.remove(selectedClass)
+            count++
+
+            val rejectedChallenges = user.getProperty(GameUserProperty::class.java)
+                    .getRejectedChallenges(constants["projectName"])
+
+            //Remove classes where a ClassCoverageChallenge has been rejected previously
+            if (!rejectedChallenges.filter {
+                        it is ClassCoverageChallenge
+                            && it.classDetails.className == selectedClass.className
+                            && it.classDetails.packageName == selectedClass.packageName}
+                            .isNullOrEmpty()) {
+                listener.logger.println("[Gamekins] Class ${selectedClass.className} in package " +
+                        "${selectedClass.packageName} was rejected previously")
+                challenge = null
+                continue
+            }
+
             val challengeClass = when (Random.nextInt(4)) {
                 0 -> {
                     Challenges.ClassCoverageChallenge
@@ -88,8 +103,11 @@ object ChallengeFactory {
             challenge = generateCoverageChallenge(selectedClass, challengeClass, constants["branch"],
                     listener, workspace)
 
-            workList.remove(selectedClass)
-            count++
+            //TODO: Overwrite all equals() methods
+            if (rejectedChallenges.contains(challenge)) {
+                listener.logger.println("[Gamekins] Challenge $challenge was already rejected previously")
+                challenge = null
+            }
         } while (challenge == null)
 
         return challenge
@@ -105,7 +123,7 @@ object ChallengeFactory {
                                           listener: TaskListener, workspace: FilePath): CoverageChallenge? {
         val document: Document
         document = try {
-            generateDocument(calculateCurrentFilePath(workspace,
+            JacocoUtil.generateDocument(JacocoUtil.calculateCurrentFilePath(workspace,
                     classDetails.jacocoSourceFile, classDetails.workspace))
         } catch (e: Exception) {
             listener.logger.println("[Gamekins] Exception with JaCoCoSourceFile "
@@ -114,8 +132,8 @@ object ChallengeFactory {
             throw e
         }
 
-        return if (calculateCoveredLines(document, "pc") > 0
-                || calculateCoveredLines(document, "nc") > 0) {
+        return if (JacocoUtil.calculateCoveredLines(document, "pc") > 0
+                || JacocoUtil.calculateCoveredLines(document, "nc") > 0) {
             when (challengeClass) {
                 Challenges.ClassCoverageChallenge -> {
                     ClassCoverageChallenge(classDetails, branch!!, workspace)
