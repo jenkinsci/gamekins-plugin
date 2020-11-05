@@ -31,7 +31,7 @@ class GamePublisherDescriptor : BuildStepDescriptor<Publisher?>(GamePublisher::c
      */
     fun doCheckJacocoCSVPath(@AncestorInPath project: AbstractProject<*, *>?,
                              @QueryParameter jacocoCSVPath: String?): FormValidation {
-        if (project == null) {
+        if (project?.someWorkspace == null) {
             return FormValidation.ok()
         }
         return if (PublisherUtil.doCheckJacocoCSVPath(project.someWorkspace!!, jacocoCSVPath!!))
@@ -44,7 +44,7 @@ class GamePublisherDescriptor : BuildStepDescriptor<Publisher?>(GamePublisher::c
      */
     fun doCheckJacocoResultsPath(@AncestorInPath project: AbstractProject<*, *>?,
                                  @QueryParameter jacocoResultsPath: String?): FormValidation {
-        if (project == null) {
+        if (project?.someWorkspace == null) {
             return FormValidation.ok()
         }
         return if (PublisherUtil.doCheckJacocoResultsPath(project.someWorkspace!!, jacocoResultsPath!!))
