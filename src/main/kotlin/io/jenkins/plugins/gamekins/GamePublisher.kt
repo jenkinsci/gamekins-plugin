@@ -3,7 +3,6 @@ package io.jenkins.plugins.gamekins
 import hudson.FilePath
 import hudson.Launcher
 import hudson.model.*
-import hudson.security.HudsonPrivateSecurityRealm.Details
 import hudson.tasks.BuildStepMonitor
 import hudson.tasks.Notifier
 import io.jenkins.plugins.gamekins.challenge.BuildChallenge
@@ -223,7 +222,7 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
                     .properties.get(GameMultiBranchProperty::class.java)
         } else {
             job = run.parent
-            property = run.parent.getProperty(GameProperty::class.java.name) as GameProperty
+            property = run.parent.getProperty(GameJobProperty::class.java.name) as GameJobProperty
         }
 
         //Add a new entry to the Statistics
