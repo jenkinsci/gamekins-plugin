@@ -51,6 +51,10 @@ class LineCoverageChallenge(classDetails: ClassDetails, branch: String, workspac
         return if (coverage >= 0.8 || coverageType == "pc") 3 else 2
     }
 
+    override fun getToolTipText(): String {
+        return "Line content: ${lineContent.trim()}"
+    }
+
     /**
      * Checks whether the [LineCoverageChallenge] is solvable if the [run] was in the [branch] (taken from
      * [constants]), where it has been generated. The line must not be covered and still be in the class.
@@ -139,6 +143,10 @@ class LineCoverageChallenge(classDetails: ClassDetails, branch: String, workspac
         }
 
         return false
+    }
+
+    override fun isToolTip(): Boolean {
+        return true
     }
 
     /**

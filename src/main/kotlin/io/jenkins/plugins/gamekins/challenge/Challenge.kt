@@ -30,6 +30,10 @@ interface Challenge {
      */
     fun getSolved(): Long
 
+    fun getToolTipText(): String {
+        return ""
+    }
+
     /**
      * Checks whether the current [Challenge] is still solvable or not.
      */
@@ -41,6 +45,10 @@ interface Challenge {
      */
     fun isSolved(constants: HashMap<String, String>, run: Run<*, *>, listener: TaskListener, workspace: FilePath)
             : Boolean
+
+    fun isToolTip(): Boolean {
+        return false
+    }
 
     /**
      * Returns the XML representation of the current [Challenge] with the [indentation] in front of the line

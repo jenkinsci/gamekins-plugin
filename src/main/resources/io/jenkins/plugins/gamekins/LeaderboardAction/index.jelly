@@ -71,7 +71,14 @@
                             <j:forEach indexVar="index" var="currentChallenge" items="${it.currentChallenges}">
                                 <tr>
                                     <td>${index + 1}</td>
-                                    <td>${currentChallenge}</td>
+                                    <j:choose>
+                                        <j:when test="${currentChallenge.toolTip}">
+                                            <td tooltip="${currentChallenge.toolTipText}">${currentChallenge}</td>
+                                        </j:when>
+                                        <j:otherwise>
+                                            <td>${currentChallenge}</td>
+                                        </j:otherwise>
+                                    </j:choose>
                                     <td>${currentChallenge.score}</td>
                                 </tr>
                             </j:forEach>
