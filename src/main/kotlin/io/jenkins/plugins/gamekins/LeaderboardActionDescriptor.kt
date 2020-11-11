@@ -35,7 +35,7 @@ class LeaderboardActionDescriptor : Descriptor<LeaderboardAction>(LeaderboardAct
         val user: User = User.current()
                 ?: return FormValidation.error("There is no user signed in")
         val property = user.getProperty(GameUserProperty::class.java)
-                ?: return FormValidation.error("Unexpected error")
+                ?: return FormValidation.error("Unexpected error while retrieving the property")
 
         val projectName = job.name
         var challenge: Challenge? = null
@@ -53,7 +53,7 @@ class LeaderboardActionDescriptor : Descriptor<LeaderboardAction>(LeaderboardAct
             user.save()
         } catch (e: IOException) {
             e.printStackTrace()
-            return FormValidation.error("Unexpected error")
+            return FormValidation.error("Unexpected error while saving")
         }
 
         return FormValidation.ok("Challenge rejected")
