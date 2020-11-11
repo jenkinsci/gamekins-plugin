@@ -138,7 +138,7 @@ class GameMultiBranchProperty
          */
         fun doFillTeamsBoxItems(@AncestorInPath job: WorkflowMultiBranchProject?): ListBoxModel {
             val property =
-                    if (job == null) null
+                    if (job == null || job.properties[this] == null) null
                     else job.properties[this] as GameMultiBranchProperty
             return PropertyUtil.doFillTeamsBoxItems(property)
         }

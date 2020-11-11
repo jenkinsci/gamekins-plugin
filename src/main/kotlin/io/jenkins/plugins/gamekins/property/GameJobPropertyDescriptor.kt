@@ -66,7 +66,9 @@ class GameJobPropertyDescriptor : JobPropertyDescriptor(GameJobProperty::class.j
      * all teams of the [job].
      */
     fun doFillTeamsBoxItems(@AncestorInPath job: Job<*, *>?): ListBoxModel {
-        val property = if (job == null) null else job.properties[this] as GameJobProperty?
+        val property =
+                if (job == null || job.properties[this] == null) null
+                else job.properties[this] as GameJobProperty?
         return PropertyUtil.doFillTeamsBoxItems(property)
     }
 
