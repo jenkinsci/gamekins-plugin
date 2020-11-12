@@ -135,6 +135,7 @@
                     <li>Rejected Challenges won't appear to be generated a second time</li>
                     <li>If a <b>Class Coverage Challenge</b> is rejected, the whole <i>class</i> is not considered again for new Challenges</li>
                     <li>Rejected Challenges are displayed in the right table</li>
+                    <li>If there are no Challenges generated for you although you have committed something recently, then checkout the <i>Git Names</i> in your profile settings</li>
                 </ul>
             </j:if>
         </l:main-panel>
