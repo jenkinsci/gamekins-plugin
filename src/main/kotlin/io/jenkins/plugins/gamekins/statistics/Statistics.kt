@@ -122,11 +122,12 @@ class Statistics(job: AbstractItem) {
             is WorkflowMultiBranchProject -> {
                 val master = job.items.stream().filter { item: WorkflowJob -> item.name == "master" }.findFirst()
                 if (master.isPresent) {
-                    val list = master.get().builds
+                    val list = mutableListOf<org.jenkinsci.plugins.workflow.job.WorkflowRun>()
+                    master.get().builds.forEach { list.add(it) }
                     list.reverse()
                     for (workflowRun in list) {
                         entries.add(RunEntry(
-                                workflowRun!!.getNumber(),
+                                workflowRun.getNumber(),
                                 "master",
                                 workflowRun.result,
                                 workflowRun.startTimeInMillis,
@@ -139,12 +140,13 @@ class Statistics(job: AbstractItem) {
                     var count = 0
                     for (workflowJob in job.items) {
                         if (count >= RUN_TOTAL_COUNT) break
-                        val list = workflowJob.builds
+                        val list = mutableListOf<org.jenkinsci.plugins.workflow.job.WorkflowRun>()
+                        workflowJob.builds.forEach { list.add(it) }
                         list.reverse()
                         for (workflowRun in list) {
                             if (count >= RUN_TOTAL_COUNT) break
                             entries.add(RunEntry(
-                                    workflowRun!!.getNumber(),
+                                    workflowRun.getNumber(),
                                     workflowJob.name,
                                     workflowRun.result,
                                     workflowRun.startTimeInMillis,
@@ -158,11 +160,12 @@ class Statistics(job: AbstractItem) {
                 }
             }
             is WorkflowJob -> {
-                val list = job.builds
+                val list = mutableListOf<org.jenkinsci.plugins.workflow.job.WorkflowRun>()
+                job.builds.forEach { list.add(it) }
                 list.reverse()
                 for (workflowRun in list) {
                     entries.add(RunEntry(
-                            workflowRun!!.getNumber(),
+                            workflowRun.getNumber(),
                             "",
                             workflowRun.result,
                             workflowRun.startTimeInMillis,
@@ -173,11 +176,12 @@ class Statistics(job: AbstractItem) {
                 }
             }
             is AbstractProject<*, *> -> {
-                val list = job.builds
+                val list = mutableListOf<AbstractBuild<*, *>>()
+                job.builds.forEach { list.add(it) }
                 list.reverse()
                 for (abstractBuild in list) {
                     entries.add(RunEntry(
-                            abstractBuild!!.getNumber(),
+                            abstractBuild.getNumber(),
                             "",
                             abstractBuild.result,
                             abstractBuild.startTimeInMillis,
