@@ -128,6 +128,10 @@ class LineCoverageChallengeTest : AnnotationSpec() {
         every { element.attr("class") } returns "pc"
         challenge = LineCoverageChallenge(details, branch, path, element)
         challenge.isSolved(map, run, listener, path) shouldBe false
+        every { element.attr("title") } returns "All 3 branches missed."
+        every { element.attr("class") } returns "nc"
+        challenge = LineCoverageChallenge(details, branch, path, element)
+        challenge.isSolved(map, run, listener, path) shouldBe false
         every { element.attr("title") } returns "1 of 3 branches missed."
         challenge.isSolved(map, run, listener, path) shouldBe true
     }

@@ -154,8 +154,9 @@ class LineCoverageChallenge(classDetails: ClassDetails, branch: String, workspac
      * coverage if solved.
      */
     private fun setSolved(element: Element, jacocoCSVFile: FilePath): Boolean {
-        if (maxCoveredBranches > 1 && maxCoveredBranches - element.attr("title").split(" ".toRegex())[0].toInt()
-                <= currentCoveredBranches) {
+        val title = element.attr("title").split(" ".toRegex())[0]
+        if (title == "All"
+                || (maxCoveredBranches > 1 && maxCoveredBranches - title.toInt() <= currentCoveredBranches)) {
             return false
         }
         solved = System.currentTimeMillis()
@@ -164,7 +165,6 @@ class LineCoverageChallenge(classDetails: ClassDetails, branch: String, workspac
     }
 
     override fun toString(): String {
-        //TODO: Add content of line
         val prefix =
                 if (maxCoveredBranches > 1) "Write a test to cover more branches (currently $currentCoveredBranches " +
                         "of $maxCoveredBranches covered) of line "
