@@ -34,11 +34,14 @@ import javax.annotation.Nonnull
  * Class that is called after the build of a job in Jenkins is finished. This one executes the main functionality of
  * Gamekins by creating and soling [Challenge]s.
  *
+ * [jacocoResultsPath] and [jacocoCSVPath] must be of type String?, because Jenkins wants to instantiate the
+ * [GamePublisher] with null when Gamekins is not activated.
+ *
  * @author Philipp Straubinger
  * @since 1.0
  */
-class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var jacocoResultsPath: String,
-                                                      @set:DataBoundSetter var jacocoCSVPath: String,
+class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var jacocoResultsPath: String?,
+                                                      @set:DataBoundSetter var jacocoCSVPath: String?,
                                                       searchCommitCount: Int)
     : Notifier(), SimpleBuildStep {
 
@@ -53,16 +56,16 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
     private fun executePublisher(run: Run<*, *>, constants: HashMap<String, String>, result: Result?,
                                  listener: TaskListener, workspace: FilePath?) {
         //Checks whether the paths of the JaCoCo files are correct
-        if (!PublisherUtil.doCheckJacocoResultsPath(workspace!!, jacocoResultsPath)) {
+        if (!PublisherUtil.doCheckJacocoResultsPath(workspace!!, jacocoResultsPath!!)) {
             listener.logger.println("[Gamekins] JaCoCo folder is not correct")
             return
         }
-        if (!PublisherUtil.doCheckJacocoCSVPath(workspace, jacocoCSVPath)) {
+        if (!PublisherUtil.doCheckJacocoCSVPath(workspace, jacocoCSVPath!!)) {
             listener.logger.println("[Gamekins] JaCoCo csv file could not be found")
             return
         }
-        constants["jacocoResultsPath"] = jacocoResultsPath
-        constants["jacocoCSVPath"] = jacocoCSVPath
+        constants["jacocoResultsPath"] = jacocoResultsPath!!
+        constants["jacocoCSVPath"] = jacocoCSVPath!!
 
         //Extracts the branch
         if (run.parent.parent is WorkflowMultiBranchProject) {
@@ -312,8 +315,8 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
             constants["projectName"] = run.parent.name
         }
 
-        constants["jacocoResultsPath"] = jacocoResultsPath
-        constants["jacocoCSVPath"] = jacocoCSVPath
+        constants["jacocoResultsPath"] = jacocoResultsPath!!
+        constants["jacocoCSVPath"] = jacocoCSVPath!!
         executePublisher(run, constants, run.result, listener, workspace)
     }
 }
