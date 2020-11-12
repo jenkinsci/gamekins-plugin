@@ -5,7 +5,6 @@ import hudson.model.AbstractItem
 import hudson.model.Action
 import hudson.model.Actionable
 import hudson.model.User
-import hudson.security.HudsonPrivateSecurityRealm.Details
 import hudson.util.FormValidation
 import hudson.util.ListBoxModel
 import io.jenkins.plugins.gamekins.GameUserProperty
@@ -171,6 +170,29 @@ object PropertyUtil {
             }
         }
         return FormValidation.error("No user with the specified name found")
+    }
+
+    /**
+     * Removes all Challenges made via the current [job] and reinitializes he statistics Does not remove teams or
+     * participations.
+     */
+    fun doReset(job: AbstractItem?, property: GameProperty?): FormValidation {
+        if (job == null) return FormValidation.error("Unexpected error: Parent job is null")
+        if (property == null) return FormValidation.error("Unexpected error: Parent job has no property")
+        property.resetStatistics(job)
+        for (user in User.getAll()) {
+            if (!realUser(user)) continue
+            val userProperty = user.getProperty(GameUserProperty::class.java)
+            if (userProperty != null && userProperty.isParticipating(job.name)) {
+                userProperty.reset(job.name)
+                try {
+                    user.save()
+                } catch (e: IOException) {
+                    return FormValidation.error(e, "There was an error with saving")
+                }
+            }
+        }
+        return FormValidation.ok("Project Challenges successfully reset")
     }
 
     /**

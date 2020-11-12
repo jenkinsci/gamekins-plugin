@@ -41,6 +41,8 @@ class PropertyUtilTest : AnnotationSpec() {
         every { property2.getTeams() } returns arrayListOf(team1)
         every { property1.removeTeam(any()) } returns Unit
         every { property2.removeTeam(any()) } returns Unit
+        every { property1.resetStatistics(any()) } returns Unit
+        every { property2.resetStatistics(any()) } returns Unit
 
         every { user1.fullName } returns userName1
         every { user2.fullName } returns userName2
@@ -66,6 +68,7 @@ class PropertyUtilTest : AnnotationSpec() {
         every { userProperty1.isParticipating(projectName2, team1) } returns false
         every { userProperty1.setParticipating(any(), any()) } returns Unit
         every { userProperty1.removeParticipation(any()) } returns Unit
+        every { userProperty1.reset(any()) } returns Unit
 
         mockkStatic(User::class)
         every { User.getAll() } returns listOf(user1, user2, user3)
@@ -133,6 +136,17 @@ class PropertyUtilTest : AnnotationSpec() {
         PropertyUtil.doRemoveUserFromTeam(job2, team1, userName1).kind shouldBe FormValidation.Kind.ERROR
 
         PropertyUtil.doRemoveUserFromTeam(job1, team2, userName1).kind shouldBe FormValidation.Kind.OK
+    }
+
+    @Test
+    fun doReset() {
+        PropertyUtil.doReset(null, null).kind shouldBe FormValidation.Kind.ERROR
+
+        PropertyUtil.doReset(job1, null).kind shouldBe FormValidation.Kind.ERROR
+
+        PropertyUtil.doReset(job1, property1).kind shouldBe FormValidation.Kind.OK
+
+        PropertyUtil.doReset(job2, property2).kind shouldBe FormValidation.Kind.OK
     }
 
     @Test

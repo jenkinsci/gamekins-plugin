@@ -8,6 +8,14 @@
         <f:entry title="Show Statistics" field="showStatistics">
             <f:checkbox />
         </f:entry>
+        <j:if test="${!instance.activated}">
+            <j:if test="${!instance.showStatistics}">
+                <f:entry>
+                    <font style="color: red; float: right">Reset will delete all Challenges and Statistics!</font>
+                    <f:validateButton title="Reset" method="reset" />
+                </f:entry>
+            </j:if>
+        </j:if>
         <f:entry title="Add Team" field="teamName">
             <f:textbox />
             <f:validateButton title="Add" method="addTeam" with="teamName" />

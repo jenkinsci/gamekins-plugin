@@ -228,6 +228,16 @@ class GameUserProperty : UserProperty() {
     }
 
     /**
+     * Removes all Challenges for a specific [projectName] and resets the score.
+     */
+    fun reset(projectName: String) {
+        completedChallenges[projectName] = CopyOnWriteArrayList()
+        currentChallenges[projectName] = CopyOnWriteArrayList()
+        rejectedChallenges[projectName] = CopyOnWriteArrayList()
+        score[projectName] = 0
+    }
+
+    /**
      * Sets the git names.
      */
     @DataBoundSetter

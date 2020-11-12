@@ -78,6 +78,11 @@ class GameMultiBranchProperty
         owner!!.save()
     }
 
+    override fun resetStatistics(job: AbstractItem) {
+        statistics = Statistics(job)
+        owner?.save()
+    }
+
     /**
      * Registers the [GameMultiBranchProperty] to Jenkins as an extension and also works as an communication point
      * between the Jetty server and the [GameMultiBranchProperty].
@@ -159,6 +164,16 @@ class GameMultiBranchProperty
         fun doRemoveUserFromTeam(@AncestorInPath job: WorkflowMultiBranchProject?, @QueryParameter teamsBox: String?,
                                  @QueryParameter usersBox: String?): FormValidation {
             return PropertyUtil.doRemoveUserFromTeam(job, teamsBox!!, usersBox!!)
+        }
+        /**
+         * Called from the Jetty server if the button to reset Gamekins in the specific [job] is called. Deletes all
+         * Challenges from all users for the current project and resets the statistics.
+         */
+        fun doReset(@AncestorInPath job: WorkflowMultiBranchProject?): FormValidation {
+            val property =
+                    if (job == null || job.properties[this] == null) null
+                    else job.properties[this] as GameMultiBranchProperty
+            return PropertyUtil.doReset(job, property)
         }
 
         @Nonnull

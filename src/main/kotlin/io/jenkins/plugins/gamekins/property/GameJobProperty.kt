@@ -91,4 +91,9 @@ class GameJobProperty
         teams.remove(teamName)
         owner.save()
     }
+
+    override fun resetStatistics(job: AbstractItem) {
+        statistics = Statistics(job)
+        owner.save()
+    }
 }

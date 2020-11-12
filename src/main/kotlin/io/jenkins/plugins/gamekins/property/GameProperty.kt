@@ -45,5 +45,8 @@ interface GameProperty {
     @Throws(IOException::class)
     fun removeTeam(teamName: String)
 
-
+    /**
+     * Removes the current Statistics and initializes a new one
+     */
+    fun resetStatistics(job: AbstractItem)
 }

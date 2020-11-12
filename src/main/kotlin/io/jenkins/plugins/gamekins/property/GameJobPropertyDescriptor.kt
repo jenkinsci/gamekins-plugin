@@ -89,6 +89,17 @@ class GameJobPropertyDescriptor : JobPropertyDescriptor(GameJobProperty::class.j
         return PropertyUtil.doRemoveUserFromTeam(job, teamsBox!!, usersBox!!)
     }
 
+    /**
+     * Called from the Jetty server if the button to reset Gamekins in the specific [job] is called. Deletes all
+     * Challenges from all users for the current project and resets the statistics.
+     */
+    fun doReset(@AncestorInPath job: Job<*, *>?): FormValidation {
+        val property =
+                if (job == null || job.properties[this] == null) null
+                else job.properties[this] as GameJobProperty?
+        return PropertyUtil.doReset(job, property)
+    }
+
     @Nonnull
     override fun getDisplayName(): String {
         return "Set the activation of the Gamekins plugin."
