@@ -1,9 +1,11 @@
 package io.jenkins.plugins.gamekins.challenge
 
 import hudson.FilePath
+import hudson.model.Result
 import hudson.model.TaskListener
 import hudson.model.User
 import io.jenkins.plugins.gamekins.GameUserProperty
+import io.jenkins.plugins.gamekins.util.GitUtil
 import io.jenkins.plugins.gamekins.util.GitUtil.HeadCommitCallable
 import io.jenkins.plugins.gamekins.util.JacocoUtil
 import io.jenkins.plugins.gamekins.util.JacocoUtil.ClassDetails
@@ -23,6 +25,33 @@ object ChallengeFactory {
 
     enum class Challenges {
         ClassCoverageChallenge, LineCoverageChallenge, MethodCoverageChallenge
+    }
+
+    /**
+     * Generates a new [BuildChallenge] if the [result] was not [Result.SUCCESS] and returns true.
+     */
+    fun generateBuildChallenge(result: Result?, user: User, workspace: FilePath, property: GameUserProperty,
+                               constants: HashMap<String, String>, listener: TaskListener = TaskListener.NULL)
+            : Boolean {
+        try {
+            if (result != null && result != Result.SUCCESS) {
+                val challenge = BuildChallenge()
+                val mapUser: User? = GitUtil.mapUser(workspace.act(HeadCommitCallable(workspace.remote))
+                        .authorIdent, User.getAll())
+
+                if (mapUser == user
+                        && !property.getCurrentChallenges(constants["projectName"]).contains(challenge)) {
+                    property.newChallenge(constants["projectName"]!!, challenge)
+                    listener.logger.println("[Gamekins] Generated new BuildChallenge")
+                    user.save()
+                    return true
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace(listener.logger)
+        }
+
+        return false
     }
 
     /**
@@ -148,5 +177,71 @@ object ChallengeFactory {
                 }
             }
         } else null
+    }
+
+    /**
+     * Generates new Challenges for a [user] if he has less than [maxChallenges] Challenges after checking the solved
+     * and solvable state of his Challenges. Returns the number of generated Challenges for debug output.
+     */
+    fun generateNewChallenges(user: User, property: GameUserProperty, constants: HashMap<String, String>,
+                              classes: ArrayList<ClassDetails>, workspace: FilePath,
+                              listener: TaskListener = TaskListener.NULL, maxChallenges: Int = 3): Int {
+
+        var generated = 0
+        if (property.getCurrentChallenges(constants["projectName"]).size < maxChallenges) {
+            listener.logger.println("[Gamekins] Start generating challenges for user ${user.fullName}")
+
+            val userClasses = ArrayList(classes)
+            userClasses.removeIf { classDetails: ClassDetails ->
+                !classDetails.changedByUsers.contains(GitUtil.GameUser(user))
+            }
+
+            listener.logger.println("[Gamekins] Found ${userClasses.size} last changed files of user ${user.fullName}")
+
+            for (i in property.getCurrentChallenges(constants["projectName"]).size..2) {
+                if (userClasses.size == 0) {
+                    property.newChallenge(constants["projectName"]!!, DummyChallenge())
+                    break
+                }
+
+                try {
+                    //Try to generate a new unique Challenge three times. because it can fail
+                    var challenge: Challenge
+                    var isChallengeUnique: Boolean
+                    var count = 0
+                    do {
+                        if (count == 3) {
+                            challenge = DummyChallenge()
+                            break
+                        }
+                        isChallengeUnique = true
+
+                        listener.logger.println("[Gamekins] Started to generate challenge")
+                        challenge = generateChallenge(user, constants, listener,
+                                userClasses, workspace)
+
+                        listener.logger.println("[Gamekins] Generated challenge $challenge")
+                        if (challenge is DummyChallenge) break
+
+                        for (currentChallenge in property.getCurrentChallenges(constants["projectName"])) {
+                            if (currentChallenge.toString() == challenge.toString()) {
+                                isChallengeUnique = false
+                                listener.logger.println("[Gamekins] Challenge is not unique")
+                                break
+                            }
+                        }
+                        count++
+                    } while (!isChallengeUnique)
+
+                    property.newChallenge(constants["projectName"]!!, challenge)
+                    listener.logger.println("[Gamekins] Added challenge $challenge")
+                    generated++
+                } catch (e: Exception) {
+                    e.printStackTrace(listener.logger)
+                }
+            }
+        }
+
+        return generated
     }
 }
