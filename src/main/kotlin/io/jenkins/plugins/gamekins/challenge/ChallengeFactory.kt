@@ -30,6 +30,7 @@ object ChallengeFactory {
     /**
      * Generates a new [BuildChallenge] if the [result] was not [Result.SUCCESS] and returns true.
      */
+    @JvmStatic
     fun generateBuildChallenge(result: Result?, user: User, workspace: FilePath, property: GameUserProperty,
                                constants: HashMap<String, String>, listener: TaskListener = TaskListener.NULL)
             : Boolean {
@@ -183,6 +184,7 @@ object ChallengeFactory {
      * Generates new Challenges for a [user] if he has less than [maxChallenges] Challenges after checking the solved
      * and solvable state of his Challenges. Returns the number of generated Challenges for debug output.
      */
+    @JvmStatic
     fun generateNewChallenges(user: User, property: GameUserProperty, constants: HashMap<String, String>,
                               classes: ArrayList<ClassDetails>, workspace: FilePath,
                               listener: TaskListener = TaskListener.NULL, maxChallenges: Int = 3): Int {

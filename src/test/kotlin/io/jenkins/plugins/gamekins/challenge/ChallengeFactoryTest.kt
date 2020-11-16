@@ -1,19 +1,24 @@
 package io.jenkins.plugins.gamekins.challenge
 
 import hudson.FilePath
+import hudson.model.Result
 import hudson.model.TaskListener
 import hudson.model.User
+import hudson.tasks.Mailer.UserProperty
 import io.jenkins.plugins.gamekins.util.GitUtil
 import io.jenkins.plugins.gamekins.util.JacocoUtil
 import io.kotest.core.spec.style.AnnotationSpec
 import io.kotest.matchers.should
+import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.beOfType
 import io.mockk.*
+import org.eclipse.jgit.lib.PersonIdent
 import org.eclipse.jgit.revwalk.RevCommit
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import org.jsoup.select.Elements
 import java.util.concurrent.CopyOnWriteArrayList
+import java.util.concurrent.CopyOnWriteArraySet
 import kotlin.collections.HashMap
 import kotlin.random.Random
 
@@ -36,10 +41,17 @@ class ChallengeFactoryTest : AnnotationSpec() {
     @BeforeEach
     fun init() {
         map["branch"] = branch
+        map["projectName"] = "test-project"
         mockkStatic(JacocoUtil::class)
         val document = mockkClass(Document::class)
         every { user.getProperty(io.jenkins.plugins.gamekins.GameUserProperty::class.java) } returns property
+        every { user.fullName } returns "Philipp Straubinger"
+        every { user.id } returns "id"
+        val mailProperty = mockkClass(UserProperty::class)
+        every { mailProperty.address } returns "philipp.straubinger@uni-passau.de"
+        every { user.getProperty(UserProperty::class.java) } returns mailProperty
         every { property.getRejectedChallenges(any()) } returns CopyOnWriteArrayList()
+        every { property.getGitNames() } returns CopyOnWriteArraySet(listOf("Philipp Straubinger"))
         every { JacocoUtil.calculateCurrentFilePath(any(), any()) } returns path
         every { JacocoUtil.getCoverageInPercentageFromJacoco(any(), any()) } returns coverage
         every { JacocoUtil.generateDocument(any()) } returns document
@@ -47,6 +59,7 @@ class ChallengeFactoryTest : AnnotationSpec() {
         every { JacocoUtil.getTestCount(any(), any()) } returns testCount
         val commit = mockkClass(RevCommit::class)
         every { commit.name } returns "ef97erb"
+        every { commit.authorIdent } returns PersonIdent("", "")
         every { path.act(ofType(GitUtil.HeadCommitCallable::class)) } returns commit
         every { path.act(ofType(JacocoUtil.FilesOfAllSubDirectoriesCallable::class)) } returns arrayListOf()
         every { path.remote } returns "/home/test/workspace"
@@ -57,6 +70,44 @@ class ChallengeFactoryTest : AnnotationSpec() {
     @AfterAll
     fun cleanUp() {
         unmockkAll()
+    }
+
+    @Test
+    fun generateBuildChallenge() {
+        ChallengeFactory.generateBuildChallenge(null, user, path, property, map) shouldBe false
+
+        ChallengeFactory.generateBuildChallenge(Result.SUCCESS, user, path, property, map) shouldBe false
+
+        mockkStatic(User::class)
+        mockkStatic(GitUtil::class)
+        every { User.getAll() } returns listOf()
+        every { GitUtil.mapUser(any(), listOf()) } returns null
+        ChallengeFactory.generateBuildChallenge(Result.FAILURE, user, path, property, map) shouldBe false
+
+        every { GitUtil.mapUser(any(), listOf()) } returns user
+        every { property.getCurrentChallenges(any()) } returns CopyOnWriteArrayList(listOf(BuildChallenge()))
+        ChallengeFactory.generateBuildChallenge(Result.FAILURE, user, path, property, map) shouldBe false
+
+        every { property.getCurrentChallenges(any()) } returns CopyOnWriteArrayList()
+        every { property.newChallenge(any(), any()) } returns Unit
+        every { user.save() } returns Unit
+        ChallengeFactory.generateBuildChallenge(Result.FAILURE, user, path, property, map) shouldBe true
+    }
+
+    @Test
+    fun generateNewChallenges() {
+        every { property.getCurrentChallenges(any()) } returns CopyOnWriteArrayList()
+        ChallengeFactory.generateNewChallenges(user, property, map, arrayListOf(details), path, maxChallenges = 0) shouldBe 0
+
+        every { property.newChallenge(any(), any()) } returns Unit
+        ChallengeFactory.generateNewChallenges(user, property, map, arrayListOf(details), path) shouldBe 0
+
+        val newDetails = mockkClass(JacocoUtil.ClassDetails::class)
+        every { newDetails.changedByUsers } returns hashSetOf(GitUtil.GameUser(user))
+        mockkStatic(ChallengeFactory::class)
+        every { ChallengeFactory.generateChallenge(any(), any(), any(), any(), any()) } returns mockkClass(TestChallenge::class)
+        ChallengeFactory.generateNewChallenges(user, property, map, arrayListOf(newDetails), path) shouldBe 3
+        mockkStatic(ChallengeFactory::class)
     }
 
     @Test

@@ -198,6 +198,7 @@ object PropertyUtil {
     /**
      * Checks whether the provided user contains login information or not
      */
+    @JvmStatic
     fun realUser(user: User): Boolean {
         return !user.properties.values.filter { it is UserDetails }.isNullOrEmpty()
     }

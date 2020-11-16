@@ -45,6 +45,8 @@ class GitUtilTest : AnnotationSpec() {
         every { user.fullName } returns name
         every { user.mail } returns mail
         every { user.gitNames } returns hashSetOf(id, name)
+
+        mockkStatic(GitUtil::class)
     }
 
     @AfterAll
