@@ -7,7 +7,7 @@ import hudson.model.User
 import io.jenkins.plugins.gamekins.util.GitUtil.getLastChangedTestFilesOfUser
 import io.jenkins.plugins.gamekins.util.JacocoUtil.getTestCount
 import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject
-import java.util.*
+import kotlin.collections.HashMap
 
 /**
  * Specific [Challenge] to motivate the user to write a new test.
@@ -16,7 +16,7 @@ import java.util.*
  * @since 1.0
  */
 class TestChallenge(private val currentCommit: String, private val testCount: Int, private val user: User,
-                    private val branch: String) : Challenge {
+                    private val branch: String, private var constants: HashMap<String, String>) : Challenge {
 
     private val created = System.currentTimeMillis()
     private var solved: Long = 0
@@ -32,6 +32,10 @@ class TestChallenge(private val currentCommit: String, private val testCount: In
 
     override fun getSolved(): Long {
         return solved
+    }
+
+    override fun getConstants(): HashMap<String, String> {
+        return constants
     }
 
     /**
@@ -85,6 +89,14 @@ class TestChallenge(private val currentCommit: String, private val testCount: In
         }
         print += "\"/>"
         return print
+    }
+
+    /**
+     * Called by Jenkins after the object has been created from his XML representation. Used for data migration.
+     */
+    private fun readResolve(): Any {
+        if (constants == null) constants = hashMapOf()
+        return this
     }
 
     override fun toString(): String {

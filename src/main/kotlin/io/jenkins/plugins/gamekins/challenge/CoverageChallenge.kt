@@ -49,6 +49,10 @@ abstract class CoverageChallenge(val classDetails: ClassDetails, val branch: Str
         return solved
     }
 
+    override fun getConstants(): HashMap<String, String> {
+        return classDetails.constants
+    }
+
 
     override fun printToXML(reason: String, indentation: String): String {
         var print = (indentation + "<" + getName() + " created=\"" + created + "\" solved=\"" + solved

@@ -64,7 +64,7 @@ class ChallengeFactoryTest : AnnotationSpec() {
         every { path.act(ofType(JacocoUtil.FilesOfAllSubDirectoriesCallable::class)) } returns arrayListOf()
         every { path.remote } returns "/home/test/workspace"
         every { path.channel } returns null
-        details = JacocoUtil.ClassDetails(path, shortFilePath, shortJacocoPath, shortJacocoCSVPath, listener)
+        details = JacocoUtil.ClassDetails(path, shortFilePath, shortJacocoPath, shortJacocoCSVPath, map, listener)
     }
 
     @AfterAll
@@ -85,7 +85,7 @@ class ChallengeFactoryTest : AnnotationSpec() {
         ChallengeFactory.generateBuildChallenge(Result.FAILURE, user, path, property, map) shouldBe false
 
         every { GitUtil.mapUser(any(), listOf()) } returns user
-        every { property.getCurrentChallenges(any()) } returns CopyOnWriteArrayList(listOf(BuildChallenge()))
+        every { property.getCurrentChallenges(any()) } returns CopyOnWriteArrayList(listOf(BuildChallenge(map)))
         ChallengeFactory.generateBuildChallenge(Result.FAILURE, user, path, property, map) shouldBe false
 
         every { property.getCurrentChallenges(any()) } returns CopyOnWriteArrayList()

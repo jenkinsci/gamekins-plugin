@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Assertions.*
 
 class DummyChallengeTest : AnnotationSpec() {
 
-    private val challenge = DummyChallenge()
+    private val challenge = DummyChallenge(hashMapOf())
 
     @AfterAll
     fun cleanUp() {

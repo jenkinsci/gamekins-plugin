@@ -102,6 +102,14 @@ class Statistics(job: AbstractItem) {
     }
 
     /**
+     * Adds the number of [additionalGenerated] Challenges after rejection to the current run of [branch].
+     */
+    fun addGeneratedAfterRejection(branch: String, additionalGenerated: Int) {
+        val entry = runEntries!!.last { it.branch == branch }
+        entry.generatedChallenges = entry.generatedChallenges + additionalGenerated
+    }
+
+    /**
      * Adds a new [entry] for a [job] and [branch] to the [Statistics]. Checks and optionally adds previous entries.
      * The [listener] reports the events to the console output of Jenkins.
      */
@@ -239,7 +247,7 @@ class Statistics(job: AbstractItem) {
      * @since 1.0
      */
     class RunEntry(val runNumber: Int, val branch: String, val result: Result?, val startTime: Long,
-                   private val generatedChallenges: Int, private val solvedChallenges: Int, val testCount: Int,
+                   var generatedChallenges: Int, val solvedChallenges: Int, val testCount: Int,
                    val coverage: Double)
         : Comparable<RunEntry> {
 

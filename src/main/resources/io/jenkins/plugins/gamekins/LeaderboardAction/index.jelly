@@ -134,6 +134,7 @@
                     <li>To reject a Challenge, choose the Challenge in the dropdown menu above and add a reason, why to Challenge was rejected</li>
                     <li>Rejected Challenges won't appear to be generated a second time</li>
                     <li>If a <b>Class Coverage Challenge</b> is rejected, the whole <i>class</i> is not considered again for new Challenges</li>
+                    <li>After rejection a new Challenge is generated if the code of the project is available</li>
                     <li>Rejected Challenges are displayed in the right table</li>
                     <li>If there are no Challenges generated for you although you have committed something recently, then checkout the <i>Git Names</i> in your profile settings</li>
                 </ul>

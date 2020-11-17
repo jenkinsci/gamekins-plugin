@@ -384,7 +384,8 @@ object JacocoUtil {
                        shortFilePath: String,
                        shortJacocoPath: String,
                        shortJacocoCSVPath: String,
-                       listener: TaskListener)
+                       var constants: HashMap<String, String>,
+                       listener: TaskListener = TaskListener.NULL)
         : Serializable {
 
         val className: String
@@ -449,6 +450,14 @@ object JacocoUtil {
          */
         fun filesExists(): Boolean {
             return jacocoCSVFile.exists() && jacocoSourceFile.exists() && jacocoMethodFile.exists()
+        }
+
+        /**
+         * Called by Jenkins after the object has been created from his XML representation. Used for data migration.
+         */
+        private fun readResolve(): Any {
+            if (constants == null) constants = hashMapOf()
+            return this
         }
 
         override fun toString(): String {

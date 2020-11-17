@@ -37,7 +37,7 @@ class MethodCoverageChallengeTest : AnnotationSpec() {
         every { JacocoUtil.calculateCoveredLines(any(), any()) } returns 0
         every { JacocoUtil.getNotFullyCoveredMethodEntries(any()) } returns arrayListOf(method)
         every { JacocoUtil.getMethodEntries(any()) } returns arrayListOf()
-        details = JacocoUtil.ClassDetails(path, shortFilePath, shortJacocoPath, shortJacocoCSVPath,
+        details = JacocoUtil.ClassDetails(path, shortFilePath, shortJacocoPath, shortJacocoCSVPath, map,
                 TaskListener.NULL)
         challenge = MethodCoverageChallenge(details, branch, path, method)
     }

@@ -18,7 +18,7 @@ class BuildChallengeTest : AnnotationSpec() {
 
     @BeforeEach
     fun init() {
-        challenge = BuildChallenge()
+        challenge = BuildChallenge(hashMapOf())
     }
 
     @AfterAll

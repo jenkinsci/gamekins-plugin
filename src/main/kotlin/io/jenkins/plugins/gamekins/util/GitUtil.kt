@@ -3,7 +3,6 @@ package io.jenkins.plugins.gamekins.util
 import hudson.FilePath
 import hudson.model.TaskListener
 import hudson.model.User
-import hudson.security.HudsonPrivateSecurityRealm.Details
 import hudson.tasks.Mailer.UserProperty
 import io.jenkins.plugins.gamekins.GameUserProperty
 import io.jenkins.plugins.gamekins.util.JacocoUtil.ClassDetails
@@ -176,8 +175,8 @@ object GitUtil {
 
                         //Add a new class
                         if (!found) {
-                            val details = ClassDetails(workspace, path,
-                                    constants["jacocoResultsPath"]!!, constants["jacocoCSVPath"]!!, listener)
+                            val details = ClassDetails(workspace, path, constants["jacocoResultsPath"]!!,
+                                    constants["jacocoCSVPath"]!!, constants, listener)
                             var user = authorMapping[commit.authorIdent]
                             if (user == null) {
                                 user = mapUser(commit.authorIdent, users)

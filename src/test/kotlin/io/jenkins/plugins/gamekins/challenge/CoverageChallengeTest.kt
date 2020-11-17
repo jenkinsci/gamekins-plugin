@@ -33,7 +33,7 @@ class CoverageChallengeTest : AnnotationSpec() {
         every { JacocoUtil.getCoverageInPercentageFromJacoco(any(), any()) } returns coverage
         every { JacocoUtil.generateDocument(any()) } returns document
         every { JacocoUtil.calculateCoveredLines(any(), any()) } returns 0
-        details = JacocoUtil.ClassDetails(path, shortFilePath, shortJacocoPath, shortJacocoCSVPath,
+        details = JacocoUtil.ClassDetails(path, shortFilePath, shortJacocoPath, shortJacocoCSVPath, hashMapOf(),
                 TaskListener.NULL)
         challenge = ClassCoverageChallenge(details, "master", path)
 

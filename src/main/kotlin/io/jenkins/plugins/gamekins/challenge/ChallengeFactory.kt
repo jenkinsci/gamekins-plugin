@@ -36,7 +36,7 @@ object ChallengeFactory {
             : Boolean {
         try {
             if (result != null && result != Result.SUCCESS) {
-                val challenge = BuildChallenge()
+                val challenge = BuildChallenge(constants)
                 val mapUser: User? = GitUtil.mapUser(workspace.act(HeadCommitCallable(workspace.remote))
                         .authorIdent, User.getAll())
 
@@ -71,7 +71,7 @@ object ChallengeFactory {
         if (Random.nextDouble() > 0.9) {
             listener.logger.println("[Gamekins] Generated new TestChallenge")
             return TestChallenge(workspace.act(HeadCommitCallable(workspace.remote)).name,
-                    JacocoUtil.getTestCount(workspace), user, constants["branch"]!!)
+                    JacocoUtil.getTestCount(workspace), user, constants["branch"]!!, constants)
         }
 
         val workList = ArrayList(classes)
@@ -87,7 +87,7 @@ object ChallengeFactory {
         do {
             if (count == 5 || workList.isEmpty()) {
                 listener.logger.println("[Gamekins] No CoverageChallenge could be built")
-                return DummyChallenge()
+                return DummyChallenge(constants)
             }
 
             val probability = Random.nextDouble()
@@ -202,7 +202,7 @@ object ChallengeFactory {
 
             for (i in property.getCurrentChallenges(constants["projectName"]).size..2) {
                 if (userClasses.size == 0) {
-                    property.newChallenge(constants["projectName"]!!, DummyChallenge())
+                    property.newChallenge(constants["projectName"]!!, DummyChallenge(constants))
                     break
                 }
 
@@ -213,7 +213,7 @@ object ChallengeFactory {
                     var count = 0
                     do {
                         if (count == 3) {
-                            challenge = DummyChallenge()
+                            challenge = DummyChallenge(constants)
                             break
                         }
                         isChallengeUnique = true

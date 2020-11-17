@@ -3,9 +3,9 @@ package io.jenkins.plugins.gamekins.challenge
 import hudson.FilePath
 import hudson.model.Run
 import hudson.model.TaskListener
-import java.util.*
 import io.jenkins.plugins.gamekins.statistics.Statistics
 import io.jenkins.plugins.gamekins.LeaderboardAction
+import kotlin.collections.HashMap
 
 /**
  * Interface for all Challenges of Gamekins.
@@ -30,9 +30,18 @@ interface Challenge {
      */
     fun getSolved(): Long
 
+    /**
+     * Returns the tooltip of the Challenge. Currently only available for the [LineCoverageChallenge].
+     */
     fun getToolTipText(): String {
         return ""
     }
+
+    /**
+     * Returns the constants provided during creation. Must include entries for "projectName", "branch", "workspace",
+     * "jacocoResultsPath" and "jacocoCSVPath".
+     */
+    fun getConstants(): HashMap<String, String>
 
     /**
      * Checks whether the current [Challenge] is still solvable or not.
@@ -46,6 +55,10 @@ interface Challenge {
     fun isSolved(constants: HashMap<String, String>, run: Run<*, *>, listener: TaskListener, workspace: FilePath)
             : Boolean
 
+    /**
+     * Returns whether a tooltip should be shown for the Challenge. Currently only available for the
+     * [LineCoverageChallenge].
+     */
     fun isToolTip(): Boolean {
         return false
     }

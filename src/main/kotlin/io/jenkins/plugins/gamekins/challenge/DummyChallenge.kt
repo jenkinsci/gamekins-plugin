@@ -3,7 +3,7 @@ package io.jenkins.plugins.gamekins.challenge
 import hudson.FilePath
 import hudson.model.Run
 import hudson.model.TaskListener
-import java.util.*
+import kotlin.collections.HashMap
 
 /**
  * Generated [Challenge] if the user has not developed something in the last commits. Only for information purposes.
@@ -12,7 +12,7 @@ import java.util.*
  * @since 1.0
  */
 //TODO: Add text why the DummyChallenge has been created
-class DummyChallenge : Challenge {
+class DummyChallenge(private var constants: HashMap<String, String>) : Challenge {
 
     /**
      * Only for dummy purposes, no need for further information.
@@ -39,6 +39,10 @@ class DummyChallenge : Challenge {
      */
     override fun getSolved(): Long {
         return 0
+    }
+
+    override fun getConstants(): HashMap<String, String> {
+        return constants
     }
 
     /**
@@ -68,6 +72,14 @@ class DummyChallenge : Challenge {
      */
     override fun printToXML(reason: String, indentation: String): String {
         return "$indentation<DummyChallenge>"
+    }
+
+    /**
+     * Called by Jenkins after the object has been created from his XML representation. Used for data migration.
+     */
+    private fun readResolve(): Any {
+        if (constants == null) constants = hashMapOf()
+        return this
     }
 
     /**

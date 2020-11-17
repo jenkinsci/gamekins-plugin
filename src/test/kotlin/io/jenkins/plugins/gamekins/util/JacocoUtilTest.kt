@@ -208,7 +208,7 @@ class JacocoUtilTest : AnnotationSpec() {
         every { path.act(ofType(JacocoUtil.FilesOfAllSubDirectoriesCallable::class)) } returns arrayListOf()
         every { path.remote } returns this.path.remote
         every { path.channel } returns null
-        val details = JacocoUtil.ClassDetails(path, shortFilePath, shortJacocoPath, shortJacocoCSVPath,
+        val details = JacocoUtil.ClassDetails(path, shortFilePath, shortJacocoPath, shortJacocoCSVPath, hashMapOf(),
                 TaskListener.NULL)
 
         details.filesExists() shouldBe true

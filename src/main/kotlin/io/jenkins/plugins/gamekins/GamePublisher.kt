@@ -55,6 +55,7 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
         }
         constants["jacocoResultsPath"] = jacocoResultsPath!!
         constants["jacocoCSVPath"] = jacocoCSVPath!!
+        constants["workspace"] = workspace.remote
 
         //Extracts the branch
         if (run.parent.parent is WorkflowMultiBranchProject) {

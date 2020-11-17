@@ -41,7 +41,7 @@ class LineCoverageChallengeTest : AnnotationSpec() {
         every { element.attr("class") } returns "nc"
         every { element.attr("title") } returns ""
         every { element.text() } returns "toString();"
-        details = JacocoUtil.ClassDetails(path, shortFilePath, shortJacocoPath, shortJacocoCSVPath,
+        details = JacocoUtil.ClassDetails(path, shortFilePath, shortJacocoPath, shortJacocoCSVPath, map,
                 TaskListener.NULL)
         challenge = LineCoverageChallenge(details, branch, path, element)
     }
@@ -55,7 +55,7 @@ class LineCoverageChallengeTest : AnnotationSpec() {
     fun getScore() {
         challenge.getScore() shouldBe 2
         every { JacocoUtil.getCoverageInPercentageFromJacoco(any(), any()) } returns 0.9
-        details = JacocoUtil.ClassDetails(path, shortFilePath, shortJacocoPath, shortJacocoCSVPath,
+        details = JacocoUtil.ClassDetails(path, shortFilePath, shortJacocoPath, shortJacocoCSVPath, map,
                 TaskListener.NULL)
         challenge = LineCoverageChallenge(details, branch, path, element)
         challenge.getScore() shouldBe 3
@@ -63,7 +63,7 @@ class LineCoverageChallengeTest : AnnotationSpec() {
                 "io.jenkins.plugins.gamekins.challenge (created for branch $branch)"
         every { element.attr("class") } returns "pc"
         every { JacocoUtil.getCoverageInPercentageFromJacoco(any(), any()) } returns coverage
-        details = JacocoUtil.ClassDetails(path, shortFilePath, shortJacocoPath, shortJacocoCSVPath,
+        details = JacocoUtil.ClassDetails(path, shortFilePath, shortJacocoPath, shortJacocoCSVPath, map,
                 TaskListener.NULL)
         challenge = LineCoverageChallenge(details, branch, path, element)
         challenge.getScore() shouldBe 3

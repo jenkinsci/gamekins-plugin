@@ -32,7 +32,7 @@ class ClassCoverageChallengeTest : AnnotationSpec() {
         every { JacocoUtil.getCoverageInPercentageFromJacoco(any(), any()) } returns coverage
         every { JacocoUtil.generateDocument(any()) } returns document
         every { JacocoUtil.calculateCoveredLines(any(), any()) } returns 0
-        details = JacocoUtil.ClassDetails(path, shortFilePath, shortJacocoPath, shortJacocoCSVPath,
+        details = JacocoUtil.ClassDetails(path, shortFilePath, shortJacocoPath, shortJacocoCSVPath, map,
                 TaskListener.NULL)
         challenge = ClassCoverageChallenge(details, branch, path)
     }
@@ -46,7 +46,7 @@ class ClassCoverageChallengeTest : AnnotationSpec() {
     fun getScore() {
         challenge.getScore() shouldBe 1
         every { JacocoUtil.getCoverageInPercentageFromJacoco(any(), any()) } returns 0.9
-        details = JacocoUtil.ClassDetails(path, shortFilePath, shortJacocoPath, shortJacocoCSVPath,
+        details = JacocoUtil.ClassDetails(path, shortFilePath, shortJacocoPath, shortJacocoCSVPath, map,
                 TaskListener.NULL)
         challenge = ClassCoverageChallenge(details, branch, path)
         challenge.getScore() shouldBe 2

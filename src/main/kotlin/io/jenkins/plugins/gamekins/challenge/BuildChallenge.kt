@@ -4,7 +4,7 @@ import hudson.FilePath
 import hudson.model.Result
 import hudson.model.Run
 import hudson.model.TaskListener
-import java.util.*
+import kotlin.collections.HashMap
 
 /**
  * Specific [Challenge] to motivate the user to fix a failing build in Jenkins.
@@ -12,7 +12,7 @@ import java.util.*
  * @author Philipp Straubinger
  * @since 1.0
  */
-class BuildChallenge : Challenge {
+class BuildChallenge(private var constants: HashMap<String, String>) : Challenge {
 
     private val created = System.currentTimeMillis()
     private var solved: Long = 0
@@ -27,6 +27,10 @@ class BuildChallenge : Challenge {
 
     override fun getSolved(): Long {
         return solved
+    }
+
+    override fun getConstants(): HashMap<String, String> {
+        return constants
     }
 
     /**
@@ -56,6 +60,14 @@ class BuildChallenge : Challenge {
         }
         print += "\"/>"
         return print
+    }
+
+    /**
+     * Called by Jenkins after the object has been created from his XML representation. Used for data migration.
+     */
+    private fun readResolve(): Any {
+        if (constants == null) constants = hashMapOf()
+        return this
     }
 
     override fun toString(): String {
