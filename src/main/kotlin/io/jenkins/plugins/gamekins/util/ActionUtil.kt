@@ -65,6 +65,7 @@ object ActionUtil {
      * possible if the constants are set in the [challenge] (may not be after updating the plugin) and the workspace
      * is on the local machine.
      */
+    @JvmStatic
     fun generateChallengeAfterRejection(challenge: Challenge, user: User, property: GameUserProperty,
                                         job: AbstractItem): String {
 

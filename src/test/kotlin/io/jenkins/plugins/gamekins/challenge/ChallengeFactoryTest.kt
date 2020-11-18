@@ -43,6 +43,7 @@ class ChallengeFactoryTest : AnnotationSpec() {
         map["branch"] = branch
         map["projectName"] = "test-project"
         mockkStatic(JacocoUtil::class)
+        mockkStatic(ChallengeFactory::class)
         val document = mockkClass(Document::class)
         every { user.getProperty(io.jenkins.plugins.gamekins.GameUserProperty::class.java) } returns property
         every { user.fullName } returns "Philipp Straubinger"

@@ -132,6 +132,7 @@ object PublisherUtil {
      * without JaCoCo files [removeClassesWithoutJacocoFiles] and sorts them according to their coverage [sort] if
      * activated.
      */
+    @JvmStatic
     fun retrieveLastChangedClasses(workspace: FilePath, searchCommitCount: Int, constants: HashMap<String, String>,
                                    users: Collection<User> = User.getAll(), listener: TaskListener = TaskListener.NULL,
                                    removeFullCoveredClasses: Boolean = true,
