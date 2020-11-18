@@ -22,6 +22,12 @@ class TestChallenge(private val currentCommit: String, private val testCount: In
     private var solved: Long = 0
     private var testCountSolved = 0
 
+    override fun equals(other: Any?): Boolean {
+        if (other == null) return false
+        if (other !is TestChallenge) return false
+        return true
+    }
+
     override fun getCreated(): Long {
         return created
     }
@@ -36,6 +42,18 @@ class TestChallenge(private val currentCommit: String, private val testCount: In
 
     override fun getConstants(): HashMap<String, String> {
         return constants
+    }
+
+    override fun hashCode(): Int {
+        var result = currentCommit.hashCode()
+        result = 31 * result + testCount
+        result = 31 * result + user.hashCode()
+        result = 31 * result + branch.hashCode()
+        result = 31 * result + constants.hashCode()
+        result = 31 * result + created.hashCode()
+        result = 31 * result + solved.hashCode()
+        result = 31 * result + testCountSolved
+        return result
     }
 
     /**

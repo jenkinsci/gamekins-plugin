@@ -21,12 +21,23 @@ import java.util.*
 class ClassCoverageChallenge(classDetails: ClassDetails, branch: String, workspace: FilePath?)
     : CoverageChallenge(classDetails, branch, workspace) {
 
+    override fun equals(other: Any?): Boolean {
+        if (other == null) return false
+        if (other !is ClassCoverageChallenge) return false
+        return other.classDetails.packageName == this.classDetails.packageName
+                && other.classDetails.className == this.classDetails.className
+    }
+
     override fun getName(): String {
         return "ClassCoverageChallenge"
     }
 
     override fun getScore(): Int {
         return if (coverage >= 0.8) 2 else 1
+    }
+
+    override fun hashCode(): Int {
+        return javaClass.hashCode()
     }
 
     /**

@@ -14,6 +14,12 @@ import kotlin.collections.HashMap
 //TODO: Add text why the DummyChallenge has been created
 class DummyChallenge(private var constants: HashMap<String, String>) : Challenge {
 
+    override fun equals(other: Any?): Boolean {
+        if (other == null) return false
+        if (other !is DummyChallenge) return false
+        return true
+    }
+
     /**
      * Only for dummy purposes, no need for further information.
      *

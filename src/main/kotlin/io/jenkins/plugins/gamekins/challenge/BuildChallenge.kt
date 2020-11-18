@@ -17,6 +17,12 @@ class BuildChallenge(private var constants: HashMap<String, String>) : Challenge
     private val created = System.currentTimeMillis()
     private var solved: Long = 0
 
+    override fun equals(other: Any?): Boolean {
+        if (other == null) return false
+        if (other !is BuildChallenge) return false
+        return true
+    }
+
     override fun getCreated(): Long {
         return created
     }
@@ -31,6 +37,13 @@ class BuildChallenge(private var constants: HashMap<String, String>) : Challenge
 
     override fun getConstants(): HashMap<String, String> {
         return constants
+    }
+
+    override fun hashCode(): Int {
+        var result = constants.hashCode()
+        result = 31 * result + created.hashCode()
+        result = 31 * result + solved.hashCode()
+        return result
     }
 
     /**

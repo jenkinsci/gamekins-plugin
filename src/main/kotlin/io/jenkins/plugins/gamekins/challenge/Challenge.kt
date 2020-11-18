@@ -15,6 +15,8 @@ import kotlin.collections.HashMap
  */
 interface Challenge {
 
+    override fun equals(other: Any?): Boolean
+
     /**
      * Returns the creation time in milliseconds since 01.01.1970.
      */
@@ -73,6 +75,4 @@ interface Challenge {
      * Returns the String representation of the [Challenge] for the [LeaderboardAction].
      */
     override fun toString(): String
-
-    //TODO: Override equals()
 }

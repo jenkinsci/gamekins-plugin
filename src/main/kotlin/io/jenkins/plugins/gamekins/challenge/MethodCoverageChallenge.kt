@@ -22,12 +22,27 @@ class MethodCoverageChallenge(classDetails: ClassDetails, branch: String, worksp
     private val methodName = method.methodName
     private val missedLines = method.missedLines
 
+    override fun equals(other: Any?): Boolean {
+        if (other == null) return false
+        if (other !is MethodCoverageChallenge) return false
+        return other.classDetails.packageName == this.classDetails.packageName
+                && other.classDetails.className == this.classDetails.className
+                && other.methodName == this.methodName
+    }
+
     override fun getName(): String {
         return "MethodCoverageChallenge"
     }
 
     override fun getScore(): Int {
         return if ((lines - missedLines) / lines.toDouble() > 0.8) 3 else 2
+    }
+
+    override fun hashCode(): Int {
+        var result = lines
+        result = 31 * result + methodName.hashCode()
+        result = 31 * result + missedLines
+        return result
     }
 
     /**

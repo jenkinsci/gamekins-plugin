@@ -43,6 +43,16 @@ class LineCoverageChallenge(classDetails: ClassDetails, branch: String, workspac
         }
     }
 
+    override fun equals(other: Any?): Boolean {
+        if (other == null) return false
+        if (other !is LineCoverageChallenge) return false
+        return other.classDetails.packageName == this.classDetails.packageName
+                && other.classDetails.className == this.classDetails.className
+                && other.lineNumber == this.lineNumber
+                && other.lineContent == this.lineContent
+                && other.coverageType == this.coverageType
+    }
+
     override fun getName(): String {
         return "LineCoverageChallenge"
     }
@@ -53,6 +63,15 @@ class LineCoverageChallenge(classDetails: ClassDetails, branch: String, workspac
 
     override fun getToolTipText(): String {
         return "Line content: ${lineContent.trim()}"
+    }
+
+    override fun hashCode(): Int {
+        var result = coverageType.hashCode()
+        result = 31 * result + currentCoveredBranches
+        result = 31 * result + lineContent.hashCode()
+        result = 31 * result + lineNumber
+        result = 31 * result + maxCoveredBranches
+        return result
     }
 
     /**
