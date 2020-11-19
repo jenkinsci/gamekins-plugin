@@ -52,6 +52,7 @@ class GitUtilTest : AnnotationSpec() {
     @AfterAll
     fun cleanUp() {
         unmockkAll()
+        File(root).deleteRecursively()
     }
 
     @Test

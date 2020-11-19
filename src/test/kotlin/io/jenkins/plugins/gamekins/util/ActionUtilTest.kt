@@ -17,7 +17,7 @@ import io.mockk.every
 import io.mockk.mockkClass
 import io.mockk.mockkStatic
 import io.mockk.unmockkAll
-import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject
+import java.io.File
 import java.util.concurrent.CopyOnWriteArrayList
 
 class ActionUtilTest: AnnotationSpec() {
@@ -51,6 +51,7 @@ class ActionUtilTest: AnnotationSpec() {
     @AfterAll
     fun cleanUp() {
         unmockkAll()
+        File(root).deleteRecursively()
     }
 
     @Test

@@ -10,6 +10,8 @@ import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockkClass
 import io.mockk.mockkStatic
+import io.mockk.unmockkAll
+import java.io.File
 
 class PropertyUtilTest : AnnotationSpec() {
 
@@ -72,6 +74,11 @@ class PropertyUtilTest : AnnotationSpec() {
 
         mockkStatic(User::class)
         every { User.getAll() } returns listOf(user1, user2, user3)
+    }
+
+    @AfterAll
+    fun cleanUp() {
+        unmockkAll()
     }
 
     @Test

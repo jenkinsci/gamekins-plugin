@@ -99,7 +99,7 @@ class PublisherUtilTest : AnnotationSpec() {
     @AfterAll
     fun cleanUp() {
         unmockkAll()
-        File("$root/output.txt").delete()
+        File(root).deleteRecursively()
     }
 
     /**
