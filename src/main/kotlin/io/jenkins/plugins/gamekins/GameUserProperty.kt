@@ -110,10 +110,8 @@ class GameUserProperty : UserProperty() {
     /**
      * Returns the list of rejected Challenges by [projectName].
      */
-    fun getRejectedChallenges(projectName: String?): CopyOnWriteArrayList<Challenge> {
-        val list = CopyOnWriteArrayList<Challenge>()
-        rejectedChallenges[projectName]!!.stream().map { obj: Pair<Challenge, String> -> obj.first }.forEach { e: Challenge -> list.add(e) }
-        return list
+    fun getRejectedChallenges(projectName: String?): CopyOnWriteArrayList<Pair<Challenge, String>> {
+        return rejectedChallenges[projectName]!!
     }
 
     /**

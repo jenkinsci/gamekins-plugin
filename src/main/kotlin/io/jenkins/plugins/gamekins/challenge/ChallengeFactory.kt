@@ -107,9 +107,9 @@ object ChallengeFactory {
 
             //Remove classes where a ClassCoverageChallenge has been rejected previously
             if (!rejectedChallenges.filter {
-                        it is ClassCoverageChallenge
-                            && it.classDetails.className == selectedClass.className
-                            && it.classDetails.packageName == selectedClass.packageName}
+                        it.first is ClassCoverageChallenge
+                            && (it.first as ClassCoverageChallenge).classDetails.className == selectedClass.className
+                            && (it.first as ClassCoverageChallenge).classDetails.packageName == selectedClass.packageName}
                             .isNullOrEmpty()) {
                 listener.logger.println("[Gamekins] Class ${selectedClass.className} in package " +
                         "${selectedClass.packageName} was rejected previously")

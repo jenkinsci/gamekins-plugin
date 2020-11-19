@@ -103,7 +103,7 @@
                             <j:forEach indexVar="index" var="rejectedChallenge" items="${it.rejectedChallenges}">
                                 <tr>
                                     <td>${index + 1}</td>
-                                    <td>${rejectedChallenge}</td>
+                                    <td tooltip="${rejectedChallenge.second}">${rejectedChallenge.first}</td>
                                 </tr>
                             </j:forEach>
                         </tr>
@@ -136,6 +136,7 @@
                     <li>If a <b>Class Coverage Challenge</b> is rejected, the whole <i>class</i> is not considered again for new Challenges</li>
                     <li>After rejection a new Challenge is generated if the code of the project is available</li>
                     <li>Rejected Challenges are displayed in the right table</li>
+                    <li>Hover over a rejected Challenge to see the reason for rejection</li>
                     <li>If there are no Challenges generated for you although you have committed something recently, then checkout the <i>Git Names</i> in your profile settings</li>
                 </ul>
             </j:if>

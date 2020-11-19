@@ -53,7 +53,7 @@ class LeaderboardAction(val job: AbstractItem) : ProminentProjectAction, Describ
     /**
      * Returns the list of rejected Challenges of the current project and user.
      */
-    fun getRejectedChallenges(): CopyOnWriteArrayList<Challenge> {
+    fun getRejectedChallenges(): CopyOnWriteArrayList<Pair<Challenge, String>> {
         val user: User = User.current() ?: return CopyOnWriteArrayList()
         val property = user.getProperty(GameUserProperty::class.java)
                 ?: return CopyOnWriteArrayList()
