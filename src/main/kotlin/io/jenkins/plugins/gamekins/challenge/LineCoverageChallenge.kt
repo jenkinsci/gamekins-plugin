@@ -90,7 +90,7 @@ class LineCoverageChallenge(classDetails: ClassDetails, branch: String, workspac
         document = try {
             if (!jacocoSourceFile.exists()) {
                 listener.logger.println("[Gamekins] JaCoCo source file "
-                        + jacocoSourceFile.remote + " exists " + jacocoSourceFile.exists())
+                        + jacocoSourceFile.remote + JacocoUtil.EXISTS + jacocoSourceFile.exists())
                 return true
             }
             JacocoUtil.generateDocument(jacocoSourceFile)
@@ -128,9 +128,9 @@ class LineCoverageChallenge(classDetails: ClassDetails, branch: String, workspac
         document = try {
             if (!jacocoSourceFile.exists() || !jacocoCSVFile.exists()) {
                 listener.logger.println("[Gamekins] JaCoCo source file " + jacocoSourceFile.remote
-                        + " exists " + jacocoSourceFile.exists())
+                        + JacocoUtil.EXISTS + jacocoSourceFile.exists())
                 listener.logger.println("[Gamekins] JaCoCo csv file " + jacocoCSVFile.remote
-                        + " exists " + jacocoCSVFile.exists())
+                        + JacocoUtil.EXISTS + jacocoCSVFile.exists())
                 return false
             }
             JacocoUtil.generateDocument(jacocoSourceFile)

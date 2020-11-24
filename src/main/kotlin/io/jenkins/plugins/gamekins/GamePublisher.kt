@@ -36,6 +36,10 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
     @set:DataBoundSetter
     var searchCommitCount: Int = if (searchCommitCount > 0) searchCommitCount else GitUtil.DEFAULT_SEARCH_COMMIT_COUNT
 
+    companion object {
+        private const val NOT_ACTIVATED = "[Gamekins] Not activated"
+    }
+
     /**
      * Starts the execution of Gamekins for a specific [run] with its [result]. The [constants] contain needed Strings
      * like the paths to the JaCoCo files. The [workspace] is the folder with the code and execution rights, and the
@@ -107,7 +111,7 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
     override fun perform(build: AbstractBuild<*, *>, launcher: Launcher, listener: BuildListener): Boolean {
         if (build.project == null || build.project.getProperty(GameJobProperty::class.java) == null
                 || !build.project.getProperty(GameJobProperty::class.java).activated) {
-            listener.logger.println("[Gamekins] Not activated")
+            listener.logger.println(NOT_ACTIVATED)
             return true
         }
 
@@ -130,14 +134,14 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
             val project = run.parent.parent as WorkflowMultiBranchProject
             if (project.properties.get(GameMultiBranchProperty::class.java) == null
                     || !project.properties.get(GameMultiBranchProperty::class.java).activated) {
-                listener.logger.println("[Gamekins] Not activated")
+                listener.logger.println(NOT_ACTIVATED)
                 return
             }
             constants["projectName"] = project.name
         } else {
             if (run.parent.getProperty(GameJobProperty::class.java) == null
                     || !run.parent.getProperty(GameJobProperty::class.java).activated) {
-                listener.logger.println("[Gamekins] Not activated")
+                listener.logger.println(NOT_ACTIVATED)
                 return
             }
             constants["projectName"] = run.parent.name

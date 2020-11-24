@@ -11,6 +11,7 @@ import io.jenkins.plugins.gamekins.challenge.DummyChallenge
 import io.jenkins.plugins.gamekins.property.GameJobProperty
 import io.jenkins.plugins.gamekins.property.GameMultiBranchProperty
 import io.jenkins.plugins.gamekins.property.GameProperty
+import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject
 import java.io.IOException
 
 /**
@@ -88,7 +89,7 @@ object ActionUtil {
                     val branch = if (constants["branch"] != null
                             && workspace.remote.contains(constants["branch"]!!.toRegex()))
                         constants["branch"]!! else "master"
-                    val jobProperty = if (job is org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject) {
+                    val jobProperty = if (job is WorkflowMultiBranchProject) {
                         job.properties.get(GameMultiBranchProperty::class.java)
                     } else {
                         (job as hudson.model.Job<*, *>).getProperty(GameJobProperty::class.java.name) as GameProperty

@@ -109,7 +109,8 @@ object ChallengeFactory {
             if (!rejectedChallenges.filter {
                         it.first is ClassCoverageChallenge
                             && (it.first as ClassCoverageChallenge).classDetails.className == selectedClass.className
-                            && (it.first as ClassCoverageChallenge).classDetails.packageName == selectedClass.packageName}
+                            && (it.first as ClassCoverageChallenge)
+                                .classDetails.packageName == selectedClass.packageName}
                             .isNullOrEmpty()) {
                 listener.logger.println("[Gamekins] Class ${selectedClass.className} in package " +
                         "${selectedClass.packageName} was rejected previously")
@@ -133,7 +134,6 @@ object ChallengeFactory {
             challenge = generateCoverageChallenge(selectedClass, challengeClass, constants["branch"],
                     listener, workspace)
 
-            //TODO: Overwrite all equals() methods
             if (rejectedChallenges.contains(challenge)) {
                 listener.logger.println("[Gamekins] Challenge $challenge was already rejected previously")
                 challenge = null

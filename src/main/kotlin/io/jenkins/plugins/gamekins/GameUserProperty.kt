@@ -151,7 +151,7 @@ class GameUserProperty : UserProperty() {
      * Checks whether the user is participating in team [teamName] in the project [projectName].
      */
     fun isParticipating(projectName: String, teamName: String): Boolean {
-        return if (participation[projectName] == null) false else participation[projectName] == teamName
+        return participation[projectName] == teamName
     }
 
     /**

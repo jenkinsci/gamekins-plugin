@@ -51,6 +51,10 @@ class DummyChallenge(private var constants: HashMap<String, String>) : Challenge
         return constants
     }
 
+    override fun hashCode(): Int {
+        return constants.hashCode()
+    }
+
     /**
      * Only for dummy purposes, always solvable.
      *

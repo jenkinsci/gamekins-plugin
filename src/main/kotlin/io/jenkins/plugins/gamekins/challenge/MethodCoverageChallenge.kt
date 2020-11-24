@@ -60,7 +60,7 @@ class MethodCoverageChallenge(classDetails: ClassDetails, branch: String, worksp
         try {
             if (!jacocoMethodFile.exists()) {
                 listener.logger.println("[Gamekins] JaCoCo method file "
-                        + jacocoMethodFile.remote + " exists " + jacocoMethodFile.exists())
+                        + jacocoMethodFile.remote + JacocoUtil.EXISTS + jacocoMethodFile.exists())
                 return true
             }
 
@@ -95,9 +95,9 @@ class MethodCoverageChallenge(classDetails: ClassDetails, branch: String, worksp
         try {
             if (!jacocoMethodFile.exists() || !jacocoCSVFile.exists()) {
                 listener.logger.println("[Gamekins] JaCoCo method file " + jacocoMethodFile.remote
-                        + " exists " + jacocoMethodFile.exists())
+                        + JacocoUtil.EXISTS + jacocoMethodFile.exists())
                 listener.logger.println("[Gamekins] JaCoCo csv file " + jacocoCSVFile.remote
-                        + " exists " + jacocoCSVFile.exists())
+                        + JacocoUtil.EXISTS + jacocoCSVFile.exists())
                 return false
             }
 

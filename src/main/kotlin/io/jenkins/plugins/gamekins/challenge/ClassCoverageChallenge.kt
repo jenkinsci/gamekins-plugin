@@ -3,6 +3,7 @@ package io.jenkins.plugins.gamekins.challenge
 import hudson.FilePath
 import hudson.model.Run
 import hudson.model.TaskListener
+import io.jenkins.plugins.gamekins.util.JacocoUtil
 import io.jenkins.plugins.gamekins.util.JacocoUtil.ClassDetails
 import io.jenkins.plugins.gamekins.util.JacocoUtil.calculateCoveredLines
 import io.jenkins.plugins.gamekins.util.JacocoUtil.calculateCurrentFilePath
@@ -56,7 +57,7 @@ class ClassCoverageChallenge(classDetails: ClassDetails, branch: String, workspa
         document = try {
             if (!jacocoSourceFile.exists()) {
                 listener.logger.println("[Gamekins] JaCoCo source file "
-                        + jacocoSourceFile.remote + " exists " + jacocoSourceFile.exists())
+                        + jacocoSourceFile.remote + JacocoUtil.EXISTS + jacocoSourceFile.exists())
                 return true
             }
             generateDocument(jacocoSourceFile)
@@ -87,9 +88,9 @@ class ClassCoverageChallenge(classDetails: ClassDetails, branch: String, workspa
         document = try {
             if (!jacocoSourceFile.exists() || !jacocoCSVFile.exists()) {
                 listener.logger.println("[Gamekins] JaCoCo source file " + jacocoSourceFile.remote
-                        + " exists " + jacocoSourceFile.exists())
+                        + JacocoUtil.EXISTS + jacocoSourceFile.exists())
                 listener.logger.println("[Gamekins] JaCoCo csv file " + jacocoCSVFile.remote
-                        + " exists " + jacocoCSVFile.exists())
+                        + JacocoUtil.EXISTS + jacocoCSVFile.exists())
                 return false
             }
             generateDocument(jacocoSourceFile)

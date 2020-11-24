@@ -26,6 +26,8 @@ import kotlin.jvm.Throws
  */
 object JacocoUtil {
 
+    const val EXISTS = " exists "
+
     /**
      * Calculates the number of covered lines in a JaCoCo class files [document] with a given [modifier].
      *
@@ -415,7 +417,7 @@ object JacocoUtil {
             jacocoCSVFile = File(jacocoPath.toString() + shortJacocoCSVPath.substring(2))
             if (!jacocoCSVFile.exists()) {
                 listener.logger.println("[Gamekins] JaCoCoCSVPath: " + jacocoCSVFile.absolutePath
-                        + " exists " + jacocoCSVFile.exists())
+                        + EXISTS + jacocoCSVFile.exists())
             }
 
             jacocoPath.append(shortJacocoPath.substring(2))
@@ -424,13 +426,13 @@ object JacocoUtil {
             jacocoMethodFile = File("$jacocoPath$className.html")
             if (!jacocoMethodFile.exists()) {
                 listener.logger.println("[Gamekins] JaCoCoMethodPath: "
-                        + jacocoMethodFile.absolutePath + " exists " + jacocoMethodFile.exists())
+                        + jacocoMethodFile.absolutePath + EXISTS + jacocoMethodFile.exists())
             }
 
             jacocoSourceFile = File(jacocoPath.toString() + className + "." + this.extension + ".html")
             if (!jacocoSourceFile.exists()) {
                 listener.logger.println("[Gamekins] JaCoCoSourcePath: "
-                        + jacocoSourceFile.absolutePath + " exists " + jacocoSourceFile.exists())
+                        + jacocoSourceFile.absolutePath + EXISTS + jacocoSourceFile.exists())
             }
 
             coverage = getCoverageInPercentageFromJacoco(className,
