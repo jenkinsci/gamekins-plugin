@@ -112,6 +112,7 @@ class TestChallenge(private val currentCommit: String, private val testCount: In
     /**
      * Called by Jenkins after the object has been created from his XML representation. Used for data migration.
      */
+    @Suppress("unused", "SENSELESS_COMPARISON")
     private fun readResolve(): Any {
         if (constants == null) constants = hashMapOf()
         return this

@@ -200,7 +200,7 @@ class GameUserProperty : UserProperty() {
     /**
      * Updates the git names if the user configuration is saved.
      */
-    override fun reconfigure(req: StaplerRequest, form: JSONObject?): UserProperty? {
+    override fun reconfigure(req: StaplerRequest, form: JSONObject?): UserProperty {
         if (form != null) setNames(form.getString("names"))
         return this
     }

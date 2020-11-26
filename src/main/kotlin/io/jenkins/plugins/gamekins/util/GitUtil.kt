@@ -139,50 +139,33 @@ object GitUtil {
                     //Not interested in merge commits
                     if (commit.shortMessage.toLowerCase().contains("merge")) break
 
-                    //Not interested in deleted classes
-                    if (line.contains("diff --git") && i + 1 < lines.size
-                            && !lines[i + 1].contains("deleted")) {
+                    if (i + 1 < lines.size && interestedInDiffLine(line, lines[i + 1])) {
                         val path = line.split(" ".toRegex())[2].substring(1)
                         val pathSplit = path.split("/".toRegex())
 
-                        //TODO: Other classes than Java and Kotlin
-                        //Not interested in tests and files written in languages other than Java and Kotlin
-                        if (path.split("/".toRegex()).contains("test") || !(path.contains(".java")
-                                        || path.contains(".kt"))) {
-                            continue
+                        //Map the author of the commit to the Jenkins user
+                        var user = authorMapping[commit.authorIdent]
+                        if (user == null) {
+                            user = mapUser(commit.authorIdent, users)
+                            if (user != null) authorMapping[commit.authorIdent] = user
                         }
 
+                        //TODO: Classes with same name in different packages
                         //Check whether the class was found before
                         val classname = pathSplit[pathSplit.size - 1].split("\\.".toRegex())[0]
                         var found = false
                         for (details in classes) {
                             if (details.className == classname) {
-                                //Map the author of the commit to the Jenkins user
-                                var user = authorMapping[commit.authorIdent]
-                                if (user == null) {
-                                    user = mapUser(commit.authorIdent, users)
-                                    if (user == null) {
-                                        found = true
-                                        break
-                                    }
-                                    authorMapping[commit.authorIdent] = user
-                                }
-                                details.addUser(user)
                                 found = true
+                                if (user != null) details.addUser(user)
                                 break
                             }
                         }
 
                         //Add a new class
-                        if (!found) {
+                        if (!found && user != null) {
                             val details = ClassDetails(workspace, path, constants["jacocoResultsPath"]!!,
                                     constants["jacocoCSVPath"]!!, constants, listener)
-                            var user = authorMapping[commit.authorIdent]
-                            if (user == null) {
-                                user = mapUser(commit.authorIdent, users)
-                                if (user == null) continue
-                                authorMapping[commit.authorIdent] = user
-                            }
                             details.addUser(user)
                             classes.add(details)
                         }
@@ -228,7 +211,7 @@ object GitUtil {
 
         val headCommit = getHead(repo)
         val git = Git(repo)
-        if (targetCommit === headCommit || targetCommit == null) return LinkedHashSet()
+        if (targetCommit == headCommit || targetCommit == null) return LinkedHashSet()
 
         var countUserCommit = 0
         var totalCount = 0
@@ -236,15 +219,10 @@ object GitUtil {
         val searchedCommits = HashSet<RevCommit>()
         searchedCommits.add(targetCommit)
         searchedCommits.addAll(targetCommit.parents)
-        var nearToLeaf = true
 
-        for (revCommit in targetCommit.parents) {
-            val parents = revCommit.parents
-            if (parents != null && parents.isNotEmpty()) {
-                nearToLeaf = false
-                searchedCommits.addAll(parents)
-            }
-        }
+        targetCommit.parents.filter { it.parents != null }.forEach { searchedCommits.addAll(it.parents) }
+        val nearToLeaf = (targetCommit.parents.size + 1) == searchedCommits.size
+
         currentCommits.add(headCommit)
 
         val pathsToFiles = LinkedHashSet<String>()
@@ -256,14 +234,11 @@ object GitUtil {
                 searchedCommits.add(commit)
 
                 val mapUser = mapUser(commit.authorIdent, users)
-                if (mapUser != null && mapUser == user) {
+                if (mapUser == user) {
                     val diff = getDiffOfCommit(git, repo, commit)
                     val lines = diff.split("\n".toRegex())
-                    for (line in lines) {
-                        if (line.contains("diff --git")) {
-                            pathsToFiles.add(line.split(" ".toRegex())[2].substring(1))
-                        }
-                    }
+                    lines.filter { it.contains("diff --git") }
+                            .forEach { pathsToFiles.add(it.split(" ".toRegex())[2].substring(1)) }
                     countUserCommit++
                 }
 
@@ -278,6 +253,7 @@ object GitUtil {
             currentCommits = HashSet(newCommits)
             totalCount++
         }
+
         return pathsToFiles
     }
 
@@ -334,6 +310,24 @@ object GitUtil {
         walk.dispose()
 
         return null
+    }
+
+    /**
+     * Checks whether the [line] contains the information needed for generating a [ClassDetails].
+     */
+    private fun interestedInDiffLine(line: String, nextLine:String): Boolean {
+
+        //Not interested in deleted classes
+        if (line.contains("diff --git") && !nextLine.contains("deleted")) {
+            val path = line.split(" ".toRegex())[2].substring(1)
+
+            //TODO: Other classes than Java and Kotlin
+            //Not interested in tests and files written in languages other than Java and Kotlin
+            return !(path.split("/".toRegex()).contains("test") || !(path.contains(".java")
+                    || path.contains(".kt")))
+        }
+
+        return false
     }
 
     /**

@@ -78,6 +78,7 @@ class BuildChallenge(private var constants: HashMap<String, String>) : Challenge
     /**
      * Called by Jenkins after the object has been created from his XML representation. Used for data migration.
      */
+    @Suppress("unused", "SENSELESS_COMPARISON")
     private fun readResolve(): Any {
         if (constants == null) constants = hashMapOf()
         return this

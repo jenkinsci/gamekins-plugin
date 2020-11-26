@@ -5,11 +5,6 @@ import hudson.model.Run
 import hudson.model.TaskListener
 import io.jenkins.plugins.gamekins.util.JacocoUtil
 import io.jenkins.plugins.gamekins.util.JacocoUtil.ClassDetails
-import io.jenkins.plugins.gamekins.util.JacocoUtil.calculateCoveredLines
-import io.jenkins.plugins.gamekins.util.JacocoUtil.calculateCurrentFilePath
-import io.jenkins.plugins.gamekins.util.JacocoUtil.generateDocument
-import io.jenkins.plugins.gamekins.util.JacocoUtil.getCoverageInPercentageFromJacoco
-import io.jenkins.plugins.gamekins.util.JacocoUtil.getJacocoFileInMultiBranchProject
 import org.jsoup.nodes.Document
 import java.util.*
 
@@ -51,7 +46,7 @@ class ClassCoverageChallenge(classDetails: ClassDetails, branch: String, workspa
                             workspace: FilePath): Boolean {
         if (branch != constants["branch"]) return true
 
-        val jacocoSourceFile = calculateCurrentFilePath(workspace,
+        val jacocoSourceFile = JacocoUtil.calculateCurrentFilePath(workspace,
                 classDetails.jacocoSourceFile, classDetails.workspace)
         val document: Document
         document = try {
@@ -60,14 +55,14 @@ class ClassCoverageChallenge(classDetails: ClassDetails, branch: String, workspa
                         + jacocoSourceFile.remote + JacocoUtil.EXISTS + jacocoSourceFile.exists())
                 return true
             }
-            generateDocument(jacocoSourceFile)
+            JacocoUtil.generateDocument(jacocoSourceFile)
         } catch (e: Exception) {
             e.printStackTrace(listener.logger)
             return false
         }
 
-        return !(calculateCoveredLines(document, "pc") == 0
-                && calculateCoveredLines(document, "nc") == 0)
+        return !(JacocoUtil.calculateCoveredLines(document, "pc") == 0
+                && JacocoUtil.calculateCoveredLines(document, "nc") == 0)
     }
 
     /**
@@ -77,35 +72,23 @@ class ClassCoverageChallenge(classDetails: ClassDetails, branch: String, workspa
      */
     override fun isSolved(constants: HashMap<String, String>, run: Run<*, *>, listener: TaskListener,
                           workspace: FilePath): Boolean {
-        val jacocoSourceFile = getJacocoFileInMultiBranchProject(run, constants,
-                calculateCurrentFilePath(workspace, classDetails.jacocoSourceFile,
+        val jacocoSourceFile = JacocoUtil.getJacocoFileInMultiBranchProject(run, constants,
+                JacocoUtil.calculateCurrentFilePath(workspace, classDetails.jacocoSourceFile,
                         classDetails.workspace), branch)
-        val jacocoCSVFile = getJacocoFileInMultiBranchProject(run, constants,
-                calculateCurrentFilePath(workspace, classDetails.jacocoCSVFile,
+        val jacocoCSVFile = JacocoUtil.getJacocoFileInMultiBranchProject(run, constants,
+                JacocoUtil.calculateCurrentFilePath(workspace, classDetails.jacocoCSVFile,
                         classDetails.workspace), branch)
 
-        val document: Document
-        document = try {
-            if (!jacocoSourceFile.exists() || !jacocoCSVFile.exists()) {
-                listener.logger.println("[Gamekins] JaCoCo source file " + jacocoSourceFile.remote
-                        + JacocoUtil.EXISTS + jacocoSourceFile.exists())
-                listener.logger.println("[Gamekins] JaCoCo csv file " + jacocoCSVFile.remote
-                        + JacocoUtil.EXISTS + jacocoCSVFile.exists())
-                return false
-            }
-            generateDocument(jacocoSourceFile)
-        } catch (e: Exception) {
-            e.printStackTrace(listener.logger)
-            return false
-        }
+        val document = JacocoUtil.generateDocument(jacocoSourceFile, jacocoCSVFile, listener) ?: return false
 
-        val fullyCoveredLines = calculateCoveredLines(document, "fc")
+        val fullyCoveredLines = JacocoUtil.calculateCoveredLines(document, "fc")
         if (fullyCoveredLines > this.fullyCoveredLines) {
             solved = System.currentTimeMillis()
-            solvedCoverage = getCoverageInPercentageFromJacoco(
+            solvedCoverage = JacocoUtil.getCoverageInPercentageFromJacoco(
                     classDetails.className, jacocoCSVFile)
             return true
         }
+
         return false
     }
 

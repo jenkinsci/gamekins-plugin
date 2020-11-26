@@ -62,6 +62,19 @@ object JacocoUtil {
     }
 
     /**
+     * Checks whether the [previous] is a method header and [line] operates on some variable.
+     */
+    private fun checkMethodHeaderForGetterSetter(previous: String, line: String): Boolean {
+        val regex = Regex("[a-zA-Z]+ +(get|set|is)([a-zA-Z_]+)\\(.*\\)")
+        val result = regex.find(previous)
+        if (result != null) {
+            val variable = result.groupValues[2]
+            if (line.contains(variable, ignoreCase = true)) return true
+        }
+        return false
+    }
+
+    /**
      * Chooses a random not fully covered line of the given [classDetails]. Returns null if there are no such lines.
      */
     fun chooseRandomLine(classDetails: ClassDetails, workspace: FilePath): Element? {
@@ -98,12 +111,62 @@ object JacocoUtil {
     }
 
     /**
+     * Extracts a [CoverageMethod] from an [element] in a JaCoCo method file.
+     */
+    private fun extractCoverageMethod(element: Element): CoverageMethod {
+        var methodName = ""
+        var lines = 0
+        var missedLines = 0
+
+        for (node in element.childNodes()) {
+            for ((key, value) in node.attributes()) {
+                if (key == "id") {
+                    when {
+                        value.matches(Regex("a\\d+")) -> {
+                            methodName = node.childNode(0).childNode(0).toString()
+                        }
+                        value.matches(Regex("h\\d+")) -> {
+                            missedLines = node.childNode(0).toString().toInt()
+                        }
+                        value.matches(Regex("i\\d+")) -> {
+                            lines = node.childNode(0).toString().toInt()
+                        }
+                    }
+                    break
+                }
+            }
+        }
+
+        return CoverageMethod(methodName, lines, missedLines)
+    }
+
+    /**
      * Generates the Jsoup document of a HTML [file].
      */
     @JvmStatic
     @Throws(IOException::class, InterruptedException::class)
     fun generateDocument(file: FilePath): Document {
         return Jsoup.parse(file.readToString())
+    }
+
+    /**
+     * Tries to generate the [Document] representation of the [jacocoSourceFile] if both the [jacocoSourceFile] and
+     * the [jacocoCSVFile] exists.
+     */
+    fun generateDocument(jacocoSourceFile: FilePath, jacocoCSVFile: FilePath, listener: TaskListener): Document? {
+        return try {
+            if (!jacocoSourceFile.exists() || !jacocoCSVFile.exists()) {
+                listener.logger.println("[Gamekins] JaCoCo source file " + jacocoSourceFile.remote
+                        + EXISTS + jacocoSourceFile.exists())
+                listener.logger.println("[Gamekins] JaCoCo csv file " + jacocoCSVFile.remote
+                        + EXISTS + jacocoCSVFile.exists())
+                return null
+            }
+            generateDocument(jacocoSourceFile)
+        } catch (e: Exception) {
+            e.printStackTrace(listener.logger)
+            return null
+        }
     }
 
     /**
@@ -195,41 +258,10 @@ object JacocoUtil {
     fun getMethodEntries(jacocoMethodFile: FilePath): ArrayList<CoverageMethod> {
         val elements = generateDocument(jacocoMethodFile).select("tr")
         val methods = ArrayList<CoverageMethod>()
-        for (element in elements) {
-            var matches = false
-            for (node in element.childNodes()) {
-                for ((key, value) in node.attributes()) {
-                    if (key == "id" && value.matches(Regex("a\\d+"))) {
-                        matches = true
-                        break
-                    }
-                }
-                if (matches) break
-            }
 
-            if (matches) {
-                var methodName = ""
-                var lines = 0
-                var missedLines = 0
-                for (node in element.childNodes()) {
-                    for ((key, value) in node.attributes()) {
-                        if (key == "id") {
-                            when {
-                                value.matches(Regex("a\\d+")) -> {
-                                    methodName = node.childNode(0).childNode(0).toString()
-                                }
-                                value.matches(Regex("h\\d+")) -> {
-                                    missedLines = node.childNode(0).toString().toInt()
-                                }
-                                value.matches(Regex("i\\d+")) -> {
-                                    lines = node.childNode(0).toString().toInt()
-                                }
-                            }
-                            break
-                        }
-                    }
-                }
-                methods.add(CoverageMethod(methodName, lines, missedLines))
+        for (element in elements) {
+            if (isMethodEntry(element)) {
+                methods.add(extractCoverageMethod(element))
             }
         }
         return methods
@@ -330,18 +362,27 @@ object JacocoUtil {
             if (linesIterator.next().contains(line)) {
                 while (linesIterator.hasPrevious()) {
                     val previous = linesIterator.previous()
-                    if (!previous.contains(line) && !previous.isBlank() && previous.trim() != "{")  {
-                        val regex = Regex("[a-zA-Z]+ +(get|set|is)([a-zA-Z_]+)\\(.*\\)")
-                        val result = regex.find(previous)
-                        if (result != null) {
-                            val variable = result.groupValues[2]
-                            if (line.contains(variable, ignoreCase = true)) return true
-                        }
-                        return false
+                    if (!previous.contains(line) && previous.isNotBlank() && previous.trim() != "{")  {
+                        return checkMethodHeaderForGetterSetter(previous, line)
                     }
                 }
             }
         }
+        return false
+    }
+
+    /**
+     * Checks whether the [element] is a method entry in the JaCoCo method file.
+     */
+    private fun isMethodEntry(element: Element): Boolean {
+        for (node in element.childNodes()) {
+            for ((key, value) in node.attributes()) {
+                if (key == "id" && value.matches(Regex("a\\d+"))) {
+                    return true
+                }
+            }
+        }
+
         return false
     }
 
@@ -457,6 +498,7 @@ object JacocoUtil {
         /**
          * Called by Jenkins after the object has been created from his XML representation. Used for data migration.
          */
+        @Suppress("SENSELESS_COMPARISON")
         private fun readResolve(): Any {
             if (constants == null) constants = hashMapOf()
             return this

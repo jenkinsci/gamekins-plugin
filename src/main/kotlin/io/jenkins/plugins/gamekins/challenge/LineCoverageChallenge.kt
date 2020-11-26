@@ -5,7 +5,6 @@ import hudson.model.Run
 import hudson.model.TaskListener
 import io.jenkins.plugins.gamekins.util.JacocoUtil
 import io.jenkins.plugins.gamekins.util.JacocoUtil.ClassDetails
-import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import java.util.*
 import kotlin.math.abs
@@ -84,20 +83,13 @@ class LineCoverageChallenge(classDetails: ClassDetails, branch: String, workspac
                             workspace: FilePath): Boolean {
         if (branch != constants["branch"]) return true
 
-        val jacocoSourceFile = JacocoUtil.calculateCurrentFilePath(workspace,
-                classDetails.jacocoSourceFile, classDetails.workspace)
-        val document: Document
-        document = try {
-            if (!jacocoSourceFile.exists()) {
-                listener.logger.println("[Gamekins] JaCoCo source file "
-                        + jacocoSourceFile.remote + JacocoUtil.EXISTS + jacocoSourceFile.exists())
-                return true
-            }
-            JacocoUtil.generateDocument(jacocoSourceFile)
-        } catch (e: Exception) {
-            e.printStackTrace(listener.logger)
-            return false
-        }
+        val jacocoSourceFile = JacocoUtil.calculateCurrentFilePath(workspace, classDetails.jacocoSourceFile,
+                classDetails.workspace)
+        val jacocoCSVFile = JacocoUtil.calculateCurrentFilePath(workspace, classDetails.jacocoCSVFile,
+                classDetails.workspace)
+        if (!jacocoSourceFile.exists() || !jacocoCSVFile.exists()) return true
+
+        val document = JacocoUtil.generateDocument(jacocoSourceFile, jacocoCSVFile, listener) ?: return false
 
         val elements = document.select("span." + "pc")
         elements.addAll(document.select("span." + "nc"))
@@ -124,20 +116,7 @@ class LineCoverageChallenge(classDetails: ClassDetails, branch: String, workspac
                 JacocoUtil.calculateCurrentFilePath(workspace, classDetails.jacocoCSVFile,
                         classDetails.workspace), branch)
 
-        val document: Document
-        document = try {
-            if (!jacocoSourceFile.exists() || !jacocoCSVFile.exists()) {
-                listener.logger.println("[Gamekins] JaCoCo source file " + jacocoSourceFile.remote
-                        + JacocoUtil.EXISTS + jacocoSourceFile.exists())
-                listener.logger.println("[Gamekins] JaCoCo csv file " + jacocoCSVFile.remote
-                        + JacocoUtil.EXISTS + jacocoCSVFile.exists())
-                return false
-            }
-            JacocoUtil.generateDocument(jacocoSourceFile)
-        } catch (e: Exception) {
-            e.printStackTrace(listener.logger)
-            return false
-        }
+        val document = JacocoUtil.generateDocument(jacocoSourceFile, jacocoCSVFile, listener) ?: return false
 
         val elements = document.select("span." + "fc")
         elements.addAll(document.select("span." + "pc"))

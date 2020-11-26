@@ -127,7 +127,7 @@ class GitUtilTest : AnnotationSpec() {
         every { user1.getProperty(UserProperty::class.java) } returns mailProperty1
 
         GitUtil.getLastChangedTestFilesOfUser(path, user1, 50, "", listOf(user1)).size shouldBe 0
-        GitUtil.getLastChangedTestFilesOfUser(path, user1, 50, headHash, listOf(user1)).size shouldBe 1
+        GitUtil.getLastChangedTestFilesOfUser(path, user1, 50, headHash, listOf(user1)).size shouldBe 0
 
         val firstCommit = "d3f574e28542876d4cd243c2ac730a6b9eed8b2c"
         GitUtil.getLastChangedTestFilesOfUser(path, user1, 50, firstCommit, listOf(user1)).size shouldBe 4

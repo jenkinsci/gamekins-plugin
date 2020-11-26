@@ -24,6 +24,39 @@ import java.util.Comparator
 object PublisherUtil {
 
     /**
+     * Checks whether one or more Challenges are unsolvable.
+     */
+    private fun checkSolvable(run: Run<*, *>, property: GameUserProperty, constants: HashMap<String, String>,
+                              workspace: FilePath, listener: TaskListener) {
+
+        for (challenge in property.getCurrentChallenges(constants["projectName"])) {
+            if (!challenge.isSolvable(constants, run, listener, workspace)) {
+                property.rejectChallenge(constants["projectName"]!!, challenge, "Not solvable")
+                listener.logger.println("[Gamekins] Challenge $challenge can not be solved anymore")
+            }
+        }
+    }
+
+    /**
+     * Checks whether one or more Challenges are solved.
+     */
+    private fun checkSolved(run: Run<*, *>, property: GameUserProperty, constants: HashMap<String, String>,
+                            workspace: FilePath, listener: TaskListener): Int {
+
+        var solved = 0
+        for (challenge in property.getCurrentChallenges(constants["projectName"])) {
+            if (challenge.isSolved(constants, run, listener, workspace)) {
+                property.completeChallenge(constants["projectName"]!!, challenge)
+                property.addScore(constants["projectName"]!!, challenge.getScore())
+                listener.logger.println("[Gamekins] Solved challenge $challenge")
+                if (challenge !is DummyChallenge) solved++
+            }
+        }
+
+        return solved
+    }
+
+    /**
      * Checks the solved and solvable state of a [user] and generates new Challenges if needed. Returns a [HashMap]
      * with the number of generated and solved Challenges.
      */
@@ -47,24 +80,12 @@ object PublisherUtil {
             listener.logger.println("[Gamekins] Start checking solved status of challenges for user ${user.fullName}")
 
             //Check if a Challenges is solved
-            for (challenge in property.getCurrentChallenges(constants["projectName"])) {
-                if (challenge.isSolved(constants, run, listener, workspace)) {
-                    property.completeChallenge(constants["projectName"]!!, challenge)
-                    property.addScore(constants["projectName"]!!, challenge.getScore())
-                    listener.logger.println("[Gamekins] Solved challenge $challenge")
-                    if (challenge !is DummyChallenge) solved++
-                }
-            }
+            solved += checkSolved(run, property, constants, workspace, listener)
 
             listener.logger.println("[Gamekins] Start checking solvable state of challenges for user ${user.fullName}")
 
             //Check if the Challenges are still solvable
-            for (challenge in property.getCurrentChallenges(constants["projectName"])) {
-                if (!challenge.isSolvable(constants, run, listener, workspace)) {
-                    property.rejectChallenge(constants["projectName"]!!, challenge, "Not solvable")
-                    listener.logger.println("[Gamekins] Challenge $challenge can not be solved anymore")
-                }
-            }
+            checkSolvable(run, property, constants, workspace, listener)
 
             //Generate new Challenges if the user has less than three
             generated += ChallengeFactory.generateNewChallenges(user, property, constants, classes,

@@ -7,6 +7,7 @@ import org.jenkinsci.plugins.workflow.job.WorkflowJob
 import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject
 import java.text.Collator
 import java.util.*
+import kotlin.collections.ArrayList
 
 /**
  * Class for evaluation purposes. Displays the information about the users and the runs in an XML format.
@@ -30,6 +31,14 @@ class Statistics(job: AbstractItem) {
     }
 
     /**
+     * Adds the number of [additionalGenerated] Challenges after rejection to the current run of [branch].
+     */
+    fun addGeneratedAfterRejection(branch: String, additionalGenerated: Int) {
+        val entry = runEntries!!.last { it.branch == branch }
+        entry.generatedChallenges = entry.generatedChallenges + additionalGenerated
+    }
+
+    /**
      * If Gamekins is not enabled when the [job] is created, this method adds the previous entries to the [Statistics]
      * according to the [branch] (only if [job] is of type [WorkflowMultiBranchProject]) recursively with the [number]
      * to the [runEntries]. It can happen that a job is aborted or fails and Gamekins is not executed. For this
@@ -47,31 +56,72 @@ class Statistics(job: AbstractItem) {
         }
         when (job) {
             is WorkflowMultiBranchProject -> {
-                for (workflowJob in job.items) {
-                    if (workflowJob.name == branch) {
-                        for (workflowRun in workflowJob.builds) {
-                            if (workflowRun.getNumber() == number) {
-                                runEntries.add(RunEntry(
-                                        workflowRun.getNumber(),
-                                        workflowJob.name,
-                                        workflowRun.result,
-                                        workflowRun.startTimeInMillis,
-                                        0,
-                                        0,
-                                        JacocoUtil.getTestCount(null, workflowRun),
-                                        0.0))
-                                return
-                            }
-                        }
-                    }
-                }
+                addPreviousEntriesWorkflowMultiBranchProject(job, branch, number)
             }
             is WorkflowJob -> {
-                for (workflowRun in job.builds) {
+                addPreviousEntriesWorkflowJob(job, number)
+            }
+            is AbstractProject<*, *> -> {
+                addPreviousEntriesAbstractProject(job, number)
+            }
+        }
+    }
+
+    /**
+     * Adds the build with [number] of the [job] to the [runEntries].
+     */
+    private fun addPreviousEntriesAbstractProject(job: AbstractProject<*, *>, number: Int) {
+
+        for (abstractBuild in job.builds) {
+            if (abstractBuild.getNumber() == number) {
+                runEntries?.add(RunEntry(
+                        abstractBuild.getNumber(),
+                        "",
+                        abstractBuild.result,
+                        abstractBuild.startTimeInMillis,
+                        0,
+                        0,
+                        JacocoUtil.getTestCount(null, abstractBuild),
+                        0.0))
+                return
+            }
+        }
+    }
+
+    /**
+     * Adds the build with [number] of the [job] to the [runEntries].
+     */
+    private fun addPreviousEntriesWorkflowJob(job: WorkflowJob, number: Int) {
+
+        for (workflowRun in job.builds) {
+            if (workflowRun.getNumber() == number) {
+                runEntries?.add(RunEntry(
+                        workflowRun.getNumber(),
+                        "",
+                        workflowRun.result,
+                        workflowRun.startTimeInMillis,
+                        0,
+                        0,
+                        JacocoUtil.getTestCount(null, workflowRun),
+                        0.0))
+                return
+            }
+        }
+    }
+
+    /**
+     * Adds the build with [number] of the [job] and [branch] to the [runEntries].
+     */
+    private fun addPreviousEntriesWorkflowMultiBranchProject(job: WorkflowMultiBranchProject, branch: String,
+                                                             number: Int) {
+
+        for (workflowJob in job.items) {
+            if (workflowJob.name == branch) {
+                for (workflowRun in workflowJob.builds) {
                     if (workflowRun.getNumber() == number) {
-                        runEntries.add(RunEntry(
+                        runEntries?.add(RunEntry(
                                 workflowRun.getNumber(),
-                                "",
+                                workflowJob.name,
                                 workflowRun.result,
                                 workflowRun.startTimeInMillis,
                                 0,
@@ -82,31 +132,7 @@ class Statistics(job: AbstractItem) {
                     }
                 }
             }
-            is AbstractProject<*, *> -> {
-                for (abstractBuild in job.builds) {
-                    if (abstractBuild.getNumber() == number) {
-                        runEntries.add(RunEntry(
-                                abstractBuild.getNumber(),
-                                "",
-                                abstractBuild.result,
-                                abstractBuild.startTimeInMillis,
-                                0,
-                                0,
-                                JacocoUtil.getTestCount(null, abstractBuild),
-                                0.0))
-                        return
-                    }
-                }
-            }
         }
-    }
-
-    /**
-     * Adds the number of [additionalGenerated] Challenges after rejection to the current run of [branch].
-     */
-    fun addGeneratedAfterRejection(branch: String, additionalGenerated: Int) {
-        val entry = runEntries!!.last { it.branch == branch }
-        entry.generatedChallenges = entry.generatedChallenges + additionalGenerated
     }
 
     /**
@@ -126,81 +152,71 @@ class Statistics(job: AbstractItem) {
      */
     private fun generateRunEntries(job: AbstractItem): ArrayList<RunEntry> {
         val entries = ArrayList<RunEntry>()
+        val list = mutableListOf<Run<*, *>>()
+        var branch = ""
         when (job) {
             is WorkflowMultiBranchProject -> {
-                val master = job.items.stream().filter { item: WorkflowJob -> item.name == "master" }.findFirst()
-                if (master.isPresent) {
-                    val list = mutableListOf<org.jenkinsci.plugins.workflow.job.WorkflowRun>()
-                    master.get().builds.forEach { list.add(it) }
-                    list.reverse()
-                    for (workflowRun in list) {
-                        entries.add(RunEntry(
-                                workflowRun.getNumber(),
-                                "master",
-                                workflowRun.result,
-                                workflowRun.startTimeInMillis,
-                                0,
-                                0,
-                                JacocoUtil.getTestCount(null, workflowRun),
-                                0.0))
-                    }
-                } else {
-                    var count = 0
-                    for (workflowJob in job.items) {
-                        if (count >= RUN_TOTAL_COUNT) break
-                        val list = mutableListOf<org.jenkinsci.plugins.workflow.job.WorkflowRun>()
-                        workflowJob.builds.forEach { list.add(it) }
-                        list.reverse()
-                        for (workflowRun in list) {
-                            if (count >= RUN_TOTAL_COUNT) break
-                            entries.add(RunEntry(
-                                    workflowRun.getNumber(),
-                                    workflowJob.name,
-                                    workflowRun.result,
-                                    workflowRun.startTimeInMillis,
-                                    0,
-                                    0,
-                                    JacocoUtil.getTestCount(null, workflowRun),
-                                    0.0))
-                            count++
-                        }
-                    }
+                val master = job.items.firstOrNull { it.name == "master" }
+                if (master != null) {
+                    master.builds.forEach { list.add(it) }
+                    branch = "master"
                 }
             }
             is WorkflowJob -> {
-                val list = mutableListOf<org.jenkinsci.plugins.workflow.job.WorkflowRun>()
                 job.builds.forEach { list.add(it) }
-                list.reverse()
-                for (workflowRun in list) {
-                    entries.add(RunEntry(
-                            workflowRun.getNumber(),
-                            "",
-                            workflowRun.result,
-                            workflowRun.startTimeInMillis,
-                            0,
-                            0,
-                            JacocoUtil.getTestCount(null, workflowRun),
-                            0.0))
-                }
             }
             is AbstractProject<*, *> -> {
-                val list = mutableListOf<AbstractBuild<*, *>>()
                 job.builds.forEach { list.add(it) }
-                list.reverse()
-                for (abstractBuild in list) {
-                    entries.add(RunEntry(
-                            abstractBuild.getNumber(),
-                            "",
-                            abstractBuild.result,
-                            abstractBuild.startTimeInMillis,
-                            0,
-                            0,
-                            JacocoUtil.getTestCount(null, abstractBuild),
-                            0.0))
-                }
             }
         }
+
+        if (list.isEmpty() && job is WorkflowMultiBranchProject) {
+            entries.addAll(generateRunEntriesWorkflowMultiBranchProject(job))
+        } else {
+            list.reverse()
+            for (run in list) {
+                entries.add(RunEntry(
+                        run.getNumber(),
+                        branch,
+                        run.result,
+                        run.startTimeInMillis,
+                        0,
+                        0,
+                        JacocoUtil.getTestCount(null, run),
+                        0.0))
+            }
+        }
+
         entries.sortedWith(compareBy({it.branch}, {it.runNumber}))
+        return entries
+    }
+
+    /**
+     * Generates [RUN_TOTAL_COUNT] entries from the [job] if no master branch was found.
+     */
+    private fun generateRunEntriesWorkflowMultiBranchProject(job: WorkflowMultiBranchProject): ArrayList<RunEntry> {
+        val entries = ArrayList<RunEntry>()
+        var count = 0
+        for (workflowJob in job.items) {
+            if (count >= RUN_TOTAL_COUNT) break
+            val runList = mutableListOf<Run<*, *>>()
+            workflowJob.builds.forEach { runList.add(it) }
+            runList.reverse()
+            for (workflowRun in runList) {
+                if (count >= RUN_TOTAL_COUNT) break
+                entries.add(RunEntry(
+                        workflowRun.getNumber(),
+                        workflowJob.name,
+                        workflowRun.result,
+                        workflowRun.startTimeInMillis,
+                        0,
+                        0,
+                        JacocoUtil.getTestCount(null, workflowRun),
+                        0.0))
+                count++
+            }
+        }
+
         return entries
     }
 

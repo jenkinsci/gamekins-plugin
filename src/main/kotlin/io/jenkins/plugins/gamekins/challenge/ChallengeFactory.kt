@@ -12,6 +12,7 @@ import io.jenkins.plugins.gamekins.util.JacocoUtil.ClassDetails
 import org.jsoup.nodes.Document
 import java.io.IOException
 import java.util.*
+import kotlin.collections.ArrayList
 import kotlin.jvm.Throws
 import kotlin.random.Random
 
@@ -25,6 +26,23 @@ object ChallengeFactory {
 
     enum class Challenges {
         ClassCoverageChallenge, LineCoverageChallenge, MethodCoverageChallenge
+    }
+
+    /**
+     * Chooses the type of [Challenge] to be generated.
+     */
+    private fun chooseChallengeType(): Challenges {
+        return when (Random.nextInt(4)) {
+            0 -> {
+                Challenges.ClassCoverageChallenge
+            }
+            1 -> {
+                Challenges.MethodCoverageChallenge
+            }
+            else -> {
+                Challenges.LineCoverageChallenge
+            }
+        }
     }
 
     /**
@@ -75,12 +93,7 @@ object ChallengeFactory {
         }
 
         val workList = ArrayList(classes)
-        val c = 1.5
-        val rankValues = DoubleArray(workList.size)
-        for (i in workList.indices) {
-            rankValues[i] = (2 - c + 2 * (c - 1) * (i / (workList.size - 1).toDouble())) / workList.size.toDouble()
-            if (i != 0) rankValues[i] += rankValues[i - 1]
-        }
+        val rankValues = initializeRankSelection(workList)
 
         var challenge: Challenge?
         var count = 0
@@ -118,17 +131,7 @@ object ChallengeFactory {
                 continue
             }
 
-            val challengeClass = when (Random.nextInt(4)) {
-                0 -> {
-                    Challenges.ClassCoverageChallenge
-                }
-                1 -> {
-                    Challenges.MethodCoverageChallenge
-                }
-                else -> {
-                    Challenges.LineCoverageChallenge
-                }
-            }
+            val challengeClass = chooseChallengeType()
 
             listener.logger.println("[Gamekins] Try class " + selectedClass.className + " and type " + challengeClass)
             challenge = generateCoverageChallenge(selectedClass, challengeClass, constants["branch"],
@@ -206,44 +209,70 @@ object ChallengeFactory {
                     break
                 }
 
-                try {
-                    //Try to generate a new unique Challenge three times. because it can fail
-                    var challenge: Challenge
-                    var isChallengeUnique: Boolean
-                    var count = 0
-                    do {
-                        if (count == 3) {
-                            challenge = DummyChallenge(constants)
-                            break
-                        }
-                        isChallengeUnique = true
-
-                        listener.logger.println("[Gamekins] Started to generate challenge")
-                        challenge = generateChallenge(user, constants, listener,
-                                userClasses, workspace)
-
-                        listener.logger.println("[Gamekins] Generated challenge $challenge")
-                        if (challenge is DummyChallenge) break
-
-                        for (currentChallenge in property.getCurrentChallenges(constants["projectName"])) {
-                            if (currentChallenge.toString() == challenge.toString()) {
-                                isChallengeUnique = false
-                                listener.logger.println("[Gamekins] Challenge is not unique")
-                                break
-                            }
-                        }
-                        count++
-                    } while (!isChallengeUnique)
-
-                    property.newChallenge(constants["projectName"]!!, challenge)
-                    listener.logger.println("[Gamekins] Added challenge $challenge")
-                    generated++
-                } catch (e: Exception) {
-                    e.printStackTrace(listener.logger)
-                }
+                generated += generateUniqueChallenge(user, property, constants, userClasses, workspace, listener)
             }
         }
 
         return generated
+    }
+
+    /**
+     * Tries to generate a new unique [Challenge].
+     */
+    private fun generateUniqueChallenge(user: User, property: GameUserProperty, constants: HashMap<String, String>,
+                                        userClasses: ArrayList<ClassDetails>, workspace: FilePath,
+                                        listener: TaskListener)
+            : Int {
+
+        var generated = 0
+        try {
+            //Try to generate a new unique Challenge three times. because it can fail
+            var challenge: Challenge
+            var isChallengeUnique: Boolean
+            var count = 0
+            do {
+                if (count == 3) {
+                    challenge = DummyChallenge(constants)
+                    break
+                }
+                isChallengeUnique = true
+
+                listener.logger.println("[Gamekins] Started to generate challenge")
+                challenge = generateChallenge(user, constants, listener, userClasses, workspace)
+
+                listener.logger.println("[Gamekins] Generated challenge $challenge")
+                if (challenge is DummyChallenge) break
+
+                for (currentChallenge in property.getCurrentChallenges(constants["projectName"])) {
+                    if (currentChallenge.toString() == challenge.toString()) {
+                        isChallengeUnique = false
+                        listener.logger.println("[Gamekins] Challenge is not unique")
+                        break
+                    }
+                }
+                count++
+            } while (!isChallengeUnique)
+
+            property.newChallenge(constants["projectName"]!!, challenge)
+            listener.logger.println("[Gamekins] Added challenge $challenge")
+            generated++
+        } catch (e: Exception) {
+            e.printStackTrace(listener.logger)
+        }
+
+        return generated
+    }
+
+    /**
+     * Initializes the array with the values for the Rank Selection algorithm.
+     */
+    private fun initializeRankSelection(workList: List<ClassDetails>): DoubleArray {
+        val c = 1.5
+        val rankValues = DoubleArray(workList.size)
+        for (i in workList.indices) {
+            rankValues[i] = (2 - c + 2 * (c - 1) * (i / (workList.size - 1).toDouble())) / workList.size.toDouble()
+            if (i != 0) rankValues[i] += rankValues[i - 1]
+        }
+        return rankValues
     }
 }

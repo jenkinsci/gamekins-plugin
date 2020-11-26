@@ -8,10 +8,6 @@ import io.jenkins.plugins.gamekins.GameUserProperty
 import io.jenkins.plugins.gamekins.challenge.Challenge
 import io.jenkins.plugins.gamekins.challenge.ChallengeFactory
 import io.jenkins.plugins.gamekins.challenge.DummyChallenge
-import io.jenkins.plugins.gamekins.property.GameJobProperty
-import io.jenkins.plugins.gamekins.property.GameMultiBranchProperty
-import io.jenkins.plugins.gamekins.property.GameProperty
-import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject
 import java.io.IOException
 
 /**
@@ -72,7 +68,7 @@ object ActionUtil {
 
         val constants = challenge.getConstants()
         var generatedText = ": No additional Challenge generated"
-        if (constants.isNotEmpty() && constants["workspace"] != null) {
+        if (constants["workspace"] != null) {
             var workspace = FilePath(null, constants["workspace"]!!)
             if (!workspace.exists() && constants["branch"] != null) {
                 workspace = FilePath(null, constants["workspace"]!!.replace(constants["branch"]!!, "master"))
@@ -84,17 +80,7 @@ object ActionUtil {
                 generatedText = ": New Challenge generated"
 
                 if (classes.isNotEmpty()) {
-                    val generated = ChallengeFactory.generateNewChallenges(
-                            user, property, constants, classes, workspace)
-                    val branch = if (constants["branch"] != null
-                            && workspace.remote.contains(constants["branch"]!!.toRegex()))
-                        constants["branch"]!! else "master"
-                    val jobProperty = if (job is WorkflowMultiBranchProject) {
-                        job.properties.get(GameMultiBranchProperty::class.java)
-                    } else {
-                        (job as hudson.model.Job<*, *>).getProperty(GameJobProperty::class.java.name) as GameProperty
-                    }
-                    jobProperty?.getStatistics()?.addGeneratedAfterRejection(branch, generated)
+                    generateAndUpdate(user, property, job, constants, classes, workspace)
                 } else {
                     property.newChallenge(constants["projectName"]!!, DummyChallenge(constants))
                 }
@@ -104,5 +90,20 @@ object ActionUtil {
         }
 
         return generatedText
+    }
+
+    /**
+     * Generates a new [Challenge] and updates the Statistics
+     */
+    private fun generateAndUpdate(user: User, property: GameUserProperty, job: AbstractItem,
+                                  constants: HashMap<String, String>, classes: ArrayList<JacocoUtil.ClassDetails>,
+                                  workspace: FilePath) {
+        val generated = ChallengeFactory.generateNewChallenges(
+                user, property, constants, classes, workspace)
+        val branch = if (constants["branch"] != null
+                && workspace.remote.contains(constants["branch"]!!.toRegex()))
+            constants["branch"]!! else "master"
+        PropertyUtil.retrieveGameProperty(job)?.getStatistics()
+                ?.addGeneratedAfterRejection(branch, generated)
     }
 }

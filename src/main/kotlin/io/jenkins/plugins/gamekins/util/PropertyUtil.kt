@@ -10,6 +10,8 @@ import hudson.util.ListBoxModel
 import io.jenkins.plugins.gamekins.GameUserProperty
 import io.jenkins.plugins.gamekins.LeaderboardAction
 import io.jenkins.plugins.gamekins.StatisticsAction
+import io.jenkins.plugins.gamekins.property.GameJobProperty
+import io.jenkins.plugins.gamekins.property.GameMultiBranchProperty
 import io.jenkins.plugins.gamekins.property.GameProperty
 import org.acegisecurity.userdetails.UserDetails
 import org.jenkinsci.plugins.workflow.job.WorkflowJob
@@ -58,24 +60,24 @@ object PropertyUtil {
     fun doAddUserToTeam(job: AbstractItem?, teamsBox: String, usersBox: String): FormValidation {
         if (teamsBox.trim { it <= ' ' }.isEmpty()) return FormValidation.error(NO_TEAM)
         if (job == null) return FormValidation.error(ERROR_PARENT)
-        for (user in User.getAll()) {
-            if (!realUser(user)) continue
-            if (user.fullName == usersBox) {
-                val projectName = job.name
-                val property = user.getProperty(GameUserProperty::class.java)
-                return if (property != null && !property.isParticipating(projectName)) {
-                    property.setParticipating(projectName, teamsBox)
-                    try {
-                        user.save()
-                    } catch (e: IOException) {
-                        return FormValidation.error(e, ERROR_SAVING)
-                    }
-                    FormValidation.ok("User successfully added")
-                } else {
-                    FormValidation.error("The user is already participating in a team")
+
+        val user = retrieveUser(usersBox)
+        if (user != null) {
+            val projectName = job.name
+            val property = user.getProperty(GameUserProperty::class.java)
+            return if (property != null && !property.isParticipating(projectName)) {
+                property.setParticipating(projectName, teamsBox)
+                try {
+                    user.save()
+                } catch (e: IOException) {
+                    return FormValidation.error(e, ERROR_SAVING)
                 }
+                FormValidation.ok("User successfully added")
+            } else {
+                FormValidation.error("The user is already participating in a team")
             }
         }
+
         return FormValidation.error("No user with the specified name found")
     }
 
@@ -156,24 +158,24 @@ object PropertyUtil {
     fun doRemoveUserFromTeam(job: AbstractItem?, teamsBox: String, usersBox: String): FormValidation {
         if (teamsBox.trim { it <= ' ' }.isEmpty()) return FormValidation.error(NO_TEAM)
         if (job == null) return FormValidation.error(ERROR_PARENT)
-        for (user in User.getAll()) {
-            if (!realUser(user)) continue
-            if (user.fullName == usersBox) {
-                val projectName = job.name
-                val property = user.getProperty(GameUserProperty::class.java)
-                return if (property != null && property.isParticipating(projectName, teamsBox)) {
-                    property.removeParticipation(projectName)
-                    try {
-                        user.save()
-                    } catch (e: IOException) {
-                        return FormValidation.error(e, ERROR_SAVING)
-                    }
-                    FormValidation.ok("User successfully removed")
-                } else {
-                    FormValidation.error("The user is not in the specified team")
+
+        val user = retrieveUser(usersBox)
+        if (user != null) {
+            val projectName = job.name
+            val property = user.getProperty(GameUserProperty::class.java)
+            return if (property != null && property.isParticipating(projectName, teamsBox)) {
+                property.removeParticipation(projectName)
+                try {
+                    user.save()
+                } catch (e: IOException) {
+                    return FormValidation.error(e, ERROR_SAVING)
                 }
+                FormValidation.ok("User successfully removed")
+            } else {
+                FormValidation.error("The user is not in the specified team")
             }
         }
+
         return FormValidation.error("No user with the specified name found")
     }
 
@@ -216,48 +218,88 @@ object PropertyUtil {
     @JvmStatic
     fun reconfigure(owner: AbstractItem, activated: Boolean, showStatistics: Boolean) {
         if (owner is WorkflowJob) {
+            reconfigureWorkFlowJob(owner, activated, showStatistics)
+        } else if (owner is WorkflowMultiBranchProject || owner is AbstractMavenProject<*, *>) {
+            reconfigureAbstractItem(owner, activated, showStatistics)
+        }
+    }
+
+    /**
+     * Adds or removes a [LeaderboardAction] or [StatisticsAction] with the help of the according methods of the
+     * [job]
+     */
+    private fun reconfigureWorkFlowJob(job: WorkflowJob, activated: Boolean, showStatistics: Boolean) {
+
+        if (activated) {
+            job.addOrReplaceAction(LeaderboardAction(job))
+        } else {
+            job.removeAction(LeaderboardAction(job))
+        }
+        if (showStatistics) {
+            job.addOrReplaceAction(StatisticsAction(job))
+        } else {
+            job.removeAction(StatisticsAction(job))
+        }
+        try {
+            job.save()
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+    }
+
+    /**
+     * Adds or removes a [LeaderboardAction] or [StatisticsAction] with the help of the according methods of the
+     * [job]
+     */
+    //TODO: Without reflection (Trigger)
+    //TODO: Replace newInstance() with constructor call
+    private fun reconfigureAbstractItem(job: AbstractItem, activated: Boolean, showStatistics: Boolean) {
+
+        try {
+            val actionField = Actionable::class.java.getDeclaredField("actions")
+            actionField.isAccessible = true
+            if (actionField[job] == null) actionField[job] = actionField.type.newInstance()
             if (activated) {
-                owner.addOrReplaceAction(LeaderboardAction(owner))
+                (actionField[job] as MutableList<*>).removeIf { action -> action is LeaderboardAction }
+                (actionField[job] as MutableList<Action?>).add(LeaderboardAction(job))
             } else {
-                owner.removeAction(LeaderboardAction(owner))
+                (actionField[job] as MutableList<*>).removeIf { action -> action is LeaderboardAction }
             }
             if (showStatistics) {
-                owner.addOrReplaceAction(StatisticsAction(owner))
+                (actionField[job] as MutableList<*>).removeIf { action -> action is StatisticsAction }
+                (actionField[job] as MutableList<Action?>).add(StatisticsAction(job))
             } else {
-                owner.removeAction(StatisticsAction(owner))
+                (actionField[job] as MutableList<*>).removeIf { action -> action is StatisticsAction }
             }
-            try {
-                owner.save()
-            } catch (e: IOException) {
-                e.printStackTrace()
-            }
-        } else if (owner is WorkflowMultiBranchProject || owner is AbstractMavenProject<*, *>) {
-            //TODO: Without reflection (Trigger)
-            //TODO: Replace newInstance() with constructor call
-            try {
-                val actionField = Actionable::class.java.getDeclaredField("actions")
-                actionField.isAccessible = true
-                if (actionField[owner] == null) actionField[owner] = actionField.type.newInstance()
-                if (activated) {
-                    (actionField[owner] as MutableList<*>).removeIf { action -> action is LeaderboardAction }
-                    (actionField[owner] as MutableList<Action?>).add(LeaderboardAction(owner))
-                } else {
-                    (actionField[owner] as MutableList<*>).removeIf { action -> action is LeaderboardAction }
-                }
-                if (showStatistics) {
-                    (actionField[owner] as MutableList<*>).removeIf { action -> action is StatisticsAction }
-                    (actionField[owner] as MutableList<Action?>).add(StatisticsAction(owner))
-                } else {
-                    (actionField[owner] as MutableList<*>).removeIf { action -> action is StatisticsAction }
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-            /*try {
-                owner.save();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }*/
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
+    }
+
+    /**
+     * Retrieves the corresponding [GameProperty] of the [job] depending on its type.
+     */
+    fun retrieveGameProperty(job: AbstractItem): GameProperty? {
+        val property = if (job is WorkflowMultiBranchProject) {
+            job.properties.get(GameMultiBranchProperty::class.java)
+        } else {
+            (job as hudson.model.Job<*, *>).getProperty(GameJobProperty::class.java.name)
+        }
+
+        return if (property == null) null else property as GameProperty
+    }
+
+    /**
+     * Retrieves the corresponding [User] according to the [fullName].
+     */
+    private fun retrieveUser(fullName: String): User? {
+        for (user in User.getAll()) {
+            if (!realUser(user)) continue
+            if (user.fullName == fullName) {
+                return user
+            }
+        }
+
+        return null
     }
 }

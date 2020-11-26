@@ -1,7 +1,6 @@
 package io.jenkins.plugins.gamekins
 
 import hudson.model.*
-import hudson.security.HudsonPrivateSecurityRealm.Details
 import io.jenkins.plugins.gamekins.challenge.Challenge
 import io.jenkins.plugins.gamekins.util.PropertyUtil
 import jenkins.model.Jenkins
@@ -38,7 +37,7 @@ class LeaderboardAction(val job: AbstractItem) : ProminentProjectAction, Describ
         return property.getCurrentChallenges(job.name)
     }
 
-    override fun getDescriptor(): Descriptor<LeaderboardAction>? {
+    override fun getDescriptor(): Descriptor<LeaderboardAction> {
         return Jenkins.get().getDescriptorOrDie(javaClass) as Descriptor<LeaderboardAction>
     }
 
@@ -70,9 +69,8 @@ class LeaderboardAction(val job: AbstractItem) : ProminentProjectAction, Describ
             val property = user.getProperty(GameUserProperty::class.java)
             if (property != null && property.isParticipating(job.name)) {
                 var index = -1
-                for (i in details.indices) {
-                    val teamDetail = details[i]
-                    if (teamDetail.teamName == property.getTeamName(job.name)) {
+                details.indices.forEach { i ->
+                    if (details[i].teamName == property.getTeamName(job.name)) {
                         index = i
                     }
                 }
