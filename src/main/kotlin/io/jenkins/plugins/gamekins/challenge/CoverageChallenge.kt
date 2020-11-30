@@ -15,14 +15,13 @@ import io.jenkins.plugins.gamekins.util.JacocoUtil.generateDocument
 abstract class CoverageChallenge(val classDetails: ClassDetails, val branch: String, workspace: FilePath?)
     : Challenge {
 
-    val coverage: Double
-    val fullyCoveredLines: Int
-    val notCoveredLines: Int
-    val partiallyCoveredLines: Int
-    var solvedCoverage = 0.0
-    //TODO: Fix
-    @get:JvmName("getCreated_") val created = System.currentTimeMillis()
-    @get:JvmName("getSolved_") var solved: Long = 0
+    protected val coverage: Double
+    protected val fullyCoveredLines: Int
+    protected val notCoveredLines: Int
+    protected val partiallyCoveredLines: Int
+    protected var solvedCoverage = 0.0
+    private val created = System.currentTimeMillis()
+    private var solved: Long = 0
 
     /**
      * Calculates the number of fully, partially and not covered lines, and the coverage of the class itself.
@@ -63,5 +62,12 @@ abstract class CoverageChallenge(val classDetails: ClassDetails, val branch: Str
         }
         print += "\"/>"
         return print
+    }
+
+    /**
+     * Needed because of automatically generated getter and setter in Kotlin.
+     */
+    fun setSolved(newSolved: Long) {
+        solved = newSolved
     }
 }

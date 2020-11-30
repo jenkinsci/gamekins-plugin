@@ -157,7 +157,7 @@ class LineCoverageChallenge(classDetails: ClassDetails, branch: String, workspac
                 || (maxCoveredBranches > 1 && maxCoveredBranches - title.toInt() <= currentCoveredBranches)) {
             return false
         }
-        solved = System.currentTimeMillis()
+        super.setSolved(System.currentTimeMillis())
         solvedCoverage = JacocoUtil.getCoverageInPercentageFromJacoco(classDetails.className, jacocoCSVFile)
         return true
     }

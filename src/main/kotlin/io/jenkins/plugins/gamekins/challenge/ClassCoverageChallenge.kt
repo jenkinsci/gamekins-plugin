@@ -83,7 +83,7 @@ class ClassCoverageChallenge(classDetails: ClassDetails, branch: String, workspa
 
         val fullyCoveredLines = JacocoUtil.calculateCoveredLines(document, "fc")
         if (fullyCoveredLines > this.fullyCoveredLines) {
-            solved = System.currentTimeMillis()
+            super.setSolved(System.currentTimeMillis())
             solvedCoverage = JacocoUtil.getCoverageInPercentageFromJacoco(
                     classDetails.className, jacocoCSVFile)
             return true

@@ -105,7 +105,7 @@ class MethodCoverageChallenge(classDetails: ClassDetails, branch: String, worksp
             for (method in methods) {
                 if (method.methodName == methodName) {
                     if (method.missedLines < missedLines) {
-                        solved = System.currentTimeMillis()
+                        super.setSolved(System.currentTimeMillis())
                         solvedCoverage = JacocoUtil.getCoverageInPercentageFromJacoco(
                                 classDetails.className, jacocoCSVFile)
                         return true
