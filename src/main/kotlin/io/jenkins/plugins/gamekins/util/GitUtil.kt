@@ -6,6 +6,7 @@ import hudson.model.User
 import hudson.tasks.Mailer.UserProperty
 import io.jenkins.plugins.gamekins.GameUserProperty
 import io.jenkins.plugins.gamekins.util.JacocoUtil.ClassDetails
+import io.jenkins.plugins.gamekins.util.JacocoUtil.computePackageName
 import jenkins.security.MasterToSlaveCallable
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.diff.DiffFormatter
@@ -150,12 +151,12 @@ object GitUtil {
                             if (user != null) authorMapping[commit.authorIdent] = user
                         }
 
-                        //TODO: Classes with same name in different packages
                         //Check whether the class was found before
                         val classname = pathSplit[pathSplit.size - 1].split("\\.".toRegex())[0]
+                        val packageName = computePackageName(path)
                         var found = false
                         for (details in classes) {
-                            if (details.className == classname) {
+                            if (details.className == classname && details.packageName == packageName) {
                                 found = true
                                 if (user != null) details.addUser(user)
                                 break
