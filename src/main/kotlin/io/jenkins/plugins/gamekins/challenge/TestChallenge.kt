@@ -28,6 +28,10 @@ class TestChallenge(private val currentCommit: String, private val testCount: In
         return true
     }
 
+    override fun getConstants(): HashMap<String, String> {
+        return constants
+    }
+
     override fun getCreated(): Long {
         return created
     }
@@ -38,10 +42,6 @@ class TestChallenge(private val currentCommit: String, private val testCount: In
 
     override fun getSolved(): Long {
         return solved
-    }
-
-    override fun getConstants(): HashMap<String, String> {
-        return constants
     }
 
     override fun hashCode(): Int {

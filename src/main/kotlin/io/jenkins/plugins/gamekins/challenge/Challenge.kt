@@ -18,6 +18,12 @@ interface Challenge {
     override fun equals(other: Any?): Boolean
 
     /**
+     * Returns the constants provided during creation. Must include entries for "projectName", "branch", "workspace",
+     * "jacocoResultsPath" and "jacocoCSVPath".
+     */
+    fun getConstants(): HashMap<String, String>
+
+    /**
      * Returns the creation time in milliseconds since 01.01.1970.
      */
     fun getCreated(): Long
@@ -38,12 +44,6 @@ interface Challenge {
     fun getToolTipText(): String {
         return ""
     }
-
-    /**
-     * Returns the constants provided during creation. Must include entries for "projectName", "branch", "workspace",
-     * "jacocoResultsPath" and "jacocoCSVPath".
-     */
-    fun getConstants(): HashMap<String, String>
 
     /**
      * Checks whether the current [Challenge] is still solvable or not.

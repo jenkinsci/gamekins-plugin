@@ -115,7 +115,6 @@ class ChallengeFactoryTest : AnnotationSpec() {
     fun generateClassCoverageChallenge() {
         mockkObject(Random)
         every { Random.nextInt(any()) } returns 0
-        every { Random.nextDouble() } returns 0.1
         every { JacocoUtil.calculateCoveredLines(any(), "nc") } returns 10
         ChallengeFactory.generateChallenge(user, map, listener, arrayListOf(details), path) should
                 beOfType(ClassCoverageChallenge::class)
@@ -124,7 +123,7 @@ class ChallengeFactoryTest : AnnotationSpec() {
     @Test
     fun generateDummyChallenge() {
         mockkObject(Random)
-        every { Random.nextDouble() } returns 0.1
+        every { Random.nextInt(any()) } returns 0
         ChallengeFactory.generateChallenge(user, map, listener, arrayListOf(details), path) should
                 beOfType(DummyChallenge::class)
     }
@@ -133,7 +132,6 @@ class ChallengeFactoryTest : AnnotationSpec() {
     fun generateLineCoverageChallenge() {
         mockkObject(Random)
         every { Random.nextInt(any()) } returns 2
-        every { Random.nextDouble() } returns 0.1
         every { JacocoUtil.calculateCoveredLines(any(), "pc") } returns 10
         val element = mockkClass(Element::class)
         val elements = Elements(listOf(element))
@@ -149,8 +147,7 @@ class ChallengeFactoryTest : AnnotationSpec() {
     @Test
     fun generateMethodCoverageChallenge() {
         mockkObject(Random)
-        every { Random.nextInt(any()) } returns 1
-        every { Random.nextDouble() } returns 0.1
+        every { Random.nextInt(any()) } returns 6
         every { JacocoUtil.calculateCoveredLines(any(), "nc") } returns 10
         val method = JacocoUtil.CoverageMethod("toString", 10, 10)
         every { JacocoUtil.getMethodEntries(any()) } returns arrayListOf(method)
@@ -161,7 +158,7 @@ class ChallengeFactoryTest : AnnotationSpec() {
     @Test
     fun generateTestChallenge() {
         mockkObject(Random)
-        every { Random.nextDouble() } returns 0.95
+        every { Random.nextInt(any()) } returns 9
         ChallengeFactory.generateChallenge(user, map, listener, arrayListOf(details), path) should
                 beOfType(TestChallenge::class)
     }

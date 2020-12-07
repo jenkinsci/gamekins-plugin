@@ -24,25 +24,26 @@ import kotlin.random.Random
  */
 object ChallengeFactory {
 
-    enum class Challenges {
-        ClassCoverageChallenge, LineCoverageChallenge, MethodCoverageChallenge
+    enum class Challenges(val selectionWeight: Int) {
+        ClassCoverageChallenge(2),
+        LineCoverageChallenge(4),
+        MethodCoverageChallenge(3),
+        TestChallenge(1)
     }
 
     /**
      * Chooses the type of [Challenge] to be generated.
      */
+    //TODO: Use kapt or similar
     private fun chooseChallengeType(): Challenges {
-        return when (Random.nextInt(4)) {
-            0 -> {
-                Challenges.ClassCoverageChallenge
-            }
-            1 -> {
-                Challenges.MethodCoverageChallenge
-            }
-            else -> {
-                Challenges.LineCoverageChallenge
+        val weightList = arrayListOf<Challenges>()
+        enumValues<Challenges>().forEach {
+            (0 until it.selectionWeight).forEach { _ ->
+                weightList.add(it)
             }
         }
+
+        return weightList[Random.nextInt(weightList.size)]
     }
 
     /**
@@ -86,11 +87,6 @@ object ChallengeFactory {
     @Throws(IOException::class, InterruptedException::class)
     fun generateChallenge(user: User, constants: HashMap<String, String>, listener: TaskListener,
                           classes: ArrayList<ClassDetails>, workspace: FilePath): Challenge {
-        if (Random.nextDouble() > 0.9) {
-            listener.logger.println("[Gamekins] Generated new TestChallenge")
-            return TestChallenge(workspace.act(HeadCommitCallable(workspace.remote)).name,
-                    JacocoUtil.getTestCount(workspace), user, constants["branch"]!!, constants)
-        }
 
         val workList = ArrayList(classes)
         val rankValues = initializeRankSelection(workList)
@@ -132,6 +128,12 @@ object ChallengeFactory {
             }
 
             val challengeClass = chooseChallengeType()
+
+            if (challengeClass == Challenges.TestChallenge) {
+                listener.logger.println("[Gamekins] Generated new TestChallenge")
+                return TestChallenge(workspace.act(HeadCommitCallable(workspace.remote)).name,
+                        JacocoUtil.getTestCount(workspace), user, constants["branch"]!!, constants)
+            }
 
             listener.logger.println("[Gamekins] Try class " + selectedClass.className + " and type " + challengeClass)
             challenge = generateCoverageChallenge(selectedClass, challengeClass, constants["branch"],

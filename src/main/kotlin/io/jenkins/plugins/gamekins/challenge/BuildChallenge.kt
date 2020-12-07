@@ -23,6 +23,10 @@ class BuildChallenge(private var constants: HashMap<String, String>) : Challenge
         return true
     }
 
+    override fun getConstants(): HashMap<String, String> {
+        return constants
+    }
+
     override fun getCreated(): Long {
         return created
     }
@@ -33,10 +37,6 @@ class BuildChallenge(private var constants: HashMap<String, String>) : Challenge
 
     override fun getSolved(): Long {
         return solved
-    }
-
-    override fun getConstants(): HashMap<String, String> {
-        return constants
     }
 
     override fun hashCode(): Int {

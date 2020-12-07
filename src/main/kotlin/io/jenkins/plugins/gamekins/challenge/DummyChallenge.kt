@@ -20,6 +20,10 @@ class DummyChallenge(private var constants: HashMap<String, String>) : Challenge
         return true
     }
 
+    override fun getConstants(): HashMap<String, String> {
+        return constants
+    }
+
     /**
      * Only for dummy purposes, no need for further information.
      *
@@ -45,10 +49,6 @@ class DummyChallenge(private var constants: HashMap<String, String>) : Challenge
      */
     override fun getSolved(): Long {
         return 0
-    }
-
-    override fun getConstants(): HashMap<String, String> {
-        return constants
     }
 
     override fun hashCode(): Int {
