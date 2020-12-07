@@ -99,15 +99,7 @@ object ChallengeFactory {
                 return DummyChallenge(constants)
             }
 
-            val probability = Random.nextDouble()
-            var selectedClass = workList[workList.size - 1]
-            for (i in workList.indices) {
-                if (rankValues[i] > probability) {
-                    selectedClass = workList[i]
-                    break
-                }
-            }
-
+            val selectedClass = selectClass(workList, rankValues)
             workList.remove(selectedClass)
             count++
 
@@ -276,5 +268,21 @@ object ChallengeFactory {
             if (i != 0) rankValues[i] += rankValues[i - 1]
         }
         return rankValues
+    }
+
+    /**
+     * Select a class of the [workList] with the Rank Selection algorithm ([rankValues]).
+     */
+    private fun selectClass(workList: List<ClassDetails>, rankValues: DoubleArray): ClassDetails {
+        val probability = Random.nextDouble()
+        var selectedClass = workList[workList.size - 1]
+        for (i in workList.indices) {
+            if (rankValues[i] > probability) {
+                selectedClass = workList[i]
+                break
+            }
+        }
+
+        return selectedClass
     }
 }
