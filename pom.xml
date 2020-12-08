@@ -4,10 +4,9 @@
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>3.57</version>
-        <relativePath />
+        <version>4.12</version>
     </parent>
-    <groupId>io.jenkins.plugins</groupId>
+    <groupId>org.gamekins</groupId>
     <artifactId>gamekins</artifactId>
     <version>1.0</version>
     <packaging>hpi</packaging>
@@ -45,27 +44,11 @@
         <dependency>
             <groupId>org.jenkins-ci.main</groupId>
             <artifactId>jenkins-core</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>log4j-over-slf4j</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>jcl-over-slf4j</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.main</groupId>
             <artifactId>jenkins-war</artifactId>
             <type>executable-war</type>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-jdk14</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
@@ -157,16 +140,6 @@
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>git</artifactId>
             <version>4.4.4</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.jenkins-ci</groupId>
-                    <artifactId>annotation-indexer</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.jenkins-ci.plugins</groupId>
-                    <artifactId>scm-api</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.jenkins-ci.main/maven-plugin -->
         <dependency>
