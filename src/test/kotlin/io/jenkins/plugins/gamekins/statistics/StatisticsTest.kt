@@ -18,7 +18,6 @@ package io.jenkins.plugins.gamekins.statistics
 
 import hudson.model.Result
 import hudson.tasks.junit.TestResultAction
-import hudson.util.RunList
 import io.kotest.core.spec.style.AnnotationSpec
 import io.kotest.matchers.shouldBe
 import io.mockk.every

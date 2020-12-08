@@ -27,7 +27,6 @@ import io.jenkins.plugins.gamekins.util.JacocoUtil
 import io.jenkins.plugins.gamekins.util.JacocoUtil.ClassDetails
 import org.jsoup.nodes.Document
 import java.io.IOException
-import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.jvm.Throws
 import kotlin.random.Random

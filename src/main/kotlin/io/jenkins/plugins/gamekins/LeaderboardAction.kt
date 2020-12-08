@@ -22,7 +22,6 @@ import io.jenkins.plugins.gamekins.util.PropertyUtil
 import jenkins.model.Jenkins
 import org.kohsuke.stapler.export.Exported
 import org.kohsuke.stapler.export.ExportedBean
-import java.util.*
 import java.util.concurrent.CopyOnWriteArrayList
 
 /**

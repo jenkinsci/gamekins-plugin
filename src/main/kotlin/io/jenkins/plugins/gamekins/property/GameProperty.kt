@@ -22,7 +22,6 @@ import org.jenkinsci.plugins.workflow.job.WorkflowJob
 import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject
 import io.jenkins.plugins.gamekins.statistics.Statistics
 import java.io.IOException
-import java.util.*
 import kotlin.jvm.Throws
 
 /**

@@ -148,6 +148,7 @@ class ChallengeFactoryTest : AnnotationSpec() {
     fun generateLineCoverageChallenge() {
         mockkObject(Random)
         every { Random.nextInt(any()) } returns 2
+        every { Random.nextInt(1) } returns 0
         every { JacocoUtil.calculateCoveredLines(any(), "pc") } returns 10
         val element = mockkClass(Element::class)
         val elements = Elements(listOf(element))
@@ -164,6 +165,7 @@ class ChallengeFactoryTest : AnnotationSpec() {
     fun generateMethodCoverageChallenge() {
         mockkObject(Random)
         every { Random.nextInt(any()) } returns 6
+        every { Random.nextInt(1) } returns 0
         every { JacocoUtil.calculateCoveredLines(any(), "nc") } returns 10
         val method = JacocoUtil.CoverageMethod("toString", 10, 10)
         every { JacocoUtil.getMethodEntries(any()) } returns arrayListOf(method)

@@ -27,7 +27,6 @@ import io.mockk.every
 import io.mockk.mockkClass
 import io.mockk.mockkStatic
 import io.mockk.unmockkAll
-import java.io.File
 
 class PropertyUtilTest : AnnotationSpec() {
 

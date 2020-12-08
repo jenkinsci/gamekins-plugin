@@ -24,9 +24,10 @@ import io.jenkins.plugins.gamekins.statistics.Statistics
 import net.sf.json.JSONObject
 import org.kohsuke.stapler.DataBoundSetter
 import org.kohsuke.stapler.StaplerRequest
-import java.util.*
+import java.util.UUID
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.CopyOnWriteArraySet
+import kotlin.collections.HashMap
 
 /**
  * Property that is added to each [User] to extend his configuration and ability. Stores all current, completed and

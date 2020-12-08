@@ -28,7 +28,6 @@ import io.jenkins.plugins.gamekins.statistics.Statistics
 import io.jenkins.plugins.gamekins.util.JacocoUtil.FilesOfAllSubDirectoriesCallable
 import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject
 import java.io.IOException
-import java.util.ArrayList
 import java.util.Comparator
 
 /**

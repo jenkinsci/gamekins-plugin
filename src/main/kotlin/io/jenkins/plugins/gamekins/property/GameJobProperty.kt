@@ -26,7 +26,6 @@ import org.kohsuke.stapler.DataBoundConstructor
 import org.kohsuke.stapler.DataBoundSetter
 import org.kohsuke.stapler.StaplerRequest
 import java.io.IOException
-import java.util.*
 import javax.annotation.Nonnull
 import kotlin.jvm.Throws
 

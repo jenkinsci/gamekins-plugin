@@ -20,8 +20,8 @@ import hudson.FilePath
 import hudson.model.Run
 import hudson.model.TaskListener
 import hudson.model.User
-import io.jenkins.plugins.gamekins.util.GitUtil.getLastChangedTestFilesOfUser
-import io.jenkins.plugins.gamekins.util.JacocoUtil.getTestCount
+import io.jenkins.plugins.gamekins.util.GitUtil
+import io.jenkins.plugins.gamekins.util.JacocoUtil
 import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject
 import kotlin.collections.HashMap
 
@@ -98,11 +98,11 @@ class TestChallenge(private val currentCommit: String, private val testCount: In
                           workspace: FilePath): Boolean {
         if (branch != constants["branch"]) return false
         try {
-            val testCountSolved = getTestCount(workspace, run)
+            val testCountSolved = JacocoUtil.getTestCount(workspace, run)
             if (testCountSolved <= testCount) {
                 return false
             }
-            val lastChangedFilesOfUser = getLastChangedTestFilesOfUser(
+            val lastChangedFilesOfUser = GitUtil.getLastChangedTestFilesOfUser(
                     workspace, user, 0, currentCommit, User.getAll())
             if (lastChangedFilesOfUser.isNotEmpty()) {
                 solved = System.currentTimeMillis()

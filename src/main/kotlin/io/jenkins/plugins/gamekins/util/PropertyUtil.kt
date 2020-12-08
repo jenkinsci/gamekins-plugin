@@ -33,7 +33,6 @@ import org.acegisecurity.userdetails.UserDetails
 import org.jenkinsci.plugins.workflow.job.WorkflowJob
 import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject
 import java.io.IOException
-import java.util.*
 import java.util.function.Consumer
 
 /**

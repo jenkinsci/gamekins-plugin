@@ -22,7 +22,6 @@ import hudson.model.TaskListener
 import io.jenkins.plugins.gamekins.util.JacocoUtil
 import io.jenkins.plugins.gamekins.util.JacocoUtil.ClassDetails
 import org.jsoup.nodes.Element
-import java.util.*
 import kotlin.math.abs
 
 /**

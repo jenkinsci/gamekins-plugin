@@ -22,7 +22,6 @@ import hudson.model.TaskListener
 import io.jenkins.plugins.gamekins.util.JacocoUtil
 import io.jenkins.plugins.gamekins.util.JacocoUtil.ClassDetails
 import org.jsoup.nodes.Document
-import java.util.*
 
 /**
  * Specific [Challenge] to motivate the user to cover more lines in a specific class.

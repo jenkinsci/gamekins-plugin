@@ -31,8 +31,9 @@ import org.jsoup.select.Elements
 import java.io.File
 import java.io.IOException
 import java.io.Serializable
-import java.util.*
+
 import kotlin.jvm.Throws
+import kotlin.random.Random
 
 /**
  * Util object for interaction with JaCoCo and Jsoup.
@@ -96,7 +97,7 @@ object JacocoUtil {
     fun chooseRandomLine(classDetails: ClassDetails, workspace: FilePath): Element? {
         val elements = getLines(calculateCurrentFilePath(
                 workspace, classDetails.jacocoSourceFile, classDetails.workspace))
-        return if (elements.isEmpty()) null else elements[Random().nextInt(elements.size)]
+        return if (elements.isEmpty()) null else elements[Random.nextInt(elements.size)]
     }
 
     /**
@@ -106,7 +107,7 @@ object JacocoUtil {
     fun chooseRandomMethod(classDetails: ClassDetails, workspace: FilePath): CoverageMethod? {
         val methods = getNotFullyCoveredMethodEntries(calculateCurrentFilePath(
                 workspace, classDetails.jacocoMethodFile, classDetails.workspace))
-        return if (methods.isEmpty()) null else methods[Random().nextInt(methods.size)]
+        return if (methods.isEmpty()) null else methods[Random.nextInt(methods.size)]
     }
 
     /**

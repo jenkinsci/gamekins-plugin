@@ -32,7 +32,6 @@ import net.sf.json.JSONObject
 import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject
 import org.kohsuke.stapler.*
 import java.io.IOException
-import java.util.*
 import javax.annotation.Nonnull
 import kotlin.jvm.Throws
 

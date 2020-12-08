@@ -22,7 +22,6 @@ import hudson.model.User
 import hudson.tasks.Mailer.UserProperty
 import io.jenkins.plugins.gamekins.GameUserProperty
 import io.jenkins.plugins.gamekins.util.JacocoUtil.ClassDetails
-import io.jenkins.plugins.gamekins.util.JacocoUtil.computePackageName
 import jenkins.security.MasterToSlaveCallable
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.diff.DiffFormatter
@@ -36,8 +35,16 @@ import org.eclipse.jgit.storage.file.FileRepositoryBuilder
 import org.eclipse.jgit.treewalk.AbstractTreeIterator
 import org.eclipse.jgit.treewalk.CanonicalTreeParser
 import org.eclipse.jgit.treewalk.EmptyTreeIterator
-import java.io.*
-import java.util.*
+import java.io.ByteArrayOutputStream
+import java.io.File
+import java.io.IOException
+import java.io.OutputStream
+import java.io.Serializable
+import java.util.Objects
+import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
+import kotlin.collections.HashSet
+import kotlin.collections.LinkedHashSet
 import kotlin.jvm.Throws
 
 /**
@@ -169,7 +176,7 @@ object GitUtil {
 
                         //Check whether the class was found before
                         val classname = pathSplit[pathSplit.size - 1].split("\\.".toRegex())[0]
-                        val packageName = computePackageName(path)
+                        val packageName = JacocoUtil.computePackageName(path)
                         var found = false
                         for (details in classes) {
                             if (details.className == classname && details.packageName == packageName) {

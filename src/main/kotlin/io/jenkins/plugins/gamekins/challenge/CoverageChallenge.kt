@@ -17,10 +17,8 @@
 package io.jenkins.plugins.gamekins.challenge
 
 import hudson.FilePath
+import io.jenkins.plugins.gamekins.util.JacocoUtil
 import io.jenkins.plugins.gamekins.util.JacocoUtil.ClassDetails
-import io.jenkins.plugins.gamekins.util.JacocoUtil.calculateCoveredLines
-import io.jenkins.plugins.gamekins.util.JacocoUtil.calculateCurrentFilePath
-import io.jenkins.plugins.gamekins.util.JacocoUtil.generateDocument
 
 /**
  * Abstract class to generate basic information about the class used for generating a [CoverageChallenge].
@@ -43,11 +41,11 @@ abstract class CoverageChallenge(val classDetails: ClassDetails, val branch: Str
      * Calculates the number of fully, partially and not covered lines, and the coverage of the class itself.
      */
     init {
-        val document = generateDocument(calculateCurrentFilePath(workspace!!,
+        val document = JacocoUtil.generateDocument(JacocoUtil.calculateCurrentFilePath(workspace!!,
                 classDetails.jacocoSourceFile, classDetails.workspace))
-        fullyCoveredLines = calculateCoveredLines(document, "fc")
-        partiallyCoveredLines = calculateCoveredLines(document, "pc")
-        notCoveredLines = calculateCoveredLines(document, "nc")
+        fullyCoveredLines = JacocoUtil.calculateCoveredLines(document, "fc")
+        partiallyCoveredLines = JacocoUtil.calculateCoveredLines(document, "pc")
+        notCoveredLines = JacocoUtil.calculateCoveredLines(document, "nc")
         coverage = classDetails.coverage
     }
 
