@@ -266,8 +266,6 @@ object PropertyUtil {
      * Adds or removes a [LeaderboardAction] or [StatisticsAction] with the help of the according methods of the
      * [job]
      */
-    //TODO: Without reflection (Trigger)
-    //TODO: Replace newInstance() with constructor call
     private fun reconfigureAbstractItem(job: AbstractItem, activated: Boolean, showStatistics: Boolean) {
 
         try {

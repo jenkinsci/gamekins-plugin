@@ -27,7 +27,6 @@ import kotlin.collections.HashMap
  * @author Philipp Straubinger
  * @since 1.0
  */
-//TODO: Add text why the DummyChallenge has been created
 class DummyChallenge(private var constants: HashMap<String, String>) : Challenge {
 
     override fun equals(other: Any?): Boolean {

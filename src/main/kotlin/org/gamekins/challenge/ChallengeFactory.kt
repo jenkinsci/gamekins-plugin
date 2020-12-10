@@ -49,7 +49,6 @@ object ChallengeFactory {
     /**
      * Chooses the type of [Challenge] to be generated.
      */
-    //TODO: Use kapt or similar
     private fun chooseChallengeType(): Challenges {
         val weightList = arrayListOf<Challenges>()
         enumValues<Challenges>().forEach {

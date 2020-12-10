@@ -99,7 +99,6 @@ object GitUtil {
     /**
      * Returns the difference between the [newCommit] and its previous commit in the [repo]sitory and [git].
      */
-    //TODO: Initial commit returns empty String (but works with getLastChangedClasses()?)
     @JvmStatic
     @Throws(IOException::class)
     private fun getDiffOfCommit(git: Git, repo: Repository, newCommit: RevCommit): String {
@@ -128,7 +127,6 @@ object GitUtil {
      * [workspace] and assigns the classes changed in these commits to the according [users]. [constants] are needed
      * for information about the JaCoCo paths and the [listener] reports the events to the console output of Jenkins.
      */
-    //TODO: Not performant - JGit has to start to search from the HEAD every time, because the history is a tree
     @JvmStatic
     @Throws(IOException::class)
     fun getLastChangedClasses(count: Int, constants: HashMap<String, String>, listener: TaskListener,
@@ -345,7 +343,6 @@ object GitUtil {
         if (line.contains("diff --git") && !nextLine.contains("deleted")) {
             val path = line.split(" ".toRegex())[2].substring(1)
 
-            //TODO: Other classes than Java and Kotlin
             //Not interested in tests and files written in languages other than Java and Kotlin
             return !(path.split("/".toRegex()).contains("test") || !(path.contains(".java")
                     || path.contains(".kt")))
@@ -519,7 +516,6 @@ object GitUtil {
         /**
          * Returns the Jenkins [User] represented by this [GameUser].
          */
-        //TODO: Not callable on remote machines
         fun getUser(): User? {
             for (user in User.getAll()) {
                 if (!PropertyUtil.realUser(user)) continue

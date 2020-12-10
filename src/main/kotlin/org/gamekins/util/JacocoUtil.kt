@@ -195,7 +195,6 @@ object JacocoUtil {
             val content = csv.readToString()
             val lines = content.split("\n".toRegex()).filter { line -> line.isNotEmpty() }
             for (coverageLine in lines) {
-                //TODO: Improve
                 val entries = coverageLine.split(",".toRegex())
                 if (className.contains(entries[2])) {
                     return entries[4].toDouble() / (entries[3].toDouble() + entries[4].toDouble())
@@ -315,7 +314,6 @@ object JacocoUtil {
                 val content = file.readToString()
                 val lines = content.split("\n".toRegex()).filter { line -> line.isNotEmpty() }
                 for (coverageLine in lines) {
-                    //TODO: Improve
                     val entries = coverageLine.split(",".toRegex())
                     if (entries[2] != "CLASS") {
                         coveredInstructionCount += entries[4].toDouble().toInt()
@@ -375,7 +373,6 @@ object JacocoUtil {
     fun isGetterOrSetter(lines: List<String>, line: String): Boolean {
         val linesIterator = lines.listIterator()
         while (linesIterator.hasNext()) {
-            //TODO: Improve
             if (linesIterator.next().contains(line)) {
                 while (linesIterator.hasPrevious()) {
                     val previous = linesIterator.previous()
