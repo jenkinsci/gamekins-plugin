@@ -29,9 +29,9 @@ import org.gamekins.util.JacocoUtil.CoverageMethod
  * @author Philipp Straubinger
  * @since 1.0
  */
-class MethodCoverageChallenge(classDetails: ClassDetails, branch: String, workspace: FilePath,
+class MethodCoverageChallenge(classDetails: ClassDetails, workspace: FilePath,
                               method: CoverageMethod)
-    : CoverageChallenge(classDetails, branch, workspace) {
+    : CoverageChallenge(classDetails, workspace) {
 
     private val lines = method.lines
     private val methodName = method.methodName
@@ -61,14 +61,14 @@ class MethodCoverageChallenge(classDetails: ClassDetails, branch: String, worksp
     }
 
     /**
-     * Checks whether the [MethodCoverageChallenge] is solvable if the [run] was in the [branch] (taken from
+     * Checks whether the [MethodCoverageChallenge] is solvable if the [run] was in the branch (taken from
      * [constants]), where it has been generated. There must be uncovered or not fully covered lines left in the
      * method. The [workspace] is the folder with the code and execution rights, and the [listener] reports the events
      * to the console output of Jenkins.
      */
     override fun isSolvable(constants: HashMap<String, String>, run: Run<*, *>, listener: TaskListener,
                             workspace: FilePath): Boolean {
-        if (branch != constants["branch"]) return true
+        if (classDetails.constants["branch"] != constants["branch"]) return true
 
         val jacocoMethodFile = JacocoUtil.calculateCurrentFilePath(workspace,
                 classDetails.jacocoMethodFile, classDetails.workspace)
@@ -102,10 +102,10 @@ class MethodCoverageChallenge(classDetails: ClassDetails, branch: String, worksp
                           workspace: FilePath): Boolean {
         val jacocoMethodFile = JacocoUtil.getJacocoFileInMultiBranchProject(run, constants,
                 JacocoUtil.calculateCurrentFilePath(workspace, classDetails.jacocoMethodFile,
-                        classDetails.workspace), branch)
+                        classDetails.workspace), classDetails.constants["branch"]!!)
         val jacocoCSVFile = JacocoUtil.getJacocoFileInMultiBranchProject(run, constants,
                 JacocoUtil.calculateCurrentFilePath(workspace, classDetails.jacocoCSVFile,
-                        classDetails.workspace), branch)
+                        classDetails.workspace), classDetails.constants["branch"]!!)
 
         try {
             if (!jacocoMethodFile.exists() || !jacocoCSVFile.exists()) {
@@ -138,6 +138,6 @@ class MethodCoverageChallenge(classDetails: ClassDetails, branch: String, worksp
     override fun toString(): String {
         return ("Write a test to cover more lines of method " + methodName + " in class "
                 + classDetails.className + " in package " + classDetails.packageName
-                + " (created for branch " + branch + ")")
+                + " (created for branch " + classDetails.constants["branch"] + ")")
     }
 }

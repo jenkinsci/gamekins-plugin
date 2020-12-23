@@ -49,9 +49,11 @@ class CoverageChallengeTest : AnnotationSpec() {
         every { JacocoUtil.getCoverageInPercentageFromJacoco(any(), any()) } returns coverage
         every { JacocoUtil.generateDocument(any()) } returns document
         every { JacocoUtil.calculateCoveredLines(any(), any()) } returns 0
-        details = JacocoUtil.ClassDetails(path, shortFilePath, shortJacocoPath, shortJacocoCSVPath, hashMapOf(),
+        val map = HashMap<String, String>()
+        map["branch"] = "master"
+        details = JacocoUtil.ClassDetails(path, shortFilePath, shortJacocoPath, shortJacocoCSVPath, map,
                 TaskListener.NULL)
-        challenge = ClassCoverageChallenge(details, "master", path)
+        challenge = ClassCoverageChallenge(details, path)
 
         challenge.printToXML("", "") shouldBe
                 "<ClassCoverageChallenge created=\"${challenge.getCreated()}\" solved=\"${challenge.getSolved()}\" " +

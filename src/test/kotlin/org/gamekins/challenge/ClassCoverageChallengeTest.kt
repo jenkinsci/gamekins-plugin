@@ -42,6 +42,7 @@ class ClassCoverageChallengeTest : AnnotationSpec() {
 
     @BeforeEach
     fun init() {
+        map["branch"] = branch
         mockkStatic(JacocoUtil::class)
         val document = mockkClass(Document::class)
         every { JacocoUtil.calculateCurrentFilePath(any(), any()) } returns path
@@ -50,7 +51,7 @@ class ClassCoverageChallengeTest : AnnotationSpec() {
         every { JacocoUtil.calculateCoveredLines(any(), any()) } returns 0
         details = JacocoUtil.ClassDetails(path, shortFilePath, shortJacocoPath, shortJacocoCSVPath, map,
                 TaskListener.NULL)
-        challenge = ClassCoverageChallenge(details, branch, path)
+        challenge = ClassCoverageChallenge(details, path)
     }
 
     @AfterAll
@@ -64,7 +65,7 @@ class ClassCoverageChallengeTest : AnnotationSpec() {
         every { JacocoUtil.getCoverageInPercentageFromJacoco(any(), any()) } returns 0.9
         details = JacocoUtil.ClassDetails(path, shortFilePath, shortJacocoPath, shortJacocoCSVPath, map,
                 TaskListener.NULL)
-        challenge = ClassCoverageChallenge(details, branch, path)
+        challenge = ClassCoverageChallenge(details, path)
         challenge.getScore() shouldBe 2
         challenge.toString() shouldBe "Write a test to cover more lines in class $className in package " +
                 "org.gamekins.challenge (created for branch $branch)"

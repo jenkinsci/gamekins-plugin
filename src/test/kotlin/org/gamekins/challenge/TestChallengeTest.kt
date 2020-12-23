@@ -44,7 +44,8 @@ class TestChallengeTest : AnnotationSpec() {
 
     @BeforeEach
     fun init() {
-        challenge = TestChallenge("", testCount, user, "master", map)
+        map["branch"] = "master"
+        challenge = TestChallenge("", testCount, user, map)
     }
 
     @AfterAll

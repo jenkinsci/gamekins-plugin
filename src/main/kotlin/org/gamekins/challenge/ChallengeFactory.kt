@@ -138,12 +138,11 @@ object ChallengeFactory {
             if (challengeClass == Challenges.TestChallenge) {
                 listener.logger.println("[Gamekins] Generated new TestChallenge")
                 return TestChallenge(workspace.act(HeadCommitCallable(workspace.remote)).name,
-                        JacocoUtil.getTestCount(workspace), user, constants["branch"]!!, constants)
+                        JacocoUtil.getTestCount(workspace), user, constants)
             }
 
             listener.logger.println("[Gamekins] Try class " + selectedClass.className + " and type " + challengeClass)
-            challenge = generateCoverageChallenge(selectedClass, challengeClass, constants["branch"],
-                    listener, workspace)
+            challenge = generateCoverageChallenge(selectedClass, challengeClass, listener, workspace)
 
             if (rejectedChallenges.contains(challenge)) {
                 listener.logger.println("[Gamekins] Challenge $challenge was already rejected previously")
@@ -156,14 +155,14 @@ object ChallengeFactory {
 
     /**
      * Generates a new [CoverageChallenge] of type [challengeClass] for the current class with details [classDetails]
-     * and the current [branch]. The [workspace] is the folder with the code and execution rights, and the [listener]
+     * and the current branch. The [workspace] is the folder with the code and execution rights, and the [listener]
      * reports the events to the console output of Jenkins.
      */
     @Throws(IOException::class, InterruptedException::class)
-    private fun generateCoverageChallenge(classDetails: ClassDetails, challengeClass: Challenges, branch: String?,
+    private fun generateCoverageChallenge(classDetails: ClassDetails, challengeClass: Challenges,
                                           listener: TaskListener, workspace: FilePath): CoverageChallenge? {
-        val document: Document
-        document = try {
+
+        val document: Document = try {
             JacocoUtil.generateDocument(JacocoUtil.calculateCurrentFilePath(workspace,
                     classDetails.jacocoSourceFile, classDetails.workspace))
         } catch (e: Exception) {
@@ -177,15 +176,15 @@ object ChallengeFactory {
                 || JacocoUtil.calculateCoveredLines(document, "nc") > 0) {
             when (challengeClass) {
                 Challenges.ClassCoverageChallenge -> {
-                    ClassCoverageChallenge(classDetails, branch!!, workspace)
+                    ClassCoverageChallenge(classDetails, workspace)
                 }
                 Challenges.MethodCoverageChallenge -> {
                     val method = JacocoUtil.chooseRandomMethod(classDetails, workspace)
-                    if (method == null) null else MethodCoverageChallenge(classDetails, branch!!, workspace, method)
+                    if (method == null) null else MethodCoverageChallenge(classDetails, workspace, method)
                 }
                 else -> {
                     val line = JacocoUtil.chooseRandomLine(classDetails, workspace)
-                    if (line == null) null else LineCoverageChallenge(classDetails, branch!!, workspace, line)
+                    if (line == null) null else LineCoverageChallenge(classDetails, workspace, line)
                 }
             }
         } else null

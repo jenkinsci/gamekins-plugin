@@ -26,7 +26,7 @@ import org.gamekins.util.JacocoUtil.ClassDetails
  * @author Philipp Straubinger
  * @since 1.0
  */
-abstract class CoverageChallenge(val classDetails: ClassDetails, val branch: String, workspace: FilePath?)
+abstract class CoverageChallenge(val classDetails: ClassDetails, workspace: FilePath?)
     : Challenge {
 
     protected val coverage: Double

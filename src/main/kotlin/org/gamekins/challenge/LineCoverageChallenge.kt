@@ -30,8 +30,8 @@ import kotlin.math.abs
  * @author Philipp Straubinger
  * @since 1.0
  */
-class LineCoverageChallenge(classDetails: ClassDetails, branch: String, workspace: FilePath, line: Element)
-    : CoverageChallenge(classDetails, branch, workspace) {
+class LineCoverageChallenge(classDetails: ClassDetails, workspace: FilePath, line: Element)
+    : CoverageChallenge(classDetails, workspace) {
 
     private val coverageType: String = line.attr("class")
     private val currentCoveredBranches: Int
@@ -89,14 +89,14 @@ class LineCoverageChallenge(classDetails: ClassDetails, branch: String, workspac
     }
 
     /**
-     * Checks whether the [LineCoverageChallenge] is solvable if the [run] was in the [branch] (taken from
+     * Checks whether the [LineCoverageChallenge] is solvable if the [run] was in the branch (taken from
      * [constants]), where it has been generated. The line must not be covered and still be in the class.
      * The [workspace] is the folder with the code and execution rights, and the [listener] reports the events to the
      * console output of Jenkins.
      */
     override fun isSolvable(constants: HashMap<String, String>, run: Run<*, *>, listener: TaskListener,
                             workspace: FilePath): Boolean {
-        if (branch != constants["branch"]) return true
+        if (classDetails.constants["branch"] != constants["branch"]) return true
 
         val jacocoSourceFile = JacocoUtil.calculateCurrentFilePath(workspace, classDetails.jacocoSourceFile,
                 classDetails.workspace)
@@ -126,10 +126,10 @@ class LineCoverageChallenge(classDetails: ClassDetails, branch: String, workspac
                           workspace: FilePath): Boolean {
         val jacocoSourceFile = JacocoUtil.getJacocoFileInMultiBranchProject(run, constants,
                 JacocoUtil.calculateCurrentFilePath(workspace, classDetails.jacocoSourceFile,
-                        classDetails.workspace), branch)
+                        classDetails.workspace), classDetails.constants["branch"]!!)
         val jacocoCSVFile = JacocoUtil.getJacocoFileInMultiBranchProject(run, constants,
                 JacocoUtil.calculateCurrentFilePath(workspace, classDetails.jacocoCSVFile,
-                        classDetails.workspace), branch)
+                        classDetails.workspace), classDetails.constants["branch"]!!)
 
         val document = JacocoUtil.generateDocument(jacocoSourceFile, jacocoCSVFile, listener) ?: return false
 
@@ -183,6 +183,7 @@ class LineCoverageChallenge(classDetails: ClassDetails, branch: String, workspac
                         "of $maxCoveredBranches covered) of line "
                 else "Write a test to fully cover line "
         return (prefix + lineNumber + " in class " + classDetails.className
-                + " in package " + classDetails.packageName + " (created for branch " + branch + ")")
+                + " in package " + classDetails.packageName + " (created for branch "
+                + classDetails.constants["branch"] + ")")
     }
 }

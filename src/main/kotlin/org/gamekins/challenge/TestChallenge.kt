@@ -32,7 +32,7 @@ import kotlin.collections.HashMap
  * @since 1.0
  */
 class TestChallenge(private val currentCommit: String, private val testCount: Int, private val user: User,
-                    private val branch: String, private var constants: HashMap<String, String>) : Challenge {
+                    private var constants: HashMap<String, String>) : Challenge {
 
     private val created = System.currentTimeMillis()
     private var solved: Long = 0
@@ -64,7 +64,7 @@ class TestChallenge(private val currentCommit: String, private val testCount: In
         var result = currentCommit.hashCode()
         result = 31 * result + testCount
         result = 31 * result + user.hashCode()
-        result = 31 * result + branch.hashCode()
+        result = 31 * result + constants["branch"].hashCode()
         result = 31 * result + constants.hashCode()
         result = 31 * result + created.hashCode()
         result = 31 * result + solved.hashCode()
@@ -80,7 +80,7 @@ class TestChallenge(private val currentCommit: String, private val testCount: In
                             workspace: FilePath): Boolean {
         if (run.parent.parent is WorkflowMultiBranchProject) {
             for (workflowJob in (run.parent.parent as WorkflowMultiBranchProject).items) {
-                if (workflowJob.name == branch) return true
+                if (workflowJob.name == this.constants["branch"]) return true
             }
         } else {
             return true
@@ -96,7 +96,7 @@ class TestChallenge(private val currentCommit: String, private val testCount: In
      */
     override fun isSolved(constants: HashMap<String, String>, run: Run<*, *>, listener: TaskListener,
                           workspace: FilePath): Boolean {
-        if (branch != constants["branch"]) return false
+        if (this.constants["branch"] != constants["branch"]) return false
         try {
             val testCountSolved = JacocoUtil.getTestCount(workspace, run)
             if (testCountSolved <= testCount) {
@@ -135,6 +135,6 @@ class TestChallenge(private val currentCommit: String, private val testCount: In
     }
 
     override fun toString(): String {
-        return "Write a new test in branch $branch"
+        return "Write a new test in branch ${constants["branch"]}"
     }
 }
