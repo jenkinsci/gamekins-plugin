@@ -19,17 +19,32 @@ package org.gamekins.challenge
 import hudson.FilePath
 import hudson.model.Run
 import hudson.model.TaskListener
+import hudson.model.User
 import org.gamekins.statistics.Statistics
 import org.gamekins.LeaderboardAction
+import org.gamekins.util.JacocoUtil.ClassDetails
+import org.gamekins.util.JacocoUtil.CoverageMethod
+import org.jsoup.nodes.Element
 import kotlin.collections.HashMap
 
 /**
  * Interface for all Challenges of Gamekins.
  *
+ * Each third party [Challenge] must have a constructor with [ChallengeGenerationData] as only input parameter.
+ *
  * @author Philipp Straubinger
  * @since 1.0
  */
 interface Challenge {
+
+    /**
+     * Only for third party Challenges. Override it to get control whether the Challenge has been built correctly. If
+     * it returns false, another Challenge will be generated.
+     */
+    @Suppress("UNUSED_PARAMETER")
+    var builtCorrectly: Boolean
+        get() = true
+        set(v) = Unit
 
     override fun equals(other: Any?): Boolean
 
@@ -91,4 +106,13 @@ interface Challenge {
      * Returns the String representation of the [Challenge] for the [LeaderboardAction].
      */
     override fun toString(): String
+
+    /**
+     * Data class for the initialisation of a Challenge. Every val variable will be non-null with the desired data.
+     */
+    data class ChallengeGenerationData(val constants: HashMap<String, String>, val user: User,
+                                       val selectedClass: ClassDetails, val workspace: FilePath,
+                                       val listener: TaskListener, var method: CoverageMethod? = null,
+                                       var line: Element? = null, var testCount: Int? = null,
+                                       var headCommitHash: String? = null)
 }

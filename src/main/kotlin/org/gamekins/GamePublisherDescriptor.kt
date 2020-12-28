@@ -21,6 +21,7 @@ import hudson.model.AbstractProject
 import hudson.tasks.BuildStepDescriptor
 import hudson.tasks.Publisher
 import hudson.util.FormValidation
+import org.gamekins.challenge.*
 import org.gamekins.util.PublisherUtil
 import org.jenkinsci.Symbol
 import org.kohsuke.stapler.AncestorInPath
@@ -38,8 +39,20 @@ import javax.annotation.Nonnull
 @Symbol("gamekins")
 class GamePublisherDescriptor : BuildStepDescriptor<Publisher?>(GamePublisher::class.java) {
 
+    /**
+     * Add third party [Challenge]s to the [HashMap] [challenges] here from your own code. This class is initialised
+     * during startup of Jenkins and it can be assumed that all built-in Challenges are registered here.
+     *
+     * The key denotes here the Java [Class] of the [Challenge] and the value the weight of the [Challenge]. Choose
+     * bigger weights for a higher probability that the [Challenge] is chosen for generation, and lower values for
+     * the opposite.
+     */
+    companion object {
+        @Transient val challenges: HashMap<Class<out Challenge>, Int> = hashMapOf()
+    }
+
     init {
-        load()
+        initChallengesMap()
     }
 
     /**
@@ -71,6 +84,16 @@ class GamePublisherDescriptor : BuildStepDescriptor<Publisher?>(GamePublisher::c
     @Nonnull
     override fun getDisplayName(): String {
         return "Publisher for Gamekins plugin"
+    }
+
+    /**
+     * Adds the built-in [Challenge]s to the [HashMap] [challenges] for generation.
+     */
+    private fun initChallengesMap() {
+        challenges[ClassCoverageChallenge::class.java] = 2
+        challenges[LineCoverageChallenge::class.java] = 4
+        challenges[MethodCoverageChallenge::class.java] = 3
+        challenges[TestChallenge::class.java] = 1
     }
 
     /**

@@ -20,7 +20,6 @@ import hudson.FilePath
 import hudson.model.Run
 import hudson.model.TaskListener
 import org.gamekins.util.JacocoUtil
-import org.gamekins.util.JacocoUtil.ClassDetails
 import org.jsoup.nodes.Element
 import kotlin.math.abs
 
@@ -30,23 +29,23 @@ import kotlin.math.abs
  * @author Philipp Straubinger
  * @since 1.0
  */
-class LineCoverageChallenge(classDetails: ClassDetails, workspace: FilePath, line: Element)
-    : CoverageChallenge(classDetails, workspace) {
+class LineCoverageChallenge(data: Challenge.ChallengeGenerationData)
+    : CoverageChallenge(data.selectedClass, data.workspace) {
 
-    private val coverageType: String = line.attr("class")
+    private val coverageType: String = data.line!!.attr("class")
     private val currentCoveredBranches: Int
-    private val lineContent: String = line.text()
-    private val lineNumber: Int = line.attr("id").substring(1).toInt()
+    private val lineContent: String = data.line!!.text()
+    private val lineNumber: Int = data.line!!.attr("id").substring(1).toInt()
     private val maxCoveredBranches: Int
 
     init {
-        val split = line.attr("title").split(" ".toRegex())
+        val split = data.line!!.attr("title").split(" ".toRegex())
         when {
             split.isEmpty() || (split.size == 1 && split[0].isBlank()) -> {
                 currentCoveredBranches = 0
                 maxCoveredBranches = 1
             }
-            line.attr("class").startsWith("pc") -> {
+            data.line!!.attr("class").startsWith("pc") -> {
                 currentCoveredBranches = split[2].toInt() - split[0].toInt()
                 maxCoveredBranches = split[2].toInt()
             }

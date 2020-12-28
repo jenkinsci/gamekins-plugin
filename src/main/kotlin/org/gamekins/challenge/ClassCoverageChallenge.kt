@@ -20,7 +20,6 @@ import hudson.FilePath
 import hudson.model.Run
 import hudson.model.TaskListener
 import org.gamekins.util.JacocoUtil
-import org.gamekins.util.JacocoUtil.ClassDetails
 import org.jsoup.nodes.Document
 
 /**
@@ -29,8 +28,8 @@ import org.jsoup.nodes.Document
  * @author Philipp Straubinger
  * @since 1.0
  */
-class ClassCoverageChallenge(classDetails: ClassDetails, workspace: FilePath?)
-    : CoverageChallenge(classDetails, workspace) {
+class ClassCoverageChallenge(data: Challenge.ChallengeGenerationData)
+    : CoverageChallenge(data.selectedClass, data.workspace) {
 
     override fun equals(other: Any?): Boolean {
         if (other == null) return false

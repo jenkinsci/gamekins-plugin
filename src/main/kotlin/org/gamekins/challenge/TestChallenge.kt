@@ -31,9 +31,12 @@ import kotlin.collections.HashMap
  * @author Philipp Straubinger
  * @since 1.0
  */
-class TestChallenge(private val currentCommit: String, private val testCount: Int, private val user: User,
-                    private var constants: HashMap<String, String>) : Challenge {
+class TestChallenge(data: Challenge.ChallengeGenerationData) : Challenge {
 
+    private val currentCommit: String = data.headCommitHash!!
+    private val testCount: Int = data.testCount!!
+    private val user: User = data.user
+    private var constants: HashMap<String, String> = data.constants
     private val created = System.currentTimeMillis()
     private var solved: Long = 0
     private var testCountSolved = 0

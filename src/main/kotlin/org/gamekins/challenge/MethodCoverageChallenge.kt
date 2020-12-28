@@ -19,9 +19,8 @@ package org.gamekins.challenge
 import hudson.FilePath
 import hudson.model.Run
 import hudson.model.TaskListener
+import org.gamekins.challenge.Challenge.ChallengeGenerationData
 import org.gamekins.util.JacocoUtil
-import org.gamekins.util.JacocoUtil.ClassDetails
-import org.gamekins.util.JacocoUtil.CoverageMethod
 
 /**
  * Specific [Challenge] to motivate the user to cover more lines in a random method of a specific class.
@@ -29,13 +28,11 @@ import org.gamekins.util.JacocoUtil.CoverageMethod
  * @author Philipp Straubinger
  * @since 1.0
  */
-class MethodCoverageChallenge(classDetails: ClassDetails, workspace: FilePath,
-                              method: CoverageMethod)
-    : CoverageChallenge(classDetails, workspace) {
+class MethodCoverageChallenge(data: ChallengeGenerationData) : CoverageChallenge(data.selectedClass, data.workspace) {
 
-    private val lines = method.lines
-    private val methodName = method.methodName
-    private val missedLines = method.missedLines
+    private val lines = data.method!!.lines
+    private val methodName = data.method!!.methodName
+    private val missedLines = data.method!!.missedLines
 
     override fun equals(other: Any?): Boolean {
         if (other == null) return false

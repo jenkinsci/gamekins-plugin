@@ -20,7 +20,9 @@ import hudson.FilePath
 import hudson.model.Result
 import hudson.model.TaskListener
 import hudson.model.User
+import org.gamekins.GamePublisherDescriptor
 import org.gamekins.GameUserProperty
+import org.gamekins.challenge.Challenge.ChallengeGenerationData
 import org.gamekins.util.GitUtil
 import org.gamekins.util.GitUtil.HeadCommitCallable
 import org.gamekins.util.JacocoUtil
@@ -39,21 +41,14 @@ import kotlin.random.Random
  */
 object ChallengeFactory {
 
-    enum class Challenges(val selectionWeight: Int) {
-        ClassCoverageChallenge(2),
-        LineCoverageChallenge(4),
-        MethodCoverageChallenge(3),
-        TestChallenge(1)
-    }
-
     /**
      * Chooses the type of [Challenge] to be generated.
      */
-    private fun chooseChallengeType(): Challenges {
-        val weightList = arrayListOf<Challenges>()
-        enumValues<Challenges>().forEach {
-            (0 until it.selectionWeight).forEach { _ ->
-                weightList.add(it)
+    private fun chooseChallengeType(): Class<out Challenge> {
+        val weightList = arrayListOf<Class<out Challenge>>()
+        GamePublisherDescriptor.challenges.forEach { (clazz, weight) ->
+            (0 until weight).forEach { _ ->
+                weightList.add(clazz)
             }
         }
 
@@ -134,18 +129,34 @@ object ChallengeFactory {
             }
 
             val challengeClass = chooseChallengeType()
+            val data = ChallengeGenerationData(constants, user, selectedClass, workspace, listener)
 
-            if (challengeClass == Challenges.TestChallenge) {
-                listener.logger.println("[Gamekins] Generated new TestChallenge")
-                return TestChallenge(workspace.act(HeadCommitCallable(workspace.remote)).name,
-                        JacocoUtil.getTestCount(workspace), user, constants)
+            when {
+                challengeClass == TestChallenge::class.java -> {
+                    data.testCount = JacocoUtil.getTestCount(workspace)
+                    data.headCommitHash = workspace.act(HeadCommitCallable(workspace.remote)).name
+                    listener.logger.println("[Gamekins] Generated new TestChallenge")
+                    challenge = challengeClass
+                        .getConstructor(ChallengeGenerationData::class.java)
+                        .newInstance(data)
+                }
+                challengeClass.superclass == CoverageChallenge::class.java -> {
+                    listener.logger.println("[Gamekins] Try class " + selectedClass.className + " and type "
+                            + challengeClass)
+                    challenge = generateCoverageChallenge(data, challengeClass)
+                }
+                else -> {
+                    challenge = generateThirdPartyChallenge(data, challengeClass)
+                }
             }
-
-            listener.logger.println("[Gamekins] Try class " + selectedClass.className + " and type " + challengeClass)
-            challenge = generateCoverageChallenge(selectedClass, challengeClass, listener, workspace)
 
             if (rejectedChallenges.contains(challenge)) {
                 listener.logger.println("[Gamekins] Challenge $challenge was already rejected previously")
+                challenge = null
+            }
+
+            if (challenge != null && !challenge.builtCorrectly) {
+                listener.logger.println("[Gamekins] Challenge $challenge was not built correctly")
                 challenge = null
             }
         } while (challenge == null)
@@ -154,37 +165,43 @@ object ChallengeFactory {
     }
 
     /**
-     * Generates a new [CoverageChallenge] of type [challengeClass] for the current class with details [classDetails]
-     * and the current branch. The [workspace] is the folder with the code and execution rights, and the [listener]
+     * Generates a new [CoverageChallenge] of type [challengeClass] for the current class with details classDetails
+     * and the current branch. The workspace is the folder with the code and execution rights, and the listener
      * reports the events to the console output of Jenkins.
      */
     @Throws(IOException::class, InterruptedException::class)
-    private fun generateCoverageChallenge(classDetails: ClassDetails, challengeClass: Challenges,
-                                          listener: TaskListener, workspace: FilePath): CoverageChallenge? {
+    private fun generateCoverageChallenge(data: ChallengeGenerationData, challengeClass: Class<out Challenge>)
+    : Challenge? {
 
         val document: Document = try {
-            JacocoUtil.generateDocument(JacocoUtil.calculateCurrentFilePath(workspace,
-                    classDetails.jacocoSourceFile, classDetails.workspace))
+            JacocoUtil.generateDocument(JacocoUtil.calculateCurrentFilePath(data.workspace,
+                    data.selectedClass.jacocoSourceFile, data.selectedClass.workspace))
         } catch (e: Exception) {
-            listener.logger.println("[Gamekins] Exception with JaCoCoSourceFile "
-                    + classDetails.jacocoSourceFile.absolutePath)
-            e.printStackTrace(listener.logger)
+            data.listener.logger.println("[Gamekins] Exception with JaCoCoSourceFile "
+                    + data.selectedClass.jacocoSourceFile.absolutePath)
+            e.printStackTrace(data.listener.logger)
             throw e
         }
 
         return if (JacocoUtil.calculateCoveredLines(document, "pc") > 0
                 || JacocoUtil.calculateCoveredLines(document, "nc") > 0) {
             when (challengeClass) {
-                Challenges.ClassCoverageChallenge -> {
-                    ClassCoverageChallenge(classDetails, workspace)
+                ClassCoverageChallenge::class.java -> {
+                    challengeClass
+                        .getConstructor(ChallengeGenerationData::class.java)
+                        .newInstance(data)
                 }
-                Challenges.MethodCoverageChallenge -> {
-                    val method = JacocoUtil.chooseRandomMethod(classDetails, workspace)
-                    if (method == null) null else MethodCoverageChallenge(classDetails, workspace, method)
+                MethodCoverageChallenge::class.java -> {
+                    data.method = JacocoUtil.chooseRandomMethod(data.selectedClass, data.workspace)
+                    if (data.method == null) null else challengeClass
+                        .getConstructor(ChallengeGenerationData::class.java)
+                        .newInstance(data)
                 }
                 else -> {
-                    val line = JacocoUtil.chooseRandomLine(classDetails, workspace)
-                    if (line == null) null else LineCoverageChallenge(classDetails, workspace, line)
+                    data.line = JacocoUtil.chooseRandomLine(data.selectedClass, data.workspace)
+                    if (data.line == null) null else challengeClass
+                        .getConstructor(ChallengeGenerationData::class.java)
+                        .newInstance(data)
                 }
             }
         } else null
@@ -221,6 +238,21 @@ object ChallengeFactory {
         }
 
         return generated
+    }
+
+    /**
+     * Generates a new third party [Challenge]. The values listed below in the method may be null and have to be checked
+     * in the initialisation of the [Challenge].
+     */
+    private fun generateThirdPartyChallenge(data: ChallengeGenerationData, challengeClass: Class<out Challenge>)
+    : Challenge? {
+
+        data.testCount = JacocoUtil.getTestCount(data.workspace)
+        data.headCommitHash = data.workspace.act(HeadCommitCallable(data.workspace.remote)).name
+        data.method = JacocoUtil.chooseRandomMethod(data.selectedClass, data.workspace)
+        data.line = JacocoUtil.chooseRandomLine(data.selectedClass, data.workspace)
+
+        return challengeClass.getConstructor(ChallengeGenerationData::class.java).newInstance(data)
     }
 
     /**
