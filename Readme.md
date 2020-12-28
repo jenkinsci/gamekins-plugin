@@ -50,7 +50,7 @@ is located
 The configuration is the same as before, except that the call to the publisher must be done in the **Jenkinsfile** 
 in the following or similar way (with example values):
  
- ```groovy
+```groovy
 pipeline {
     post {
         always {
@@ -80,3 +80,22 @@ In the background, data about the usage of the project and the participants is l
 By activating the **Statistics** checkbox, another entry on the left side panel is displayed. Currently, the 
 information is not send to the developers, which will come in future with the consens of the owner of the Jenkins 
 instance and privacy promises.
+
+### Extensibility
+There are two possible ways to add Challenges to the current version of Gamekins:
+
+#### Pull-Request
+You can create a Pull-Request with the new Challenges. There is no guarantee that the changes will be merged.
+
+#### Dependency
+You can also add Gamekins as a dependencies to your own plugin and add your Challenges to the default Challenges of 
+Gamekins in this way:
+
+```kotlin
+org.gamekins.GamePublisherDescriptor.challenges.put(NewChallenge::class.java, weight)
+```
+
+The key denotes here the Java Class of the Challenge and the value the weight of the Challenge. Choose
+bigger weights for a higher probability that the Challenge is chosen for generation, and lower values for
+the opposite. Each third party Challenge must have a constructor with 
+```org.gamekins.challenge.Challenge.ChallengeGenerationData``` as only input parameter.
