@@ -53,7 +53,10 @@ class CoverageChallengeTest : AnnotationSpec() {
         map["branch"] = "master"
         details = JacocoUtil.ClassDetails(path, shortFilePath, shortJacocoPath, shortJacocoCSVPath, map,
                 TaskListener.NULL)
-        challenge = ClassCoverageChallenge(details, path)
+        val data = mockkClass(Challenge.ChallengeGenerationData::class)
+        every { data.selectedClass } returns details
+        every { data.workspace } returns path
+        challenge = ClassCoverageChallenge(data)
 
         challenge.printToXML("", "") shouldBe
                 "<ClassCoverageChallenge created=\"${challenge.getCreated()}\" solved=\"${challenge.getSolved()}\" " +

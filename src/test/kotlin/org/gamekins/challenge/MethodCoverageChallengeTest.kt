@@ -41,6 +41,7 @@ class MethodCoverageChallengeTest : AnnotationSpec() {
     private val listener = TaskListener.NULL
     private val branch = "master"
     private val methodName = "toString"
+    private val data = mockkClass(Challenge.ChallengeGenerationData::class)
 
     @BeforeEach
     fun init() {
@@ -56,7 +57,10 @@ class MethodCoverageChallengeTest : AnnotationSpec() {
         every { JacocoUtil.getMethodEntries(any()) } returns arrayListOf()
         details = JacocoUtil.ClassDetails(path, shortFilePath, shortJacocoPath, shortJacocoCSVPath, map,
                 TaskListener.NULL)
-        challenge = MethodCoverageChallenge(details, path, method)
+        every { data.selectedClass } returns details
+        every { data.workspace } returns path
+        every { data.method } returns method
+        challenge = MethodCoverageChallenge(data)
     }
 
     @AfterAll
@@ -69,7 +73,8 @@ class MethodCoverageChallengeTest : AnnotationSpec() {
         challenge.getScore() shouldBe 2
         method = JacocoUtil.CoverageMethod(methodName, 10, 1)
         every { JacocoUtil.getNotFullyCoveredMethodEntries(any()) } returns arrayListOf(method)
-        challenge = MethodCoverageChallenge(details, path, method)
+        every { data.method } returns method
+        challenge = MethodCoverageChallenge(data)
         challenge.getScore() shouldBe 3
         challenge.toString() shouldBe "Write a test to cover more lines of method $methodName in class " +
                 "$className in package org.gamekins.challenge (created for branch $branch)"

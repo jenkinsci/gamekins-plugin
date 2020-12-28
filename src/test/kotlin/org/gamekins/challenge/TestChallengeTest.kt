@@ -45,7 +45,12 @@ class TestChallengeTest : AnnotationSpec() {
     @BeforeEach
     fun init() {
         map["branch"] = "master"
-        challenge = TestChallenge("", testCount, user, map)
+        val data = mockkClass(Challenge.ChallengeGenerationData::class)
+        every { data.headCommitHash } returns ""
+        every { data.testCount } returns testCount
+        every { data.user } returns user
+        every { data.constants } returns map
+        challenge = TestChallenge(data)
     }
 
     @AfterAll

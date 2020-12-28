@@ -30,6 +30,7 @@ import io.kotest.matchers.types.beOfType
 import io.mockk.*
 import org.eclipse.jgit.lib.PersonIdent
 import org.eclipse.jgit.revwalk.RevCommit
+import org.gamekins.GamePublisherDescriptor
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import org.jsoup.select.Elements
@@ -56,6 +57,7 @@ class ChallengeFactoryTest : AnnotationSpec() {
 
     @BeforeEach
     fun init() {
+        GamePublisherDescriptor()
         map["branch"] = branch
         map["projectName"] = "test-project"
         mockkStatic(JacocoUtil::class)
@@ -130,7 +132,8 @@ class ChallengeFactoryTest : AnnotationSpec() {
     @Test
     fun generateClassCoverageChallenge() {
         mockkObject(Random)
-        every { Random.nextInt(any()) } returns 0
+        GamePublisherDescriptor.challenges.clear()
+        GamePublisherDescriptor.challenges[ClassCoverageChallenge::class.java] = 1
         every { JacocoUtil.calculateCoveredLines(any(), "nc") } returns 10
         ChallengeFactory.generateChallenge(user, map, listener, arrayListOf(details), path) should
                 beOfType(ClassCoverageChallenge::class)
@@ -140,6 +143,8 @@ class ChallengeFactoryTest : AnnotationSpec() {
     fun generateDummyChallenge() {
         mockkObject(Random)
         every { Random.nextInt(any()) } returns 0
+        GamePublisherDescriptor.challenges.clear()
+        GamePublisherDescriptor.challenges[ClassCoverageChallenge::class.java] = 1
         ChallengeFactory.generateChallenge(user, map, listener, arrayListOf(details), path) should
                 beOfType(DummyChallenge::class)
     }
@@ -147,7 +152,8 @@ class ChallengeFactoryTest : AnnotationSpec() {
     @Test
     fun generateLineCoverageChallenge() {
         mockkObject(Random)
-        every { Random.nextInt(any()) } returns 2
+        GamePublisherDescriptor.challenges.clear()
+        GamePublisherDescriptor.challenges[LineCoverageChallenge::class.java] = 1
         every { Random.nextInt(1) } returns 0
         every { JacocoUtil.calculateCoveredLines(any(), "pc") } returns 10
         val element = mockkClass(Element::class)
@@ -164,7 +170,8 @@ class ChallengeFactoryTest : AnnotationSpec() {
     @Test
     fun generateMethodCoverageChallenge() {
         mockkObject(Random)
-        every { Random.nextInt(any()) } returns 6
+        GamePublisherDescriptor.challenges.clear()
+        GamePublisherDescriptor.challenges[MethodCoverageChallenge::class.java] = 1
         every { Random.nextInt(1) } returns 0
         every { JacocoUtil.calculateCoveredLines(any(), "nc") } returns 10
         val method = JacocoUtil.CoverageMethod("toString", 10, 10)
@@ -176,7 +183,8 @@ class ChallengeFactoryTest : AnnotationSpec() {
     @Test
     fun generateTestChallenge() {
         mockkObject(Random)
-        every { Random.nextInt(any()) } returns 9
+        GamePublisherDescriptor.challenges.clear()
+        GamePublisherDescriptor.challenges[TestChallenge::class.java] = 1
         ChallengeFactory.generateChallenge(user, map, listener, arrayListOf(details), path) should
                 beOfType(TestChallenge::class)
     }
