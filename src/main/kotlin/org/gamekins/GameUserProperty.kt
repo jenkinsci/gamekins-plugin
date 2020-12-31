@@ -110,7 +110,7 @@ class GameUserProperty : UserProperty(), Action {
     }
 
     override fun getIconFileName(): String {
-        return "document.png"
+        return "/plugin/gamekins/icons/trophy.png"
     }
 
     /**
