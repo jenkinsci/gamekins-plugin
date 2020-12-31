@@ -16,6 +16,7 @@
 
 package org.gamekins
 
+import hudson.model.Action
 import hudson.model.User
 import hudson.model.UserProperty
 import org.gamekins.challenge.Challenge
@@ -36,7 +37,7 @@ import kotlin.collections.HashMap
  * @author Philipp Straubinger
  * @since 1.0
  */
-class GameUserProperty : UserProperty() {
+class GameUserProperty : UserProperty(), Action {
 
     private val completedChallenges: HashMap<String, CopyOnWriteArrayList<Challenge>> = HashMap()
     private val currentChallenges: HashMap<String, CopyOnWriteArrayList<Challenge>> = HashMap()
@@ -97,11 +98,19 @@ class GameUserProperty : UserProperty() {
         return currentChallenges[projectName]!!
     }
 
+    override fun getDisplayName(): String {
+        return "Gamekins"
+    }
+
     /**
      * Returns the git author name sof the user.
      */
     fun getGitNames(): CopyOnWriteArraySet<String> {
         return gitNames ?: CopyOnWriteArraySet()
+    }
+
+    override fun getIconFileName(): String {
+        return "document.png"
     }
 
     /**
@@ -148,6 +157,10 @@ class GameUserProperty : UserProperty() {
         val name: String? = participation[projectName]
         //Should not happen since each call is of getTeamName() is surrounded with a call to isParticipating()
         return name ?: "null"
+    }
+
+    override fun getUrlName(): String {
+        return "gamekins"
     }
 
     /**
