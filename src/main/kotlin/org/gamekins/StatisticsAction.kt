@@ -39,7 +39,7 @@ class StatisticsAction(val job: AbstractItem) : ProminentProjectAction {
     }
 
     override fun getIconFileName(): String {
-        return "document.png"
+        return "graph.png"
     }
 
     /**
