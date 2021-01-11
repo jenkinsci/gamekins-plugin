@@ -99,7 +99,7 @@ class GameUserProperty : UserProperty(), Action {
     }
 
     override fun getDisplayName(): String {
-        return "Gamekins"
+        return "Achievements"
     }
 
     /**
@@ -160,7 +160,7 @@ class GameUserProperty : UserProperty(), Action {
     }
 
     override fun getUrlName(): String {
-        return "gamekins"
+        return "achievements"
     }
 
     /**
