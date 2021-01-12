@@ -136,7 +136,7 @@
                     <li>Normally, the build is triggered after each commit or after a specific amount of time. If you don't want to wait, you can start the build manually by clicking <b>Build Now</b> in the left panel</li>
                     <li>Solved Challenges are displayed in the middle table</li>
                     <li>If the Challenge cannot be solved for some reason or the class/method under test should not be tested, the Challenges can be rejected</li>
-                    <li>To reject a Challenge, choose the Challenge in the dropdown menu above and add a reason, why to Challenge was rejected</li>
+                    <li>To reject a Challenge, click the <b>X</b> button behind the Challenge and add a reason, why to Challenge was rejected</li>
                     <li>Rejected Challenges won't appear to be generated a second time</li>
                     <li>If a <b>Class Coverage Challenge</b> is rejected, the whole <i>class</i> is not considered again for new Challenges</li>
                     <li>After rejection a new Challenge is generated if the code of the project is available</li>
