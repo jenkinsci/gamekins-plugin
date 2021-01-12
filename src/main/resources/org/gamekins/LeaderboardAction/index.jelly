@@ -63,22 +63,40 @@
                 </div>
                 <br/>
                 <div>
-                    <table class="pane sortable bigtable" style="width:33%; display: inline-table">
+                    <table id="currentChallengesTable" class="pane sortable bigtable" style="width:33%; display: inline-table">
                         <tr>
                             <td class="pane-header" align="left,center">#</td>
                             <td class="pane-header" align="left,center">Current Challenges</td>
+                            <td class="pane-header" align="left,center"/>
                             <td class="pane-header" align="left,center">Points</td>
                             <j:forEach indexVar="index" var="currentChallenge" items="${it.currentChallenges}">
                                 <tr>
                                     <td>${index + 1}</td>
                                     <j:choose>
                                         <j:when test="${currentChallenge.toolTip}">
-                                            <td tooltip="${currentChallenge.toolTipText}">${currentChallenge}</td>
+                                            <td tooltip="${currentChallenge.toolTipText}">
+                                                <div id="currentChallengeText${index + 1}">${currentChallenge}</div>
+                                                <div id="currentChallengeDiv${index + 1}" style="display: none; margin-top: 2%">
+                                                    <input type="text" id="rejectReason${index + 1}" style="margin-right: 2%; margin-bottom: 2%"/>
+                                                    <button id="rejectButton${index + 1}" onClick="rejectChallenge(${index + 1}, '${it.descriptor.descriptorFullUrl}')">Reject</button>
+                                                    <div id="errorDiv${index + 1}" style="margin-top: 2%"/>
+                                                </div>
+                                            </td>
                                         </j:when>
                                         <j:otherwise>
-                                            <td>${currentChallenge}</td>
+                                            <td>
+                                                <div id="currentChallengeText${index + 1}">${currentChallenge}</div>
+                                                <div id="currentChallengeDiv${index + 1}" style="display: none; margin-top: 2%">
+                                                    <input type="text" id="rejectReason${index + 1}" style="margin-right: 2%; margin-bottom: 2%"/>
+                                                    <button id="rejectButton${index + 1}" onClick="rejectChallenge(${index + 1}, '${it.descriptor.descriptorFullUrl}')">Reject</button>
+                                                    <div id="errorDiv${index + 1}" style="margin-top: 2%"/>
+                                                </div>
+                                            </td>
                                         </j:otherwise>
                                     </j:choose>
+                                    <td>
+                                        <button onClick="showReject(${index + 1})">X</button>
+                                    </td>
                                     <td>${currentChallenge.score}</td>
                                 </tr>
                             </j:forEach>
@@ -140,6 +158,37 @@
                     <li>If there are no Challenges generated for you although you have committed something recently, then checkout the <i>Git Names</i> in your profile settings</li>
                 </ul>
             </j:if>
+
+            <script>
+                function showReject(index) {
+                    let div = document.getElementById("currentChallengeDiv" + index)
+                    if (div.style.display === "none") {
+                        div.style.display = "block"
+                    } else {
+                        div.style.display = "none"
+                    }
+                }
+
+                function rejectChallenge(index, descriptorURL) {
+                    let challenge = document.getElementById("currentChallengeText" + index).innerText
+                    let reason = document.getElementById("rejectReason" + index).value
+                    let url = descriptorURL + "/rejectChallenge"
+                    let parameters = {}
+                    parameters["reject"] = challenge
+                    parameters["reason"] = reason
+
+                    new Ajax.Request(url, {
+                        parameters: parameters,
+                        onComplete: function (rsp) {
+                            let errorDiv = document.getElementById("errorDiv" + index)
+                            errorDiv.innerHTML = rsp.responseText
+                            if (errorDiv.firstElementChild.className !== "error") {
+                                location.reload()
+                            }
+                        }
+                    })
+                }
+            </script>
         </l:main-panel>
     </l:layout>
 </j:jelly>
