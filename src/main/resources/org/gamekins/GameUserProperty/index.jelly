@@ -5,29 +5,16 @@
             <st:include page="sidepanel.jelly" it="${it.user}" optional="true" />
         </l:side-panel>
         <l:main-panel>
-            <img src="${rootURL}/plugin/gamekins/icons/trophy.png" height="96" width="96" onClick="showDescription()"  onmouseover="hoverOver(this)" onmouseout="hoverOut(this)" />
-            <p id="description" />
-
-            <script>
-                function showDescription() {
-                    let element = document.getElementById("description")
-                    if (element.innerText) {
-                        element.innerText = ""
-                    } else {
-                        element.innerText = "Complete your first Challenge"
-                    }
-                }
-
-                function hoverOver(image) {
-                    image.style.height = "100px"
-                    image.style.width = "100px"
-                }
-
-                function hoverOut(image) {
-                    image.style.height = "96px"
-                    image.style.width = "96px"
-                }
-            </script>
+            <table style="border: 2px solid grey">
+                <tr>
+                    <td rowspan="2" style="padding-right: 5px"><img src="${rootURL}/plugin/gamekins/icons/trophy.png" height="48" width="48"/></td>
+                    <td style="vertical-align: bottom"><b>I took the first Challenge</b></td>
+                    <td rowspan="2" style="vertical-align: middle; text-align: right; width: 300px">Achieved 13 January 2021 @ 11:00 am</td>
+                </tr>
+                <tr>
+                    <td style="vertical-align: top"><i>Solve your first Challenge</i></td>
+                </tr>
+            </table>
         </l:main-panel>
     </l:layout>
 </j:jelly>
