@@ -21,11 +21,14 @@ import hudson.model.AbstractProject
 import hudson.tasks.BuildStepDescriptor
 import hudson.tasks.Publisher
 import hudson.util.FormValidation
+import org.gamekins.achievement.Achievement
+import org.gamekins.achievement.AchievementInitializer
 import org.gamekins.challenge.*
 import org.gamekins.util.PublisherUtil
 import org.jenkinsci.Symbol
 import org.kohsuke.stapler.AncestorInPath
 import org.kohsuke.stapler.QueryParameter
+import java.io.File
 import javax.annotation.Nonnull
 
 /**
@@ -49,10 +52,12 @@ class GamePublisherDescriptor : BuildStepDescriptor<Publisher?>(GamePublisher::c
      */
     companion object {
         @Transient val challenges: HashMap<Class<out Challenge>, Int> = hashMapOf()
+        @Transient val achievements: ArrayList<Achievement> = arrayListOf()
     }
 
     init {
         initChallengesMap()
+        initAchievementsList()
     }
 
     /**
@@ -84,6 +89,17 @@ class GamePublisherDescriptor : BuildStepDescriptor<Publisher?>(GamePublisher::c
     @Nonnull
     override fun getDisplayName(): String {
         return "Publisher for Gamekins plugin"
+    }
+
+    /**
+     * Adds the built-in [Achievement]s to the [List] [achievements] for adding to a specific user.
+     */
+    private fun initAchievementsList() {
+        val path = javaClass.getResource("/achievements").path
+        val files = File(path).listFiles()!!.filter { it.extension == "json" }
+        for (file in files) {
+            achievements.add(AchievementInitializer.initializeAchievement("/achievements/" + file.name))
+        }
     }
 
     /**

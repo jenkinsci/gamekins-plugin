@@ -5,16 +5,20 @@
             <st:include page="sidepanel.jelly" it="${it.user}" optional="true" />
         </l:side-panel>
         <l:main-panel>
-            <table style="border: 2px solid grey">
-                <tr>
-                    <td rowspan="2" style="padding-right: 5px"><img src="${rootURL}/plugin/gamekins/icons/trophy.png" height="48" width="48"/></td>
-                    <td style="vertical-align: bottom"><b>I took the first Challenge</b></td>
-                    <td rowspan="2" style="vertical-align: middle; text-align: right; width: 300px">Achieved 13 January 2021 @ 11:00 am</td>
-                </tr>
-                <tr>
-                    <td style="vertical-align: top"><i>Solve your first Challenge</i></td>
-                </tr>
-            </table>
+            <j:forEach indexVar="index" var="achievement" items="${it.unsolvedAchievements}">
+                <table style="border: 2px solid grey; width: 50%; margin-left: auto; margin-right: auto">
+                    <tr>
+                        <td rowspan="2" style="padding-right: 5px; vertical-align: middle; width: 50px"><img src="${rootURL}${achievement.badgePath}" height="48" width="48"/></td>
+                        <td style="vertical-align: bottom; text-align: left"><b>${achievement.title}</b></td>
+                        <td rowspan="2" style="vertical-align: middle; text-align: right; width: 300px">Not solved</td>
+                        <!--<td rowspan="2" style="vertical-align: middle; text-align: right; width: 300px">Achieved 13 January 2021 @ 11:00 am</td>-->
+                    </tr>
+                    <tr>
+                        <td style="vertical-align: top; text-align: left"><i>${achievement.description}</i></td>
+                    </tr>
+                    <br/>
+                </table>
+            </j:forEach>
         </l:main-panel>
     </l:layout>
 </j:jelly>

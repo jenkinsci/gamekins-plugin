@@ -23,6 +23,8 @@ import org.gamekins.challenge.Challenge
 import org.gamekins.challenge.DummyChallenge
 import org.gamekins.statistics.Statistics
 import net.sf.json.JSONObject
+import org.gamekins.achievement.Achievement
+import org.gamekins.util.PropertyUtil
 import org.kohsuke.stapler.DataBoundSetter
 import org.kohsuke.stapler.StaplerRequest
 import java.util.UUID
@@ -39,6 +41,7 @@ import kotlin.collections.HashMap
  */
 class GameUserProperty : UserProperty(), Action {
 
+    private var completedAchievements: ArrayList<Achievement> = arrayListOf()
     private val completedChallenges: HashMap<String, CopyOnWriteArrayList<Challenge>> = HashMap()
     private val currentChallenges: HashMap<String, CopyOnWriteArrayList<Challenge>> = HashMap()
     private var gitNames: CopyOnWriteArraySet<String>? = null
@@ -46,6 +49,7 @@ class GameUserProperty : UserProperty(), Action {
     private val pseudonym: UUID = UUID.randomUUID()
     private val rejectedChallenges: HashMap<String, CopyOnWriteArrayList<Pair<Challenge, String>>> = HashMap()
     private val score: HashMap<String, Int> = HashMap()
+    private var unsolvedAchievements: ArrayList<Achievement> = ArrayList(GamePublisherDescriptor.achievements)
 
     /**
      * Adds an additional [score] to one project [projectName], since one user can participate in multiple projects.
@@ -159,6 +163,13 @@ class GameUserProperty : UserProperty(), Action {
         return name ?: "null"
     }
 
+    /**
+     * Returns the list of unsolved [Achievement]s.
+     */
+    fun getUnsolvedAchievements(): List<Achievement> {
+        return unsolvedAchievements
+    }
+
     override fun getUrlName(): String {
         return "achievements"
     }
@@ -228,6 +239,21 @@ class GameUserProperty : UserProperty(), Action {
     }
 
     /**
+     * Called by Jenkins after the object has been created from his XML representation. Used for data migration.
+     */
+    @Suppress("unused", "SENSELESS_COMPARISON")
+    private fun readResolve(): Any {
+        if (completedAchievements == null) completedAchievements = arrayListOf()
+        if (unsolvedAchievements == null) unsolvedAchievements = ArrayList(GamePublisherDescriptor.achievements)
+
+        GamePublisherDescriptor.achievements
+            .filter { !completedAchievements.contains(it) && !unsolvedAchievements.contains(it) }
+            .forEach { unsolvedAchievements.add(it) }
+
+        return this
+    }
+
+    /**
      * Updates the git names if the user configuration is saved.
      */
     override fun reconfigure(req: StaplerRequest, form: JSONObject?): UserProperty {
@@ -291,5 +317,6 @@ class GameUserProperty : UserProperty(), Action {
     override fun setUser(u: User) {
         user = u
         if (gitNames == null) gitNames = computeInitialGitNames()
+        if (!PropertyUtil.realUser(user)) unsolvedAchievements = arrayListOf()
     }
 }
