@@ -159,6 +159,16 @@ class GameUserProperty : UserProperty(), Action {
     }
 
     /**
+     * Returns true if the this user asks for his [Achievement]s. False if another user wants to see it.
+     */
+    fun doIsCurrentUser(rsp: StaplerResponse) {
+        rsp.contentType = "text/plain"
+        val printer = rsp.writer
+        printer.print(this.user == User.current())
+        printer.flush()
+    }
+
+    /**
      * Returns the list of completed Challenges by [projectName].
      */
     fun getCompletedChallenges(projectName: String?): CopyOnWriteArrayList<Challenge> {

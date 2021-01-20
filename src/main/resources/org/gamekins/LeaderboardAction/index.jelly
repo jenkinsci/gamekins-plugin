@@ -20,7 +20,7 @@
                     <j:forEach indexVar="index" var="userdetail" items="${it.userDetails}">
                         <tr>
                             <td>${index + 1}</td>
-                            <td><a href="${userdetail.url}">${userdetail.userName}</a></td>
+                            <td><a href="${userdetail.url}/achievements">${userdetail.userName}</a></td>
                             <td>${userdetail.teamName}</td>
                             <td>${userdetail.completedChallenges}</td>
                             <td>${userdetail.score}</td>

@@ -51,29 +51,21 @@
                     let urlCompleted = window.location.href + "getCompletedAchievements"
                     let urlTotalCount = window.location.href + "getAchievementsCount"
                     let urlSecretCount = window.location.href + "getUnsolvedSecretAchievementsCount"
+                    let urlCurrentUser = window.location.href + "isCurrentUser"
+                    let currentUser = false
                     let parameters = {}
                     parameters["projectName"] = projects.value
+
+                    new Ajax.Request(urlCurrentUser, {
+                        onComplete: function (rsp) {
+                            currentUser = (rsp.responseText === "true")
+                        }
+                    })
 
                     new Ajax.Request(urlTotalCount, {
                         parameters: parameters,
                         onComplete: function (rsp) {
                             let totalCount = rsp.responseText
-
-                            new Ajax.Request(urlUnsolved, {
-                                parameters: parameters,
-                                onComplete: function (rsp) {
-                                    let list = JSON.parse(rsp.responseText)
-                                    let div = document.getElementById("unsolvedAchievements")
-
-                                    for(var i = 0; i &lt; list.length; i++) {
-                                        createAchievement(div, list[i])
-                                        div.appendChild(document.createElement("br"))
-                                    }
-
-                                    let header = document.getElementById("unsolvedAchievementsHeader")
-                                    header.innerText = header.innerText + " (" + list.length + "/" + totalCount + ")"
-                                }
-                            })
 
                             new Ajax.Request(urlCompleted, {
                                 parameters: parameters,
@@ -81,7 +73,7 @@
                                     let list = JSON.parse(rsp.responseText)
                                     let div = document.getElementById("completedAchievements")
 
-                                    if (list.length === 0) {
+                                    if (list.length === 0 &amp;&amp; currentUser) {
                                         let header = document.createElement("h5")
                                         header.style.display = "block"
                                         header.style.textAlign = "center"
@@ -94,18 +86,43 @@
                                         }
                                     }
 
-                                    let header = document.getElementById("completedAchievementsHeader")
-                                    header.innerText = header.innerText + " (" + list.length + "/" + totalCount + ")"
+                                    if (currentUser) {
+                                        let header = document.getElementById("completedAchievementsHeader")
+                                        header.innerText = header.innerText + " (" + list.length + "/" + totalCount + ")"
+                                    }
                                 }
                             })
 
-                            new Ajax.Request(urlSecretCount, {
-                                parameters: parameters,
-                                onComplete: function (rsp) {
-                                    let header = document.getElementById("secretAchievementsHeader")
-                                    header.innerText = header.innerText + " (" + rsp.responseText + ")"
-                                }
-                            })
+                            if (currentUser) {
+                                new Ajax.Request(urlUnsolved, {
+                                    parameters: parameters,
+                                    onComplete: function (rsp) {
+                                        let list = JSON.parse(rsp.responseText)
+                                        let div = document.getElementById("unsolvedAchievements")
+
+                                        for(var i = 0; i &lt; list.length; i++) {
+                                            createAchievement(div, list[i])
+                                            div.appendChild(document.createElement("br"))
+                                        }
+
+                                        let header = document.getElementById("unsolvedAchievementsHeader")
+                                        header.innerText = header.innerText + " (" + list.length + "/" + totalCount + ")"
+                                    }
+                                })
+
+                                new Ajax.Request(urlSecretCount, {
+                                    parameters: parameters,
+                                    onComplete: function (rsp) {
+                                        let header = document.getElementById("secretAchievementsHeader")
+                                        header.innerText = header.innerText + " (" + rsp.responseText + ")"
+                                    }
+                                })
+                            } else {
+                                let div = document.getElementById("unsolvedAchievements")
+                                div.style.display = "none"
+                                div = document.getElementById("secretAchievements")
+                                div.style.display = "none"
+                            }
                         }
                     })
 
