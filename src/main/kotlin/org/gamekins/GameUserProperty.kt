@@ -66,6 +66,19 @@ class GameUserProperty : UserProperty(), Action {
     }
 
     /**
+     * Sets an [achievement] of project [projectName] to complete an removes it from the [unsolvedAchievements].
+     */
+    fun completeAchievement(projectName: String, achievement: Achievement) {
+        completedAchievements.computeIfAbsent(projectName) { CopyOnWriteArrayList() }
+        val completedAchievements = completedAchievements[projectName]!!
+        completedAchievements.add(achievement)
+        this.completedAchievements[projectName] = completedAchievements
+        val unsolvedAchievements = unsolvedAchievements[projectName]!!
+        unsolvedAchievements.remove(achievement)
+        this.unsolvedAchievements[projectName] = unsolvedAchievements
+    }
+
+    /**
      * Sets a [challenge] of project [projectName] to complete and removes it from the [currentChallenges].
      */
     fun completeChallenge(projectName: String, challenge: Challenge) {
@@ -169,6 +182,13 @@ class GameUserProperty : UserProperty(), Action {
     }
 
     /**
+     * Returns the list of completed achievements.
+     */
+    fun getCompletedAchievements(projectName: String): CopyOnWriteArrayList<Achievement> {
+        return completedAchievements[projectName]!!
+    }
+
+    /**
      * Returns the list of completed Challenges by [projectName].
      */
     fun getCompletedChallenges(projectName: String?): CopyOnWriteArrayList<Challenge> {
@@ -241,6 +261,13 @@ class GameUserProperty : UserProperty(), Action {
         val name: String? = participation[projectName]
         //Should not happen since each call is of getTeamName() is surrounded with a call to isParticipating()
         return name ?: "null"
+    }
+
+    /**
+     * Returns the list of unsolved achievements.
+     */
+    fun getUnsolvedAchievements(projectName: String): CopyOnWriteArrayList<Achievement> {
+        return unsolvedAchievements[projectName]!!
     }
 
     override fun getUrlName(): String {
@@ -317,8 +344,7 @@ class GameUserProperty : UserProperty(), Action {
     @Suppress("unused", "SENSELESS_COMPARISON")
     private fun readResolve(): Any {
         if (completedAchievements == null) completedAchievements = hashMapOf()
-        //if (unsolvedAchievements == null) unsolvedAchievements = hashMapOf()
-        unsolvedAchievements = hashMapOf()
+        if (unsolvedAchievements == null) unsolvedAchievements = hashMapOf()
 
         if (participation.size != 0) {
             if (completedAchievements.size == 0) {

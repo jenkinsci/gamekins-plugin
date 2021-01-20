@@ -124,7 +124,7 @@ class PublisherUtilTest : AnnotationSpec() {
      */
     @Test
     fun checkUser() {
-        val map = hashMapOf("generated" to 0, "solved" to 0)
+        val map = hashMapOf("generated" to 0, "solved" to 0, "solvedAchievements" to 0)
 
         every { PropertyUtil.realUser(user) } returns false
         PublisherUtil.checkUser(user, run, arrayListOf(classDetails), constants, Result.SUCCESS, path) shouldBe map
@@ -140,8 +140,9 @@ class PublisherUtilTest : AnnotationSpec() {
         every { userProperty.isParticipating(any()) } returns true
         every { ChallengeFactory.generateBuildChallenge(any(), any(), any(), any(), any()) } returns true
         every { userProperty.getCurrentChallenges(any()) } returns CopyOnWriteArrayList()
+        every { userProperty.getUnsolvedAchievements(any()) } returns CopyOnWriteArrayList()
         every { ChallengeFactory.generateNewChallenges(any(), any(), any(), any(), any()) } returns 0
-        PublisherUtil.checkUser(user, run, arrayListOf(classDetails), constants, Result.SUCCESS, path) shouldBe hashMapOf("generated" to 1, "solved" to 0)
+        PublisherUtil.checkUser(user, run, arrayListOf(classDetails), constants, Result.SUCCESS, path) shouldBe hashMapOf("generated" to 1, "solved" to 0, "solvedAchievements" to 0)
 
         every { ChallengeFactory.generateBuildChallenge(any(), any(), any(), any(), any()) } returns false
         every { challenge.isSolved(any(), any(), any(), any()) } returns false
@@ -155,7 +156,7 @@ class PublisherUtilTest : AnnotationSpec() {
         every { userProperty.completeChallenge(any(), any()) } returns Unit
         every { userProperty.addScore(any(), any()) } returns Unit
         every { userProperty.rejectChallenge(any(), any(), any()) } returns Unit
-        PublisherUtil.checkUser(user, run, arrayListOf(classDetails), constants, Result.SUCCESS, path) shouldBe hashMapOf("generated" to 0, "solved" to 1)
+        PublisherUtil.checkUser(user, run, arrayListOf(classDetails), constants, Result.SUCCESS, path) shouldBe hashMapOf("generated" to 0, "solved" to 1, "solvedAchievements" to 0)
     }
 
     @Test
@@ -200,7 +201,7 @@ class PublisherUtilTest : AnnotationSpec() {
         val outputString = "[Gamekins] No entry for Statistics added"
 
         var listener = StreamTaskListener(File("$root/output.txt"))
-        PublisherUtil.updateStatistics(run, constants, path, 0, 0, listener)
+        PublisherUtil.updateStatistics(run, constants, path, 0, 0, 0, listener)
         var output = FilePath(null, "$root/output.txt").readToString()
         output shouldNotContain outputString
 
@@ -208,20 +209,20 @@ class PublisherUtilTest : AnnotationSpec() {
                 descList2 as DescribableList<AbstractFolderProperty<*>, AbstractFolderPropertyDescriptor>?
         every { descList2.get(org.gamekins.property.GameMultiBranchProperty::class.java) } returns
                 null
-        PublisherUtil.updateStatistics(run, constants, path, 0, 0, listener)
+        PublisherUtil.updateStatistics(run, constants, path, 0, 0, 0, listener)
         output = FilePath(null, "$root/output.txt").readToString()
         File("$root/output.txt").delete() shouldBe true
         listener = StreamTaskListener(File("$root/output.txt"))
         output shouldContain outputString
 
         every { job.parent } returns multiProject
-        PublisherUtil.updateStatistics(run, constants, path, 0, 0, listener)
+        PublisherUtil.updateStatistics(run, constants, path, 0, 0, 0, listener)
         output = FilePath(null, "$root/output.txt").readToString()
         output shouldNotContain outputString
 
         every { job.getProperty(org.gamekins.property.GameJobProperty::class.java.name) } returns null
         val e = shouldThrow<NullPointerException> {
-            PublisherUtil.updateStatistics(run, constants, path, 0, 0, listener)
+            PublisherUtil.updateStatistics(run, constants, path, 0, 0, 0, listener)
         }
         e.message shouldBe "null cannot be cast to non-null type org.gamekins.property.GameJobProperty"
     }

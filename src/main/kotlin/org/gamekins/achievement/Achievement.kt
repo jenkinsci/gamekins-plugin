@@ -38,7 +38,7 @@ class Achievement(val badgePath: String, private val fullyQualifiedFunctionName:
 
     @Transient private lateinit var callClass: KClass<out Any>
     @Transient private lateinit var callFunction: KCallable<*>
-    var solvedTime: Long = 0
+    private var solvedTime: Long = 0
     val solvedTimeString: String
     get() {
         if (solvedTime == 0L) {
@@ -126,5 +126,9 @@ class Achievement(val badgePath: String, private val fullyQualifiedFunctionName:
     private fun readResolve(): Any {
         initCalls()
         return this
+    }
+
+    override fun toString(): String {
+        return "$title: $description"
     }
 }

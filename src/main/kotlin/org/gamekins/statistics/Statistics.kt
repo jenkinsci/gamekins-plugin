@@ -98,6 +98,7 @@ class Statistics(job: AbstractItem) {
                         abstractBuild.startTimeInMillis,
                         0,
                         0,
+                    0,
                         JacocoUtil.getTestCount(null, abstractBuild),
                         0.0))
                 return
@@ -119,6 +120,7 @@ class Statistics(job: AbstractItem) {
                         workflowRun.startTimeInMillis,
                         0,
                         0,
+                    0,
                         JacocoUtil.getTestCount(null, workflowRun),
                         0.0))
                 return
@@ -143,6 +145,7 @@ class Statistics(job: AbstractItem) {
                                 workflowRun.startTimeInMillis,
                                 0,
                                 0,
+                            0,
                                 JacocoUtil.getTestCount(null, workflowRun),
                                 0.0))
                         return
@@ -199,6 +202,7 @@ class Statistics(job: AbstractItem) {
                         run.startTimeInMillis,
                         0,
                         0,
+                    0,
                         JacocoUtil.getTestCount(null, run),
                         0.0))
             }
@@ -228,6 +232,7 @@ class Statistics(job: AbstractItem) {
                         workflowRun.startTimeInMillis,
                         0,
                         0,
+                    0,
                         JacocoUtil.getTestCount(null, workflowRun),
                         0.0))
                 count++
@@ -280,8 +285,8 @@ class Statistics(job: AbstractItem) {
      * @since 1.0
      */
     class RunEntry(val runNumber: Int, val branch: String, val result: Result?, val startTime: Long,
-                   var generatedChallenges: Int, val solvedChallenges: Int, val testCount: Int,
-                   val coverage: Double)
+                   var generatedChallenges: Int, val solvedChallenges: Int, var solvedAchievements: Int,
+                   val testCount: Int, val coverage: Double)
         : Comparable<RunEntry> {
 
         /**
@@ -303,6 +308,15 @@ class Statistics(job: AbstractItem) {
         override fun compareTo(other: RunEntry): Int {
             val result = Collator.getInstance().compare(branch, other.branch)
             return if (result == 0) runNumber.compareTo(other.runNumber) else result
+        }
+
+        /**
+         * Called by Jenkins after the object has been created from his XML representation. Used for data migration.
+         */
+        @Suppress("unused", "SENSELESS_COMPARISON")
+        private fun readResolve(): Any {
+            if (solvedAchievements == null) solvedAchievements = 0
+            return this
         }
     }
 }

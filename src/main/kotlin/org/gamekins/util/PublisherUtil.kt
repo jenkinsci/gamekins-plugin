@@ -39,6 +39,25 @@ import java.util.Comparator
 object PublisherUtil {
 
     /**
+     * Checks whether one or more achievements are solved.
+     */
+    private fun checkAchievements(user: User, property: GameUserProperty, run: Run<*, *>,
+                                  classes: ArrayList<JacocoUtil.ClassDetails>, constants: HashMap<String, String>,
+                                  workspace: FilePath, listener: TaskListener): Int {
+
+        var solved = 0
+        for (achievement in property.getUnsolvedAchievements(constants["projectName"]!!)) {
+            if (achievement.isSolved(classes, constants, run, user, workspace, listener)) {
+                property.completeAchievement(constants["projectName"]!!, achievement)
+                listener.logger.println("[Gamekins] Solved achievement ")
+                solved++
+            }
+        }
+
+        return solved
+    }
+
+    /**
      * Checks whether one or more Challenges are unsolvable.
      */
     private fun checkSolvable(run: Run<*, *>, property: GameUserProperty, constants: HashMap<String, String>,
@@ -82,7 +101,9 @@ object PublisherUtil {
 
         var generated = 0
         var solved = 0
-        if (!PropertyUtil.realUser(user)) return hashMapOf("generated" to 0, "solved" to 0)
+        var solvedAchievements = 0
+        if (!PropertyUtil.realUser(user)) return hashMapOf("generated" to 0, "solved" to 0,
+            "solvedAchievements" to solvedAchievements)
 
         val property = user.getProperty(GameUserProperty::class.java)
         if (property != null && property.isParticipating(constants["projectName"]!!)) {
@@ -102,9 +123,14 @@ object PublisherUtil {
             //Check if the Challenges are still solvable
             checkSolvable(run, property, constants, workspace, listener)
 
+            listener.logger.println("[Gamekins] Start checking solved status of achievements for user ${user.fullName}")
+
             //Generate new Challenges if the user has less than three
             generated += ChallengeFactory.generateNewChallenges(user, property, constants, classes,
                     workspace, listener)
+
+            //Check if an achievement is solved
+            solvedAchievements = checkAchievements(user, property, run, classes, constants, workspace, listener)
 
             try {
                 user.save()
@@ -113,7 +139,7 @@ object PublisherUtil {
             }
         }
 
-        return hashMapOf("generated" to generated, "solved" to solved)
+        return hashMapOf("generated" to generated, "solved" to solved, "solvedAchievements" to solvedAchievements)
     }
 
     /**
@@ -124,8 +150,7 @@ object PublisherUtil {
         var csvPath = jacocoCSVPath
         if (csvPath.startsWith("**")) csvPath = csvPath.substring(2)
         val split = csvPath.split("/".toRegex())
-        val files: List<FilePath>
-        files = try {
+        val files: List<FilePath> = try {
             workspace.act(
                     FilesOfAllSubDirectoriesCallable(workspace, split[split.size - 1]))
         } catch (ignored: Exception) {
@@ -147,8 +172,7 @@ object PublisherUtil {
         var resultsPath = jacocoResultsPath
         if (!resultsPath.endsWith("/")) resultsPath += "/"
         if (resultsPath.startsWith("**")) resultsPath = resultsPath.substring(2)
-        val files: List<FilePath>
-        files = try {
+        val files: List<FilePath> = try {
             workspace.act(FilesOfAllSubDirectoriesCallable(workspace, "index.html"))
         } catch (e: Exception) {
             e.printStackTrace()
@@ -208,7 +232,7 @@ object PublisherUtil {
      * Updates the [Statistics] after all users have been checked.
      */
     fun updateStatistics(run: Run<*, *>, constants: HashMap<String, String>, workspace: FilePath, generated: Int,
-                         solved: Int, listener: TaskListener = TaskListener.NULL) {
+                         solved: Int, solvedAchievements:Int, listener: TaskListener = TaskListener.NULL) {
 
         //Get the current job and property
         val property: GameProperty?
@@ -235,6 +259,7 @@ object PublisherUtil {
                                     run.startTimeInMillis,
                                     generated,
                                     solved,
+                                solvedAchievements,
                                     JacocoUtil.getTestCount(workspace, run),
                                     JacocoUtil.getProjectCoverage(workspace,
                                             constants["jacocoCSVPath"]!!

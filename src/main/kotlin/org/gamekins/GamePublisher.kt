@@ -94,17 +94,20 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
         //Checks for each user his Challenges and generates new ones if needed
         var generated = 0
         var solved = 0
+        var solvedAchievements = 0
         for (user in User.getAll()) {
             val results = PublisherUtil.checkUser(user, run, classes, constants, result, workspace, listener)
             generated += (if (results["generated"] != null) results["generated"] else 0)!!
             solved += (if (results["solved"] != null) results["solved"] else 0)!!
+            solvedAchievements += (if (results["solvedAchievements"] != null) results["solvedAchievements"] else 0)!!
         }
 
         listener.logger.println("[Gamekins] Solved $solved Challenges and generated $generated Challenges")
+        listener.logger.println("[Gamekins] Solved $solvedAchievements Achievements")
         listener.logger.println("[Gamekins] Update Statistics")
 
         //Updates the Statistics
-        PublisherUtil.updateStatistics(run, constants, workspace, generated, solved, listener)
+        PublisherUtil.updateStatistics(run, constants, workspace, generated, solved, solvedAchievements, listener)
 
         listener.logger.println("[Gamekins] Finished")
     }
