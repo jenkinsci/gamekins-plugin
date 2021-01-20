@@ -1,0 +1,7 @@
+{
+  "badgePath": "/plugin/gamekins/icons/trophy.png",
+  "description": "Solve three Challenges with one Jenkins build",
+  "title": "Multitasker",
+  "fullyQualifiedFunctionName": "org.gamekins.util.JacocoUtil::computePackageName",
+  "secret": false
+}
