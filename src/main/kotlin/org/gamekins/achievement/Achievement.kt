@@ -21,9 +21,10 @@ import hudson.model.Run
 import hudson.model.TaskListener
 import hudson.model.User
 import org.gamekins.util.JacocoUtil
+import java.util.*
+import kotlin.collections.ArrayList
 import kotlin.reflect.KCallable
 import kotlin.reflect.KClass
-import java.util.HashMap
 
 /**
  * Class for holding an individual [Achievement]. Described in a json file in path /resources/achievements/ and
@@ -33,11 +34,46 @@ import java.util.HashMap
  * @since 1.0
  */
 class Achievement(val badgePath: String, private val fullyQualifiedFunctionName: String,
-                  val description: String, val title: String) {
+                  val description: String, val title: String, val secret: Boolean) {
 
     @Transient private lateinit var callClass: KClass<out Any>
     @Transient private lateinit var callFunction: KCallable<*>
     var solvedTime: Long = 0
+    val solvedTimeString: String
+    get() {
+        if (solvedTime == 0L) {
+            return "Not solved"
+        } else {
+            val calendar = Calendar.getInstance()
+            calendar.timeInMillis = solvedTime
+            val month = when (calendar.get(Calendar.MONTH)) {
+                Calendar.JANUARY -> "Jan"
+                Calendar.FEBRUARY -> "Feb"
+                Calendar.MARCH -> "Mar"
+                Calendar.APRIL -> "Apr"
+                Calendar.MAY -> "May"
+                Calendar.JUNE -> "Jun"
+                Calendar.JULY -> "Jul"
+                Calendar.AUGUST -> "Aug"
+                Calendar.SEPTEMBER -> "Sep"
+                Calendar.OCTOBER -> "Oct"
+                Calendar.NOVEMBER -> "Nov"
+                Calendar.DECEMBER -> "Dec"
+                else -> ""
+            }
+            var hour = calendar.get(Calendar.HOUR).toString()
+            if (hour.toInt() < 10) hour = "0$hour"
+            var minute = calendar.get(Calendar.MINUTE).toString()
+            if (minute.toInt() < 10) minute = "0$minute"
+            val amPm = when (calendar.get(Calendar.AM_PM)) {
+                Calendar.AM -> "am"
+                Calendar.PM -> "pm"
+                else -> ""
+            }
+            return "Achieved ${calendar.get(Calendar.DAY_OF_MONTH)} $month ${calendar.get(Calendar.YEAR)} " +
+                    "@ $hour:$minute $amPm"
+        }
+    }
 
     init {
         initCalls()

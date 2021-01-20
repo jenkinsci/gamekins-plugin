@@ -16,6 +16,7 @@
 
 package org.gamekins
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import hudson.model.Action
 import hudson.model.User
 import hudson.model.UserProperty
@@ -26,7 +27,9 @@ import net.sf.json.JSONObject
 import org.gamekins.achievement.Achievement
 import org.gamekins.util.PropertyUtil
 import org.kohsuke.stapler.DataBoundSetter
+import org.kohsuke.stapler.QueryParameter
 import org.kohsuke.stapler.StaplerRequest
+import org.kohsuke.stapler.StaplerResponse
 import java.util.UUID
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.CopyOnWriteArraySet
@@ -41,7 +44,7 @@ import kotlin.collections.HashMap
  */
 class GameUserProperty : UserProperty(), Action {
 
-    private var completedAchievements: ArrayList<Achievement> = arrayListOf()
+    private var completedAchievements: HashMap<String, CopyOnWriteArrayList<Achievement>> = HashMap()
     private val completedChallenges: HashMap<String, CopyOnWriteArrayList<Challenge>> = HashMap()
     private val currentChallenges: HashMap<String, CopyOnWriteArrayList<Challenge>> = HashMap()
     private var gitNames: CopyOnWriteArraySet<String>? = null
@@ -49,7 +52,11 @@ class GameUserProperty : UserProperty(), Action {
     private val pseudonym: UUID = UUID.randomUUID()
     private val rejectedChallenges: HashMap<String, CopyOnWriteArrayList<Pair<Challenge, String>>> = HashMap()
     private val score: HashMap<String, Int> = HashMap()
-    private var unsolvedAchievements: ArrayList<Achievement> = ArrayList(GamePublisherDescriptor.achievements)
+    private var unsolvedAchievements: HashMap<String, CopyOnWriteArrayList<Achievement>> = HashMap()
+
+    companion object {
+        const val TYPE_JSON = "application/json"
+    }
 
     /**
      * Adds an additional [score] to one project [projectName], since one user can participate in multiple projects.
@@ -86,6 +93,69 @@ class GameUserProperty : UserProperty(), Action {
             set.add(user.id)
         }
         return set
+    }
+
+    /**
+     * Returns the number of total [Achievement]s available in [completedAchievements] and [unsolvedAchievements] for
+     * a specific [projectName].
+     */
+    fun doGetAchievementsCount(rsp: StaplerResponse, @QueryParameter projectName: String) {
+        rsp.contentType = "text/plain"
+        val printer = rsp.writer
+        if (projectName.isEmpty() || completedAchievements[projectName] == null
+            || unsolvedAchievements[projectName] == null) {
+            printer.print(0)
+        } else {
+            printer.print(completedAchievements[projectName]!!.size + unsolvedAchievements[projectName]!!.size)
+        }
+        printer.flush()
+    }
+
+    /**
+     * Returns the list of completed [Achievement]s for a specific [projectName].
+     */
+    fun doGetCompletedAchievements(rsp: StaplerResponse, @QueryParameter projectName: String) {
+        val json = jacksonObjectMapper().writeValueAsString(completedAchievements[projectName])
+        rsp.contentType = TYPE_JSON
+        val printer = rsp.writer
+        printer.print(json)
+        printer.flush()
+    }
+
+    /**
+     * Returns the list of projects the user is currently participating.
+     */
+    fun doGetProjects(rsp: StaplerResponse) {
+        val json = jacksonObjectMapper().writeValueAsString(participation.keys)
+        rsp.contentType = TYPE_JSON
+        val printer = rsp.writer
+        printer.print(json)
+        printer.flush()
+    }
+
+    /**
+     * Returns the list of unsolved [Achievement]s.
+     */
+    fun doGetUnsolvedAchievements(rsp: StaplerResponse, @QueryParameter projectName: String) {
+        val json = jacksonObjectMapper().writeValueAsString(unsolvedAchievements[projectName]?.filter { !it.secret })
+        rsp.contentType = TYPE_JSON
+        val printer = rsp.writer
+        printer.print(json)
+        printer.flush()
+    }
+
+    /**
+     * Returns the list of unsolved secret [Achievement]s for a specific [projectName].
+     */
+    fun doGetUnsolvedSecretAchievementsCount(rsp: StaplerResponse, @QueryParameter projectName: String) {
+        rsp.contentType = "text/plain"
+        val printer = rsp.writer
+        if (projectName.isEmpty() || unsolvedAchievements[projectName] == null) {
+            printer.print(0)
+        } else {
+            printer.print(unsolvedAchievements[projectName]!!.filter { it.secret }.size)
+        }
+        printer.flush()
     }
 
     /**
@@ -163,13 +233,6 @@ class GameUserProperty : UserProperty(), Action {
         return name ?: "null"
     }
 
-    /**
-     * Returns the list of unsolved [Achievement]s.
-     */
-    fun getUnsolvedAchievements(): List<Achievement> {
-        return unsolvedAchievements
-    }
-
     override fun getUrlName(): String {
         return "achievements"
     }
@@ -243,12 +306,29 @@ class GameUserProperty : UserProperty(), Action {
      */
     @Suppress("unused", "SENSELESS_COMPARISON")
     private fun readResolve(): Any {
-        if (completedAchievements == null) completedAchievements = arrayListOf()
-        if (unsolvedAchievements == null) unsolvedAchievements = ArrayList(GamePublisherDescriptor.achievements)
+        if (completedAchievements == null) completedAchievements = hashMapOf()
+        //if (unsolvedAchievements == null) unsolvedAchievements = hashMapOf()
+        unsolvedAchievements = hashMapOf()
 
-        GamePublisherDescriptor.achievements
-            .filter { !completedAchievements.contains(it) && !unsolvedAchievements.contains(it) }
-            .forEach { unsolvedAchievements.add(it) }
+        if (participation.size != 0) {
+            if (completedAchievements.size == 0) {
+                for (project in participation.keys) {
+                    completedAchievements[project] = CopyOnWriteArrayList()
+                }
+            }
+            if (unsolvedAchievements.size == 0) {
+                for (project in participation.keys) {
+                    unsolvedAchievements[project] = CopyOnWriteArrayList(GamePublisherDescriptor.achievements)
+                }
+            }
+        }
+
+        participation.keys.forEach { project ->
+            GamePublisherDescriptor.achievements
+                .filter { !completedAchievements[project]!!.contains(it)
+                        && !unsolvedAchievements[project]!!.contains(it) }
+                .forEach { unsolvedAchievements[project]!!.add(it) }
+        }
 
         return this
     }
@@ -309,6 +389,7 @@ class GameUserProperty : UserProperty(), Action {
         completedChallenges.putIfAbsent(projectName, CopyOnWriteArrayList())
         currentChallenges.putIfAbsent(projectName, CopyOnWriteArrayList())
         rejectedChallenges.putIfAbsent(projectName, CopyOnWriteArrayList())
+        unsolvedAchievements.putIfAbsent(projectName, CopyOnWriteArrayList(GamePublisherDescriptor.achievements))
     }
 
     /**
@@ -317,6 +398,6 @@ class GameUserProperty : UserProperty(), Action {
     override fun setUser(u: User) {
         user = u
         if (gitNames == null) gitNames = computeInitialGitNames()
-        if (!PropertyUtil.realUser(user)) unsolvedAchievements = arrayListOf()
+        if (!PropertyUtil.realUser(user)) unsolvedAchievements = hashMapOf()
     }
 }
