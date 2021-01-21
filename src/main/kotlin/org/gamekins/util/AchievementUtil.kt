@@ -44,13 +44,15 @@ object AchievementUtil {
     }
 
     /**
-     * Solve the achievement I took the first Challenge: Solve your first Challenge.
+     * Solve the achievements with description: Solve X Challenges. Needs the key 'solveNumber'
+     * in the map [additionalParameters] with a positive Int value.
      */
-    fun solveFirstChallenge(classes: ArrayList<JacocoUtil.ClassDetails>, constants: HashMap<String, String>,
+    fun solveXChallenges(classes: ArrayList<JacocoUtil.ClassDetails>, constants: HashMap<String, String>,
                             run: Run<*, *>, property: GameUserProperty, workspace: FilePath, listener: TaskListener,
                             additionalParameters: HashMap<String, String>): Boolean {
 
-        return property.getCompletedChallenges(constants["projectName"]).isNotEmpty()
+        return property.getCompletedChallenges(constants["projectName"]).size >=
+                additionalParameters["solveNumber"]?.toInt() ?: Int.MAX_VALUE
     }
 
     /**
@@ -61,6 +63,6 @@ object AchievementUtil {
                         run: Run<*, *>, property: GameUserProperty, workspace: FilePath, listener: TaskListener,
                         additionalParameters: HashMap<String, String>): Boolean {
 
-        return constants["solved"]?.toInt() ?: 0 >= additionalParameters["solveNumber"]?.toInt() ?: 1
+        return constants["solved"]?.toInt() ?: 0 >= additionalParameters["solveNumber"]?.toInt() ?: Int.MAX_VALUE
     }
 }

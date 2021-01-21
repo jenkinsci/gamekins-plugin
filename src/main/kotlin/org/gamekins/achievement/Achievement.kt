@@ -20,6 +20,7 @@ import hudson.FilePath
 import hudson.model.Run
 import hudson.model.TaskListener
 import org.gamekins.GameUserProperty
+import org.gamekins.LeaderboardAction
 import org.gamekins.util.JacocoUtil
 import java.util.*
 import kotlin.collections.ArrayList
@@ -121,6 +122,9 @@ class Achievement(val badgePath: String, val fullyQualifiedFunctionName: String,
         return result
     }
 
+    /**
+     * Returns the String representation of the [Achievement] for the [LeaderboardAction].
+     */
     fun printToXML(indentation: String): String {
         return "$indentation<Achievement title=\"$title\" description=\"$description\" secret=\"$secret\"/>"
     }

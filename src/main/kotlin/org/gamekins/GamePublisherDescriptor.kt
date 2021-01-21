@@ -97,8 +97,8 @@ class GamePublisherDescriptor : BuildStepDescriptor<Publisher?>(GamePublisher::c
     private fun initAchievementsList() {
         val path = javaClass.getResource("/achievements").path
         val files = File(path).listFiles()!!.filter { it.extension == "json" }
-        for (file in files) {
-            achievements.add(AchievementInitializer.initializeAchievement("/achievements/" + file.name))
+        files.forEach { file ->
+            achievements.addAll(AchievementInitializer.initializeAchievements("/achievements/" + file.name))
         }
     }
 

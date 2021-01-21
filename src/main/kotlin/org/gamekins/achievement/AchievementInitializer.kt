@@ -30,13 +30,39 @@ object AchievementInitializer {
      * Initializes the [Achievement] specified by the json file given via [fileName]. [fileName] has the path to the
      * resources folder as root folder, which means that it has to start with / followed by the folders and ending by
      * the json filename.
+     *
+     * Only for one [Achievement] per file.
      */
+    @Deprecated("Better use a json file with a list of achievements",
+        ReplaceWith("AchievementInitializer.initializeAchievements()")
+    )
     fun initializeAchievement(fileName: String): Achievement {
         val jsonContent = javaClass.getResource(fileName).readText()
         val data = jacksonObjectMapper().readValue(jsonContent, AchievementData::class.java)
-        val achievement = Achievement(data.badgePath, data.fullyQualifiedFunctionName,
-            data.description, data.title, data.secret, data.additionalParameters)
-        return achievement
+        return Achievement(data.badgePath, data.fullyQualifiedFunctionName, data.description, data.title,
+            data.secret, data.additionalParameters)
+    }
+
+    /**
+     * Initializes the [Achievement] specified by the json file given via [fileName]. [fileName] has the path to the
+     * resources folder as root folder, which means that it has to start with / followed by the folders and ending by
+     * the json filename.
+     *
+     * Only for more than one [Achievement] per file.
+     */
+    fun initializeAchievements(fileName: String): List<Achievement> {
+        val jsonContent = javaClass.getResource(fileName).readText()
+        val data: List<AchievementData> = jacksonObjectMapper().readValue(
+            jsonContent,
+            jacksonObjectMapper().typeFactory.constructCollectionType(List::class.java, AchievementData::class.java)
+        )
+
+        return data.map {
+            Achievement(
+                it.badgePath, it.fullyQualifiedFunctionName,
+                it.description, it.title, it.secret, it.additionalParameters
+            )
+        }
     }
 
     /**

@@ -1,0 +1,22 @@
+[
+  {
+    "badgePath": "/plugin/gamekins/icons/trophy.png",
+    "description": "Solve your first Challenge",
+    "title": "I took the first Challenge",
+    "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::solveXChallenges",
+    "secret": false,
+    "additionalParameters": {
+      "solveNumber": 1
+    }
+  },
+  {
+    "badgePath": "/plugin/gamekins/icons/trophy.png",
+    "description": "Solve three Challenges",
+    "title": "Triple",
+    "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::solveXChallenges",
+    "secret": false,
+    "additionalParameters": {
+      "solveNumber": 3
+    }
+  }
+]
