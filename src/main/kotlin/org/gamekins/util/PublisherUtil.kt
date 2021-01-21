@@ -41,13 +41,13 @@ object PublisherUtil {
     /**
      * Checks whether one or more achievements are solved.
      */
-    private fun checkAchievements(user: User, property: GameUserProperty, run: Run<*, *>,
+    private fun checkAchievements(property: GameUserProperty, run: Run<*, *>,
                                   classes: ArrayList<JacocoUtil.ClassDetails>, constants: HashMap<String, String>,
                                   workspace: FilePath, listener: TaskListener): Int {
 
         var solved = 0
         for (achievement in property.getUnsolvedAchievements(constants["projectName"]!!)) {
-            if (achievement.isSolved(classes, constants, run, user, workspace, listener)) {
+            if (achievement.isSolved(classes, constants, run, property, workspace, listener)) {
                 property.completeAchievement(constants["projectName"]!!, achievement)
                 listener.logger.println("[Gamekins] Solved achievement ")
                 solved++
@@ -116,7 +116,7 @@ object PublisherUtil {
             listener.logger.println("[Gamekins] Start checking solved status of challenges for user ${user.fullName}")
 
             //Check if a Challenges is solved
-            solved += checkSolved(run, property, constants, workspace, listener)
+            val userSolved = checkSolved(run, property, constants, workspace, listener)
 
             listener.logger.println("[Gamekins] Start checking solvable state of challenges for user ${user.fullName}")
 
@@ -126,11 +126,16 @@ object PublisherUtil {
             listener.logger.println("[Gamekins] Start checking solved status of achievements for user ${user.fullName}")
 
             //Generate new Challenges if the user has less than three
-            generated += ChallengeFactory.generateNewChallenges(user, property, constants, classes,
+            val userGenerated = ChallengeFactory.generateNewChallenges(user, property, constants, classes,
                     workspace, listener)
 
             //Check if an achievement is solved
-            solvedAchievements = checkAchievements(user, property, run, classes, constants, workspace, listener)
+            constants["solved"] = userSolved.toString()
+            constants["generated"] = userGenerated.toString()
+            solvedAchievements = checkAchievements(property, run, classes, constants, workspace, listener)
+
+            solved += userSolved
+            generated += userGenerated
 
             try {
                 user.save()

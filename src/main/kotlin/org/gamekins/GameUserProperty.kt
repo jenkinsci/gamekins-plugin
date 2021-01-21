@@ -56,6 +56,7 @@ class GameUserProperty : UserProperty(), Action {
 
     companion object {
         const val TYPE_JSON = "application/json"
+        const val TYPE_PLAIN = "text/plain"
     }
 
     /**
@@ -113,7 +114,7 @@ class GameUserProperty : UserProperty(), Action {
      * a specific [projectName].
      */
     fun doGetAchievementsCount(rsp: StaplerResponse, @QueryParameter projectName: String) {
-        rsp.contentType = "text/plain"
+        rsp.contentType = TYPE_PLAIN
         val printer = rsp.writer
         if (projectName.isEmpty() || completedAchievements[projectName] == null
             || unsolvedAchievements[projectName] == null) {
@@ -161,7 +162,7 @@ class GameUserProperty : UserProperty(), Action {
      * Returns the list of unsolved secret [Achievement]s for a specific [projectName].
      */
     fun doGetUnsolvedSecretAchievementsCount(rsp: StaplerResponse, @QueryParameter projectName: String) {
-        rsp.contentType = "text/plain"
+        rsp.contentType = TYPE_PLAIN
         val printer = rsp.writer
         if (projectName.isEmpty() || unsolvedAchievements[projectName] == null) {
             printer.print(0)
@@ -175,7 +176,7 @@ class GameUserProperty : UserProperty(), Action {
      * Returns true if the this user asks for his [Achievement]s. False if another user wants to see it.
      */
     fun doIsCurrentUser(rsp: StaplerResponse) {
-        rsp.contentType = "text/plain"
+        rsp.contentType = TYPE_PLAIN
         val printer = rsp.writer
         printer.print(this.user == User.current())
         printer.flush()
@@ -346,6 +347,7 @@ class GameUserProperty : UserProperty(), Action {
         if (completedAchievements == null) completedAchievements = hashMapOf()
         if (unsolvedAchievements == null) unsolvedAchievements = hashMapOf()
 
+        //Add achievements if newly introduced
         if (participation.size != 0) {
             if (completedAchievements.size == 0) {
                 for (project in participation.keys) {
@@ -359,12 +361,16 @@ class GameUserProperty : UserProperty(), Action {
             }
         }
 
+        //Add new achievements
         participation.keys.forEach { project ->
             GamePublisherDescriptor.achievements
                 .filter { !completedAchievements[project]!!.contains(it)
                         && !unsolvedAchievements[project]!!.contains(it) }
                 .forEach { unsolvedAchievements[project]!!.add(it) }
         }
+
+        //Update achievements with changed fullyQualifiedFunctionName or secret
+        updateAchievements()
 
         return this
     }
@@ -435,5 +441,25 @@ class GameUserProperty : UserProperty(), Action {
         user = u
         if (gitNames == null) gitNames = computeInitialGitNames()
         if (!PropertyUtil.realUser(user)) unsolvedAchievements = hashMapOf()
+    }
+
+    /**
+     * Updates achievements with changed fullyQualifiedFunctionName or secret. Only for unsolved achievements.
+     */
+    private fun updateAchievements() {
+        for (project in participation.keys) {
+            for (achievement in GamePublisherDescriptor.achievements) {
+
+                val ach = unsolvedAchievements[project]!!.find { it == achievement }
+                if (ach != null && (ach.fullyQualifiedFunctionName != achievement.fullyQualifiedFunctionName
+                            || ach.secret != achievement.secret)) {
+
+                    val list = unsolvedAchievements[project]!!
+                    list.remove(ach)
+                    list.add(achievement)
+                    unsolvedAchievements[project] = list
+                }
+            }
+        }
     }
 }

@@ -19,7 +19,7 @@ package org.gamekins.achievement
 import hudson.FilePath
 import hudson.model.Run
 import hudson.model.TaskListener
-import hudson.model.User
+import org.gamekins.GameUserProperty
 import org.gamekins.util.JacocoUtil
 import java.util.*
 import kotlin.collections.ArrayList
@@ -33,7 +33,7 @@ import kotlin.reflect.KClass
  * @author Philipp Straubinger
  * @since 1.0
  */
-class Achievement(val badgePath: String, private val fullyQualifiedFunctionName: String,
+class Achievement(val badgePath: String, val fullyQualifiedFunctionName: String,
                   val description: String, val title: String, val secret: Boolean) {
 
     @Transient private lateinit var callClass: KClass<out Any>
@@ -112,8 +112,8 @@ class Achievement(val badgePath: String, private val fullyQualifiedFunctionName:
      * parameter and executes the [callFunction] of the [callClass].
      */
     fun isSolved(classes: ArrayList<JacocoUtil.ClassDetails>, constants: HashMap<String, String>, run: Run<*, *>,
-                 user: User, workspace: FilePath, listener: TaskListener = TaskListener.NULL): Boolean {
-        val array = arrayOf(callClass.objectInstance, classes, constants, run, user, workspace, listener)
+                 property: GameUserProperty, workspace: FilePath, listener: TaskListener = TaskListener.NULL): Boolean {
+        val array = arrayOf(callClass.objectInstance, classes, constants, run, property, workspace, listener)
         val result: Boolean = callFunction.call(*array) as Boolean
         if (result) solvedTime = System.currentTimeMillis()
         return result
