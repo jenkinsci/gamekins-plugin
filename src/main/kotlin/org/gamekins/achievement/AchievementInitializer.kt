@@ -35,7 +35,7 @@ object AchievementInitializer {
         val jsonContent = javaClass.getResource(fileName).readText()
         val data = jacksonObjectMapper().readValue(jsonContent, AchievementData::class.java)
         val achievement = Achievement(data.badgePath, data.fullyQualifiedFunctionName,
-            data.description, data.title, data.secret)
+            data.description, data.title, data.secret, data.additionalParameters)
         return achievement
     }
 
@@ -49,5 +49,6 @@ object AchievementInitializer {
                                val description: String,
                                val title: String,
                                val fullyQualifiedFunctionName: String,
-                               val secret: Boolean)
+                               val secret: Boolean,
+                               val additionalParameters: HashMap<String, String>)
 }

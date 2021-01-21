@@ -33,42 +33,34 @@ import java.util.HashMap
 object AchievementUtil {
 
     /**
-     * Solves the achievement Fixing my own mistake: Let the build pass after it failed with one of your commits as head
+     * Solves the achievement Fixing my own mistake: Let the build pass after it failed with one of
+     * your commits as head.
      */
     fun solveFirstBuildFail(classes: ArrayList<JacocoUtil.ClassDetails>, constants: HashMap<String, String>,
-                            run: Run<*, *>, property: GameUserProperty, workspace: FilePath, listener: TaskListener)
-    : Boolean {
+                            run: Run<*, *>, property: GameUserProperty, workspace: FilePath, listener: TaskListener,
+                            additionalParameters: HashMap<String, String>): Boolean {
 
         return property.getCompletedChallenges(constants["projectName"]).filterIsInstance<BuildChallenge>().isNotEmpty()
     }
 
     /**
-     * Solve the achievement I took the first Challenge: Solve your first Challenge
+     * Solve the achievement I took the first Challenge: Solve your first Challenge.
      */
     fun solveFirstChallenge(classes: ArrayList<JacocoUtil.ClassDetails>, constants: HashMap<String, String>,
-                            run: Run<*, *>, property: GameUserProperty, workspace: FilePath, listener: TaskListener)
-    : Boolean {
+                            run: Run<*, *>, property: GameUserProperty, workspace: FilePath, listener: TaskListener,
+                            additionalParameters: HashMap<String, String>): Boolean {
 
         return property.getCompletedChallenges(constants["projectName"]).isNotEmpty()
     }
 
     /**
-     * Solves the achievement Impossible Multitasker: Solve four Challenges with one Jenkins build
+     * Solves the achievements with description: Solve X Challenges with one Jenkins build. Needs the key 'solveNumber'
+     * in the map [additionalParameters] with a positive Int value.
      */
-    fun solveFourAtOnce(classes: ArrayList<JacocoUtil.ClassDetails>, constants: HashMap<String, String>,
-                        run: Run<*, *>, property: GameUserProperty, workspace: FilePath, listener: TaskListener)
-    : Boolean {
+    fun solveXAtOnce(classes: ArrayList<JacocoUtil.ClassDetails>, constants: HashMap<String, String>,
+                        run: Run<*, *>, property: GameUserProperty, workspace: FilePath, listener: TaskListener,
+                        additionalParameters: HashMap<String, String>): Boolean {
 
-        return constants["solved"]?.toInt() ?: 0 >= 4
-    }
-
-    /**
-     * Solves the achievement Multitasker: Solve three Challenges with one Jenkins build
-     */
-    fun solveThreeAtOnce(classes: ArrayList<JacocoUtil.ClassDetails>, constants: HashMap<String, String>,
-                        run: Run<*, *>, property: GameUserProperty, workspace: FilePath, listener: TaskListener)
-    : Boolean {
-
-        return constants["solved"]?.toInt() ?: 0 >= 3
+        return constants["solved"]?.toInt() ?: 0 >= additionalParameters["solveNumber"]?.toInt() ?: 1
     }
 }

@@ -2,6 +2,9 @@
   "badgePath": "/plugin/gamekins/icons/trophy.png",
   "description": "Solve four Challenges with one Jenkins build",
   "title": "Impossible Multitasker",
-  "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::solveFourAtOnce",
-  "secret": true
+  "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::solveXAtOnce",
+  "secret": true,
+  "additionalParameters": {
+    "solveNumber": 4
+  }
 }

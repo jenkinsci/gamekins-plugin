@@ -34,7 +34,8 @@ import kotlin.reflect.KClass
  * @since 1.0
  */
 class Achievement(val badgePath: String, val fullyQualifiedFunctionName: String,
-                  val description: String, val title: String, val secret: Boolean) {
+                  val description: String, val title: String, val secret: Boolean,
+                  val additionalParameters: HashMap<String, String>) {
 
     @Transient private lateinit var callClass: KClass<out Any>
     @Transient private lateinit var callFunction: KCallable<*>
@@ -113,7 +114,8 @@ class Achievement(val badgePath: String, val fullyQualifiedFunctionName: String,
      */
     fun isSolved(classes: ArrayList<JacocoUtil.ClassDetails>, constants: HashMap<String, String>, run: Run<*, *>,
                  property: GameUserProperty, workspace: FilePath, listener: TaskListener = TaskListener.NULL): Boolean {
-        val array = arrayOf(callClass.objectInstance, classes, constants, run, property, workspace, listener)
+        val array = arrayOf(callClass.objectInstance, classes, constants, run, property, workspace, listener,
+            additionalParameters)
         val result: Boolean = callFunction.call(*array) as Boolean
         if (result) solvedTime = System.currentTimeMillis()
         return result

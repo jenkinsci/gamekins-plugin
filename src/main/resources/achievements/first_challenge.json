@@ -3,5 +3,6 @@
   "description": "Solve your first Challenge",
   "title": "I took the first Challenge",
   "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::solveFirstChallenge",
-  "secret": false
+  "secret": false,
+  "additionalParameters": {}
 }
