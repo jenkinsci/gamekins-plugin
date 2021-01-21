@@ -121,6 +121,10 @@ class Achievement(val badgePath: String, val fullyQualifiedFunctionName: String,
         return result
     }
 
+    fun printToXML(indentation: String): String {
+        return "$indentation<Achievement title=\"$title\" description=\"$description\" secret=\"$secret\"/>"
+    }
+
     /**
      * Called by Jenkins after the object has been created from his XML representation. Used for data migration.
      */

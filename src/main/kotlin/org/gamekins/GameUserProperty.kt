@@ -335,6 +335,13 @@ class GameUserProperty : UserProperty(), Action {
         }
         print.append(indentation).append("    </RejectedChallenges>\n")
 
+        print.append(indentation).append("    <Achievements count=\"")
+            .append(getCompletedAchievements(projectName).size).append("\">\n")
+        for (achievement in completedAchievements[projectName]!!) {
+            print.append(achievement.printToXML("$indentation        ")).append("\n")
+        }
+        print.append(indentation).append("    </Achievements>\n")
+
         print.append(indentation).append("</User>")
         return print.toString()
     }

@@ -296,8 +296,8 @@ class Statistics(job: AbstractItem) {
             return (indentation + "<Run number=\"" + runNumber + "\" branch=\"" + branch +
                     "\" result=\"" + (result?.toString() ?: "NULL") + "\" startTime=\"" +
                     startTime + "\" generatedChallenges=\"" + generatedChallenges +
-                    "\" solvedChallenges=\"" + solvedChallenges + "\" tests=\"" + testCount
-                    + "\" coverage=\"" + coverage + "\"/>")
+                    "\" solvedChallenges=\"" + solvedChallenges + "\" solvedAchievements=\"" + solvedAchievements +
+                    "\" tests=\"" + testCount + "\" coverage=\"" + coverage + "\"/>")
         }
 
         /**
