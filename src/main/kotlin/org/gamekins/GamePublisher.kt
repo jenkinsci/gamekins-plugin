@@ -27,6 +27,7 @@ import org.gamekins.property.GameMultiBranchProperty
 import org.gamekins.util.GitUtil
 import org.gamekins.util.PublisherUtil
 import jenkins.tasks.SimpleBuildStep
+import org.gamekins.util.JacocoUtil
 import org.jenkinsci.plugins.workflow.job.WorkflowJob
 import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject
 import org.kohsuke.stapler.DataBoundConstructor
@@ -91,6 +92,12 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
                 listener = listener)
         if (classes.isEmpty()) return
 
+        //Generate some project statistics
+        constants["projectCoverage"] = JacocoUtil.getProjectCoverage(workspace,
+            constants["jacocoCSVPath"]!!.split("/".toRegex())
+                    [constants["jacocoCSVPath"]!!.split("/".toRegex()).size - 1]).toString()
+        constants["projectTests"] = JacocoUtil.getTestCount(workspace, run).toString()
+
         //Checks for each user his Challenges and generates new ones if needed
         var generated = 0
         var solved = 0
@@ -107,7 +114,7 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
         listener.logger.println("[Gamekins] Update Statistics")
 
         //Updates the Statistics
-        PublisherUtil.updateStatistics(run, constants, workspace, generated, solved, solvedAchievements, listener)
+        PublisherUtil.updateStatistics(run, constants, generated, solved, solvedAchievements, listener)
 
         listener.logger.println("[Gamekins] Finished")
     }

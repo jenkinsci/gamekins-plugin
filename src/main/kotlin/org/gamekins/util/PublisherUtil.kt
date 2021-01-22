@@ -49,7 +49,7 @@ object PublisherUtil {
         for (achievement in property.getUnsolvedAchievements(constants["projectName"]!!)) {
             if (achievement.isSolved(classes, constants, run, property, workspace, listener)) {
                 property.completeAchievement(constants["projectName"]!!, achievement)
-                listener.logger.println("[Gamekins] Solved achievement ")
+                listener.logger.println("[Gamekins] Solved achievement $achievement")
                 solved++
             }
         }
@@ -236,8 +236,8 @@ object PublisherUtil {
     /**
      * Updates the [Statistics] after all users have been checked.
      */
-    fun updateStatistics(run: Run<*, *>, constants: HashMap<String, String>, workspace: FilePath, generated: Int,
-                         solved: Int, solvedAchievements:Int, listener: TaskListener = TaskListener.NULL) {
+    fun updateStatistics(run: Run<*, *>, constants: HashMap<String, String>, generated: Int, solved: Int,
+                         solvedAchievements:Int, listener: TaskListener = TaskListener.NULL) {
 
         //Get the current job and property
         val property: GameProperty?
@@ -254,25 +254,20 @@ object PublisherUtil {
         //Add a new entry to the Statistics
         if (property != null) {
             property.getStatistics()
-                    .addRunEntry(
-                            job,
-                            constants["branch"]!!,
-                            Statistics.RunEntry(
-                                    run.getNumber(),
-                                    constants["branch"]!!,
-                                    run.result,
-                                    run.startTimeInMillis,
-                                    generated,
-                                    solved,
-                                solvedAchievements,
-                                    JacocoUtil.getTestCount(workspace, run),
-                                    JacocoUtil.getProjectCoverage(workspace,
-                                            constants["jacocoCSVPath"]!!
-                                                    .split("/".toRegex())
-                                                    [constants["jacocoCSVPath"]!!
-                                                    .split("/".toRegex())
-                                                    .size - 1])
-                            ), listener)
+                .addRunEntry(
+                    job,
+                    constants["branch"]!!,
+                    Statistics.RunEntry(
+                        run.getNumber(),
+                        constants["branch"]!!,
+                        run.result,
+                        run.startTimeInMillis,
+                        generated,
+                        solved,
+                        solvedAchievements,
+                        constants["projectTests"]!!.toInt(),
+                        constants["projectCoverage"]!!.toDouble()
+                    ), listener)
 
             try {
                 property.getOwner().save()

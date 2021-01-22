@@ -33,6 +33,30 @@ import java.util.HashMap
 object AchievementUtil {
 
     /**
+     * Solve the achievements with description: Have X% project coverage. Needs the key 'haveCoverage'
+     * in the map [additionalParameters] with a positive Double value.
+     */
+    fun haveXProjectCoverage(classes: ArrayList<JacocoUtil.ClassDetails>, constants: HashMap<String, String>,
+                             run: Run<*, *>, property: GameUserProperty, workspace: FilePath, listener: TaskListener,
+                             additionalParameters: HashMap<String, String>): Boolean {
+
+        return constants["projectCoverage"]!!.toDouble() >=
+                additionalParameters["haveCoverage"]?.toDouble() ?: Double.MAX_VALUE
+    }
+
+    /**
+     * Solve the achievements with description: Have X tests in your project. Needs the key 'haveTests'
+     * in the map [additionalParameters] with a positive Int value.
+     */
+    fun haveXProjectTests(classes: ArrayList<JacocoUtil.ClassDetails>, constants: HashMap<String, String>,
+                             run: Run<*, *>, property: GameUserProperty, workspace: FilePath, listener: TaskListener,
+                             additionalParameters: HashMap<String, String>): Boolean {
+
+        return constants["projectTests"]!!.toInt() >=
+                additionalParameters["haveTests"]?.toInt() ?: Int.MAX_VALUE
+    }
+
+    /**
      * Solves the achievement Fixing my own mistake: Let the build pass after it failed with one of
      * your commits as head.
      */

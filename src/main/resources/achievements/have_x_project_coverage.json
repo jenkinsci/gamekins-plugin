@@ -1,0 +1,72 @@
+[
+  {
+    "badgePath": "/plugin/gamekins/icons/trophy.png",
+    "description": "Have 50% project coverage",
+    "title": "Half things",
+    "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::haveXProjectCoverage",
+    "secret": false,
+    "additionalParameters": {
+      "haveCoverage": 50.0
+    }
+  },
+  {
+    "badgePath": "/plugin/gamekins/icons/trophy.png",
+    "description": "Have 61.8% project coverage",
+    "title": "Golden ratio",
+    "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::haveXProjectCoverage",
+    "secret": true,
+    "additionalParameters": {
+      "haveCoverage": 61.8
+    }
+  },
+  {
+    "badgePath": "/plugin/gamekins/icons/trophy.png",
+    "description": "Have 66.6% project coverage",
+    "title": "Supermajority",
+    "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::haveXProjectCoverage",
+    "secret": false,
+    "additionalParameters": {
+      "haveCoverage": 66.6
+    }
+  },
+  {
+    "badgePath": "/plugin/gamekins/icons/trophy.png",
+    "description": "Have 80% project coverage",
+    "title": "The common goal",
+    "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::haveXProjectCoverage",
+    "secret": false,
+    "additionalParameters": {
+      "haveCoverage": 80.0
+    }
+  },
+  {
+    "badgePath": "/plugin/gamekins/icons/trophy.png",
+    "description": "Have 90% project coverage",
+    "title": "Going to the top",
+    "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::haveXProjectCoverage",
+    "secret": false,
+    "additionalParameters": {
+      "haveCoverage": 90.0
+    }
+  },
+  {
+    "badgePath": "/plugin/gamekins/icons/trophy.png",
+    "description": "Have 99% project coverage",
+    "title": "Almost done",
+    "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::haveXProjectCoverage",
+    "secret": false,
+    "additionalParameters": {
+      "haveCoverage": 99.0
+    }
+  },
+  {
+    "badgePath": "/plugin/gamekins/icons/trophy.png",
+    "description": "Have 100% project coverage",
+    "title": "Safety-critical project",
+    "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::haveXProjectCoverage",
+    "secret": false,
+    "additionalParameters": {
+      "haveCoverage": 100.0
+    }
+  }
+]

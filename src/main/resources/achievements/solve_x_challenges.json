@@ -18,5 +18,65 @@
     "additionalParameters": {
       "solveNumber": 3
     }
+  },
+  {
+    "badgePath": "/plugin/gamekins/icons/trophy.png",
+    "description": "Solve ten Challenges",
+    "title": "Newcomer",
+    "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::solveXChallenges",
+    "secret": false,
+    "additionalParameters": {
+      "solveNumber": 10
+    }
+  },
+  {
+    "badgePath": "/plugin/gamekins/icons/trophy.png",
+    "description": "Solve 20 Challenges",
+    "title": "Double Cross",
+    "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::solveXChallenges",
+    "secret": false,
+    "additionalParameters": {
+      "solveNumber": 20
+    }
+  },
+  {
+    "badgePath": "/plugin/gamekins/icons/trophy.png",
+    "description": "Solve 42 Challenges",
+    "title": "The answer",
+    "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::solveXChallenges",
+    "secret": true,
+    "additionalParameters": {
+      "solveNumber": 42
+    }
+  },
+  {
+    "badgePath": "/plugin/gamekins/icons/trophy.png",
+    "description": "Solve 50 Challenges",
+    "title": "Tin soldier",
+    "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::solveXChallenges",
+    "secret": false,
+    "additionalParameters": {
+      "solveNumber": 50
+    }
+  },
+  {
+    "badgePath": "/plugin/gamekins/icons/trophy.png",
+    "description": "Solve 84 Challenges",
+    "title": "I got the answer - twice",
+    "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::solveXChallenges",
+    "secret": true,
+    "additionalParameters": {
+      "solveNumber": 84
+    }
+  },
+  {
+    "badgePath": "/plugin/gamekins/icons/trophy.png",
+    "description": "Solve 100 Challenges",
+    "title": "100 Continue",
+    "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::solveXChallenges",
+    "secret": false,
+    "additionalParameters": {
+      "solveNumber": 100
+    }
   }
 ]

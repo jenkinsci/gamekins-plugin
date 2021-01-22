@@ -106,7 +106,7 @@
                                         }
 
                                         let header = document.getElementById("unsolvedAchievementsHeader")
-                                        header.innerText = header.innerText + " (" + list.length + "/" + totalCount + ")"
+                                        header.innerText = header.innerText + " (" + list.length + ")"
                                     }
                                 })
 
