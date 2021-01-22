@@ -6,7 +6,7 @@
     "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::haveXProjectCoverage",
     "secret": false,
     "additionalParameters": {
-      "haveCoverage": 50.0
+      "haveCoverage": 0.5
     }
   },
   {
@@ -16,7 +16,7 @@
     "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::haveXProjectCoverage",
     "secret": true,
     "additionalParameters": {
-      "haveCoverage": 61.8
+      "haveCoverage": 0.618
     }
   },
   {
@@ -26,7 +26,7 @@
     "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::haveXProjectCoverage",
     "secret": false,
     "additionalParameters": {
-      "haveCoverage": 66.6
+      "haveCoverage": 0.666
     }
   },
   {
@@ -36,7 +36,7 @@
     "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::haveXProjectCoverage",
     "secret": false,
     "additionalParameters": {
-      "haveCoverage": 80.0
+      "haveCoverage": 0.8
     }
   },
   {
@@ -46,7 +46,7 @@
     "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::haveXProjectCoverage",
     "secret": false,
     "additionalParameters": {
-      "haveCoverage": 90.0
+      "haveCoverage": 0.9
     }
   },
   {
@@ -56,7 +56,7 @@
     "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::haveXProjectCoverage",
     "secret": false,
     "additionalParameters": {
-      "haveCoverage": 99.0
+      "haveCoverage": 0.99
     }
   },
   {
@@ -66,7 +66,7 @@
     "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::haveXProjectCoverage",
     "secret": false,
     "additionalParameters": {
-      "haveCoverage": 100.0
+      "haveCoverage": 1.0
     }
   }
 ]
