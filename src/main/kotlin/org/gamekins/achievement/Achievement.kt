@@ -126,7 +126,8 @@ class Achievement(val badgePath: String, val fullyQualifiedFunctionName: String,
      * Returns the String representation of the [Achievement] for the [LeaderboardAction].
      */
     fun printToXML(indentation: String): String {
-        return "$indentation<Achievement title=\"$title\" description=\"$description\" secret=\"$secret\"/>"
+        return "$indentation<Achievement title=\"$title\" description=\"$description\" secret=\"$secret\" " +
+                "solved=\"$solvedTime\"/>"
     }
 
     /**

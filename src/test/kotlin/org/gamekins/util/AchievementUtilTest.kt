@@ -24,6 +24,7 @@ import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.string.shouldEndWith
 import io.mockk.every
 import io.mockk.mockkClass
+import io.mockk.mockkStatic
 import io.mockk.unmockkAll
 import org.gamekins.challenge.BuildChallenge
 import org.gamekins.challenge.ClassCoverageChallenge
@@ -50,6 +51,7 @@ class AchievementUtilTest: AnnotationSpec() {
         root shouldEndWith "test-project"
         TestUtils.unzip("$root.zip", root)
 
+        mockkStatic(AchievementUtil::class)
         constants["projectName"] = "Test-Project"
         every { property.getCompletedChallenges(any()) } returns CopyOnWriteArrayList(listOf(challenge))
     }

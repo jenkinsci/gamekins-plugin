@@ -132,6 +132,7 @@ object AchievementUtil {
      * Solves the achievements with description: Solve X Challenges. Needs the key 'solveNumber'
      * in the map [additionalParameters] with a positive Int value.
      */
+    @JvmStatic
     fun solveXChallenges(classes: ArrayList<JacocoUtil.ClassDetails>, constants: HashMap<String, String>,
                             run: Run<*, *>, property: GameUserProperty, workspace: FilePath, listener: TaskListener,
                             additionalParameters: HashMap<String, String>): Boolean {
