@@ -33,7 +33,7 @@ abstract class CoverageChallenge(val classDetails: ClassDetails, workspace: File
     protected val fullyCoveredLines: Int
     protected val notCoveredLines: Int
     protected val partiallyCoveredLines: Int
-    protected var solvedCoverage = 0.0
+    var solvedCoverage = 0.0
     private val created = System.currentTimeMillis()
     private var solved: Long = 0
 

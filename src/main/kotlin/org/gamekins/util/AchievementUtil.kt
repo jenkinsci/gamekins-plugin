@@ -21,6 +21,7 @@ import hudson.model.Run
 import hudson.model.TaskListener
 import org.gamekins.GameUserProperty
 import org.gamekins.challenge.BuildChallenge
+import org.gamekins.challenge.CoverageChallenge
 import java.util.HashMap
 
 /**
@@ -33,7 +34,67 @@ import java.util.HashMap
 object AchievementUtil {
 
     /**
-     * Solve the achievements with description: Have X% project coverage. Needs the key 'haveCoverage'
+     * Returns the number of lines of code (LOC). Excludes blank lines and comments.
+     */
+    fun getLinesOfCode(file: FilePath): Int {
+        val content = file.readToString().split("\n")
+
+        return content
+            .map { it.trim() }
+            .count { it.isNotEmpty() && !it.startsWith("/") && !it.startsWith("*") }
+    }
+
+    /**
+     * Solves the achievements with description: Solve a CoverageChallenge with at least X% coverage in the required
+     * class. Needs the key 'haveCoverage' in the map [additionalParameters] with a positive Double value.
+     */
+    fun haveClassWithXCoverage(classes: ArrayList<JacocoUtil.ClassDetails>, constants: HashMap<String, String>,
+                               run: Run<*, *>, property: GameUserProperty, workspace: FilePath, listener: TaskListener,
+                               additionalParameters: HashMap<String, String>): Boolean {
+
+        return property.getCompletedChallenges(constants["projectName"])
+            .filterIsInstance<CoverageChallenge>()
+            .any { it.solvedCoverage >= additionalParameters["haveCoverage"]?.toDouble() ?: Double.MAX_VALUE }
+    }
+
+    /**
+     * Solves the achievements with description: Solve X CoverageChallenges with Y% coverage in the required class.
+     * Needs the keys 'haveCoverage' and 'classesCount' in the map [additionalParameters] with a positive
+     * Double/Int value.
+     */
+    fun haveXClassesWithYCoverage(classes: ArrayList<JacocoUtil.ClassDetails>, constants: HashMap<String, String>,
+                                  run: Run<*, *>, property: GameUserProperty, workspace: FilePath,
+                                  listener: TaskListener, additionalParameters: HashMap<String, String>): Boolean {
+
+        return property.getCompletedChallenges(constants["projectName"])
+            .filterIsInstance<CoverageChallenge>()
+            .count { it.solvedCoverage >= additionalParameters["haveCoverage"]?.toDouble() ?: Double.MAX_VALUE } >=
+                additionalParameters["classesCount"]?.toInt() ?: Int.MAX_VALUE
+    }
+
+    /**
+     * Solves the achievements with description: Solve X CoverageChallenges with Y% coverage in the required class
+     * with at least Z LOC. Needs the keys 'haveCoverage', 'classesCount' 'linesCount' and  in the map
+     * [additionalParameters] with a positive Double/Int/Int value.
+     */
+    fun haveXClassesWithYCoverageAndZLines(classes: ArrayList<JacocoUtil.ClassDetails>,
+                                           constants: HashMap<String, String>, run: Run<*, *>,
+                                           property: GameUserProperty, workspace: FilePath, listener: TaskListener,
+                                           additionalParameters: HashMap<String, String>): Boolean {
+
+        val path = workspace.remote.removeSuffix("/")
+        return property.getCompletedChallenges(constants["projectName"])
+            .filterIsInstance<CoverageChallenge>()
+            .filter { it.solvedCoverage >= additionalParameters["haveCoverage"]?.toDouble() ?: Double.MAX_VALUE }
+            .count {
+                getLinesOfCode(
+                    FilePath(workspace.channel, path + it.classDetails.sourceFilePath)
+                ) >= additionalParameters["linesCount"]?.toInt() ?: Int.MAX_VALUE
+            } >= additionalParameters["classesCount"]?.toInt() ?: Int.MAX_VALUE
+    }
+
+    /**
+     * Solves the achievements with description: Have X% project coverage. Needs the key 'haveCoverage'
      * in the map [additionalParameters] with a positive Double value.
      */
     fun haveXProjectCoverage(classes: ArrayList<JacocoUtil.ClassDetails>, constants: HashMap<String, String>,
@@ -45,7 +106,7 @@ object AchievementUtil {
     }
 
     /**
-     * Solve the achievements with description: Have X tests in your project. Needs the key 'haveTests'
+     * Solves the achievements with description: Have X tests in your project. Needs the key 'haveTests'
      * in the map [additionalParameters] with a positive Int value.
      */
     fun haveXProjectTests(classes: ArrayList<JacocoUtil.ClassDetails>, constants: HashMap<String, String>,
@@ -68,7 +129,7 @@ object AchievementUtil {
     }
 
     /**
-     * Solve the achievements with description: Solve X Challenges. Needs the key 'solveNumber'
+     * Solves the achievements with description: Solve X Challenges. Needs the key 'solveNumber'
      * in the map [additionalParameters] with a positive Int value.
      */
     fun solveXChallenges(classes: ArrayList<JacocoUtil.ClassDetails>, constants: HashMap<String, String>,

@@ -299,8 +299,7 @@ object JacocoUtil {
      */
     @JvmStatic
     fun getProjectCoverage(workspace: FilePath, csvName: String): Double {
-        val files: ArrayList<FilePath>
-        files = try {
+        val files: ArrayList<FilePath> = try {
             workspace.act(FilesOfAllSubDirectoriesCallable(workspace, csvName))
         } catch (e: Exception) {
             e.printStackTrace()
@@ -430,7 +429,7 @@ object JacocoUtil {
      * The internal representation of a class from JaCoCo.
      *
      * @param workspace Workspace of the project
-     * @param shortFilePath Path of the file, starting in the workspace root directory
+     * @param sourceFilePath Path of the file, starting in the workspace root directory
      * @param shortJacocoPath Path of the JaCoCo root directory, beginning with ** / (without space)
      * @param shortJacocoCSVPath Path of the JaCoCo csv file, beginning with ** / (without space)
      *
@@ -438,7 +437,7 @@ object JacocoUtil {
      * @since 1.0
      */
     class ClassDetails(workspace: FilePath,
-                       shortFilePath: String,
+                       var sourceFilePath: String,
                        shortJacocoPath: String,
                        shortJacocoCSVPath: String,
                        var constants: HashMap<String, String>,
@@ -456,11 +455,11 @@ object JacocoUtil {
         val workspace: String = workspace.remote
 
         init {
-            val pathSplit = shortFilePath.split("/".toRegex())
+            val pathSplit = sourceFilePath.split("/".toRegex())
             //Compute class, package and extension name
             className = pathSplit[pathSplit.size - 1].split("\\.".toRegex())[0]
             this.extension = pathSplit[pathSplit.size - 1].split("\\.".toRegex())[1]
-            packageName = computePackageName(shortFilePath)
+            packageName = computePackageName(sourceFilePath)
 
             //Build the paths to the JaCoCo files
             val jacocoPath = StringBuilder(workspace.remote)
@@ -515,6 +514,16 @@ object JacocoUtil {
         @Suppress("SENSELESS_COMPARISON")
         private fun readResolve(): Any {
             if (constants == null) constants = hashMapOf()
+
+            if (sourceFilePath == null) {
+                val split = packageName.split(".")
+                sourceFilePath = "/src/main/java/"
+                for (part in split) {
+                    sourceFilePath += "$part/"
+                }
+                sourceFilePath += "$className.$extension"
+            }
+
             return this
         }
 

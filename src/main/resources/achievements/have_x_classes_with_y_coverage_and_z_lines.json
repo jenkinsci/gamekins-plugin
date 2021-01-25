@@ -1,0 +1,62 @@
+[
+  {
+    "badgePath": "/plugin/gamekins/icons/trophy.png",
+    "description": "Solve one CoverageChallenges with 100% coverage in the required class with at least 200 LOC",
+    "title": "Short class - check",
+    "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::haveXClassesWithYCoverageAndZLines",
+    "secret": false,
+    "additionalParameters": {
+      "haveCoverage": 1.0,
+      "classesCount": 1,
+      "linesCount": 200
+    }
+  },
+  {
+    "badgePath": "/plugin/gamekins/icons/trophy.png",
+    "description": "Solve one CoverageChallenges with 100% coverage in the required class with at least 500 LOC",
+    "title": "The classes are getting longer",
+    "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::haveXClassesWithYCoverageAndZLines",
+    "secret": false,
+    "additionalParameters": {
+      "haveCoverage": 1.0,
+      "classesCount": 1,
+      "linesCount": 500
+    }
+  },
+  {
+    "badgePath": "/plugin/gamekins/icons/trophy.png",
+    "description": "Solve one CoverageChallenges with 100% coverage in the required class with at least 1000 LOC",
+    "title": "I ain't afraid of no classes!",
+    "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::haveXClassesWithYCoverageAndZLines",
+    "secret": false,
+    "additionalParameters": {
+      "haveCoverage": 1.0,
+      "classesCount": 1,
+      "linesCount": 1000
+    }
+  },
+  {
+    "badgePath": "/plugin/gamekins/icons/trophy.png",
+    "description": "Solve one CoverageChallenges with 100% coverage in the required class with at least 1500 LOC",
+    "title": "Split the class",
+    "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::haveXClassesWithYCoverageAndZLines",
+    "secret": true,
+    "additionalParameters": {
+      "haveCoverage": 1.0,
+      "classesCount": 1,
+      "linesCount": 1500
+    }
+  },
+  {
+    "badgePath": "/plugin/gamekins/icons/trophy.png",
+    "description": "Solve one CoverageChallenges with 100% coverage in the required class with at least 2000 LOC",
+    "title": "Seriously - Split the class!",
+    "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::haveXClassesWithYCoverageAndZLines",
+    "secret": true,
+    "additionalParameters": {
+      "haveCoverage": 1.0,
+      "classesCount": 1,
+      "linesCount": 2000
+    }
+  }
+]
