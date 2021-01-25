@@ -24,6 +24,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
  * @author Philipp Straubinger
  * @since 1.0
  */
+@Suppress("RECEIVER_NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
 object AchievementInitializer {
 
     /**
@@ -37,7 +38,7 @@ object AchievementInitializer {
         ReplaceWith("AchievementInitializer.initializeAchievements()")
     )
     fun initializeAchievement(fileName: String): Achievement {
-        val jsonContent = javaClass.getResource(fileName).readText()
+        val jsonContent = javaClass.classLoader.getResource(fileName).readText()
         val data = jacksonObjectMapper().readValue(jsonContent, AchievementData::class.java)
         return Achievement(data.badgePath, data.fullyQualifiedFunctionName, data.description, data.title,
             data.secret, data.additionalParameters)
@@ -50,8 +51,9 @@ object AchievementInitializer {
      *
      * Only for more than one [Achievement] per file.
      */
+    @JvmStatic
     fun initializeAchievements(fileName: String): List<Achievement> {
-        val jsonContent = javaClass.getResource(fileName).readText()
+        val jsonContent = javaClass.classLoader.getResource(fileName).readText()
         val data: List<AchievementData> = jacksonObjectMapper().readValue(
             jsonContent,
             jacksonObjectMapper().typeFactory.constructCollectionType(List::class.java, AchievementData::class.java)

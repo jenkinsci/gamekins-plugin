@@ -31,6 +31,8 @@ import io.mockk.*
 import org.eclipse.jgit.lib.PersonIdent
 import org.eclipse.jgit.revwalk.RevCommit
 import org.gamekins.GamePublisherDescriptor
+import org.gamekins.achievement.Achievement
+import org.gamekins.achievement.AchievementInitializer
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import org.jsoup.select.Elements
@@ -57,6 +59,8 @@ class ChallengeFactoryTest : AnnotationSpec() {
 
     @BeforeEach
     fun init() {
+        mockkStatic(AchievementInitializer::class)
+        every { AchievementInitializer.initializeAchievements(any()) } returns listOf()
         GamePublisherDescriptor()
         map["branch"] = branch
         map["projectName"] = "test-project"
