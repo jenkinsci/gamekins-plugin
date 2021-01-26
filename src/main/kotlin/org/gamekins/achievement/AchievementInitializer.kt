@@ -54,8 +54,19 @@ object AchievementInitializer {
     @JvmStatic
     fun initializeAchievements(fileName: String): List<Achievement> {
         val jsonContent = javaClass.classLoader.getResource(fileName).readText()
+        return initializeAchievementsWithContent(jsonContent)
+    }
+
+    /**
+     * Initializes the [Achievement] specified by the json content given via [fileContent]. [fileContent] must be a
+     * valid json String.
+     *
+     * Only for more than one [Achievement] per file.
+     */
+    @JvmStatic
+    fun initializeAchievementsWithContent(fileContent: String): List<Achievement> {
         val data: List<AchievementData> = jacksonObjectMapper().readValue(
-            jsonContent,
+            fileContent,
             jacksonObjectMapper().typeFactory.constructCollectionType(List::class.java, AchievementData::class.java)
         )
 

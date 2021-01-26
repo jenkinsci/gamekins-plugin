@@ -21,6 +21,7 @@ import hudson.model.AbstractProject
 import hudson.tasks.BuildStepDescriptor
 import hudson.tasks.Publisher
 import hudson.util.FormValidation
+import org.apache.http.client.utils.URIBuilder
 import org.gamekins.achievement.Achievement
 import org.gamekins.achievement.AchievementInitializer
 import org.gamekins.challenge.*
@@ -29,7 +30,15 @@ import org.jenkinsci.Symbol
 import org.kohsuke.stapler.AncestorInPath
 import org.kohsuke.stapler.QueryParameter
 import java.io.File
+import java.lang.IllegalArgumentException
+import java.net.URI
+import java.util.*
+import java.util.jar.JarFile
+import java.util.zip.ZipEntry
+import java.util.zip.ZipInputStream
 import javax.annotation.Nonnull
+import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 
 /**
  * Registers the [GamePublisher] to Jenkins as an extension and also works as an communication
@@ -95,10 +104,31 @@ class GamePublisherDescriptor : BuildStepDescriptor<Publisher?>(GamePublisher::c
      * Adds the built-in [Achievement]s to the [List] [achievements] for adding to a specific user.
      */
     private fun initAchievementsList() {
-        val path = javaClass.getResource("/achievements").path
-        val files = File(path).listFiles()!!.filter { it.extension == "json" }
-        files.forEach { file ->
-            achievements.addAll(AchievementInitializer.initializeAchievements("/achievements/" + file.name))
+        val resource = javaClass.getResource("/achievements")
+
+        if (resource.path.contains(".jar!")) {
+            var path = resource.path.replaceAfter(".jar!", "").replace(".jar!", ".jar")
+            path = path.replace("file:", "")
+            val zip = ZipInputStream(URI("file", "", path, null).toURL().openStream())
+
+            var entry: ZipEntry? = zip.nextEntry
+            while (entry != null) {
+                if (!entry.isDirectory && entry.name.startsWith("achievements/") && entry.name.endsWith(".json")) {
+                    val scanner = Scanner(zip)
+                    var content = ""
+                    while (scanner.hasNextLine()) {
+                        content += "${scanner.nextLine()}\n"
+                    }
+                    achievements.addAll(AchievementInitializer.initializeAchievementsWithContent(content))
+                }
+
+                entry = zip.nextEntry
+            }
+        } else {
+            val files = File(resource.toURI()).listFiles()!!.filter { it.extension == "json" }
+            files.forEach { file ->
+                achievements.addAll(AchievementInitializer.initializeAchievements("/achievements/" + file.name))
+            }
         }
     }
 
