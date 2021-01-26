@@ -141,8 +141,10 @@
                         td1.style.verticalAlign = "middle"
                         td1.style.width = "50px"
                         let img = document.createElement("img")
-                        let split = document.getElementsByTagName("img")[0].src.split("/", 6)
-                        img.src = location.origin + "/jenkins/static/" + split[split.length - 1] + achievement.badgePath
+                        let src = document.getElementsByTagName("img")[0].src
+                        let base = src.substring(0, src.indexOf("static"))
+                        let endSplit = src.substring(src.indexOf("static")).split("/")
+                        img.src = base + "static/" + endSplit[1] + achievement.badgePath
                         img.height = 48
                         img.width = 48
                         td1.appendChild(img)
