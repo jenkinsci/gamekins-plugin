@@ -136,7 +136,7 @@ class LineCoverageChallenge(data: Challenge.ChallengeGenerationData)
         elements.addAll(document.select("span." + "pc"))
         for (element in elements) {
             if (element.text() == lineContent && element.attr("id").substring(1).toInt() == lineNumber) {
-                return setSolved(elements[0], jacocoCSVFile)
+                return setSolved(element, jacocoCSVFile)
             }
         }
 
@@ -149,7 +149,7 @@ class LineCoverageChallenge(data: Challenge.ChallengeGenerationData)
             } else {
                 val nearestElement = elements.minByOrNull { abs(lineNumber - it.attr("id").substring(1).toInt()) }
                 if (nearestElement != null && nearestElement.attr("class") != "nc") {
-                    return setSolved(elements[0], jacocoCSVFile)
+                    return setSolved(nearestElement, jacocoCSVFile)
                 }
             }
         }

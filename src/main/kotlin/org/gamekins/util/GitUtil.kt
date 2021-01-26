@@ -153,13 +153,13 @@ object GitUtil {
             for (commit in currentCommits) {
                 searchedCommits.add(commit)
 
+                //Not interested in merge commits
+                if (commit.shortMessage.toLowerCase().contains("merge")) break
+
                 val diff = getDiffOfCommit(git, repo, commit)
                 val lines = diff.split("\n".toRegex())
                 for (i in lines.indices) {
                     val line = lines[i]
-
-                    //Not interested in merge commits
-                    if (commit.shortMessage.toLowerCase().contains("merge")) break
 
                     if (i + 1 < lines.size && interestedInDiffLine(line, lines[i + 1])) {
                         val path = line.split(" ".toRegex())[2].substring(1)

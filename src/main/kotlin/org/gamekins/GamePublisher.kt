@@ -90,7 +90,6 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
         //Computes the last changed classes
         val classes = PublisherUtil.retrieveLastChangedClasses(workspace, searchCommitCount, constants,
                 listener = listener)
-        if (classes.isEmpty()) return
 
         //Generate some project statistics
         constants["projectCoverage"] = JacocoUtil.getProjectCoverage(workspace,
