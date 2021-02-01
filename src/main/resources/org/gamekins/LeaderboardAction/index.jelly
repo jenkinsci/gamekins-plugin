@@ -143,6 +143,7 @@
                     <li>Rejected Challenges are displayed in the right table</li>
                     <li>Hover over a rejected Challenge to see the reason for rejection</li>
                     <li>If there are no Challenges generated for you although you have committed something recently, then checkout the <i>Git Names</i> in your profile settings</li>
+                    <li>Also have a look at the <b>Achievements</b> available in your profile. You can access them by clicking on the link of your name in the Leaderboard. Remember to choose the right project in the dropdown in your profile.</li>
                 </ul>
             </j:if>
 
