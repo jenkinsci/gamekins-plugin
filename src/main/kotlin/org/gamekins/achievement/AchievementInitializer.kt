@@ -40,8 +40,8 @@ object AchievementInitializer {
     fun initializeAchievement(fileName: String): Achievement {
         val jsonContent = javaClass.classLoader.getResource(fileName).readText()
         val data = jacksonObjectMapper().readValue(jsonContent, AchievementData::class.java)
-        return Achievement(data.badgePath, data.fullyQualifiedFunctionName, data.description, data.title,
-            data.secret, data.additionalParameters)
+        return Achievement(data.badgePath, data.unsolvedBadgePath, data.fullyQualifiedFunctionName, data.description,
+            data.title, data.secret, data.additionalParameters)
     }
 
     /**
@@ -72,7 +72,7 @@ object AchievementInitializer {
 
         return data.map {
             Achievement(
-                it.badgePath, it.fullyQualifiedFunctionName,
+                it.badgePath, it.unsolvedBadgePath, it.fullyQualifiedFunctionName,
                 it.description, it.title, it.secret, it.additionalParameters
             )
         }
@@ -85,6 +85,7 @@ object AchievementInitializer {
      * @since 1.0
      */
     data class AchievementData(val badgePath: String,
+                               val unsolvedBadgePath: String,
                                val description: String,
                                val title: String,
                                val fullyQualifiedFunctionName: String,

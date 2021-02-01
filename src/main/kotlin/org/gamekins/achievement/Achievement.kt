@@ -34,7 +34,7 @@ import kotlin.reflect.KClass
  * @author Philipp Straubinger
  * @since 1.0
  */
-class Achievement(val badgePath: String, val fullyQualifiedFunctionName: String,
+class Achievement(val badgePath: String, var unsolvedBadgePath: String, val fullyQualifiedFunctionName: String,
                   val description: String, val title: String, val secret: Boolean,
                   val additionalParameters: HashMap<String, String>) {
 
@@ -136,6 +136,7 @@ class Achievement(val badgePath: String, val fullyQualifiedFunctionName: String,
     @Suppress("unused", "SENSELESS_COMPARISON")
     private fun readResolve(): Any {
         initCalls()
+        if (unsolvedBadgePath.isNullOrEmpty()) unsolvedBadgePath = badgePath
         return this
     }
 

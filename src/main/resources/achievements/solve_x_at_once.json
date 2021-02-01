@@ -1,6 +1,7 @@
 [
   {
     "badgePath": "/plugin/gamekins/icons/trophy.png",
+    "unsolvedBadgePath": "/plugin/gamekins/icons/trophy.png",
     "description": "Solve three Challenges with one Jenkins build",
     "title": "Multitasker",
     "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::solveXAtOnce",
@@ -11,6 +12,7 @@
   },
   {
     "badgePath": "/plugin/gamekins/icons/trophy.png",
+    "unsolvedBadgePath": "/plugin/gamekins/icons/trophy.png",
     "description": "Solve four Challenges with one Jenkins build",
     "title": "Impossible Multitasker",
     "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::solveXAtOnce",

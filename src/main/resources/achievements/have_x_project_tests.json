@@ -1,6 +1,7 @@
 [
   {
     "badgePath": "/plugin/gamekins/icons/trophy.png",
+    "unsolvedBadgePath": "/plugin/gamekins/icons/trophy.png",
     "description": "Have one test in your project",
     "title": "What is testing?",
     "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::haveXProjectTests",
@@ -11,6 +12,7 @@
   },
   {
     "badgePath": "/plugin/gamekins/icons/trophy.png",
+    "unsolvedBadgePath": "/plugin/gamekins/icons/trophy.png",
     "description": "Have ten tests in your project",
     "title": "Why haven't I tested more before?",
     "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::haveXProjectTests",
@@ -21,6 +23,7 @@
   },
   {
     "badgePath": "/plugin/gamekins/icons/trophy.png",
+    "unsolvedBadgePath": "/plugin/gamekins/icons/trophy.png",
     "description": "Have 100 tests in your project",
     "title": "Centipede",
     "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::haveXProjectTests",
@@ -31,6 +34,7 @@
   },
   {
     "badgePath": "/plugin/gamekins/icons/trophy.png",
+    "unsolvedBadgePath": "/plugin/gamekins/icons/trophy.png",
     "description": "Have 300 tests in your project",
     "title": "C3",
     "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::haveXProjectTests",
@@ -41,6 +45,7 @@
   },
   {
     "badgePath": "/plugin/gamekins/icons/trophy.png",
+    "unsolvedBadgePath": "/plugin/gamekins/icons/trophy.png",
     "description": "Have 500 tests in your project",
     "title": "Forbes 500",
     "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::haveXProjectTests",
@@ -51,6 +56,7 @@
   },
   {
     "badgePath": "/plugin/gamekins/icons/trophy.png",
+    "unsolvedBadgePath": "/plugin/gamekins/icons/trophy.png",
     "description": "Have 1000 tests in your project",
     "title": "Kilo-tests",
     "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::haveXProjectTests",
@@ -61,6 +67,7 @@
   },
   {
     "badgePath": "/plugin/gamekins/icons/trophy.png",
+    "unsolvedBadgePath": "/plugin/gamekins/icons/trophy.png",
     "description": "Have 1111 tests in your project",
     "title": "Schnapszahl",
     "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::haveXProjectTests",

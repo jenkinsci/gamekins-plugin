@@ -1,6 +1,7 @@
 [
   {
     "badgePath": "/plugin/gamekins/icons/trophy.png",
+    "unsolvedBadgePath": "/plugin/gamekins/icons/trophy.png",
     "description": "Solve two CoverageChallenges with 100% coverage in the required class",
     "title": "Oops!... I did it again",
     "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::haveXClassesWithYCoverage",
@@ -12,6 +13,7 @@
   },
   {
     "badgePath": "/plugin/gamekins/icons/trophy.png",
+    "unsolvedBadgePath": "/plugin/gamekins/icons/trophy.png",
     "description": "Solve five CoverageChallenges with 100% coverage in the required class",
     "title": "I don't fear branches!",
     "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::haveXClassesWithYCoverage",
@@ -23,6 +25,7 @@
   },
   {
     "badgePath": "/plugin/gamekins/icons/trophy.png",
+    "unsolvedBadgePath": "/plugin/gamekins/icons/trophy.png",
     "description": "Solve ten CoverageChallenges with 100% coverage in the required class",
     "title": "I want more!",
     "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::haveXClassesWithYCoverage",

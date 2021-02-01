@@ -81,7 +81,7 @@
                                         div.appendChild(header)
                                     } else {
                                         for(var i = 0; i &lt; list.length; i++) {
-                                            createAchievement(div, list[i])
+                                            createAchievement(div, list[i], false)
                                             div.appendChild(document.createElement("br"))
                                         }
                                     }
@@ -101,7 +101,7 @@
                                         let div = document.getElementById("unsolvedAchievements")
 
                                         for(var i = 0; i &lt; list.length; i++) {
-                                            createAchievement(div, list[i])
+                                            createAchievement(div, list[i], true)
                                             div.appendChild(document.createElement("br"))
                                         }
 
@@ -126,7 +126,7 @@
                         }
                     })
 
-                    function createAchievement(parent, achievement) {
+                    function createAchievement(parent, achievement, unsolved) {
                         let table = document.createElement("table")
                         table.style.border = "2px solid grey"
                         table.style.width = "50%"
@@ -144,7 +144,12 @@
                         let src = document.getElementsByTagName("img")[0].src
                         let base = src.substring(0, src.indexOf("static"))
                         let endSplit = src.substring(src.indexOf("static")).split("/")
-                        img.src = base + "static/" + endSplit[1] + achievement.badgePath
+                        if (unsolved) {
+                            img.src = base + "static/" + endSplit[1] + achievement.unsolvedBadgePath
+                        } else {
+                            img.src = base + "static/" + endSplit[1] + achievement.badgePath
+                        }
+
                         img.height = 48
                         img.width = 48
                         td1.appendChild(img)

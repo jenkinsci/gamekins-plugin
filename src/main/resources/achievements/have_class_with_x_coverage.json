@@ -1,6 +1,7 @@
 [
   {
     "badgePath": "/plugin/gamekins/icons/trophy.png",
+    "unsolvedBadgePath": "/plugin/gamekins/icons/trophy.png",
     "description": "Solve a CoverageChallenge with at least 80% coverage in the required class",
     "title": "Most of the lines seem familiar",
     "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::haveClassWithXCoverage",
@@ -11,6 +12,7 @@
   },
   {
     "badgePath": "/plugin/gamekins/icons/trophy.png",
+    "unsolvedBadgePath": "/plugin/gamekins/icons/trophy.png",
     "description": "Solve a CoverageChallenge with at least 90% coverage in the required class",
     "title": "What should I do with the defensive programming part?",
     "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::haveClassWithXCoverage",
@@ -21,6 +23,7 @@
   },
   {
     "badgePath": "/plugin/gamekins/icons/trophy.png",
+    "unsolvedBadgePath": "/plugin/gamekins/icons/trophy.png",
     "description": "Solve a CoverageChallenge with 100% coverage in the required class",
     "title": "Somehow I hit all the lines and branches",
     "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::haveClassWithXCoverage",

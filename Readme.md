@@ -114,6 +114,7 @@ json file with the following format:
 [
   {
     "badgePath": "/plugin/<your_plugin>/<path>/file.png",
+    "unsolvedBadgePath": "/plugin/gamekins/icons/trophy.png",
     "description": "Solve a CoverageChallenge with at least 80% coverage in the required class",
     "title": "Most of the lines seem familiar",
     "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::haveClassWithXCoverage",
@@ -125,10 +126,10 @@ json file with the following format:
 ]
 ```
 
-The ```badgePath``` is the path to the icon for the Achievement. In Jenkins, the files saved in the ```webapp``` folder 
-are available from the Jetty server during runtime. In Gamekins the path to the Achievements' icon is 
-```/plugin/gamekins/icons/trophy.png``` with the real path ```/webapp/icons/trophy.png```. ```description``` and 
-```title``` are self explaining in this context.
+The ```badgePath``` is the path to the icon for the Achievement if it is solved, ```unsolvedBadgePath``` if not. 
+In Jenkins, the files saved in the ```webapp``` folder are available from the Jetty server during runtime. 
+In Gamekins the path to the Achievements' icon is ```/plugin/gamekins/icons/trophy.png``` with the real path
+```/webapp/icons/trophy.png```. ```description``` and ```title``` are self explaining in this context.
 
 The ```fullyQualifiedFunctionName``` is built in the way ```<full_class_path>::<function_name>```, so that at runtime 
 the method to check whether the Achievement is solved, can be found with reflection. You can use the built-in methods 

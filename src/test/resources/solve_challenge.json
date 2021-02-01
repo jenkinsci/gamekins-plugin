@@ -1,5 +1,6 @@
 {
   "badgePath": "/plugin/gamekins/icons/trophy.png",
+  "unsolvedBadgePath": "/plugin/gamekins/icons/trophy.png",
   "description": "Solve your first Challenge",
   "title": "I took the first Challenge",
   "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::solveXChallenges",

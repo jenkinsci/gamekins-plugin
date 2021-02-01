@@ -460,7 +460,8 @@ class GameUserProperty : UserProperty(), Action {
                 val ach = unsolvedAchievements[project]!!.find { it == achievement }
                 if (ach != null && (ach.fullyQualifiedFunctionName != achievement.fullyQualifiedFunctionName
                             || ach.secret != achievement.secret
-                            || ach.additionalParameters != achievement.additionalParameters)) {
+                            || ach.additionalParameters != achievement.additionalParameters
+                            || ach.unsolvedBadgePath != achievement.unsolvedBadgePath)) {
 
                     val list = unsolvedAchievements[project]!!
                     list.remove(ach)
