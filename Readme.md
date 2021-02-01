@@ -88,8 +88,9 @@ There are two possible ways to add Challenges to the current version of Gamekins
 You can create a Pull-Request with the new Challenges. There is no guarantee that the changes will be merged.
 
 #### Dependency
-You can also add Gamekins as a dependencies to your own plugin and add your Challenges to the default Challenges of 
-Gamekins in this way:
+You can also add Gamekins as a dependencies to your own plugin. 
+
+Add your Challenges to the default Challenges of Gamekins in this way:
 
 ```kotlin
 org.gamekins.GamePublisherDescriptor.challenges.put(NewChallenge::class.java, weight)
@@ -99,3 +100,59 @@ The key denotes here the Java Class of the Challenge and the value the weight of
 bigger weights for a higher probability that the Challenge is chosen for generation, and lower values for
 the opposite. Each third party Challenge must have a constructor with 
 ```org.gamekins.challenge.Challenge.ChallengeGenerationData``` as only input parameter.
+
+Add your Achievements to the default Achievements of Gamekins in this way:
+```kotlin
+org.gamekins.GamePublisherDescriptor.challenges.add(achievement)
+```
+
+You can of course inherit from ```org.gamekins.achievement.Achievement```, but there is an easier and faster way. 
+Use the built-in ```org.gamekins.achievement.AchievementInitializer``` to initialize one or more Achievements from a 
+json file with the following format:
+
+```json
+[
+  {
+    "badgePath": "/plugin/<your_plugin>/<path>/file.png",
+    "description": "Solve a CoverageChallenge with at least 80% coverage in the required class",
+    "title": "Most of the lines seem familiar",
+    "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::haveClassWithXCoverage",
+    "secret": false,
+    "additionalParameters": {
+      "haveCoverage": 0.8
+    }
+  }
+]
+```
+
+The ```badgePath``` is the path to the icon for the Achievement. In Jenkins, the files saved in the ```webapp``` folder 
+are available from the Jetty server during runtime. In Gamekins the path to the Achievements' icon is 
+```/plugin/gamekins/icons/trophy.png``` with the real path ```/webapp/icons/trophy.png```. ```description``` and 
+```title``` are self explaining in this context.
+
+The ```fullyQualifiedFunctionName``` is built in the way ```<full_class_path>::<function_name>```, so that at runtime 
+the method to check whether the Achievement is solved, can be found with reflection. You can use the built-in methods 
+of Gamekins in the object ```org.gamekins.util.AchievementUtil``` or define your own methods. Keep in mind that each 
+method called by the ```isSolved``` method of Achievement must have the following signature:
+
+```kotlin
+fun haveClassWithXCoverage(classes: ArrayList<JacocoUtil.ClassDetails>, constants: HashMap<String, String>,
+                           run: Run<*, *>, property: GameUserProperty, workspace: FilePath, listener: TaskListener,
+                           additionalParameters: HashMap<String, String>): Boolean
+```
+
+- The ```classes``` contain all recently changed classes of the current user (that is the user that owns the instance 
+of the Achievement)
+- The ```constants``` contain information and values about the project with the following keys: **projectName**, 
+  **jacocoResultsPath**, **jacocoCSVPath**, **workspace**, **branch**, **projectCoverage**, **projectTests**, 
+  **solved** (solved Challenges), **generated** (generated Challenges)
+- The ```run``` contains all information about the current Jenkins build
+- The ```property``` contains all Gamekins related information for the current user
+- The ```workspace``` contains the path and channel to the current workspace
+- The ```listener``` is used for logging into the console of the current build
+- The ```additionalParameters``` are explained in the next paragraph
+
+Back to the json file, the ```secret``` denotes whether the Achievement is secret and the description should not be 
+shown in the Achievements view. The last parameter is the ```additionalParameters``` part, where additional 
+key-value-pairs can be defined and propagated to the method defined via ```fullyQualifiedFunctionName```. The value is 
+always a String, but it can be converted in the method if necessary.
