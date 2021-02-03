@@ -22,7 +22,7 @@ import org.gamekins.util.JacocoUtil
 import org.jenkinsci.plugins.workflow.job.WorkflowJob
 import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject
 import java.text.Collator
-import java.util.Objects
+import java.util.*
 import kotlin.Comparator
 import kotlin.collections.ArrayList
 
@@ -270,7 +270,42 @@ class Statistics(job: AbstractItem) {
         print.append("    </Runs>\n")
 
         print.append("</Statistics>")
-        return print.toString()
+
+        return replaceClassesInString(print.toString())
+    }
+
+    fun replaceClassesInString(file: String): String {
+        var regex = "class=\"[^\"]+\"".toRegex()
+        var matchResults = regex.findAll(file)
+        var map = hashMapOf<String, String>()
+        var resultString = file
+
+        for (result in matchResults) {
+            map.putIfAbsent(result.value, UUID.randomUUID().toString())
+            resultString = resultString.replace(result.value, "class=\"${map[result.value]}\"")
+        }
+
+        regex = "project=\"[^\"]+\"".toRegex()
+        matchResults = regex.findAll(file)
+        map = hashMapOf()
+
+        for (result in matchResults) {
+            map.putIfAbsent(result.value, UUID.randomUUID().toString())
+            resultString = resultString.replace(result.value, "project=\"${map[result.value]}\"")
+        }
+
+        regex = "branch=\"[^\"]+\"".toRegex()
+        matchResults = regex.findAll(file)
+        map = hashMapOf()
+        map.put("branch=\"master\"", "master")
+        map.put("branch=\"main\"", "main")
+
+        for (result in matchResults) {
+            map.putIfAbsent(result.value, UUID.randomUUID().toString())
+            resultString = resultString.replace(result.value, "branch=\"${map[result.value]}\"")
+        }
+
+        return resultString
     }
 
     /**
