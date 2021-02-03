@@ -21,9 +21,12 @@ import com.cloudbees.hudson.plugins.folder.AbstractFolderProperty
 import com.cloudbees.hudson.plugins.folder.AbstractFolderPropertyDescriptor
 import hudson.Extension
 import hudson.model.AbstractItem
+import hudson.model.Item
 import hudson.model.JobPropertyDescriptor
 import hudson.util.FormValidation
 import hudson.util.ListBoxModel
+import jenkins.branch.OrganizationFolder
+import jenkins.model.Jenkins
 import org.gamekins.LeaderboardAction
 import org.gamekins.StatisticsAction
 import org.gamekins.statistics.Statistics
@@ -44,7 +47,7 @@ import kotlin.jvm.Throws
 class GameMultiBranchProperty
 @DataBoundConstructor constructor(job: AbstractItem?, @set:DataBoundSetter var activated: Boolean,
                                   @set:DataBoundSetter var showStatistics: Boolean)
-    : AbstractFolderProperty<AbstractFolder<*>?>(), GameProperty {
+    : AbstractFolderProperty<AbstractFolder<*>?>(), GameProperty, StaplerProxy {
 
     private var statistics: Statistics
     private val teams: ArrayList<String> = ArrayList()
@@ -68,6 +71,15 @@ class GameMultiBranchProperty
             statistics = Statistics(owner!!)
         }
         return statistics
+    }
+
+    override fun getTarget(): Any {
+        if (this.owner?.parent is OrganizationFolder) {
+            Jenkins.getInstanceOrNull()?.checkPermission(Item.READ)
+        } else {
+            Jenkins.getInstanceOrNull()?.checkPermission(Item.CONFIGURE)
+        }
+        return this
     }
 
     override fun getTeams(): ArrayList<String> {

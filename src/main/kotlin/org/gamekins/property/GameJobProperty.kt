@@ -17,6 +17,7 @@
 package org.gamekins.property
 
 import hudson.model.*
+import jenkins.model.Jenkins
 import org.gamekins.LeaderboardAction
 import org.gamekins.util.PropertyUtil
 import org.gamekins.StatisticsAction
@@ -24,6 +25,7 @@ import org.gamekins.statistics.Statistics
 import net.sf.json.JSONObject
 import org.kohsuke.stapler.DataBoundConstructor
 import org.kohsuke.stapler.DataBoundSetter
+import org.kohsuke.stapler.StaplerProxy
 import org.kohsuke.stapler.StaplerRequest
 import java.io.IOException
 import javax.annotation.Nonnull
@@ -38,7 +40,7 @@ import kotlin.jvm.Throws
 class GameJobProperty
 @DataBoundConstructor constructor(job: AbstractItem, @set:DataBoundSetter var activated: Boolean,
                                   @set:DataBoundSetter var showStatistics: Boolean)
-    : JobProperty<Job<*, *>>(), GameProperty {
+    : JobProperty<Job<*, *>>(), GameProperty, StaplerProxy {
 
     private var statistics: Statistics
     private val teams: ArrayList<String> = ArrayList()
@@ -82,6 +84,11 @@ class GameJobProperty
             statistics = Statistics(owner)
         }
         return statistics
+    }
+
+    override fun getTarget(): Any {
+        Jenkins.getInstanceOrNull()?.checkPermission(Item.CONFIGURE)
+        return this
     }
 
     override fun getTeams(): ArrayList<String> {

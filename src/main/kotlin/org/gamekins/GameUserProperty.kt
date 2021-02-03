@@ -16,13 +16,16 @@
 
 package org.gamekins
 
+import hudson.model.Item
 import hudson.model.User
 import hudson.model.UserProperty
+import jenkins.model.Jenkins
 import org.gamekins.challenge.Challenge
 import org.gamekins.challenge.DummyChallenge
 import org.gamekins.statistics.Statistics
 import net.sf.json.JSONObject
 import org.kohsuke.stapler.DataBoundSetter
+import org.kohsuke.stapler.StaplerProxy
 import org.kohsuke.stapler.StaplerRequest
 import java.util.UUID
 import java.util.concurrent.CopyOnWriteArrayList
@@ -36,7 +39,7 @@ import kotlin.collections.HashMap
  * @author Philipp Straubinger
  * @since 1.0
  */
-class GameUserProperty : UserProperty() {
+class GameUserProperty : UserProperty(), StaplerProxy {
 
     private val completedChallenges: HashMap<String, CopyOnWriteArrayList<Challenge>> = HashMap()
     private val currentChallenges: HashMap<String, CopyOnWriteArrayList<Challenge>> = HashMap()
@@ -139,6 +142,10 @@ class GameUserProperty : UserProperty() {
             score[projectName] = 0
         }
         return score[projectName]!!
+    }
+
+    override fun getTarget(): Any? {
+        return if (User.current() != this.user) null else this
     }
 
     /**

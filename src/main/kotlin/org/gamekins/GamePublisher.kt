@@ -21,6 +21,7 @@ import hudson.Launcher
 import hudson.model.*
 import hudson.tasks.BuildStepMonitor
 import hudson.tasks.Notifier
+import jenkins.model.Jenkins
 import org.gamekins.challenge.Challenge
 import org.gamekins.property.GameJobProperty
 import org.gamekins.property.GameMultiBranchProperty
@@ -31,6 +32,7 @@ import org.jenkinsci.plugins.workflow.job.WorkflowJob
 import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject
 import org.kohsuke.stapler.DataBoundConstructor
 import org.kohsuke.stapler.DataBoundSetter
+import org.kohsuke.stapler.StaplerProxy
 import javax.annotation.Nonnull
 
 /**
@@ -46,13 +48,18 @@ import javax.annotation.Nonnull
 class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var jacocoResultsPath: String?,
                                                       @set:DataBoundSetter var jacocoCSVPath: String?,
                                                       searchCommitCount: Int)
-    : Notifier(), SimpleBuildStep {
+    : Notifier(), SimpleBuildStep, StaplerProxy {
 
     @set:DataBoundSetter
     var searchCommitCount: Int = if (searchCommitCount > 0) searchCommitCount else GitUtil.DEFAULT_SEARCH_COMMIT_COUNT
 
     companion object {
         private const val NOT_ACTIVATED = "[Gamekins] Not activated"
+    }
+
+    override fun getTarget(): Any {
+        Jenkins.getInstanceOrNull()?.checkPermission(Item.CONFIGURE)
+        return this
     }
 
     /**
