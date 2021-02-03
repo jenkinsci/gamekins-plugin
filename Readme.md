@@ -59,11 +59,18 @@ pipeline {
     }
 }
 ```
+To use the Jenkinsfile, you may need to install additional plugins on your Jenkins.
  
 #### Organization folders
 Since a organization folder consists of multiple projects, which configuration cannot (easily) be changed, Gamekins 
 has to be enabled for each project. To do this, enable Gamekins for the project in the main configuration page of 
 the folder. It can be disabled in the same way and now configured in the desired project as described before.
+
+#### Adding teams and users
+In the configuration page of the job underneath the checkboxes of the Gamekins section, new teams can be added and 
+removed. The newly added team is only displayed after reloading the page. No information will be lost in the Gamekins 
+section, even if a popup says otherwise. To add or remove a user to a team, choose both the team and the user in the 
+dropdown menus and click on  the corresponding button. Team members can be looked up in the Leaderboard (more later).
  
 #### Execution
 If configured correctly, Gamekins is executed after each run of the project. Every output of the plugin, including 
@@ -78,8 +85,12 @@ Gamekins.
 #### Statistics
 In the background, data about the usage of the project and the participants is logged for evaluation purposes. 
 By activating the **Statistics** checkbox, another entry on the left side panel is displayed. Currently, the 
-information is not send to the developers, which will come in future with the consens of the owner of the Jenkins 
+information is not sent to the developers, which will come in future with the consens of the owner of the Jenkins 
 instance and privacy promises.
+
+#### Additional help
+Each user, which has been added to a team in the job, gets a **Help** section in the Leaderboard with a short 
+explanation of the Leaderboard itself, and the game in total.
 
 ### Extensibility
 There are two possible ways to add Challenges to the current version of Gamekins:
