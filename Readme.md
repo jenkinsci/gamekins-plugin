@@ -99,3 +99,8 @@ The key denotes here the Java Class of the Challenge and the value the weight of
 bigger weights for a higher probability that the Challenge is chosen for generation, and lower values for
 the opposite. Each third party Challenge must have a constructor with 
 ```org.gamekins.challenge.Challenge.ChallengeGenerationData``` as only input parameter.
+
+### Research
+This project is funded by the [German Research Foundation](https://www.dfg.de/en/) and developed on the
+[Chair of Software Engineering II](https://www.fim.uni-passau.de/lehrstuhl-fuer-software-engineering-ii/) at the 
+University of Passau.
