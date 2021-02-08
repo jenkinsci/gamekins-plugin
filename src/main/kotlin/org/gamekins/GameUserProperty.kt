@@ -45,7 +45,7 @@ import kotlin.collections.HashMap
  * @author Philipp Straubinger
  * @since 1.0
  */
-class GameUserProperty : UserProperty(), StaplerProxy {
+class GameUserProperty : UserProperty(), Action, StaplerProxy {
 
     private var completedAchievements: HashMap<String, CopyOnWriteArrayList<Achievement>> = HashMap()
     private val completedChallenges: HashMap<String, CopyOnWriteArrayList<Challenge>> = HashMap()
