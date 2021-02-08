@@ -18,13 +18,18 @@ package org.gamekins
 
 import hudson.model.AbstractItem
 import hudson.model.AbstractProject
+import hudson.model.Item
 import hudson.model.ProminentProjectAction
+import jenkins.model.Jenkins
 import org.gamekins.property.GameJobProperty
 import org.gamekins.property.GameMultiBranchProperty
 import org.gamekins.property.GameProperty
 import org.gamekins.statistics.Statistics
 import org.jenkinsci.plugins.workflow.job.WorkflowJob
 import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject
+import org.kohsuke.accmod.Restricted
+import org.kohsuke.accmod.restrictions.NoExternalUse
+import org.kohsuke.stapler.StaplerProxy
 
 /**
  * Action to display the [Statistics] XML representation on the left side panel of a job for evaluation purposes.
@@ -32,7 +37,7 @@ import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject
  * @author Philipp Straubinger
  * @since 1.0
  */
-class StatisticsAction(val job: AbstractItem) : ProminentProjectAction {
+class StatisticsAction(val job: AbstractItem) : ProminentProjectAction, StaplerProxy {
 
     override fun getDisplayName(): String {
         return "Statistics"
@@ -58,6 +63,12 @@ class StatisticsAction(val job: AbstractItem) : ProminentProjectAction {
             }
         }
         return property.getStatistics().printToXML()
+    }
+
+    @Restricted(NoExternalUse::class)
+    override fun getTarget(): Any {
+        Jenkins.getInstanceOrNull()?.checkPermission(Item.CONFIGURE)
+        return this
     }
 
     override fun getUrlName(): String {

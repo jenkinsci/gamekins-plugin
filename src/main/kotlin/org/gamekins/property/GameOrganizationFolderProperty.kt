@@ -20,13 +20,16 @@ import com.cloudbees.hudson.plugins.folder.AbstractFolder
 import com.cloudbees.hudson.plugins.folder.AbstractFolderProperty
 import com.cloudbees.hudson.plugins.folder.AbstractFolderPropertyDescriptor
 import hudson.Extension
+import hudson.model.Item
 import hudson.model.JobPropertyDescriptor
 import hudson.util.ListBoxModel
 import jenkins.branch.MultiBranchProject
 import jenkins.branch.OrganizationFolder
+import jenkins.model.Jenkins
 import net.sf.json.JSONObject
 import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject
 import org.kohsuke.stapler.AncestorInPath
+import org.kohsuke.stapler.StaplerProxy
 import org.kohsuke.stapler.StaplerRequest
 import java.io.IOException
 import javax.annotation.Nonnull
@@ -38,7 +41,13 @@ import javax.annotation.Nonnull
  * @author Philipp Straubinger
  * @since 1.0
  */
-class GameOrganizationFolderProperty private constructor() : AbstractFolderProperty<AbstractFolder<*>?>() {
+class GameOrganizationFolderProperty private constructor()
+    : AbstractFolderProperty<AbstractFolder<*>?>(), StaplerProxy {
+
+    override fun getTarget(): Any {
+        Jenkins.getInstanceOrNull()?.checkPermission(Item.CONFIGURE)
+        return this
+    }
 
     /**
      * Registers the [GameOrganizationFolderProperty] to Jenkins as an extension and also works as an communication

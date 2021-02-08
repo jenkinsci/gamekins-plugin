@@ -20,7 +20,8 @@ argument ```hpi:run```. It can also be debugged this way.
 ### Installation
 To install the plugin on a dedicated Jenkins, the Jenkins must have version 2.249.3 or higher. Create the compiled 
 plugin by executing ```mvn clean package``` on the command line in the root project folder. The package is located in 
-the path ```<project-root>/target/gamekins.hpi```.
+the path ```<project-root>/target/gamekins.hpi```. The packed version can also be found in the current release 
+on Github.
 
 On the Jenkins, navigate to the **Manage Plugins** settings in **Manage Jenkins**. Go to the **Advanced** tab and 
 upload the plugin. After the first installation, the plugin should work without restarting the Jenkins, whereas an 
@@ -28,7 +29,7 @@ update of an existing installation requires a restart of Jenkins.
 
 ### Usage
 
-#### Supported project types
+Gamekins support the following project types:
  - Freestyle project
  - Maven project
  - Pipeline
@@ -59,11 +60,18 @@ pipeline {
     }
 }
 ```
+To use the Jenkinsfile, you may need to install additional plugins on your Jenkins.
  
 #### Organization folders
-Since a organization folder consists of multiple projects, which configuration cannot (easily) be changed, Gamekins 
+Since an organization folder consists of multiple projects, which configuration cannot (easily) be changed, Gamekins 
 has to be enabled for each project. To do this, enable Gamekins for the project in the main configuration page of 
 the folder. It can be disabled in the same way and now configured in the desired project as described before.
+
+#### Adding teams and users
+In the configuration page of the job underneath the checkboxes of the Gamekins section, new teams can be added and 
+removed. The newly added team is only displayed after reloading the page. No information will be lost in the Gamekins 
+section, even if a popup says otherwise. To add or remove a user to a team, choose both the team and the user in the 
+dropdown menus and click on  the corresponding button. Team members can be looked up in the Leaderboard (more later).
  
 #### Execution
 If configured correctly, Gamekins is executed after each run of the project. Every output of the plugin, including 
@@ -78,14 +86,18 @@ Gamekins.
 #### Statistics
 In the background, data about the usage of the project and the participants is logged for evaluation purposes. 
 By activating the **Statistics** checkbox, another entry on the left side panel is displayed. Currently, the 
-information is not send to the developers, which will come in future with the consens of the owner of the Jenkins 
+information is not sent to the developers, which may come in future with the consent of the owner of the Jenkins 
 instance and privacy promises.
+
+#### Additional help
+Users who have been added to a team in the job can access a **Help** section in the Leaderboard with a short 
+explanation of the Leaderboard itself, and the game in total.
 
 ### Extensibility
 There are two possible ways to add Challenges to the current version of Gamekins:
 
 #### Pull-Request
-You can create a Pull-Request with the new Challenges. There is no guarantee that the changes will be merged.
+You can create a Pull-Request with new Challenges and features, which will be checked by us as soon as possible.
 
 #### Dependency
 You can also add Gamekins as a dependencies to your own plugin. 
@@ -157,3 +169,8 @@ Back to the json file, the ```secret``` denotes whether the Achievement is secre
 shown in the Achievements view. The last parameter is the ```additionalParameters``` part, where additional 
 key-value-pairs can be defined and propagated to the method defined via ```fullyQualifiedFunctionName```. The value is 
 always a String, but it can be converted in the method if necessary.
+
+### Research
+This project is funded by the [German Research Foundation](https://www.dfg.de/en/) and developed on the
+[Chair of Software Engineering II](https://www.fim.uni-passau.de/lehrstuhl-fuer-software-engineering-ii/) at the 
+University of Passau.

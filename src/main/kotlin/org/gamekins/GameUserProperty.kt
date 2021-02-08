@@ -18,8 +18,10 @@ package org.gamekins
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import hudson.model.Action
+import hudson.model.Item
 import hudson.model.User
 import hudson.model.UserProperty
+import jenkins.model.Jenkins
 import org.gamekins.challenge.Challenge
 import org.gamekins.challenge.DummyChallenge
 import org.gamekins.statistics.Statistics
@@ -28,6 +30,7 @@ import org.gamekins.achievement.Achievement
 import org.gamekins.util.PropertyUtil
 import org.kohsuke.stapler.DataBoundSetter
 import org.kohsuke.stapler.QueryParameter
+import org.kohsuke.stapler.StaplerProxy
 import org.kohsuke.stapler.StaplerRequest
 import org.kohsuke.stapler.StaplerResponse
 import java.util.UUID
@@ -42,7 +45,7 @@ import kotlin.collections.HashMap
  * @author Philipp Straubinger
  * @since 1.0
  */
-class GameUserProperty : UserProperty(), Action {
+class GameUserProperty : UserProperty(), StaplerProxy {
 
     private var completedAchievements: HashMap<String, CopyOnWriteArrayList<Achievement>> = HashMap()
     private val completedChallenges: HashMap<String, CopyOnWriteArrayList<Challenge>> = HashMap()
@@ -253,6 +256,10 @@ class GameUserProperty : UserProperty(), Action {
             score[projectName] = 0
         }
         return score[projectName]!!
+    }
+
+    override fun getTarget(): Any? {
+        return if (User.current() != this.user) null else this
     }
 
     /**

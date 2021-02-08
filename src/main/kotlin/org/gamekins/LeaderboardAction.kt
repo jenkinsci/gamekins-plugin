@@ -20,6 +20,7 @@ import hudson.model.*
 import org.gamekins.challenge.Challenge
 import org.gamekins.util.PropertyUtil
 import jenkins.model.Jenkins
+import org.kohsuke.stapler.StaplerProxy
 import org.kohsuke.stapler.export.Exported
 import org.kohsuke.stapler.export.ExportedBean
 import java.util.concurrent.CopyOnWriteArrayList
@@ -30,7 +31,7 @@ import java.util.concurrent.CopyOnWriteArrayList
  * @author Philipp Straubinger
  * @since 1.0
  */
-class LeaderboardAction(val job: AbstractItem) : ProminentProjectAction, Describable<LeaderboardAction> {
+class LeaderboardAction(val job: AbstractItem) : ProminentProjectAction, Describable<LeaderboardAction>, StaplerProxy {
 
     /**
      * Returns the list of completed Challenges of the current project and user.
@@ -72,6 +73,11 @@ class LeaderboardAction(val job: AbstractItem) : ProminentProjectAction, Describ
         val property = user.getProperty(GameUserProperty::class.java)
                 ?: return CopyOnWriteArrayList()
         return property.getRejectedChallenges(job.name)
+    }
+
+    override fun getTarget(): Any {
+        Jenkins.getInstanceOrNull()?.checkPermission(Item.READ)
+        return this
     }
 
     /**
