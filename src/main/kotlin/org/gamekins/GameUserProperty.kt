@@ -18,21 +18,15 @@ package org.gamekins
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import hudson.model.Action
-import hudson.model.Item
 import hudson.model.User
 import hudson.model.UserProperty
-import jenkins.model.Jenkins
 import org.gamekins.challenge.Challenge
 import org.gamekins.challenge.DummyChallenge
 import org.gamekins.statistics.Statistics
 import net.sf.json.JSONObject
 import org.gamekins.achievement.Achievement
 import org.gamekins.util.PropertyUtil
-import org.kohsuke.stapler.DataBoundSetter
-import org.kohsuke.stapler.QueryParameter
-import org.kohsuke.stapler.StaplerProxy
-import org.kohsuke.stapler.StaplerRequest
-import org.kohsuke.stapler.StaplerResponse
+import org.kohsuke.stapler.*
 import java.util.UUID
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.CopyOnWriteArraySet
@@ -259,7 +253,8 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
     }
 
     override fun getTarget(): Any? {
-        return if (User.current() != this.user) null else this
+        return if (User.current() == this.user
+            || Stapler.getCurrentRequest().requestURI.toString().contains("achievements")) this else null
     }
 
     /**
