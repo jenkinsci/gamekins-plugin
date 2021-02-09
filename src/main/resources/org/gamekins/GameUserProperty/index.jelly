@@ -72,6 +72,9 @@
                                 onComplete: function (rsp) {
                                     let list = JSON.parse(rsp.responseText)
                                     let div = document.getElementById("completedAchievements")
+                                    while (div.childNodes.length > 1) {
+                                        div.removeChild(div.lastChild)
+                                    }
 
                                     if (list.length === 0 &amp;&amp; currentUser) {
                                         let header = document.createElement("h5")
@@ -88,7 +91,9 @@
 
                                     if (currentUser) {
                                         let header = document.getElementById("completedAchievementsHeader")
-                                        header.innerText = header.innerText + " (" + list.length + "/" + totalCount + ")"
+                                        if (header.innerText === "Completed Achievements") {
+                                            header.innerText = header.innerText + " (" + list.length + "/" + totalCount + ")"
+                                        }
                                     }
                                 }
                             })
@@ -99,6 +104,9 @@
                                     onComplete: function (rsp) {
                                         let list = JSON.parse(rsp.responseText)
                                         let div = document.getElementById("unsolvedAchievements")
+                                        while (div.childNodes.length > 1) {
+                                            div.removeChild(div.lastChild)
+                                        }
 
                                         for(var i = 0; i &lt; list.length; i++) {
                                             createAchievement(div, list[i], true)
@@ -106,7 +114,9 @@
                                         }
 
                                         let header = document.getElementById("unsolvedAchievementsHeader")
-                                        header.innerText = header.innerText + " (" + list.length + ")"
+                                        if (header.innerText === "Unsolved Achievements") {
+                                            header.innerText = header.innerText + " (" + list.length + ")"
+                                        }
                                     }
                                 })
 
@@ -114,7 +124,9 @@
                                     parameters: parameters,
                                     onComplete: function (rsp) {
                                         let header = document.getElementById("secretAchievementsHeader")
-                                        header.innerText = header.innerText + " (" + rsp.responseText + ")"
+                                        if (header.innerText === "Secret Achievements") {
+                                            header.innerText = header.innerText + " (" + rsp.responseText + ")"
+                                        }
                                     }
                                 })
                             } else {
