@@ -38,13 +38,17 @@ class Achievement(val badgePath: String, var unsolvedBadgePath: String, val full
                   val description: String, val title: String, val secret: Boolean,
                   val additionalParameters: HashMap<String, String>) {
 
+    companion object {
+        const val NOT_SOLVED = "Not solved"
+    }
+
     @Transient private lateinit var callClass: KClass<out Any>
     @Transient private lateinit var callFunction: KCallable<*>
     private var solvedTime: Long = 0
     val solvedTimeString: String
     get() {
         if (solvedTime == 0L) {
-            return "Not solved"
+            return NOT_SOLVED
         } else {
             val calendar = Calendar.getInstance()
             calendar.timeInMillis = solvedTime
@@ -79,6 +83,11 @@ class Achievement(val badgePath: String, var unsolvedBadgePath: String, val full
 
     init {
         initCalls()
+    }
+
+    fun clone(): Achievement {
+        return Achievement(badgePath, unsolvedBadgePath, fullyQualifiedFunctionName, description, title,
+            secret, additionalParameters)
     }
 
     override fun equals(other: Any?): Boolean {

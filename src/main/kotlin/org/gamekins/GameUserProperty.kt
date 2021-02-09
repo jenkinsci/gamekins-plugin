@@ -370,9 +370,18 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
             }
             if (unsolvedAchievements.size == 0) {
                 for (project in participation.keys) {
-                    unsolvedAchievements[project] = CopyOnWriteArrayList(GamePublisherDescriptor.achievements)
+                    val list = CopyOnWriteArrayList<Achievement>()
+                    GamePublisherDescriptor.achievements.forEach { list.add(it.clone()) }
+                    unsolvedAchievements[project] = list
                 }
             }
+        }
+
+        //Remove falsely solved achievements
+        for (project in participation.keys) {
+            val list = unsolvedAchievements[project]!!
+            list.removeIf { it.solvedTimeString !=  Achievement.NOT_SOLVED }
+            unsolvedAchievements[project] = list
         }
 
         //Add new achievements
@@ -380,7 +389,7 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
             GamePublisherDescriptor.achievements
                 .filter { !completedAchievements[project]!!.contains(it)
                         && !unsolvedAchievements[project]!!.contains(it) }
-                .forEach { unsolvedAchievements[project]!!.add(it) }
+                .forEach { unsolvedAchievements[project]!!.add(it.clone()) }
         }
 
         //Update achievements with changed fullyQualifiedFunctionName or secret
@@ -472,7 +481,7 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
 
                     val list = unsolvedAchievements[project]!!
                     list.remove(ach)
-                    list.add(achievement)
+                    list.add(achievement.clone())
                     unsolvedAchievements[project] = list
                 }
             }
