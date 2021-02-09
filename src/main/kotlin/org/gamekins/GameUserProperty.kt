@@ -45,6 +45,7 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
     private val completedChallenges: HashMap<String, CopyOnWriteArrayList<Challenge>> = HashMap()
     private val currentChallenges: HashMap<String, CopyOnWriteArrayList<Challenge>> = HashMap()
     private var gitNames: CopyOnWriteArraySet<String>? = null
+    private var lastProject: String = ""
     private val participation: HashMap<String, String> = HashMap()
     private val pseudonym: UUID = UUID.randomUUID()
     private val rejectedChallenges: HashMap<String, CopyOnWriteArrayList<Pair<Challenge, String>>> = HashMap()
@@ -137,7 +138,10 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
      * Returns the list of projects the user is currently participating.
      */
     fun doGetProjects(rsp: StaplerResponse) {
-        val json = jacksonObjectMapper().writeValueAsString(participation.keys)
+        val projects = arrayListOf<String>()
+        if (participation.keys.contains(lastProject)) projects.add(lastProject)
+        projects.addAll(participation.keys)
+        val json = jacksonObjectMapper().writeValueAsString(projects.distinct())
         rsp.contentType = TYPE_JSON
         val printer = rsp.writer
         printer.print(json)
@@ -253,6 +257,8 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
     }
 
     override fun getTarget(): Any? {
+        val match = "/job/(.+)/leaderboard".toRegex().find(Stapler.getCurrentRequest().getHeader("Referer"))
+        lastProject = match?.groupValues?.get(1) ?: lastProject
         return if (User.current() == this.user
             || Stapler.getCurrentRequest().requestURI.toString().contains("achievements")) this else null
     }
@@ -355,6 +361,7 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
     private fun readResolve(): Any {
         if (completedAchievements == null) completedAchievements = hashMapOf()
         if (unsolvedAchievements == null) unsolvedAchievements = hashMapOf()
+        if (lastProject == null) lastProject = ""
 
         //Add achievements if newly introduced
         if (participation.size != 0) {
