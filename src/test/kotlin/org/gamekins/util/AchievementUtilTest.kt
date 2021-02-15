@@ -28,6 +28,7 @@ import io.mockk.mockkStatic
 import io.mockk.unmockkAll
 import org.gamekins.challenge.BuildChallenge
 import org.gamekins.challenge.ClassCoverageChallenge
+import org.gamekins.challenge.LineCoverageChallenge
 import org.gamekins.test.TestUtils
 import java.io.File
 import java.util.concurrent.CopyOnWriteArrayList
@@ -60,6 +61,34 @@ class AchievementUtilTest: AnnotationSpec() {
     fun cleanUp() {
         unmockkAll()
         File(root).deleteRecursively()
+    }
+
+    @Test
+    fun coverLineWithXBranches() {
+        additionalParameters.clear()
+        AchievementUtil.coverLineWithXBranches(classes, constants, run, property, workspace, TaskListener.NULL,
+            additionalParameters) shouldBe false
+
+        additionalParameters["branches"] = "2"
+        val lineChallenge = mockkClass(LineCoverageChallenge::class)
+        every { property.getCompletedChallenges(any()) } returns CopyOnWriteArrayList(listOf(lineChallenge))
+        every { lineChallenge.getMaxCoveredBranchesIfFullyCovered() } returns 0
+        AchievementUtil.coverLineWithXBranches(classes, constants, run, property, workspace, TaskListener.NULL,
+            additionalParameters) shouldBe false
+
+        every { lineChallenge.getMaxCoveredBranchesIfFullyCovered() } returns 1
+        AchievementUtil.coverLineWithXBranches(classes, constants, run, property, workspace, TaskListener.NULL,
+            additionalParameters) shouldBe false
+
+        every { lineChallenge.getMaxCoveredBranchesIfFullyCovered() } returns 2
+        AchievementUtil.coverLineWithXBranches(classes, constants, run, property, workspace, TaskListener.NULL,
+            additionalParameters) shouldBe true
+
+        every { lineChallenge.getMaxCoveredBranchesIfFullyCovered() } returns 3
+        AchievementUtil.coverLineWithXBranches(classes, constants, run, property, workspace, TaskListener.NULL,
+            additionalParameters) shouldBe true
+
+        every { property.getCompletedChallenges(any()) } returns CopyOnWriteArrayList(listOf(challenge))
     }
 
     @Test

@@ -37,6 +37,7 @@ class LineCoverageChallenge(data: Challenge.ChallengeGenerationData)
     private val lineContent: String = data.line!!.text()
     private val lineNumber: Int = data.line!!.attr("id").substring(1).toInt()
     private val maxCoveredBranches: Int
+    private var solvedCoveredBranches: Int = 0
 
     init {
         val split = data.line!!.attr("title").split(" ".toRegex())
@@ -64,6 +65,10 @@ class LineCoverageChallenge(data: Challenge.ChallengeGenerationData)
                 && other.lineNumber == this.lineNumber
                 && other.lineContent == this.lineContent
                 && other.coverageType == this.coverageType
+    }
+
+    fun getMaxCoveredBranchesIfFullyCovered(): Int {
+        return if (solvedCoveredBranches == maxCoveredBranches) maxCoveredBranches else 0
     }
 
     override fun getName(): String {
@@ -162,14 +167,31 @@ class LineCoverageChallenge(data: Challenge.ChallengeGenerationData)
     }
 
     /**
+     * Called by Jenkins after the object has been created from his XML representation. Used for data migration.
+     */
+    @Suppress("unused", "SENSELESS_COMPARISON")
+    private fun readResolve(): Any {
+        if (solvedCoveredBranches == null) solvedCoveredBranches = 0
+        return this
+    }
+
+    /**
      * Checks whether the line [element] has more covered branches than during creation and sets the time and
      * coverage if solved.
      */
     private fun setSolved(element: Element, jacocoCSVFile: FilePath): Boolean {
-        val title = element.attr("title").split(" ".toRegex())[0]
-        if (title == "All"
-                || (maxCoveredBranches > 1 && maxCoveredBranches - title.toInt() <= currentCoveredBranches)) {
+        val split = element.attr("title").split(" ".toRegex())
+        val title = split[0]
+        if (split.size >= 4 && split[3] == "missed.") return false
+        if (title != "All"
+            && maxCoveredBranches > 1 && maxCoveredBranches - title.toInt() <= currentCoveredBranches) {
             return false
+        }
+
+        solvedCoveredBranches = when (title) {
+            "All" -> maxCoveredBranches
+            "" -> maxCoveredBranches
+            else -> maxCoveredBranches - title.toInt()
         }
         super.setSolved(System.currentTimeMillis())
         solvedCoverage = JacocoUtil.getCoverageInPercentageFromJacoco(classDetails.className, jacocoCSVFile)

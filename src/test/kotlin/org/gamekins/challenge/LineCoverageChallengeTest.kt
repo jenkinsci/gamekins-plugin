@@ -73,6 +73,20 @@ class LineCoverageChallengeTest : AnnotationSpec() {
     }
 
     @Test
+    fun getMaxCoveredBranchesIfFullyCovered() {
+        challenge.getMaxCoveredBranchesIfFullyCovered() shouldBe 0
+        val pathMock = mockkClass(FilePath::class)
+        every { pathMock.exists() } returns true
+        every { pathMock.remote } returns path.remote
+        every { JacocoUtil.getJacocoFileInMultiBranchProject(any(), any(), any(), any()) } returns pathMock
+        every { document.select("span.pc") } returns Elements()
+        every { document.select("span.nc") } returns Elements()
+        every { document.select("span.fc") } returns elements
+        challenge.isSolved(map, run, listener, path) shouldBe true
+        challenge.getMaxCoveredBranchesIfFullyCovered() shouldBe 1
+    }
+
+    @Test
     fun getScore() {
         challenge.getScore() shouldBe 2
         every { JacocoUtil.getCoverageInPercentageFromJacoco(any(), any()) } returns 0.9

@@ -22,6 +22,7 @@ import hudson.model.TaskListener
 import org.gamekins.GameUserProperty
 import org.gamekins.challenge.BuildChallenge
 import org.gamekins.challenge.CoverageChallenge
+import org.gamekins.challenge.LineCoverageChallenge
 import java.util.HashMap
 
 /**
@@ -32,6 +33,15 @@ import java.util.HashMap
  */
 @Suppress("UNUSED_PARAMETER", "unused")
 object AchievementUtil {
+
+    fun coverLineWithXBranches(classes: ArrayList<JacocoUtil.ClassDetails>, constants: HashMap<String, String>,
+                               run: Run<*, *>, property: GameUserProperty, workspace: FilePath, listener: TaskListener,
+                               additionalParameters: HashMap<String, String>): Boolean {
+        return property.getCompletedChallenges(constants["projectName"])
+            .filterIsInstance<LineCoverageChallenge>()
+            .any { it.getMaxCoveredBranchesIfFullyCovered() >= additionalParameters["branches"]?.toInt()
+                    ?: Int.MAX_VALUE }
+    }
 
     /**
      * Returns the number of lines of code (LOC). Excludes blank lines and comments.
