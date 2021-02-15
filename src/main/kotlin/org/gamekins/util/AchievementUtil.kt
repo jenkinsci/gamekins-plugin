@@ -34,6 +34,10 @@ import java.util.HashMap
 @Suppress("UNUSED_PARAMETER", "unused")
 object AchievementUtil {
 
+    /**
+     * Solves the achievements with description: SSolve a LineCoverageChallenge with at least X branches in the
+     * required line. Needs the key 'branches' in the map [additionalParameters] with a positive Int value.
+     */
     fun coverLineWithXBranches(classes: ArrayList<JacocoUtil.ClassDetails>, constants: HashMap<String, String>,
                                run: Run<*, *>, property: GameUserProperty, workspace: FilePath, listener: TaskListener,
                                additionalParameters: HashMap<String, String>): Boolean {
@@ -125,6 +129,18 @@ object AchievementUtil {
 
         return constants["projectTests"]!!.toInt() >=
                 additionalParameters["haveTests"]?.toInt() ?: Int.MAX_VALUE
+    }
+
+    /**
+     * Solves the achievements with description: Solve a Challenge a maximum of X hours after generation. Needs the
+     * key 'timeDifference' in the map [additionalParameters] with a positive Long value.
+     */
+    fun solveChallengeInXSeconds(classes: ArrayList<JacocoUtil.ClassDetails>, constants: HashMap<String, String>,
+                                 run: Run<*, *>, property: GameUserProperty, workspace: FilePath,
+                                 listener: TaskListener, additionalParameters: HashMap<String, String>): Boolean {
+        return property.getCompletedChallenges(constants["projectName"])
+            .any { (it.getSolved() - it.getCreated()).div(1000) <=
+                    additionalParameters["timeDifference"]?.toLong() ?: 0}
     }
 
     /**

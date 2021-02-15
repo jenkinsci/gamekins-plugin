@@ -1,0 +1,57 @@
+[
+  {
+    "badgePath": "/plugin/gamekins/icons/trophy.png",
+    "unsolvedBadgePath": "/plugin/gamekins/icons/trophy.png",
+    "description": "Solve a Challenge a maximum of 24 hours after generation",
+    "title": "It took my one day",
+    "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::solveChallengeInXSeconds",
+    "secret": false,
+    "additionalParameters": {
+      "timeDifference": 86400
+    }
+  },
+  {
+    "badgePath": "/plugin/gamekins/icons/trophy.png",
+    "unsolvedBadgePath": "/plugin/gamekins/icons/trophy.png",
+    "description": "Solve a Challenge a maximum of eight hours after generation",
+    "title": "All I could do in one working day",
+    "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::solveChallengeInXSeconds",
+    "secret": false,
+    "additionalParameters": {
+      "timeDifference": 28800
+    }
+  },
+  {
+    "badgePath": "/plugin/gamekins/icons/trophy.png",
+    "unsolvedBadgePath": "/plugin/gamekins/icons/trophy.png",
+    "description": "Solve a Challenge a maximum of two hours after generation",
+    "title": "Not that difficult",
+    "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::solveChallengeInXSeconds",
+    "secret": false,
+    "additionalParameters": {
+      "timeDifference": 7200
+    }
+  },
+  {
+    "badgePath": "/plugin/gamekins/icons/trophy.png",
+    "unsolvedBadgePath": "/plugin/gamekins/icons/trophy.png",
+    "description": "Solve a Challenge a maximum of one hour after generation",
+    "title": "Road Runner",
+    "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::solveChallengeInXSeconds",
+    "secret": false,
+    "additionalParameters": {
+      "timeDifference": 3600
+    }
+  },
+  {
+    "badgePath": "/plugin/gamekins/icons/trophy.png",
+    "unsolvedBadgePath": "/plugin/gamekins/icons/trophy.png",
+    "description": "Solve a Challenge a maximum of 15 minutes after generation",
+    "title": "Lucky Luke",
+    "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::solveChallengeInXSeconds",
+    "secret": true,
+    "additionalParameters": {
+      "timeDifference": 900
+    }
+  }
+]

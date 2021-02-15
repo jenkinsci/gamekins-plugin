@@ -195,6 +195,27 @@ class AchievementUtilTest: AnnotationSpec() {
     }
 
     @Test
+    fun solveChallengeInXSeconds() {
+        additionalParameters.clear()
+        every { challenge.getSolved() } returns 100000000
+        every { challenge.getCreated() } returns 10000000
+        AchievementUtil.solveChallengeInXSeconds(classes, constants, run, property, workspace, TaskListener.NULL,
+            additionalParameters) shouldBe false
+
+        additionalParameters["timeDifference"] = "3600"
+        AchievementUtil.solveChallengeInXSeconds(classes, constants, run, property, workspace, TaskListener.NULL,
+            additionalParameters) shouldBe false
+
+        every { challenge.getCreated() } returns 99996400
+        AchievementUtil.solveChallengeInXSeconds(classes, constants, run, property, workspace, TaskListener.NULL,
+            additionalParameters) shouldBe true
+
+        every { challenge.getCreated() } returns 99999999
+        AchievementUtil.solveChallengeInXSeconds(classes, constants, run, property, workspace, TaskListener.NULL,
+            additionalParameters) shouldBe true
+    }
+
+    @Test
     fun solveFirstBuildFail() {
         additionalParameters.clear()
         val buildProperty = mockkClass(org.gamekins.GameUserProperty::class)
