@@ -35,7 +35,7 @@ import java.util.HashMap
 object AchievementUtil {
 
     /**
-     * Solves the achievements with description: SSolve a LineCoverageChallenge with at least X branches in the
+     * Solves the achievements with description: Solve a LineCoverageChallenge with at least X branches in the
      * required line. Needs the key 'branches' in the map [additionalParameters] with a positive Int value.
      */
     fun coverLineWithXBranches(classes: ArrayList<JacocoUtil.ClassDetails>, constants: HashMap<String, String>,
@@ -56,6 +56,21 @@ object AchievementUtil {
         return content
             .map { it.trim() }
             .count { it.isNotEmpty() && !it.startsWith("/") && !it.startsWith("*") }
+    }
+
+    /**
+     * Solves the achievements with description: Start a successful build with more than X minutes duration. Needs the
+     * key 'more' in the map [additionalParameters] with a Boolean value and the key 'duration' with a Long value.
+     */
+    fun haveBuildWithXSeconds(classes: ArrayList<JacocoUtil.ClassDetails>, constants: HashMap<String, String>,
+                              run: Run<*, *>, property: GameUserProperty, workspace: FilePath, listener: TaskListener,
+                              additionalParameters: HashMap<String, String>): Boolean {
+        if (additionalParameters["more"].isNullOrEmpty()) return false
+        return if (additionalParameters["more"].toBoolean()) {
+            run.duration > additionalParameters["duration"]?.toLong()?.times(1000) ?: Long.MAX_VALUE
+        } else {
+            run.duration < additionalParameters["duration"]?.toLong()?.times(1000) ?: 0
+        }
     }
 
     /**

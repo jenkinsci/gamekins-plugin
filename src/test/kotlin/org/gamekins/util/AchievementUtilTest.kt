@@ -98,6 +98,39 @@ class AchievementUtilTest: AnnotationSpec() {
     }
 
     @Test
+    fun haveBuildWithXSeconds() {
+        additionalParameters.clear()
+        every { run.duration } returns 100000000000
+        AchievementUtil.haveBuildWithXSeconds(classes, constants, run, property, workspace, TaskListener.NULL,
+            additionalParameters) shouldBe false
+
+        additionalParameters["more"] = "false"
+        AchievementUtil.haveBuildWithXSeconds(classes, constants, run, property, workspace, TaskListener.NULL,
+            additionalParameters) shouldBe false
+
+        additionalParameters["more"] = "true"
+        AchievementUtil.haveBuildWithXSeconds(classes, constants, run, property, workspace, TaskListener.NULL,
+            additionalParameters) shouldBe false
+
+        additionalParameters["duration"] = "100000000"
+        AchievementUtil.haveBuildWithXSeconds(classes, constants, run, property, workspace, TaskListener.NULL,
+            additionalParameters) shouldBe false
+
+        every { run.duration } returns 100000000001
+        AchievementUtil.haveBuildWithXSeconds(classes, constants, run, property, workspace, TaskListener.NULL,
+            additionalParameters) shouldBe true
+
+        every { run.duration } returns 100000000000
+        additionalParameters["more"] = "false"
+        AchievementUtil.haveBuildWithXSeconds(classes, constants, run, property, workspace, TaskListener.NULL,
+            additionalParameters) shouldBe false
+
+        every { run.duration } returns 99999999999
+        AchievementUtil.haveBuildWithXSeconds(classes, constants, run, property, workspace, TaskListener.NULL,
+            additionalParameters) shouldBe true
+    }
+
+    @Test
     fun haveClassWithXCoverage() {
         additionalParameters.clear()
         every { challenge.solvedCoverage } returns 0.9

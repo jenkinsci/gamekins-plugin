@@ -1,0 +1,74 @@
+[
+  {
+    "badgePath": "/plugin/gamekins/icons/trophy.png",
+    "unsolvedBadgePath": "/plugin/gamekins/icons/trophy.png",
+    "description": "Start a successful build with more than one hour duration",
+    "title": "Upgrades, People, Upgrades",
+    "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::haveBuildWithXSeconds",
+    "secret": false,
+    "additionalParameters": {
+      "duration": 3600,
+      "more": true
+    }
+  },
+  {
+    "badgePath": "/plugin/gamekins/icons/trophy.png",
+    "unsolvedBadgePath": "/plugin/gamekins/icons/trophy.png",
+    "description": "Start a successful build with more than one hour duration",
+    "title": "Lunch break",
+    "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::haveBuildWithXSeconds",
+    "secret": false,
+    "additionalParameters": {
+      "duration": 3600,
+      "more": true
+    }
+  },
+  {
+    "badgePath": "/plugin/gamekins/icons/trophy.png",
+    "unsolvedBadgePath": "/plugin/gamekins/icons/trophy.png",
+    "description": "Start a successful build with more than 15 minutes duration",
+    "title": "Coffee break",
+    "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::haveBuildWithXSeconds",
+    "secret": false,
+    "additionalParameters": {
+      "duration": 900,
+      "more": true
+    }
+  },
+  {
+    "badgePath": "/plugin/gamekins/icons/trophy.png",
+    "unsolvedBadgePath": "/plugin/gamekins/icons/trophy.png",
+    "description": "Start a successful build with more than five minutes duration",
+    "title": "Grab a cup of coffee",
+    "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::haveBuildWithXSeconds",
+    "secret": false,
+    "additionalParameters": {
+      "duration": 300,
+      "more": true
+    }
+  },
+  {
+    "badgePath": "/plugin/gamekins/icons/trophy.png",
+    "unsolvedBadgePath": "/plugin/gamekins/icons/trophy.png",
+    "description": "Start a successful build with less than one minute duration",
+    "title": "Just wait for it",
+    "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::haveBuildWithXSeconds",
+    "secret": false,
+    "additionalParameters": {
+      "duration": 60,
+      "more": false
+    }
+  },
+  {
+    "badgePath": "/plugin/gamekins/icons/trophy.png",
+    "unsolvedBadgePath": "/plugin/gamekins/icons/trophy.png",
+    "description": "Start a successful build with less than ten seconds duration",
+    "title": "Don't blink!",
+    "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::haveBuildWithXSeconds",
+    "secret": true,
+    "additionalParameters": {
+      "duration": 10,
+      "more": false
+    }
+  }
+]
