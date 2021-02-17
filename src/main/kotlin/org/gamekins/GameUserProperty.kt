@@ -436,6 +436,10 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
         currentChallenges[projectName] = CopyOnWriteArrayList()
         rejectedChallenges[projectName] = CopyOnWriteArrayList()
         score[projectName] = 0
+        completedAchievements[projectName] = CopyOnWriteArrayList()
+        val list = CopyOnWriteArrayList<Achievement>()
+        GamePublisherDescriptor.achievements.forEach { list.add(it.clone()) }
+        unsolvedAchievements[projectName] = list
     }
 
     /**
