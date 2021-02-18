@@ -17,6 +17,7 @@
 package org.gamekins.util
 
 import hudson.FilePath
+import hudson.model.Result
 import hudson.model.TaskListener
 import io.kotest.core.spec.style.AnnotationSpec
 import io.kotest.matchers.shouldBe
@@ -193,6 +194,37 @@ class AchievementUtilTest: AnnotationSpec() {
         every { challenge.solvedCoverage } returns 0.7
         AchievementUtil.haveXClassesWithYCoverageAndZLines(classes, constants, run, property, workspace, TaskListener.NULL,
             additionalParameters) shouldBe false
+    }
+
+    @Test
+    fun haveXFailedTests() {
+        additionalParameters.clear()
+        every { run.result } returns Result.SUCCESS
+        AchievementUtil.haveXFailedTests(classes, constants, run, property, workspace, TaskListener.NULL,
+            additionalParameters) shouldBe false
+
+        mockkStatic(JacocoUtil::class)
+        every { run.result } returns Result.FAILURE
+        every { JacocoUtil.getTestFailCount(any(), any()) } returns 0
+        AchievementUtil.haveXFailedTests(classes, constants, run, property, workspace, TaskListener.NULL,
+            additionalParameters) shouldBe false
+
+        additionalParameters["failedTests"] = "1"
+        AchievementUtil.haveXFailedTests(classes, constants, run, property, workspace, TaskListener.NULL,
+            additionalParameters) shouldBe false
+
+        every { JacocoUtil.getTestFailCount(any(), any()) } returns 1
+        AchievementUtil.haveXFailedTests(classes, constants, run, property, workspace, TaskListener.NULL,
+            additionalParameters) shouldBe true
+
+        additionalParameters["failedTests"] = "0"
+        every { JacocoUtil.getTestCount(any(), any()) } returns 2
+        AchievementUtil.haveXFailedTests(classes, constants, run, property, workspace, TaskListener.NULL,
+            additionalParameters) shouldBe false
+
+        every { JacocoUtil.getTestCount(any(), any()) } returns 1
+        AchievementUtil.haveXFailedTests(classes, constants, run, property, workspace, TaskListener.NULL,
+            additionalParameters) shouldBe true
     }
 
     @Test

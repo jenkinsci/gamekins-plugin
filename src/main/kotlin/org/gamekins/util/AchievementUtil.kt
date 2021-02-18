@@ -17,6 +17,7 @@
 package org.gamekins.util
 
 import hudson.FilePath
+import hudson.model.Result
 import hudson.model.Run
 import hudson.model.TaskListener
 import org.gamekins.GameUserProperty
@@ -120,6 +121,22 @@ object AchievementUtil {
                     FilePath(workspace.channel, path + it.classDetails.sourceFilePath)
                 ) >= additionalParameters["linesCount"]?.toInt() ?: Int.MAX_VALUE
             } >= additionalParameters["classesCount"]?.toInt() ?: Int.MAX_VALUE
+    }
+
+    /**
+     * Solves the achievements with description: Fail the build with X failed test. Needs the key 'failedTests'
+     * in the map [additionalParameters] with a positive Int value. 'failedTests' with the value '0' means all tests.
+     */
+    fun haveXFailedTests(classes: ArrayList<JacocoUtil.ClassDetails>, constants: HashMap<String, String>,
+                         run: Run<*, *>, property: GameUserProperty, workspace: FilePath, listener: TaskListener,
+                         additionalParameters: HashMap<String, String>): Boolean {
+        if (additionalParameters["failedTests"]?.toInt() == 0) {
+            return JacocoUtil.getTestCount(workspace, run) == JacocoUtil.getTestFailCount(workspace, run)
+        } else if (run.result == Result.FAILURE) {
+            return JacocoUtil.getTestFailCount(workspace, run) == additionalParameters["failedTests"]?.toInt()
+        }
+
+        return false
     }
 
     /**

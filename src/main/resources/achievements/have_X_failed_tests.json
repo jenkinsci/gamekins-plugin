@@ -1,0 +1,24 @@
+[
+  {
+    "badgePath": "/plugin/gamekins/icons/trophy.png",
+    "unsolvedBadgePath": "/plugin/gamekins/icons/trophy.png",
+    "description": "Fail the build with only one failed test",
+    "title": "Close call",
+    "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::haveXFailedTests",
+    "secret": false,
+    "additionalParameters": {
+      "failedTests": 1
+    }
+  },
+  {
+    "badgePath": "/plugin/gamekins/icons/trophy.png",
+    "unsolvedBadgePath": "/plugin/gamekins/icons/trophy.png",
+    "description": "Fail all tests in a build",
+    "title": "Miserable Failure",
+    "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::haveXFailedTests",
+    "secret": false,
+    "additionalParameters": {
+      "failedTests": 0
+    }
+  }
+]
