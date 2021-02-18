@@ -170,6 +170,30 @@ object PublisherUtil {
     }
 
     /**
+     * Checks whether the path of the moco json file [mocoJSONPath] exists in the [workspace].
+     */
+    @JvmStatic
+    fun doCheckMocoJSONPath(workspace: FilePath, mocoJSONPath: String): Boolean {
+        var jsonPath = mocoJSONPath
+        if (!jsonPath.endsWith(".json")) return false
+        if (jsonPath.startsWith("**")) jsonPath = jsonPath.substring(2)
+        val split = jsonPath.split("/".toRegex())
+        val files: List<FilePath> = try {
+            workspace.act(
+                FilesOfAllSubDirectoriesCallable(workspace, split[split.size - 1]))
+        } catch (ignored: Exception) {
+            return false
+        }
+        for (file in files) {
+            if (file.remote.endsWith(jsonPath)) {
+                return true
+            }
+        }
+        return false
+    }
+
+
+    /**
      * Checks whether the path of the JaCoCo index.html file [jacocoResultsPath] exists in the [workspace].
      */
     @JvmStatic

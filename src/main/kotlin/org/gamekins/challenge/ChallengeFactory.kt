@@ -325,20 +325,25 @@ object ChallengeFactory {
 
         val relevantMutationResultsByClass: Map<String, List<MutationInfo>>? =
             MutationResults.retrievedMutationsFromJson(
-                classDetails.constants["mutationJsonPath"]
+                classDetails.constants["mocoJSONPath"]
             )?.entries?.filter {
                 it.key == "${classDetails.packageName}.${classDetails.className}"
                         && it.value.any { it1 -> it1.result == "survived" }
             }
 
+        if (relevantMutationResultsByClass.isNullOrEmpty()) {
+            listener.logger.println("[Gamekins] Mutation test challenge generating - " +
+                    "no mutation information for class $${classDetails.className}")
+            return null
+        }
         // Choose a survived mutation randomly
-        val randomMutationKey = relevantMutationResultsByClass?.keys?.toList()?.random()
+        val randomMutationKey = relevantMutationResultsByClass.keys.toList().random()
         val chosenMutation: MutationInfo? =
-            relevantMutationResultsByClass?.get(randomMutationKey)?.shuffled()?.find { it.result == "survived" }
+            relevantMutationResultsByClass[randomMutationKey]?.shuffled()?.find { it.result == "survived" }
 
         if (chosenMutation == null) {
             listener.logger.println("[Gamekins] No mutation test challenge can " +
-                    "be generated for class ${classDetails.className}")
+                    "be generated for class ${classDetails.className} since all were killed")
             return null
         }
         return MutationTestChallenge(chosenMutation, classDetails, branch, workspace)

@@ -10,8 +10,7 @@ data class MutationResults(val entries: Map<String, List<MutationInfo>>) {
         val mapper = jacksonObjectMapper()
 
         fun retrievedMutationsFromJson(
-            //TODO: Remove default param later
-            path: String? = "/Users/phantran/Study/Passau/Thesis/gamekins/target/moco.json"
+            path: String?
         ): MutationResults? {
 
             try {
@@ -21,7 +20,7 @@ data class MutationResults(val entries: Map<String, List<MutationInfo>>) {
                 return retrievedResults
             } catch (e: Exception) {
                 println(e.printStackTrace())
-                throw RuntimeException("Error while reading mutation results from csv file")
+                throw RuntimeException("Error while reading mutation results from json file")
             }
         }
     }

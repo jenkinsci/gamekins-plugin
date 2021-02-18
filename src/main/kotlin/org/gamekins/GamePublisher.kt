@@ -39,16 +39,18 @@ import javax.annotation.Nonnull
 
 /**
  * Class that is called after the build of a job in Jenkins is finished. This one executes the main functionality of
- * Gamekins by creating and soling [Challenge]s.
+ * Gamekins by creating and solving [Challenge]s.
  *
- * [jacocoResultsPath] and [jacocoCSVPath] must be of type String?, because Jenkins wants to instantiate the
+ * [jacocoResultsPath], [jacocoCSVPath], and [mocoJSONPath] must be of type String?, as Jenkins wants to instantiate the
  * [GamePublisher] with null when Gamekins is not activated.
  *
  * @author Philipp Straubinger
  * @since 1.0
  */
+
 class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var jacocoResultsPath: String?,
                                                       @set:DataBoundSetter var jacocoCSVPath: String?,
+                                                      @set:DataBoundSetter var mocoJSONPath: String?,
                                                       searchCommitCount: Int)
     : Notifier(), SimpleBuildStep, StaplerProxy {
 
@@ -69,8 +71,10 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
      * like the paths to the JaCoCo files. The [workspace] is the folder with the code and execution rights, and the
      * [listener] reports the events to the console output of Jenkins.
      */
-    private fun executePublisher(run: Run<*, *>, constants: HashMap<String, String>, result: Result?,
-                                 listener: TaskListener, workspace: FilePath?) {
+    private fun executePublisher(
+        run: Run<*, *>, constants: HashMap<String, String>, result: Result?,
+        listener: TaskListener, workspace: FilePath?
+    ) {
 
         //Checks whether the paths of the JaCoCo files are correct
         if (!PublisherUtil.doCheckJacocoResultsPath(workspace!!, jacocoResultsPath!!)) {
@@ -81,8 +85,13 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
             listener.logger.println("[Gamekins] JaCoCo csv file could not be found")
             return
         }
+        if (!PublisherUtil.doCheckMocoJSONPath(workspace, mocoJSONPath!!)) {
+            listener.logger.println("[Gamekins] MoCo json file could not be found")
+            return
+        }
         constants["jacocoResultsPath"] = jacocoResultsPath!!
         constants["jacocoCSVPath"] = jacocoCSVPath!!
+        constants["mocoJSONPath"] = mocoJSONPath!!
         constants["workspace"] = workspace.remote
 
         //Extracts the branch
@@ -142,7 +151,8 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
      */
     override fun perform(build: AbstractBuild<*, *>, launcher: Launcher, listener: BuildListener): Boolean {
         if (build.project == null || build.project.getProperty(GameJobProperty::class.java) == null
-                || !build.project.getProperty(GameJobProperty::class.java).activated) {
+            || !build.project.getProperty(GameJobProperty::class.java).activated
+        ) {
             listener.logger.println(NOT_ACTIVATED)
             return true
         }
@@ -159,20 +169,24 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
      *
      * @see SimpleBuildStep.perform
      */
-    override fun perform(@Nonnull run: Run<*, *>, @Nonnull workspace: FilePath,
-                         @Nonnull launcher: Launcher, @Nonnull listener: TaskListener) {
+    override fun perform(
+        @Nonnull run: Run<*, *>, @Nonnull workspace: FilePath,
+        @Nonnull launcher: Launcher, @Nonnull listener: TaskListener
+    ) {
         val constants = HashMap<String, String>()
         if (run.parent.parent is WorkflowMultiBranchProject) {
             val project = run.parent.parent as WorkflowMultiBranchProject
             if (project.properties.get(GameMultiBranchProperty::class.java) == null
-                    || !project.properties.get(GameMultiBranchProperty::class.java).activated) {
+                || !project.properties.get(GameMultiBranchProperty::class.java).activated
+            ) {
                 listener.logger.println(NOT_ACTIVATED)
                 return
             }
             constants["projectName"] = project.name
         } else {
             if (run.parent.getProperty(GameJobProperty::class.java) == null
-                    || !run.parent.getProperty(GameJobProperty::class.java).activated) {
+                || !run.parent.getProperty(GameJobProperty::class.java).activated
+            ) {
                 listener.logger.println(NOT_ACTIVATED)
                 return
             }
