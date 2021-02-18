@@ -91,9 +91,7 @@
 
                                     if (currentUser) {
                                         let header = document.getElementById("completedAchievementsHeader")
-                                        if (header.innerText === "Completed Achievements") {
-                                            header.innerText = header.innerText + " (" + list.length + "/" + totalCount + ")"
-                                        }
+                                        header.innerText = "Completed Achievements" + " (" + list.length + "/" + totalCount + ")"
                                     }
                                 }
                             })
@@ -114,9 +112,7 @@
                                         }
 
                                         let header = document.getElementById("unsolvedAchievementsHeader")
-                                        if (header.innerText === "Unsolved Achievements") {
-                                            header.innerText = header.innerText + " (" + list.length + ")"
-                                        }
+                                        header.innerText = "Unsolved Achievements" + " (" + list.length + ")"
                                     }
                                 })
 
@@ -124,9 +120,7 @@
                                     parameters: parameters,
                                     onComplete: function (rsp) {
                                         let header = document.getElementById("secretAchievementsHeader")
-                                        if (header.innerText === "Secret Achievements") {
-                                            header.innerText = header.innerText + " (" + rsp.responseText + ")"
-                                        }
+                                        header.innerText = "Secret Achievements" + " (" + rsp.responseText + ")"
                                     }
                                 })
                             } else {
