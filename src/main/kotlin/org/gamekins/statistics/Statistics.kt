@@ -243,6 +243,13 @@ class Statistics(job: AbstractItem) {
     }
 
     /**
+     * Returns the last run of a [branch].
+     */
+    fun getLastRun(branch: String): RunEntry? {
+        return runEntries?.filter { it.branch == branch }?.maxByOrNull {it.runNumber }
+    }
+
+    /**
      * If the [Statistics] is interrupted during initialization, it is triggered again.
      */
     fun isNotFullyInitialized(): Boolean {

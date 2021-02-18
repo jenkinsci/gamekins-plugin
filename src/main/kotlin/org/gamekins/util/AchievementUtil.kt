@@ -20,10 +20,12 @@ import hudson.FilePath
 import hudson.model.Result
 import hudson.model.Run
 import hudson.model.TaskListener
+import hudson.model.User
 import org.gamekins.GameUserProperty
 import org.gamekins.challenge.BuildChallenge
 import org.gamekins.challenge.CoverageChallenge
 import org.gamekins.challenge.LineCoverageChallenge
+import org.gamekins.property.GameJobProperty
 import java.util.HashMap
 
 /**
@@ -161,6 +163,26 @@ object AchievementUtil {
 
         return constants["projectTests"]!!.toInt() >=
                 additionalParameters["haveTests"]?.toInt() ?: Int.MAX_VALUE
+    }
+
+    /**
+     * Solves the achievements with description: Improve the coverage of the project by X%. Needs the
+     * key 'haveCoverage' in the map [additionalParameters] with a positive Double value.
+     */
+    fun improveProjectCoverageByX(classes: ArrayList<JacocoUtil.ClassDetails>, constants: HashMap<String, String>,
+                                  run: Run<*, *>, property: GameUserProperty, workspace: FilePath,
+                                  listener: TaskListener, additionalParameters: HashMap<String, String>): Boolean {
+        val mapUser: User? = GitUtil.mapUser(workspace.act(GitUtil.HeadCommitCallable(workspace.remote)).authorIdent,
+            User.getAll())
+        if (mapUser == property.getUser()) {
+            val lastRun = run.parent.getProperty(GameJobProperty::class.java).getStatistics()
+                .getLastRun(constants["branch"]!!)
+            if (lastRun != null) {
+                return (constants["projectCoverage"]!!.toBigDecimal().minus(lastRun.coverage.toBigDecimal())
+                        >= additionalParameters["haveCoverage"]?.toBigDecimal() ?: Double.MAX_VALUE.toBigDecimal())
+            }
+        }
+        return false
     }
 
     /**

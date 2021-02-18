@@ -19,6 +19,7 @@ package org.gamekins.util
 import hudson.FilePath
 import hudson.model.Result
 import hudson.model.TaskListener
+import hudson.model.User
 import io.kotest.core.spec.style.AnnotationSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -27,10 +28,15 @@ import io.mockk.every
 import io.mockk.mockkClass
 import io.mockk.mockkStatic
 import io.mockk.unmockkAll
+import org.eclipse.jgit.lib.PersonIdent
+import org.eclipse.jgit.revwalk.RevCommit
 import org.gamekins.challenge.BuildChallenge
 import org.gamekins.challenge.ClassCoverageChallenge
 import org.gamekins.challenge.LineCoverageChallenge
+import org.gamekins.property.GameJobProperty
+import org.gamekins.statistics.Statistics
 import org.gamekins.test.TestUtils
+import org.jenkinsci.plugins.workflow.job.WorkflowJob
 import java.io.File
 import java.util.concurrent.CopyOnWriteArrayList
 
@@ -44,6 +50,7 @@ class AchievementUtilTest: AnnotationSpec() {
     private val property = mockkClass(org.gamekins.GameUserProperty::class)
     private val workspace = mockkClass(FilePath::class)
     private val additionalParameters = hashMapOf<String, String>()
+    private lateinit var path: FilePath
 
     @BeforeAll
     fun init() {
@@ -52,6 +59,7 @@ class AchievementUtilTest: AnnotationSpec() {
         root = rootDirectory.file.removeSuffix(".zip")
         root shouldEndWith "test-project"
         TestUtils.unzip("$root.zip", root)
+        path = FilePath(null, root)
 
         mockkStatic(AchievementUtil::class)
         constants["projectName"] = "Test-Project"
@@ -257,6 +265,55 @@ class AchievementUtilTest: AnnotationSpec() {
         constants["projectTests"] = "99"
         AchievementUtil.haveXProjectTests(classes, constants, run, property, workspace, TaskListener.NULL,
             additionalParameters) shouldBe false
+    }
+
+    @Test
+    fun improveProjectCoverageByX() {
+        additionalParameters.clear()
+        mockkStatic(GitUtil::class)
+        mockkStatic(hudson.model.User::class)
+        val head = mockkClass(RevCommit::class)
+        val user = mockkClass(hudson.model.User::class)
+        val user2 = mockkClass(hudson.model.User::class)
+        val userList = arrayListOf(user)
+        every { User.getAll() } returns userList
+        every { head.authorIdent } returns mockkClass(PersonIdent::class)
+        every { GitUtil.getHead(any()) } returns head
+        every { GitUtil.mapUser(any(), userList) } returns user
+        every { property.getUser() } returns user2
+        AchievementUtil.improveProjectCoverageByX(classes, constants, run, property, path, TaskListener.NULL,
+            additionalParameters) shouldBe false
+
+        every { property.getUser() } returns user
+        val job = mockkClass(WorkflowJob::class)
+        val jobProperty = mockkClass(GameJobProperty::class)
+        val statistics = mockkClass(Statistics::class)
+        constants["branch"] = "master"
+        every { run.parent } returns job
+        every { job.getProperty(GameJobProperty::class.java) } returns jobProperty
+        every { jobProperty.getStatistics() } returns statistics
+        every { statistics.getLastRun("master") } returns null
+        AchievementUtil.improveProjectCoverageByX(classes, constants, run, property, path, TaskListener.NULL,
+            additionalParameters) shouldBe false
+
+        val runEntry = mockkClass(Statistics.RunEntry::class)
+        constants["projectCoverage"] = "0.7"
+        every { runEntry.coverage } returns 0.6
+        every { statistics.getLastRun("master") } returns runEntry
+        AchievementUtil.improveProjectCoverageByX(classes, constants, run, property, path, TaskListener.NULL,
+            additionalParameters) shouldBe false
+
+        additionalParameters["haveCoverage"] = "0.2"
+        AchievementUtil.improveProjectCoverageByX(classes, constants, run, property, path, TaskListener.NULL,
+            additionalParameters) shouldBe false
+
+        additionalParameters["haveCoverage"] = "0.1"
+        AchievementUtil.improveProjectCoverageByX(classes, constants, run, property, path, TaskListener.NULL,
+            additionalParameters) shouldBe true
+
+        additionalParameters["haveCoverage"] = "0.05"
+        AchievementUtil.improveProjectCoverageByX(classes, constants, run, property, path, TaskListener.NULL,
+            additionalParameters) shouldBe true
     }
 
     @Test

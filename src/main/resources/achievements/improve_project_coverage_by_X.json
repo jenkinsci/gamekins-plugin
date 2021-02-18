@@ -1,0 +1,46 @@
+[
+  {
+    "badgePath": "/plugin/gamekins/icons/trophy.png",
+    "unsolvedBadgePath": "/plugin/gamekins/icons/trophy.png",
+    "description": "Improve the coverage of the project by 0.1%",
+    "title": "Helpful",
+    "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::improveProjectCoverageByX",
+    "secret": false,
+    "additionalParameters": {
+      "haveCoverage": 0.001
+    }
+  },
+  {
+    "badgePath": "/plugin/gamekins/icons/trophy.png",
+    "unsolvedBadgePath": "/plugin/gamekins/icons/trophy.png",
+    "description": "Improve the coverage of the project by 0.5%",
+    "title": "Improvement",
+    "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::improveProjectCoverageByX",
+    "secret": false,
+    "additionalParameters": {
+      "haveCoverage": 0.005
+    }
+  },
+  {
+    "badgePath": "/plugin/gamekins/icons/trophy.png",
+    "unsolvedBadgePath": "/plugin/gamekins/icons/trophy.png",
+    "description": "Improve the coverage of the project by 1.0%",
+    "title": "Progress",
+    "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::improveProjectCoverageByX",
+    "secret": false,
+    "additionalParameters": {
+      "haveCoverage": 0.01
+    }
+  },
+  {
+    "badgePath": "/plugin/gamekins/icons/trophy.png",
+    "unsolvedBadgePath": "/plugin/gamekins/icons/trophy.png",
+    "description": "Improve the coverage of the project by 2.0%",
+    "title": "That is engagement!",
+    "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::improveProjectCoverageByX",
+    "secret": false,
+    "additionalParameters": {
+      "haveCoverage": 0.02
+    }
+  }
+]
