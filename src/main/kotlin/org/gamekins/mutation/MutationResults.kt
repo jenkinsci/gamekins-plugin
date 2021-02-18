@@ -9,13 +9,14 @@ data class MutationResults(val entries: Map<String, List<MutationInfo>>) {
         var retrievedResults: MutationResults? = null
         val mapper = jacksonObjectMapper()
 
-        fun retrievedMutationResultsFromJson(
-            path: String = "/Users/phantran/Study/Passau/Thesis/gamekins/target/moco.json"
+        fun retrievedMutationsFromJson(
+            //TODO: Remove default param later
+            path: String? = "/Users/phantran/Study/Passau/Thesis/gamekins/target/moco.json"
         ): MutationResults? {
 
             try {
                 if (retrievedResults == null ) {
-                    retrievedResults = mapper.readValue(File(path), MutationResults::class.java)
+                    retrievedResults = mapper.readValue(File(path!!), MutationResults::class.java)
                 }
                 return retrievedResults
             } catch (e: Exception) {

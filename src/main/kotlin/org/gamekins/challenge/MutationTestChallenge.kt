@@ -20,7 +20,6 @@ import hudson.FilePath
 import hudson.model.Run
 import hudson.model.TaskListener
 import org.gamekins.mutation.MutationInfo
-import org.gamekins.util.JacocoUtil
 import org.gamekins.util.JacocoUtil.ClassDetails
 
 
@@ -65,7 +64,7 @@ class MutationTestChallenge(
                 + "\" class=\"" + className
                 + "\" method=\"" + methodName
                 + "\" lineOfCode=\"" + lineOfCode
-                + "\" mutationType=\"" + mutationDescription
+                + "\" mutationDescription=\"" + mutationDescription
                 + "\" result=\"" + mutationInfo.result)
 
         if (reason.isNotEmpty()) {
@@ -116,26 +115,9 @@ class MutationTestChallenge(
         constants: HashMap<String, String>, run: Run<*, *>, listener: TaskListener,
         workspace: FilePath
     ): Boolean {
-        if (branch != constants["branch"]) return true
-
-        val jacocoMethodFile = JacocoUtil.calculateCurrentFilePath(
-            workspace,
-            classDetails.jacocoMethodFile, classDetails.workspace
-        )
-        try {
-            if (!jacocoMethodFile.exists()) {
-                listener.logger.println(
-                    "[Gamekins] JaCoCo method file "
-                            + jacocoMethodFile.remote + JacocoUtil.EXISTS + jacocoMethodFile.exists()
-                )
-                return true
-            }
-        } catch (e: Exception) {
-            e.printStackTrace(listener.logger)
-            return false
-        }
-
-        return false
+        // Mutation challenge is collected and analyzed in mutation testing tool so it is also responsible for
+        // checking the solvability and save mutants to json file
+        return true
     }
 
     /**

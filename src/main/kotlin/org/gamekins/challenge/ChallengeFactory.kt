@@ -313,6 +313,9 @@ object ChallengeFactory {
      * Generates a new [MutationTestChallenge] of type [Challenge] for the current class with details [classDetails]
      * and the current [branch]. The [workspace] is the folder with the code and execution rights, and the [listener]
      * reports the events to the console output of Jenkins.
+     *
+     * This function parses JSON file of mutation test results and filter to take only SURVIVED
+     * mutations which belong to the given class
      */
     @Throws(IOException::class, InterruptedException::class)
     private fun generateMutationTestChallenge(
@@ -320,21 +323,24 @@ object ChallengeFactory {
         listener: TaskListener, workspace: FilePath
     ): MutationTestChallenge? {
 
-
         val relevantMutationResultsByClass: Map<String, List<MutationInfo>>? =
-            MutationResults.retrievedResults?.entries?.filter {
+            MutationResults.retrievedMutationsFromJson(
+                classDetails.constants["mutationJsonPath"]
+            )?.entries?.filter {
                 it.key == "${classDetails.packageName}.${classDetails.className}"
                         && it.value.any { it1 -> it1.result == "survived" }
             }
 
+        // Choose a survived mutation randomly
         val randomMutationKey = relevantMutationResultsByClass?.keys?.toList()?.random()
         val chosenMutation: MutationInfo? =
             relevantMutationResultsByClass?.get(randomMutationKey)?.shuffled()?.find { it.result == "survived" }
+
         if (chosenMutation == null) {
-            listener.logger.println("[Gamekins] No mutation test challenge can be generated")
+            listener.logger.println("[Gamekins] No mutation test challenge can " +
+                    "be generated for class ${classDetails.className}")
             return null
         }
-
         return MutationTestChallenge(chosenMutation, classDetails, branch, workspace)
     }
 
