@@ -6,12 +6,18 @@ import java.io.File
 data class MutationResults(val entries: Map<String, List<MutationInfo>>) {
 
     companion object {
+        var retrievedResults: MutationResults? = null
+        val mapper = jacksonObjectMapper()
+
         fun retrievedMutationResultsFromJson(
             path: String = "/Users/phantran/Study/Passau/Thesis/gamekins/target/moco.json"
-        ): MutationResults {
-            val mapper = jacksonObjectMapper()
+        ): MutationResults? {
+
             try {
-                return mapper.readValue(File(path), MutationResults::class.java)
+                if (retrievedResults == null ) {
+                    retrievedResults = mapper.readValue(File(path), MutationResults::class.java)
+                }
+                return retrievedResults
             } catch (e: Exception) {
                 println(e.printStackTrace())
                 throw RuntimeException("Error while reading mutation results from csv file")

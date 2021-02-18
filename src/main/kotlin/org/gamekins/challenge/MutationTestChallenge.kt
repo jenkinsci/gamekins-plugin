@@ -33,7 +33,7 @@ import org.gamekins.util.JacocoUtil.ClassDetails
 class MutationTestChallenge(
     val mutationInfo: MutationInfo,
     val classDetails: ClassDetails,
-    val branch: String,
+    val branch: String?,
     workspace: FilePath
 ) : Challenge {
 

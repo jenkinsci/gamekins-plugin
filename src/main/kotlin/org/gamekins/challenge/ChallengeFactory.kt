@@ -23,6 +23,8 @@ import hudson.model.User
 import org.gamekins.GamePublisherDescriptor
 import org.gamekins.GameUserProperty
 import org.gamekins.challenge.Challenge.ChallengeGenerationData
+import org.gamekins.mutation.MutationInfo
+import org.gamekins.mutation.MutationResults
 import org.gamekins.util.GitUtil
 import org.gamekins.util.GitUtil.HeadCommitCallable
 import org.gamekins.util.JUnitUtil
@@ -52,7 +54,6 @@ object ChallengeFactory {
                 weightList.add(clazz)
             }
         }
-
         return weightList[Random.nextInt(weightList.size)]
     }
 
@@ -67,10 +68,10 @@ object ChallengeFactory {
             if (result != null && result != Result.SUCCESS) {
                 val challenge = BuildChallenge(constants)
                 val mapUser: User? = GitUtil.mapUser(workspace.act(HeadCommitCallable(workspace.remote))
-                        .authorIdent, User.getAll())
+                    .authorIdent, User.getAll())
 
                 if (mapUser == user
-                        && !property.getCurrentChallenges(constants["projectName"]).contains(challenge)) {
+                    && !property.getCurrentChallenges(constants["projectName"]).contains(challenge)) {
                     property.newChallenge(constants["projectName"]!!, challenge)
                     listener.logger.println("[Gamekins] Generated new BuildChallenge")
                     user.save()
@@ -114,15 +115,15 @@ object ChallengeFactory {
             count++
 
             val rejectedChallenges = user.getProperty(GameUserProperty::class.java)
-                    .getRejectedChallenges(constants["projectName"])
+                .getRejectedChallenges(constants["projectName"])
 
             //Remove classes where a ClassCoverageChallenge has been rejected previously
             if (!rejectedChallenges.filter {
-                        it.first is ClassCoverageChallenge
+                    it.first is ClassCoverageChallenge
                             && (it.first as ClassCoverageChallenge).classDetails.className == selectedClass.className
                             && (it.first as ClassCoverageChallenge)
-                                .classDetails.packageName == selectedClass.packageName}
-                            .isNullOrEmpty()) {
+                        .classDetails.packageName == selectedClass.packageName}
+                    .isNullOrEmpty()) {
                 listener.logger.println("[Gamekins] Class ${selectedClass.className} in package " +
                         "${selectedClass.packageName} was rejected previously")
                 challenge = null
@@ -145,6 +146,11 @@ object ChallengeFactory {
                     listener.logger.println("[Gamekins] Try class " + selectedClass.className + " and type "
                             + challengeClass)
                     challenge = generateCoverageChallenge(data, challengeClass)
+                }
+                challengeClass.superclass == MutationTestChallenge::class.java -> {
+                    listener.logger.println("[Gamekins] Try class " + selectedClass.className + " and type "
+                            + challengeClass)
+                    challenge = generateMutationTestChallenge(selectedClass, constants["branch"], listener, workspace)
                 }
                 else -> {
                     challenge = generateThirdPartyChallenge(data, challengeClass)
@@ -172,11 +178,11 @@ object ChallengeFactory {
      */
     @Throws(IOException::class, InterruptedException::class)
     private fun generateCoverageChallenge(data: ChallengeGenerationData, challengeClass: Class<out Challenge>)
-    : Challenge? {
+            : Challenge? {
 
         val document: Document = try {
             JacocoUtil.generateDocument(JacocoUtil.calculateCurrentFilePath(data.workspace,
-                    data.selectedClass.jacocoSourceFile, data.selectedClass.workspace))
+                data.selectedClass.jacocoSourceFile, data.selectedClass.workspace))
         } catch (e: Exception) {
             data.listener.logger.println("[Gamekins] Exception with JaCoCoSourceFile "
                     + data.selectedClass.jacocoSourceFile.absolutePath)
@@ -185,7 +191,7 @@ object ChallengeFactory {
         }
 
         return if (JacocoUtil.calculateCoveredLines(document, "pc") > 0
-                || JacocoUtil.calculateCoveredLines(document, "nc") > 0) {
+            || JacocoUtil.calculateCoveredLines(document, "nc") > 0) {
             when (challengeClass) {
                 ClassCoverageChallenge::class.java -> {
                     challengeClass
@@ -246,7 +252,7 @@ object ChallengeFactory {
      * in the initialisation of the [Challenge].
      */
     private fun generateThirdPartyChallenge(data: ChallengeGenerationData, challengeClass: Class<out Challenge>)
-    : Challenge? {
+            : Challenge? {
 
         data.testCount = JUnitUtil.getTestCount(data.workspace)
         data.headCommitHash = data.workspace.act(HeadCommitCallable(data.workspace.remote)).name
@@ -301,6 +307,35 @@ object ChallengeFactory {
         }
 
         return generated
+    }
+
+    /**
+     * Generates a new [MutationTestChallenge] of type [Challenge] for the current class with details [classDetails]
+     * and the current [branch]. The [workspace] is the folder with the code and execution rights, and the [listener]
+     * reports the events to the console output of Jenkins.
+     */
+    @Throws(IOException::class, InterruptedException::class)
+    private fun generateMutationTestChallenge(
+        classDetails: ClassDetails, branch: String?,
+        listener: TaskListener, workspace: FilePath
+    ): MutationTestChallenge? {
+
+
+        val relevantMutationResultsByClass: Map<String, List<MutationInfo>>? =
+            MutationResults.retrievedResults?.entries?.filter {
+                it.key == "${classDetails.packageName}.${classDetails.className}"
+                        && it.value.any { it1 -> it1.result == "survived" }
+            }
+
+        val randomMutationKey = relevantMutationResultsByClass?.keys?.toList()?.random()
+        val chosenMutation: MutationInfo? =
+            relevantMutationResultsByClass?.get(randomMutationKey)?.shuffled()?.find { it.result == "survived" }
+        if (chosenMutation == null) {
+            listener.logger.println("[Gamekins] No mutation test challenge can be generated")
+            return null
+        }
+
+        return MutationTestChallenge(chosenMutation, classDetails, branch, workspace)
     }
 
     /**
