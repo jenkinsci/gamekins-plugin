@@ -96,7 +96,8 @@ class PublisherUtilTest : AnnotationSpec() {
         every { run.startTimeInMillis } returns 0
 
         mockkStatic(JacocoUtil::class)
-        every { JacocoUtil.getTestCount(any(), any()) } returns 4
+        mockkStatic(JUnitUtil::class)
+        every { JUnitUtil.getTestCount(any(), any()) } returns 4
         every { JacocoUtil.getProjectCoverage(any(), any()) } returns 0.4
 
         every { job.getProperty(org.gamekins.property.GameJobProperty::class.java.name) } returns

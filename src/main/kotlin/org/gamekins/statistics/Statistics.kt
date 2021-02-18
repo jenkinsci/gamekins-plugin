@@ -18,7 +18,7 @@ package org.gamekins.statistics
 
 import hudson.model.*
 import org.gamekins.GameUserProperty
-import org.gamekins.util.JacocoUtil
+import org.gamekins.util.JUnitUtil
 import org.jenkinsci.plugins.workflow.job.WorkflowJob
 import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject
 import java.text.Collator
@@ -92,15 +92,15 @@ class Statistics(job: AbstractItem) {
         for (abstractBuild in job.builds) {
             if (abstractBuild.getNumber() == number) {
                 runEntries?.add(RunEntry(
-                        abstractBuild.getNumber(),
-                        "",
-                        abstractBuild.result,
-                        abstractBuild.startTimeInMillis,
-                        0,
-                        0,
+                    abstractBuild.getNumber(),
+                    "",
+                    abstractBuild.result,
+                    abstractBuild.startTimeInMillis,
                     0,
-                        JacocoUtil.getTestCount(null, abstractBuild),
-                        0.0))
+                    0,
+                    0,
+                    JUnitUtil.getTestCount(null, abstractBuild),
+                    0.0))
                 return
             }
         }
@@ -114,15 +114,15 @@ class Statistics(job: AbstractItem) {
         for (workflowRun in job.builds) {
             if (workflowRun.getNumber() == number) {
                 runEntries?.add(RunEntry(
-                        workflowRun.getNumber(),
-                        "",
-                        workflowRun.result,
-                        workflowRun.startTimeInMillis,
-                        0,
-                        0,
+                    workflowRun.getNumber(),
+                    "",
+                    workflowRun.result,
+                    workflowRun.startTimeInMillis,
                     0,
-                        JacocoUtil.getTestCount(null, workflowRun),
-                        0.0))
+                    0,
+                    0,
+                    JUnitUtil.getTestCount(null, workflowRun),
+                    0.0))
                 return
             }
         }
@@ -139,15 +139,15 @@ class Statistics(job: AbstractItem) {
                 for (workflowRun in workflowJob.builds) {
                     if (workflowRun.getNumber() == number) {
                         runEntries?.add(RunEntry(
-                                workflowRun.getNumber(),
-                                workflowJob.name,
-                                workflowRun.result,
-                                workflowRun.startTimeInMillis,
-                                0,
-                                0,
+                            workflowRun.getNumber(),
+                            workflowJob.name,
+                            workflowRun.result,
+                            workflowRun.startTimeInMillis,
                             0,
-                                JacocoUtil.getTestCount(null, workflowRun),
-                                0.0))
+                            0,
+                            0,
+                            JUnitUtil.getTestCount(null, workflowRun),
+                            0.0))
                         return
                     }
                 }
@@ -196,15 +196,15 @@ class Statistics(job: AbstractItem) {
             list.reverse()
             for (run in list) {
                 entries.add(RunEntry(
-                        run.getNumber(),
-                        branch,
-                        run.result,
-                        run.startTimeInMillis,
-                        0,
-                        0,
+                    run.getNumber(),
+                    branch,
+                    run.result,
+                    run.startTimeInMillis,
                     0,
-                        JacocoUtil.getTestCount(null, run),
-                        0.0))
+                    0,
+                    0,
+                    JUnitUtil.getTestCount(null, run),
+                    0.0))
             }
         }
 
@@ -226,15 +226,15 @@ class Statistics(job: AbstractItem) {
             for (workflowRun in runList) {
                 if (count >= RUN_TOTAL_COUNT) break
                 entries.add(RunEntry(
-                        workflowRun.getNumber(),
-                        workflowJob.name,
-                        workflowRun.result,
-                        workflowRun.startTimeInMillis,
-                        0,
-                        0,
+                    workflowRun.getNumber(),
+                    workflowJob.name,
+                    workflowRun.result,
+                    workflowRun.startTimeInMillis,
                     0,
-                        JacocoUtil.getTestCount(null, workflowRun),
-                        0.0))
+                    0,
+                    0,
+                    JUnitUtil.getTestCount(null, workflowRun),
+                    0.0))
                 count++
             }
         }
@@ -302,8 +302,8 @@ class Statistics(job: AbstractItem) {
         regex = "branch=\"[^\"]+\"".toRegex()
         matchResults = regex.findAll(file)
         map = hashMapOf()
-        map.put("branch=\"master\"", "master")
-        map.put("branch=\"main\"", "main")
+        map["branch=\"master\""] = "master"
+        map["branch=\"main\""] = "main"
 
         for (result in matchResults) {
             map.putIfAbsent(result.value, UUID.randomUUID().toString())

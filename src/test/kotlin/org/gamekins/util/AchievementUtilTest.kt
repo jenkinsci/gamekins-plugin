@@ -203,9 +203,9 @@ class AchievementUtilTest: AnnotationSpec() {
         AchievementUtil.haveXFailedTests(classes, constants, run, property, workspace, TaskListener.NULL,
             additionalParameters) shouldBe false
 
-        mockkStatic(JacocoUtil::class)
+        mockkStatic(JUnitUtil::class)
         every { run.result } returns Result.FAILURE
-        every { JacocoUtil.getTestFailCount(any(), any()) } returns 0
+        every { JUnitUtil.getTestFailCount(any(), any()) } returns 0
         AchievementUtil.haveXFailedTests(classes, constants, run, property, workspace, TaskListener.NULL,
             additionalParameters) shouldBe false
 
@@ -213,16 +213,16 @@ class AchievementUtilTest: AnnotationSpec() {
         AchievementUtil.haveXFailedTests(classes, constants, run, property, workspace, TaskListener.NULL,
             additionalParameters) shouldBe false
 
-        every { JacocoUtil.getTestFailCount(any(), any()) } returns 1
+        every { JUnitUtil.getTestFailCount(any(), any()) } returns 1
         AchievementUtil.haveXFailedTests(classes, constants, run, property, workspace, TaskListener.NULL,
             additionalParameters) shouldBe true
 
         additionalParameters["failedTests"] = "0"
-        every { JacocoUtil.getTestCount(any(), any()) } returns 2
+        every { JUnitUtil.getTestCount(any(), any()) } returns 2
         AchievementUtil.haveXFailedTests(classes, constants, run, property, workspace, TaskListener.NULL,
             additionalParameters) shouldBe false
 
-        every { JacocoUtil.getTestCount(any(), any()) } returns 1
+        every { JUnitUtil.getTestCount(any(), any()) } returns 1
         AchievementUtil.haveXFailedTests(classes, constants, run, property, workspace, TaskListener.NULL,
             additionalParameters) shouldBe true
     }

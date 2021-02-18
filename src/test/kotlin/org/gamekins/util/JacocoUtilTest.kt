@@ -20,7 +20,6 @@ import hudson.FilePath
 import hudson.model.Job
 import hudson.model.Run
 import hudson.model.TaskListener
-import hudson.tasks.junit.TestResultAction
 import org.gamekins.test.TestUtils
 import io.kotest.core.spec.style.AnnotationSpec
 import io.kotest.matchers.collections.shouldHaveSize
@@ -50,6 +49,7 @@ class JacocoUtilTest : AnnotationSpec() {
     fun initAll() {
         //Needed because of bug in mockk library which does not release mocked objects
         mockkStatic(JacocoUtil::class)
+        mockkStatic(JUnitUtil::class)
         val rootDirectory = javaClass.classLoader.getResource("test-project.zip")
         rootDirectory shouldNotBe null
         root = rootDirectory.file.removeSuffix(".zip")
@@ -175,24 +175,6 @@ class JacocoUtilTest : AnnotationSpec() {
     }
 
     @Test
-    fun getTestCount() {
-        JacocoUtil.getTestCount(path) shouldBe 5
-
-        JacocoUtil.getTestCount(null, null) shouldBe 0
-
-        val run = mockkClass(Run::class)
-        every { run.getAction(TestResultAction::class.java) } returns null
-        JacocoUtil.getTestCount(null, run) shouldBe 0
-
-        val action = mockkClass(TestResultAction::class)
-        every { action.totalCount } returns 5
-        every { run.getAction(TestResultAction::class.java) } returns action
-        JacocoUtil.getTestCount(null, run) shouldBe 5
-
-        JacocoUtil.getTestCount(path, null) shouldBe 5
-    }
-
-    @Test
     fun isGetterOrSetter() {
         val rationalPath = FilePath(null, path.remote + "/target/site/jacoco/com.example/Rational.java.html")
         JacocoUtil.isGetterOrSetter(rationalPath.readToString().split("\n"), "    return num;") shouldBe true
@@ -219,7 +201,7 @@ class JacocoUtilTest : AnnotationSpec() {
         every { JacocoUtil.getCoverageInPercentageFromJacoco(any(), any()) } returns coverage
         every { JacocoUtil.generateDocument(any()) } returns document
         every { JacocoUtil.calculateCoveredLines(any(), any()) } returns 0
-        every { JacocoUtil.getTestCount(any(), any()) } returns testCount
+        every { JUnitUtil.getTestCount(any(), any()) } returns testCount
         val commit = mockkClass(RevCommit::class)
         every { commit.name } returns "ef97erb"
         every { path.act(ofType(GitUtil.HeadCommitCallable::class)) } returns commit

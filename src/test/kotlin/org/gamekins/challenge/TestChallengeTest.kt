@@ -31,6 +31,7 @@ import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.string.shouldStartWith
 import io.mockk.*
 import jenkins.branch.MultiBranchProject
+import org.gamekins.util.JUnitUtil
 
 class TestChallengeTest : AnnotationSpec() {
 
@@ -82,14 +83,15 @@ class TestChallengeTest : AnnotationSpec() {
     @Test
     fun isSolved() {
         mockkStatic(JacocoUtil::class)
+        mockkStatic(JUnitUtil::class)
         mockkStatic(GitUtil::class)
         mockkStatic(User::class)
         map["branch"] = "master"
 
-        every { JacocoUtil.getTestCount(path, run) } returns testCount
+        every { JUnitUtil.getTestCount(path, run) } returns testCount
         challenge.isSolved(map, run, listener, path) shouldBe false
 
-        every { JacocoUtil.getTestCount(path, run) } returns (testCount + 1)
+        every { JUnitUtil.getTestCount(path, run) } returns (testCount + 1)
         every { GitUtil.getLastChangedTestFilesOfUser(path, user, 0, "", listOf()) } returns setOf()
         every { User.getAll() } returns listOf()
         challenge.isSolved(map, run, listener, path) shouldBe false

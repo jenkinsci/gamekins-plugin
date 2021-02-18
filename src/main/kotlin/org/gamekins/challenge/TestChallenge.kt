@@ -21,6 +21,7 @@ import hudson.model.Run
 import hudson.model.TaskListener
 import hudson.model.User
 import org.gamekins.util.GitUtil
+import org.gamekins.util.JUnitUtil
 import org.gamekins.util.JacocoUtil
 import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject
 import kotlin.collections.HashMap
@@ -101,7 +102,7 @@ class TestChallenge(data: Challenge.ChallengeGenerationData) : Challenge {
                           workspace: FilePath): Boolean {
         if (this.constants["branch"] != constants["branch"]) return false
         try {
-            val testCountSolved = JacocoUtil.getTestCount(workspace, run)
+            val testCountSolved = JUnitUtil.getTestCount(workspace, run)
             if (testCountSolved <= testCount) {
                 return false
             }

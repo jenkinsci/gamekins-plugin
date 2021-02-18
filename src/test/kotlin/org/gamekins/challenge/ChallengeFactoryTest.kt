@@ -33,6 +33,7 @@ import org.eclipse.jgit.revwalk.RevCommit
 import org.gamekins.GamePublisherDescriptor
 import org.gamekins.achievement.Achievement
 import org.gamekins.achievement.AchievementInitializer
+import org.gamekins.util.JUnitUtil
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import org.jsoup.select.Elements
@@ -65,6 +66,7 @@ class ChallengeFactoryTest : AnnotationSpec() {
         map["branch"] = branch
         map["projectName"] = "test-project"
         mockkStatic(JacocoUtil::class)
+        mockkStatic(JUnitUtil::class)
         mockkStatic(ChallengeFactory::class)
         val document = mockkClass(Document::class)
         every { user.getProperty(org.gamekins.GameUserProperty::class.java) } returns property
@@ -79,7 +81,7 @@ class ChallengeFactoryTest : AnnotationSpec() {
         every { JacocoUtil.getCoverageInPercentageFromJacoco(any(), any()) } returns coverage
         every { JacocoUtil.generateDocument(any()) } returns document
         every { JacocoUtil.calculateCoveredLines(any(), any()) } returns 0
-        every { JacocoUtil.getTestCount(any(), any()) } returns testCount
+        every { JUnitUtil.getTestCount(any(), any()) } returns testCount
         val commit = mockkClass(RevCommit::class)
         every { commit.name } returns "ef97erb"
         every { commit.authorIdent } returns PersonIdent("", "")

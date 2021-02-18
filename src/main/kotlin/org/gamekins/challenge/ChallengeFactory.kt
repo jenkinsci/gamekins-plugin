@@ -25,6 +25,7 @@ import org.gamekins.GameUserProperty
 import org.gamekins.challenge.Challenge.ChallengeGenerationData
 import org.gamekins.util.GitUtil
 import org.gamekins.util.GitUtil.HeadCommitCallable
+import org.gamekins.util.JUnitUtil
 import org.gamekins.util.JacocoUtil
 import org.gamekins.util.JacocoUtil.ClassDetails
 import org.jsoup.nodes.Document
@@ -133,7 +134,7 @@ object ChallengeFactory {
 
             when {
                 challengeClass == TestChallenge::class.java -> {
-                    data.testCount = JacocoUtil.getTestCount(workspace)
+                    data.testCount = JUnitUtil.getTestCount(workspace)
                     data.headCommitHash = workspace.act(HeadCommitCallable(workspace.remote)).name
                     listener.logger.println("[Gamekins] Generated new TestChallenge")
                     challenge = challengeClass
@@ -247,7 +248,7 @@ object ChallengeFactory {
     private fun generateThirdPartyChallenge(data: ChallengeGenerationData, challengeClass: Class<out Challenge>)
     : Challenge? {
 
-        data.testCount = JacocoUtil.getTestCount(data.workspace)
+        data.testCount = JUnitUtil.getTestCount(data.workspace)
         data.headCommitHash = data.workspace.act(HeadCommitCallable(data.workspace.remote)).name
         data.method = JacocoUtil.chooseRandomMethod(data.selectedClass, data.workspace)
         data.line = JacocoUtil.chooseRandomLine(data.selectedClass, data.workspace)

@@ -131,9 +131,9 @@ object AchievementUtil {
                          run: Run<*, *>, property: GameUserProperty, workspace: FilePath, listener: TaskListener,
                          additionalParameters: HashMap<String, String>): Boolean {
         if (additionalParameters["failedTests"]?.toInt() == 0) {
-            return JacocoUtil.getTestCount(workspace, run) == JacocoUtil.getTestFailCount(workspace, run)
+            return JUnitUtil.getTestCount(workspace, run) == JUnitUtil.getTestFailCount(workspace, run)
         } else if (run.result == Result.FAILURE) {
-            return JacocoUtil.getTestFailCount(workspace, run) == additionalParameters["failedTests"]?.toInt()
+            return JUnitUtil.getTestFailCount(workspace, run) == additionalParameters["failedTests"]?.toInt()
         }
 
         return false
