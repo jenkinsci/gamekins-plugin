@@ -20,6 +20,7 @@ import hudson.FilePath
 import hudson.model.Run
 import hudson.model.TaskListener
 import org.gamekins.mutation.MutationInfo
+import org.gamekins.mutation.MutationResults
 import org.gamekins.util.JacocoUtil.ClassDetails
 
 
@@ -33,7 +34,6 @@ class MutationTestChallenge(
     val mutationInfo: MutationInfo,
     val classDetails: ClassDetails,
     val branch: String?,
-    workspace: FilePath
 ) : Challenge {
 
     private val created = System.currentTimeMillis()
@@ -42,12 +42,11 @@ class MutationTestChallenge(
     private val className = mutationInfo.mutationDetails.methodInfo["className"]
     private val mutationDescription = mutationInfo.mutationDetails.mutationDescription
     private val lineOfCode = mutationInfo.mutationDetails.loc
-
+    val uniqueID = mutationInfo.uniqueID
 
     override fun getCreated(): Long {
         return created
     }
-
 
     fun getName(): String {
         return "MutationTestChallenge"
@@ -98,7 +97,7 @@ class MutationTestChallenge(
 
 
     override fun getScore(): Int {
-        //TODO: Improve later
+        //fixme: find a way to determine mutation score - could be based on complexity compared to original code
         return 4
     }
 
@@ -115,9 +114,11 @@ class MutationTestChallenge(
         constants: HashMap<String, String>, run: Run<*, *>, listener: TaskListener,
         workspace: FilePath
     ): Boolean {
-        // Mutation challenge is collected and analyzed in mutation testing tool so it is also responsible for
-        // checking the solvability and save mutants to json file
-        return true
+        // Mutation challenges are collected and analyzed in the mutation testing tool thus it ais lso responsible for
+        // checking the solvability of mutants.
+        // But there are cases when classes are no longer in JSON file, thus unsolvable
+        val mutationResults = MutationResults.retrievedMutationsFromJson(constants["mocoJSONPath"])
+        return mutationResults?.entries?.any { it.key == this.className } as Boolean
     }
 
     /**
@@ -129,8 +130,15 @@ class MutationTestChallenge(
         constants: HashMap<String, String>, run: Run<*, *>, listener: TaskListener,
         workspace: FilePath
     ): Boolean {
-        if (mutationInfo.result == "killed") {
-            return true
+        val mutationResults = MutationResults.retrievedMutationsFromJson(constants["mocoJSONPath"])
+        val filteredByClass = mutationResults?.entries?.filter { it.key == this.className }
+        if (!filteredByClass.isNullOrEmpty()) {
+            return (filteredByClass.any {
+                it.value.any { it1 ->
+                    ((it1.uniqueID == uniqueID) || (it1.mutationDetails == mutationInfo.mutationDetails))
+                            && (it1.result == "killed")
+                }
+            })
         }
         return false
     }

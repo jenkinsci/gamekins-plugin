@@ -346,7 +346,7 @@ object ChallengeFactory {
                     "be generated for class ${classDetails.className} since all were killed")
             return null
         }
-        return MutationTestChallenge(chosenMutation, classDetails, branch, workspace)
+        return MutationTestChallenge(chosenMutation, classDetails, branch)
     }
 
     /**

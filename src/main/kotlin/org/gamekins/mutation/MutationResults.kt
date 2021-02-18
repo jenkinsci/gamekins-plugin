@@ -12,7 +12,6 @@ data class MutationResults(val entries: Map<String, List<MutationInfo>>) {
         fun retrievedMutationsFromJson(
             path: String?
         ): MutationResults? {
-
             try {
                 if (retrievedResults == null ) {
                     retrievedResults = mapper.readValue(File(path!!), MutationResults::class.java)
