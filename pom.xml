@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
@@ -10,7 +11,7 @@
     <artifactId>gamekins</artifactId>
     <version>0.2</version>
     <packaging>hpi</packaging>
-    
+
     <properties>
         <!-- Baseline Jenkins version you use to build the plugin. Users must have this version or newer to run. -->
         <jenkins.version>2.249.3</jenkins.version>
@@ -201,6 +202,7 @@
             <version>4.3.0</version>
             <scope>test</scope>
         </dependency>
+
         <!-- https://mvnrepository.com/artifact/org.jetbrains.kotlin/kotlin-reflect -->
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
@@ -208,20 +210,27 @@
             <version>${kotlin.version}</version>
             <scope>compile</scope>
         </dependency>
+        <!-- Mutation Test dependencies -->
         <dependency>
             <groupId>com.fasterxml.jackson.module</groupId>
             <artifactId>jackson-module-kotlin</artifactId>
             <version>2.12.0</version>
         </dependency>
+
     </dependencies>
 
     <!-- If you want this to appear on the wiki page: -->
     <developers>
-      <developer>
-        <id>Philipp Straubinger</id>
-        <name>Philipp Straubinger</name>
-        <email>philipp.straubinger@uni-passau.de</email>
-      </developer>
+        <developer>
+            <id>Philipp Straubinger</id>
+            <name>Philipp Straubinger</name>
+            <email>philipp.straubinger@uni-passau.de</email>
+        </developer>
+        <developer>
+            <id>Tran Phan</id>
+            <name>Tran Phan</name>
+            <email>phantran197@gmail.com</email>
+        </developer>
     </developers>
 
     <!-- Assuming you want to host on @jenkinsci:
