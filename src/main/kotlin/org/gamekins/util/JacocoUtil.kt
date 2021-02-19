@@ -266,6 +266,25 @@ object JacocoUtil {
         return elements
     }
 
+
+    /**
+     * Returns lines within specific lines of code range the [jacocoSourceFile].
+     */
+    @JvmStatic
+    @Throws(IOException::class, InterruptedException::class)
+    fun getLinesInRange(jacocoSourceFile: FilePath, range: Pair<Int, Int>): Elements? {
+        if (range.first > range.second) return null
+        val document = Jsoup.parse(jacocoSourceFile.readToString())
+        val elements = Elements()
+        for (l in range.first..range.second) {
+            val line = document.select("#L$l")
+            if (line != null && line.size > 0) {
+                elements.addAll(line)
+            }
+        }
+        return elements
+    }
+
     /**
      * Returns all methods of a given class by their [jacocoMethodFile].
      */

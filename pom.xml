@@ -28,6 +28,8 @@
           ~ stapler-plugin.version: The Stapler Maven plugin version required by the plugin.
      -->
     </properties>
+
+
     <name>Gamekins Plugin</name>
     <!-- The default licence for Jenkins OSS Plugins is MIT. Substitute for the applicable one if needed. -->
     <licenses>
@@ -216,6 +218,55 @@
             <artifactId>jackson-module-kotlin</artifactId>
             <version>2.12.0</version>
         </dependency>
+        <!--        &lt;!&ndash; new UI dependencies &ndash;&gt;-->
+        <dependency>
+            <groupId>io.jenkins.plugins</groupId>
+            <artifactId>font-awesome-api</artifactId>
+            <version>5.15.2-1</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.commons</groupId>
+                    <artifactId>commons-lang3</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>io.jenkins.plugins</groupId>
+            <artifactId>bootstrap4-api</artifactId>
+            <version>4.6.0-1</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.github.spotbugs</groupId>
+                    <artifactId>spotbugs-annotations</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.commons</groupId>
+                    <artifactId>commons-lang3</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>io.jenkins.plugins</groupId>
+            <artifactId>jquery3-api</artifactId>
+            <version>3.5.1-2</version>
+        </dependency>
+
+        <!--        <dependency>-->
+        <!--            <groupId>io.jenkins.plugins</groupId>-->
+        <!--            <artifactId>echarts-api</artifactId>-->
+        <!--            <version>4.8.0-2</version>-->
+        <!--        </dependency>-->
+        <!--        <dependency>-->
+        <!--            <groupId>io.jenkins.plugins</groupId>-->
+        <!--            <artifactId>plugin-util-api</artifactId>-->
+        <!--            <version>1.1.0</version>-->
+        <!--        </dependency>-->
+        <!--        <dependency>-->
+        <!--            <groupId>io.jenkins.plugins</groupId>-->
+        <!--            <artifactId>data-tables-api</artifactId>-->
+        <!--            <version>${data-tables-api.version}</version>-->
+        <!--        </dependency>-->
+
 
     </dependencies>
 

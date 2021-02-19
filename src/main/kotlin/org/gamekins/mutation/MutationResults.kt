@@ -1,6 +1,7 @@
 package org.gamekins.mutation
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import hudson.model.TaskListener
 import java.io.File
 
 data class MutationResults(val entries: Map<String, List<MutationInfo>>) {
@@ -10,16 +11,17 @@ data class MutationResults(val entries: Map<String, List<MutationInfo>>) {
         val mapper = jacksonObjectMapper()
 
         fun retrievedMutationsFromJson(
-            path: String?
+            path: String?, listener: TaskListener
         ): MutationResults? {
             try {
-                if (retrievedResults == null ) {
+                if (retrievedResults == null) {
                     retrievedResults = mapper.readValue(File(path!!), MutationResults::class.java)
                 }
                 return retrievedResults
             } catch (e: Exception) {
-                println(e.printStackTrace())
-                throw RuntimeException("Error while reading mutation results from json file")
+                listener.logger.println("Error while reading mutation results from json file, please check MoCo JSON path")
+                listener.logger.println(e.printStackTrace())
+                return null
             }
         }
     }

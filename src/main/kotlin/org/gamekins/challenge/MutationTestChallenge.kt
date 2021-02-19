@@ -34,6 +34,7 @@ class MutationTestChallenge(
     val mutationInfo: MutationInfo,
     val classDetails: ClassDetails,
     val branch: String?,
+    workspace: FilePath
 ) : Challenge {
 
     private val created = System.currentTimeMillis()
@@ -43,6 +44,9 @@ class MutationTestChallenge(
     private val mutationDescription = mutationInfo.mutationDetails.mutationDescription
     private val lineOfCode = mutationInfo.mutationDetails.loc
     val uniqueID = mutationInfo.uniqueID
+    private val codeSnippet = mutationInfo.getCodeSnippet(classDetails, lineOfCode, workspace)
+    private var mutationStillInJson = true
+    private var classStillInJson = true
 
     override fun getCreated(): Long {
         return created
@@ -114,11 +118,10 @@ class MutationTestChallenge(
         constants: HashMap<String, String>, run: Run<*, *>, listener: TaskListener,
         workspace: FilePath
     ): Boolean {
-        // Mutation challenges are collected and analyzed in the mutation testing tool thus it ais lso responsible for
-        // checking the solvability of mutants.
-        // But there are cases when classes are no longer in JSON file, thus unsolvable
-        val mutationResults = MutationResults.retrievedMutationsFromJson(constants["mocoJSONPath"])
-        return mutationResults?.entries?.any { it.key == this.className } as Boolean
+        // Check if a class is no longer in JSON file, thus unsolvable
+        // This assumes that isSolved is always called before isSolvable in checkUser method
+        // This logic needs to be changed if the call order is changed or they are invoked somewhere else
+        return classStillInJson and mutationStillInJson
     }
 
     /**
@@ -130,15 +133,21 @@ class MutationTestChallenge(
         constants: HashMap<String, String>, run: Run<*, *>, listener: TaskListener,
         workspace: FilePath
     ): Boolean {
-        val mutationResults = MutationResults.retrievedMutationsFromJson(constants["mocoJSONPath"])
+        val mutationResults = MutationResults.retrievedMutationsFromJson(constants["mocoJSONPath"], listener)
         val filteredByClass = mutationResults?.entries?.filter { it.key == this.className }
         if (!filteredByClass.isNullOrEmpty()) {
-            return (filteredByClass.any {
-                it.value.any { it1 ->
-                    ((it1.uniqueID == uniqueID) || (it1.mutationDetails == mutationInfo.mutationDetails))
-                            && (it1.result == "killed")
-                }
-            })
+            val filteredByDetails =  filteredByClass.filter {
+                it.value.any { it1 -> ((it1.uniqueID == uniqueID) ||
+                        (it1.mutationDetails == mutationInfo.mutationDetails)) }
+            }
+            if (filteredByDetails.isNullOrEmpty()) {
+                mutationStillInJson  = false
+                return false
+            } else {
+                return filteredByDetails.any { it.value.any { it1 -> it1.result == "killed" } }
+            }
+        } else {
+            classStillInJson = false
         }
         return false
     }
@@ -146,6 +155,6 @@ class MutationTestChallenge(
     override fun toString(): String {
         return ("Write a test to kill this mutant at line $lineOfCode of method " +
                 "$methodName in class $className in package ${classDetails.packageName}" +
-                " (created for branch " + branch + ")")
+                " (created for branch " + branch + ") code snippet: $codeSnippet")
     }
 }

@@ -325,14 +325,14 @@ object ChallengeFactory {
 
         val relevantMutationResultsByClass: Map<String, List<MutationInfo>>? =
             MutationResults.retrievedMutationsFromJson(
-                classDetails.constants["mocoJSONPath"]
+                classDetails.constants["mocoJSONPath"], listener
             )?.entries?.filter {
                 it.key == "${classDetails.packageName}.${classDetails.className}"
                         && it.value.any { it1 -> it1.result == "survived" }
             }
 
         if (relevantMutationResultsByClass.isNullOrEmpty()) {
-            listener.logger.println("[Gamekins] Mutation test challenge generating - " +
+            listener.logger.println("[Gamekins] Mutation test challenge - " +
                     "no mutation information for class $${classDetails.className}")
             return null
         }
@@ -346,7 +346,7 @@ object ChallengeFactory {
                     "be generated for class ${classDetails.className} since all were killed")
             return null
         }
-        return MutationTestChallenge(chosenMutation, classDetails, branch)
+        return MutationTestChallenge(chosenMutation, classDetails, branch, workspace)
     }
 
     /**

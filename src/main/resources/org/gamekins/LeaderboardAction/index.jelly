@@ -1,50 +1,62 @@
 <?jelly escape-by-default='true'?>
-<j:jelly xmlns:j="jelly:core" xmlns:l="/lib/layout" xmlns:st="jelly:stapler" xmlns:f="/lib/form">
+<j:jelly xmlns:j="jelly:core" xmlns:l="/lib/layout" xmlns:st="jelly:stapler" xmlns:f="/lib/form" xmlns:fa="/font-awesome" xmlns:bs="/bootstrap">
     <l:layout title="Leaderboard">
         <l:side-panel>
             <st:include page="sidepanel.jelly" it="${it.job}" optional="true" />
         </l:side-panel>
         <l:main-panel>
-            <h1>
+        <st:adjunct includes="io.jenkins.plugins.bootstrap4"/>
+            <h1 class="mb-2">
                 Leaderboard
             </h1>
-            <div>
-                <table class="pane sortable bigtable" style="width: 49.5%; display: inline-table; margin-right: 1%">
-                    <tr>
-                        <td class="pane-header" align="left,center">#</td>
-                        <td class="pane-header" align="left,center">Participant</td>
-                        <td class="pane-header" align="left,center">Team</td>
-                        <td class="pane-header" align="left,center">Completed Challenges</td>
-                        <td class="pane-header" initialSortDir="up" align="left" width="10%">Score</td>
-                    </tr>
-                    <j:forEach indexVar="index" var="userdetail" items="${it.userDetails}">
+            <div class="container-fluid row mx-1">
+                <div class="col-12 col-md-7 table-responsive">
+                    <table class="mt-3 shadow table-hover table pane sortable bigtable">
+                      <thead>
                         <tr>
+
                             <td>${index + 1}</td>
                             <td><a href="${userdetail.url}/achievements">${userdetail.userName}</a></td>
                             <td>${userdetail.teamName}</td>
                             <td>${userdetail.completedChallenges}</td>
                             <td>${userdetail.score}</td>
+
                         </tr>
-                    </j:forEach>
-                </table>
-                <table class="pane sortable bigtable" style="width: 49.5%; display: inline-table">
-                    <tr>
-                        <td class="pane-header" align="left,center">#</td>
-                        <td class="pane-header" align="left,center">Team</td>
-                        <td class="pane-header" align="left,center">Completed Challenges</td>
-                        <td class="pane-header" initialSortDir="up" align="left" width="10%">Score</td>
-                    </tr>
-                    <j:forEach indexVar="index" var="teamdetail" items="${it.teamDetails}">
-                        <tr>
-                            <td>${index + 1}</td>
-                            <td>${teamdetail.teamName}</td>
-                            <td>${teamdetail.completedChallenges}</td>
-                            <td>${teamdetail.score}</td>
-                        </tr>
-                    </j:forEach>
-                </table>
+                        </thead>
+                        <j:forEach indexVar="index" var="userDetail" items="${it.userDetails}">
+                            <tr>
+                                <td>${index + 1}</td>
+                                <td><a href="${userDetail.url}">${userDetail.userName}</a></td>
+                                <td>${userDetail.teamName}</td>
+                                <td>${userDetail.completedChallenges}</td>
+                                <td>${userDetail.score}</td>
+                            </tr>
+                        </j:forEach>
+                    </table>
+                </div>
+                <div class="col-12 col-md-5 table-responsive ">
+                    <table class="mt-3 shadow table-hover table pane sortable bigtable">
+                        <thead>
+                            <tr>
+                                <th scope="col">#</th>
+                                <th scope="col">Team</th>
+                                <th scope="col">Completed Challenges</th>
+                                <th initialSortDir="up" scope="col">Score</th>
+                            </tr>
+                        </thead>
+                        <j:forEach indexVar="index" var="teamDetail" items="${it.teamDetails}">
+                            <tr>
+                                <td>${index + 1}</td>
+                                <td>${teamDetail.teamName}</td>
+                                <td>${teamDetail.completedChallenges}</td>
+                                <td>${teamDetail.score}</td>
+                            </tr>
+                        </j:forEach>
+                    </table>
+                </div>
             </div>
             <br/>
+
             <j:if test="${it.participating}">
                 <h1>
                     Challenges
