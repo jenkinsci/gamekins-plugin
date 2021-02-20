@@ -19,6 +19,7 @@ package org.gamekins.challenge
 import hudson.FilePath
 import org.gamekins.util.JacocoUtil
 import org.gamekins.util.JacocoUtil.ClassDetails
+import org.jsoup.nodes.Element
 
 /**
  * Abstract class to generate basic information about the class used for generating a [CoverageChallenge].
@@ -36,6 +37,8 @@ abstract class CoverageChallenge(val classDetails: ClassDetails, workspace: File
     var solvedCoverage = 0.0
     private val created = System.currentTimeMillis()
     private var solved: Long = 0
+    protected var codeSnippet = ""
+
 
     /**
      * Calculates the number of fully, partially and not covered lines, and the coverage of the class itself.
@@ -82,5 +85,9 @@ abstract class CoverageChallenge(val classDetails: ClassDetails, workspace: File
      */
     fun setSolved(newSolved: Long) {
         solved = newSolved
+    }
+
+    open fun getCodeSnippet(classDetails: ClassDetails, lineOfCode: Int, workspace: FilePath): String {
+        return ""
     }
 }

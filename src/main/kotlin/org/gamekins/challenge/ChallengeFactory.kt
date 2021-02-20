@@ -147,7 +147,7 @@ object ChallengeFactory {
                             + challengeClass)
                     challenge = generateCoverageChallenge(data, challengeClass)
                 }
-                challengeClass.superclass == MutationTestChallenge::class.java -> {
+                challengeClass == MutationTestChallenge::class.java -> {
                     listener.logger.println("[Gamekins] Try class " + selectedClass.className + " and type "
                             + challengeClass)
                     challenge = generateMutationTestChallenge(selectedClass, constants["branch"], listener, workspace)
@@ -322,10 +322,15 @@ object ChallengeFactory {
         classDetails: ClassDetails, branch: String?,
         listener: TaskListener, workspace: FilePath
     ): MutationTestChallenge? {
+        listener.logger.println(classDetails.mocoJSONFile)
+
+        val jsonFilePath = JacocoUtil.calculateCurrentFilePath(
+                workspace, classDetails.mocoJSONFile, classDetails.workspace
+            )
+        listener.logger.println(jsonFilePath)
 
         val relevantMutationResultsByClass: Map<String, List<MutationInfo>>? =
-            MutationResults.retrievedMutationsFromJson(
-                classDetails.constants["mocoJSONPath"], listener
+            MutationResults.retrievedMutationsFromJson(jsonFilePath, listener
             )?.entries?.filter {
                 it.key == "${classDetails.packageName}.${classDetails.className}"
                         && it.value.any { it1 -> it1.result == "survived" }

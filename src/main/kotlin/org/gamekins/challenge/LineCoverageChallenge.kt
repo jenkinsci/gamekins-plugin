@@ -39,7 +39,9 @@ class LineCoverageChallenge(data: Challenge.ChallengeGenerationData)
     private val maxCoveredBranches: Int
     private var solvedCoveredBranches: Int = 0
 
+
     init {
+        codeSnippet = getCodeSnippet(classDetails, lineNumber,  data.workspace)
         val split = data.line!!.attr("title").split(" ".toRegex())
         when {
             split.isEmpty() || (split.size == 1 && split[0].isBlank()) -> {
@@ -206,5 +208,22 @@ class LineCoverageChallenge(data: Challenge.ChallengeGenerationData)
         return (prefix + lineNumber + " in class " + classDetails.className
                 + " in package " + classDetails.packageName + " (created for branch "
                 + classDetails.constants["branch"] + ")")
+    }
+
+    override fun getCodeSnippet(classDetails: JacocoUtil.ClassDetails, lineOfCode: Int, workspace: FilePath): String {
+        if (lineOfCode < 0) {
+            return ""
+        }
+        if (classDetails.jacocoSourceFile.exists()) {
+            val javaHtmlPath = JacocoUtil.calculateCurrentFilePath(
+                workspace, classDetails.jacocoSourceFile, classDetails.workspace
+            )
+            val range = if (lineOfCode > 0) Pair(lineOfCode - 1, lineOfCode + 1) else Pair(lineOfCode, lineOfCode + 2)
+            val snippetElements = JacocoUtil.getLinesInRange(javaHtmlPath, range)
+            return "pre class=\"prettyprint source lang-java linenums:${range.first}\">" +
+                    snippetElements +
+                    "</pre>"
+        }
+        return ""
     }
 }

@@ -21,7 +21,9 @@ import hudson.model.Run
 import hudson.model.TaskListener
 import org.gamekins.mutation.MutationInfo
 import org.gamekins.mutation.MutationResults
+import org.gamekins.util.JacocoUtil
 import org.gamekins.util.JacocoUtil.ClassDetails
+import org.jsoup.nodes.Element
 
 
 /**
@@ -30,11 +32,8 @@ import org.gamekins.util.JacocoUtil.ClassDetails
  * @author Tran Phan
  * @since 1.0
  */
-class MutationTestChallenge(
-    val mutationInfo: MutationInfo,
-    val classDetails: ClassDetails,
-    val branch: String?,
-    workspace: FilePath
+class MutationTestChallenge(val mutationInfo: MutationInfo, val classDetails: ClassDetails,
+                            val branch: String?, workspace: FilePath
 ) : Challenge {
 
     private val created = System.currentTimeMillis()
@@ -44,7 +43,7 @@ class MutationTestChallenge(
     private val mutationDescription = mutationInfo.mutationDetails.mutationDescription
     private val lineOfCode = mutationInfo.mutationDetails.loc
     val uniqueID = mutationInfo.uniqueID
-    private val codeSnippet = mutationInfo.getCodeSnippet(classDetails, lineOfCode, workspace)
+    private val codeSnippet = getCodeSnippet(classDetails, lineOfCode, workspace)
     private var mutationStillInJson = true
     private var classStillInJson = true
 
@@ -133,7 +132,10 @@ class MutationTestChallenge(
         constants: HashMap<String, String>, run: Run<*, *>, listener: TaskListener,
         workspace: FilePath
     ): Boolean {
-        val mutationResults = MutationResults.retrievedMutationsFromJson(constants["mocoJSONPath"], listener)
+        val jsonFilePath = JacocoUtil.calculateCurrentFilePath(
+            workspace, classDetails.mocoJSONFile, classDetails.workspace
+        )
+        val mutationResults = MutationResults.retrievedMutationsFromJson(jsonFilePath, listener)
         val filteredByClass = mutationResults?.entries?.filter { it.key == this.className }
         if (!filteredByClass.isNullOrEmpty()) {
             val filteredByDetails =  filteredByClass.filter {
@@ -156,5 +158,20 @@ class MutationTestChallenge(
         return ("Write a test to kill this mutant at line $lineOfCode of method " +
                 "$methodName in class $className in package ${classDetails.packageName}" +
                 " (created for branch " + branch + ") code snippet: $codeSnippet")
+    }
+
+    fun getCodeSnippet(classDetails: ClassDetails, lineOfCode: Int, workspace: FilePath): String {
+        if (lineOfCode < 0) {
+            return ""
+        }
+        if (classDetails.jacocoSourceFile.exists()) {
+            val javaHtmlPath = JacocoUtil.calculateCurrentFilePath(
+                workspace, classDetails.jacocoSourceFile, classDetails.workspace
+            )
+            val range = if (lineOfCode > 0) Pair(lineOfCode - 1, lineOfCode + 1) else Pair(lineOfCode, lineOfCode + 2)
+            val snippetElements = JacocoUtil.getLinesInRange(javaHtmlPath, range)
+            return snippetElements
+        }
+        return ""
     }
 }

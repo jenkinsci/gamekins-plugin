@@ -187,7 +187,8 @@ object GitUtil {
                         //Add a new class
                         if (!found && user != null) {
                             val details = ClassDetails(workspace, path, constants["jacocoResultsPath"]!!,
-                                    constants["jacocoCSVPath"]!!, constants, listener)
+                                    constants["jacocoCSVPath"]!!,  constants["mocoJSONPath"]!!,
+                                    constants, listener)
                             details.addUser(user)
                             classes.add(details)
                         }

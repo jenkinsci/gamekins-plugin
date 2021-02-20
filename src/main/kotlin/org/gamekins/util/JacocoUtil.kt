@@ -268,19 +268,17 @@ object JacocoUtil {
 
 
     /**
-     * Returns lines within specific lines of code range the [jacocoSourceFile].
+     * Returns lines of code within specific lines of code range the [jacocoSourceFile].
      */
     @JvmStatic
     @Throws(IOException::class, InterruptedException::class)
-    fun getLinesInRange(jacocoSourceFile: FilePath, range: Pair<Int, Int>): Elements? {
-        if (range.first > range.second) return null
+    fun getLinesInRange(jacocoSourceFile: FilePath, range: Pair<Int, Int>): String {
+        if (range.first > range.second) return ""
         val document = Jsoup.parse(jacocoSourceFile.readToString())
-        val elements = Elements()
+        var elements = ""
         for (l in range.first..range.second) {
-            val line = document.select("#L$l")
-            if (line != null && line.size > 0) {
-                elements.addAll(line)
-            }
+            val line: String = document.select("#L$l").text()
+            elements += line
         }
         return elements
     }
@@ -424,6 +422,7 @@ object JacocoUtil {
                        var sourceFilePath: String,
                        shortJacocoPath: String,
                        shortJacocoCSVPath: String,
+                       shortMocoJSONPath: String,
                        var constants: HashMap<String, String>,
                        listener: TaskListener = TaskListener.NULL)
         : Serializable {
@@ -434,6 +433,7 @@ object JacocoUtil {
         val jacocoMethodFile: File
         val jacocoSourceFile: File
         val jacocoCSVFile: File
+        val mocoJSONFile: File
         val coverage: Double
         val changedByUsers: HashSet<GameUser>
         val workspace: String = workspace.remote
@@ -456,6 +456,12 @@ object JacocoUtil {
             if (!jacocoCSVFile.exists()) {
                 listener.logger.println("[Gamekins] JaCoCoCSVPath: " + jacocoCSVFile.absolutePath
                         + EXISTS + jacocoCSVFile.exists())
+            }
+
+            mocoJSONFile = File(StringBuilder(workspace.remote).toString() + shortMocoJSONPath.substring(2))
+            if (!mocoJSONFile.exists()) {
+                listener.logger.println("[Gamekins] MoCoJSONPath: " + mocoJSONFile.absolutePath
+                        + EXISTS + mocoJSONFile.exists())
             }
 
             jacocoPath.append(shortJacocoPath.substring(2))
