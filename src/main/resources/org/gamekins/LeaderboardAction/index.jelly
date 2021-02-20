@@ -5,64 +5,61 @@
 <j:jelly xmlns:j="jelly:core" xmlns:l="/lib/layout" xmlns:st="jelly:stapler" xmlns:f="/lib/form"
          xmlns:fa="/font-awesome" xmlns:bs="/bootstrap">
 
-
-
     <l:layout title="Leaderboard">
         <link rel="stylesheet" href="${rootURL}/plugin/gamekins/css/prettify.css"/>
-
+            <st:adjunct includes="io.jenkins.plugins.popper"/>
 
         <l:side-panel>
             <st:include page="sidepanel.jelly" it="${it.job}" optional="true"/>
         </l:side-panel>
         <l:main-panel>
-            <st:adjunct includes="io.jenkins.plugins.bootstrap4"/>
             <st:adjunct includes="io.jenkins.plugins.jquery3"/>
+            <st:adjunct includes="io.jenkins.plugins.bootstrap4"/>
 
             <h1 class="ml-2 mb-2">
                 Leaderboard
             </h1>
-            <div class="container-fluid row px-4">
-                <div class="col-12 col-md-7 table-responsive">
+            <div class="container-fluid row px-4 justify-content-center">
+                <div class="col-12 col-md-7 table-responsive pr-3">
                     <table class="mt-3 shadow table-hover table pane sortable bigtable">
                         <thead class="thead-dark">
                         <tr>
 
-
-                            <th scope="col">#</th>
-                            <th scope="col">Participant</th>
-                            <th scope="col">Team</th>
-                            <th scope="col">Completed Challenges</th>
-                            <th initialSortDir="up" scope="col">Score</th>
+                            <th scope="col" class="text-center">#</th>
+                            <th scope="col" class="text-center">Participant</th>
+                            <th scope="col" class="text-center">Team</th>
+                            <th scope="col" class="text-center">Completed Challenges</th>
+                            <th initialSortDir="up" class="text-center" scope="col">Score</th>
 
                         </tr>
                         </thead>
                         <j:forEach indexVar="index" var="userDetail" items="${it.userDetails}">
                             <tr>
-                                <td>${index + 1}</td>
-                                <td><a href="${userDetail.url}">${userDetail.userName}</a></td>
-                                <td>${userDetail.teamName}</td>
-                                <td>${userDetail.completedChallenges}</td>
-                                <td>${userDetail.score}</td>
+                                <td class="text-center">${index + 1}</td>
+                                <td class="text-center"><a href="${userDetail.url}">${userDetail.userName}</a></td>
+                                <td class="text-center">${userDetail.teamName}</td>
+                                <td class="text-center">${userDetail.completedChallenges}</td>
+                                <td class="text-center">${userDetail.score}</td>
                             </tr>
                         </j:forEach>
                     </table>
                 </div>
-                <div class="col-12 col-md-5 table-responsive ">
+                <div class="col-12 col-md-5 table-responsive pl-3">
                     <table class="mt-3 shadow table-hover table pane sortable bigtable">
                         <thead class="thead-dark">
                         <tr>
-                            <th scope="col">#</th>
-                            <th scope="col">Team</th>
-                            <th scope="col">Completed Challenges</th>
-                            <th initialSortDir="up" scope="col">Score</th>
+                            <th scope="col" class="text-center">#</th>
+                            <th scope="col" class="text-center">Team</th>
+                            <th scope="col" class="text-center">Completed Challenges</th>
+                            <th initialSortDir="up" class="text-center" scope="col">Score</th>
                         </tr>
                         </thead>
                         <j:forEach indexVar="index" var="teamDetail" items="${it.teamDetails}">
                             <tr>
-                                <td>${index + 1}</td>
-                                <td>${teamDetail.teamName}</td>
-                                <td>${teamDetail.completedChallenges}</td>
-                                <td>${teamDetail.score}</td>
+                                <td class="text-center">${index + 1}</td>
+                                <td class="text-center">${teamDetail.teamName}</td>
+                                <td class="text-center">${teamDetail.completedChallenges}</td>
+                                <td class="text-center">${teamDetail.score}</td>
                             </tr>
                         </j:forEach>
                     </table>
@@ -75,19 +72,19 @@
                     Challenges
                 </h1>
 
-                <div class="container-fluid py-1 px-4">
+                <div class="row container-fluid py-1 px-5 justify-content-center">
                     <p class="font-italic font-weight-light">Click on a challenge to expand and see more details</p>
 
-                    <div id="accordion" class="shadow">
+                    <div id="accordion" class="col-12 px-0 shadow-lg">
                         <div class="card-header py-1 my-1 bg-dark text-white" id="headingOne">
-                            <h6 class="m-2">Current Challenges</h6>
+                            <h5 class="m-2">Current Challenges</h5>
                         </div>
 
                         <j:forEach indexVar="index" var="currentChallenge" items="${it.currentChallenges}">
                             <div class="card border-0">
                                 <div class="card-header p-0 m-0" data-toggle="tooltip" data-placement="top"
                                      title="Click to see more details" id="heading${index}">
-                                    <div class="row">
+                                    <div class="row mx-1">
                                         <div class="col-12 col-sm-10">
                                             <h5 class="mb-0">
                                                 <button class="btn btn-link text-dark text-left text-decoration-none"
@@ -123,8 +120,10 @@
 
                                 <div id="challenge${index}" class="collapse" aria-labelledby="heading${index}"
                                      data-parent="#accordion">
-                                    <div class="card-body">
-        ${currentChallenge.codeSnippet}
+                                    <div class="card-body" style="font-size:15px;">
+                                    <?jelly escape-by-default='false'?>
+                                            ${currentChallenge.snippet}
+
                                     </div>
                                 </div>
                             </div>
@@ -159,18 +158,18 @@
                     </div>
                 </div>
 
-                <div class="row container-fluid py-3 px-4">
-                    <div class="col-12 col-md-6 table-responsive">
+                <div class="row container-fluid py-3 px-4 justify-content-center">
+                    <div class="col-12 col-md-6 table-responsive p-4">
                         <table class="mt-3 shadow table-hover table pane sortable bigtable">
                             <thead class="thead-dark">
                             <tr>
-                                <th scope="col">#</th>
-                                <th scope="col">Completed Challenges</th>
+                                <th scope="col" class="text-left"><h5>#</h5></th>
+                                <th scope="col" class="text-left"><h5>Completed Challenges</h5></th>
                             </tr>
                             </thead>
 
                             <j:forEach indexVar="index" var="completedChallenge" items="${it.completedChallenges}">
-                                <j:if test="${completedChallenge.name != 'Dummy'}">
+                                <j:if test="${!completedChallenge.first.toString().contains(' nothing developed recently')}">
                                     <tr>
                                         <td>${index + 1}</td>
                                         <td>${completedChallenge}
@@ -183,22 +182,23 @@
 
                         </table>
                     </div>
-                    <div class="col-12 col-md-6 table-responsive">
+                    <div class="col-12 col-md-6 table-responsive p-4" style="height: 600px;">
                         <table class="mt-3 shadow table-hover table pane sortable bigtable">
                             <thead class="thead-dark">
                             <tr>
-                                <th scope="col">#</th>
-                                <th scope="col">Rejected Challenges</th>
+                                <th scope="col" class="text-left"><h5>#</h5></th>
+                                <th scope="col" class="text-left"><h5>Rejected Challenges</h5></th>
                             </tr>
                             </thead>
 
                             <j:forEach indexVar="index" var="rejectedChallenge" items="${it.rejectedChallenges}">
-                                <j:if test="${rejectedChallenge.name != 'Dummy'}">
+                                <j:if test="${!rejectedChallenge.first.toString().contains(' nothing developed recently')}">
                                     <tr>
                                         <td>${index + 1}</td>
-                                        <td tooltip="${rejectedChallenge.second}">
+                                        <td
+                                            data-toggle="tooltip" data-placement="left" title="${rejectedChallenge.second}">
                                             ${rejectedChallenge.first}
-                                            <span class="ml-2 badge badge-warning">${completedChallenge.name}</span>
+                                            <span class="ml-2 badge badge-warning">${rejectedChallenge.name}</span>
                                         </td>
                                     </tr>
                                 </j:if>

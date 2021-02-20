@@ -87,7 +87,9 @@ abstract class CoverageChallenge(val classDetails: ClassDetails, workspace: File
         solved = newSolved
     }
 
-    open fun getCodeSnippet(classDetails: ClassDetails, lineOfCode: Int, workspace: FilePath): String {
+    open fun createCodeSnippet(classDetails: ClassDetails, lineOfCode: Int, workspace: FilePath): String {
         return ""
     }
+
+    abstract fun getSnippet(): String
 }

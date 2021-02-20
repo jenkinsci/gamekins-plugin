@@ -42,6 +42,10 @@ class ClassCoverageChallenge(data: Challenge.ChallengeGenerationData)
         return "ClassCoverageChallenge"
     }
 
+    override fun getSnippet(): String {
+        TODO("Not yet implemented")
+    }
+
     override fun getScore(): Int {
         return if (coverage >= 0.8) 2 else 1
     }

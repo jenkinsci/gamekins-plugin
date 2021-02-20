@@ -41,7 +41,7 @@ class LineCoverageChallenge(data: Challenge.ChallengeGenerationData)
 
 
     init {
-        codeSnippet = getCodeSnippet(classDetails, lineNumber,  data.workspace)
+        codeSnippet = createCodeSnippet(classDetails, lineNumber,  data.workspace)
         val split = data.line!!.attr("title").split(" ".toRegex())
         when {
             split.isEmpty() || (split.size == 1 && split[0].isBlank()) -> {
@@ -79,6 +79,10 @@ class LineCoverageChallenge(data: Challenge.ChallengeGenerationData)
 
     override fun getScore(): Int {
         return if (coverage >= 0.8 || coverageType == "pc") 3 else 2
+    }
+
+    override fun getSnippet(): String {
+        return codeSnippet
     }
 
     override fun getToolTipText(): String {
@@ -210,7 +214,7 @@ class LineCoverageChallenge(data: Challenge.ChallengeGenerationData)
                 + classDetails.constants["branch"] + ")")
     }
 
-    override fun getCodeSnippet(classDetails: JacocoUtil.ClassDetails, lineOfCode: Int, workspace: FilePath): String {
+    override fun createCodeSnippet(classDetails: JacocoUtil.ClassDetails, lineOfCode: Int, workspace: FilePath): String {
         if (lineOfCode < 0) {
             return ""
         }
@@ -220,7 +224,7 @@ class LineCoverageChallenge(data: Challenge.ChallengeGenerationData)
             )
             val range = if (lineOfCode > 0) Pair(lineOfCode - 1, lineOfCode + 1) else Pair(lineOfCode, lineOfCode + 2)
             val snippetElements = JacocoUtil.getLinesInRange(javaHtmlPath, range)
-            return "pre class=\"prettyprint source lang-java linenums:${range.first}\">" +
+            return "<pre class='prettyprint source lang-java linenums:${range.first}'>" +
                     snippetElements +
                     "</pre>"
         }

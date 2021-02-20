@@ -46,6 +46,10 @@ class MethodCoverageChallenge(data: ChallengeGenerationData) : CoverageChallenge
         return "MethodCoverageChallenge"
     }
 
+    override fun getSnippet(): String {
+        TODO("Not yet implemented")
+    }
+
     override fun getScore(): Int {
         return if ((lines - missedLines) / lines.toDouble() > 0.8) 3 else 2
     }
