@@ -143,7 +143,7 @@ object JacocoUtil {
                     when {
                         value.matches(Regex("a\\d+")) -> {
                             methodName = node.childNode(0).childNode(0).toString()
-                            val temp = node.childNode(0).attributes().find { it.key == "href" && it.value.endsWith("#L\\d+") }
+                            val temp = node.childNode(0).attributes().find { it.key == "href" && it.value.matches(Regex(".*#L\\d+")) }
                             firstLineID = temp?.value?.substringAfterLast("#") ?: ""
                         }
                         value.matches(Regex("h\\d+")) -> {

@@ -37,10 +37,12 @@ class MutationTestChallenge(val mutationInfo: MutationInfo, val classDetails: Cl
 
     private val created = System.currentTimeMillis()
     private var solved: Long = 0
-    private val methodName = mutationInfo.mutationDetails.methodInfo["methodName"]
-    private val className = mutationInfo.mutationDetails.methodInfo["className"]
-    private val mutationDescription = mutationInfo.mutationDetails.mutationDescription
-    private val lineOfCode = mutationInfo.mutationDetails.loc
+    private var mutationDetails = mutationInfo.mutationDetails
+    private val methodName = mutationDetails.methodInfo["methodName"]
+    private val className = mutationDetails.methodInfo["className"]
+    private val mutationDescription = mutationDetails.mutationDescription
+    private val lineOfCode = mutationDetails.loc
+    private val fileName = mutationDetails.fileName
     val uniqueID = mutationInfo.uniqueID
     private val codeSnippet = createCodeSnippet(classDetails, lineOfCode, workspace)
     private var mutationStillInJson = true
@@ -52,6 +54,14 @@ class MutationTestChallenge(val mutationInfo: MutationInfo, val classDetails: Cl
 
     fun getName(): String {
         return "MutationTestChallenge"
+    }
+
+    fun getMutationDescription(): String {
+        return mutationDescription
+    }
+
+    fun getFileName(): String {
+        return if (codeSnippet.isNotEmpty()) fileName else ""
     }
 
     override fun getSolved(): Long {
@@ -175,9 +185,7 @@ class MutationTestChallenge(val mutationInfo: MutationInfo, val classDetails: Cl
             if (snippetElements == "") {
                 return ""
             }
-            return "Write or update tests so that they fail when we make a" +
-                    " <b>${this.mutationDescription.toLowerCase()}</b> at the mentioned location." +
-                    "<pre class='prettyprint linenums:${lineOfCode - 2}'><code class='language-java'>" + snippetElements +
+            return "<pre class='prettyprint linenums:${lineOfCode - 2} mt-2'><code class='language-java'>" + snippetElements +
                     "</code></pre>"
         }
         return ""

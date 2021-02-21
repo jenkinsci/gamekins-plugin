@@ -37,7 +37,7 @@ class MethodCoverageChallenge(data: ChallengeGenerationData) : CoverageChallenge
 
 
     init {
-        codeSnippet = createCodeSnippet(classDetails, "#$firstLineID", data.workspace)
+        codeSnippet = createCodeSnippet(classDetails, firstLineID, data.workspace)
     }
 
     override fun equals(other: Any?): Boolean {
@@ -157,7 +157,9 @@ class MethodCoverageChallenge(data: ChallengeGenerationData) : CoverageChallenge
             if (snippetElements == "") {
                 return ""
             }
-            return "<pre class='prettyprint'><code class='language-java'>" + snippetElements +
+            val loc = (target as String).substring(1)
+            val linenums = if (loc.toIntOrNull() is Int) "linenums:${loc.toInt() - 2}" else ""
+            return "<pre class='prettyprint mt-2 ${linenums}'><code class='language-java'>" + snippetElements +
                     "</code></pre>"
         }
         return ""

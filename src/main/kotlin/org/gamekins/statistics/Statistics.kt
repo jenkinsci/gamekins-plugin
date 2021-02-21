@@ -36,7 +36,7 @@ class Statistics(job: AbstractItem) {
 
     private var fullyInitialized: Boolean = false
     private val projectName: String = job.name
-    private val runEntries: ArrayList<RunEntry>?
+    private val runEntries: MutableList<RunEntry>?
 
     init {
         runEntries = generateRunEntries(job)
@@ -51,8 +51,8 @@ class Statistics(job: AbstractItem) {
      * Adds the number of [additionalGenerated] Challenges after rejection to the current run of [branch].
      */
     fun addGeneratedAfterRejection(branch: String, additionalGenerated: Int) {
-        val entry = runEntries!!.last { it.branch == branch }
-        entry.generatedChallenges = entry.generatedChallenges + additionalGenerated
+        val entry = runEntries!!.lastOrNull { it.branch == branch }
+        entry?.generatedChallenges = entry?.generatedChallenges?.plus(additionalGenerated)!!
     }
 
     /**

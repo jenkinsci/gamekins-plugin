@@ -230,7 +230,7 @@ class LineCoverageChallenge(data: Challenge.ChallengeGenerationData)
             if (snippetElements == "") {
                 return ""
             }
-            return "<pre class='prettyprint linenums:${target - 1}'><code class='language-java'>" + snippetElements +
+            return "<pre class='prettyprint linenums:${target - 1} mt-2'><code class='language-java'>" + snippetElements +
                    "</code></pre>"
         }
         return ""
