@@ -160,7 +160,7 @@ class MutationTestChallenge(val mutationInfo: MutationInfo, val classDetails: Cl
     }
 
     fun getSnippet(): String {
-        return if (codeSnippet.isNotEmpty()) codeSnippet else "Code snippet is not available"
+        return codeSnippet
     }
 
     fun createCodeSnippet(classDetails: ClassDetails, lineOfCode: Int, workspace: FilePath): String {
@@ -175,8 +175,8 @@ class MutationTestChallenge(val mutationInfo: MutationInfo, val classDetails: Cl
             if (snippetElements == "") {
                 return ""
             }
-            return "Write tests to kill this mutant when we make a" +
-                    " <b>'${this.mutationDescription.toLowerCase()}'</b> at the mentioned location." +
+            return "Write or update tests so that they fail when we make a" +
+                    " <b>${this.mutationDescription.toLowerCase()}</b> at the mentioned location." +
                     "<pre class='prettyprint linenums:${lineOfCode - 2}'><code class='language-java'>" + snippetElements +
                     "</code></pre>"
         }
