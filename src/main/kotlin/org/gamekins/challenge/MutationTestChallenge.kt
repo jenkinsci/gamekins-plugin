@@ -39,7 +39,7 @@ class MutationTestChallenge(val mutationInfo: MutationInfo, val classDetails: Cl
     private var solved: Long = 0
     private var mutationDetails = mutationInfo.mutationDetails
     private val methodName = mutationDetails.methodInfo["methodName"]
-    private val className = mutationDetails.methodInfo["className"]
+    private val className = mutationDetails.methodInfo["className"]?.replace("/", ".")
     private val mutationDescription = mutationDetails.mutationDescription
     private val lineOfCode = mutationDetails.loc
     private val fileName = mutationDetails.fileName
