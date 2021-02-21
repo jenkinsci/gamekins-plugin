@@ -31,9 +31,6 @@ data class MutationResults(val entries: Map<String, List<MutationInfo>>) : Seria
             remotePath: FilePath, listener: TaskListener
         ): MutationResults? {
             return try {
-                listener.logger.println(remotePath.toURI())
-                listener.logger.println(remotePath)
-
                 // Get json contents as string
                 val jsonString: String = remotePath.act(GetMutationResultsCallable(remotePath))
                 if (retrievedResults == null) {

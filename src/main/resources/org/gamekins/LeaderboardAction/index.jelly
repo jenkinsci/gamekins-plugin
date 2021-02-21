@@ -1,18 +1,18 @@
-
-
 <?jelly escape-by-default='true'?>
 
 <j:jelly xmlns:j="jelly:core" xmlns:l="/lib/layout" xmlns:st="jelly:stapler" xmlns:f="/lib/form"
          xmlns:fa="/font-awesome" xmlns:bs="/bootstrap">
 
     <l:layout title="Leaderboard">
-        <link rel="stylesheet" href="${rootURL}/plugin/gamekins/css/prettify.css"/>
-            <st:adjunct includes="io.jenkins.plugins.popper"/>
+
+        <link rel="stylesheet" href="${rootURL}/plugin/gamekins/css/prettify.css" type="text/css"/>
+        <script src="${rootURL}/plugin/gamekins/vendor/prettify.js" type="text/javascript"/>
 
         <l:side-panel>
             <st:include page="sidepanel.jelly" it="${it.job}" optional="true"/>
         </l:side-panel>
         <l:main-panel>
+            <st:adjunct includes="io.jenkins.plugins.popper"/>
             <st:adjunct includes="io.jenkins.plugins.jquery3"/>
             <st:adjunct includes="io.jenkins.plugins.bootstrap4"/>
 
@@ -71,27 +71,28 @@
                 <h1 class="ml-2">
                     Challenges
                 </h1>
-
                 <div class="row container-fluid py-1 px-5 justify-content-center">
-                    <p class="font-italic font-weight-light">Click on a challenge to expand and see more details</p>
+                    <p class="font-italic font-weight-light">Click on a challenge to expand and see more details if
+                        available</p>
 
                     <div id="accordion" class="col-12 px-0 shadow-lg">
-                        <div class="card-header py-1 my-1 bg-dark text-white" id="headingOne">
+                        <div class="card-header py-2 my-1 bg-dark text-white" id="headingOne">
                             <h5 class="m-2">Current Challenges</h5>
                         </div>
+                        <?jelly escape-by-default='false'?>
 
                         <j:forEach indexVar="index" var="currentChallenge" items="${it.currentChallenges}">
                             <div class="card border-0">
                                 <div class="card-header p-0 m-0" data-toggle="tooltip" data-placement="top"
-                                     title="Click to see more details" id="heading${index}">
-                                    <div class="row mx-1">
+                                     title="Click to see more details" id="heading${index + 1}">
+                                    <div class="row mx-1 align-items-center mb-2">
                                         <div class="col-12 col-sm-10">
-                                            <h5 class="mb-0">
+                                            <h5>
                                                 <button class="btn btn-link text-dark text-left text-decoration-none"
-                                                        data-toggle="collapse" data-target="#challenge${index}"
+                                                        data-toggle="collapse" data-target="#challenge${index + 1}"
                                                         aria-expanded="true"
                                                         aria-controls="collapseOne"
-                                                        style="font-size:14px; ">
+                                                        style="font-size:14px;">
                                                     ${index + 1}. <span id="currentChallengeText${index + 1}">${currentChallenge}</span>
                                                     <span class="ml-2 badge badge-success">${currentChallenge.score} points</span>
                                                     <span class="ml-2 badge badge-warning">${currentChallenge.name}</span>
@@ -99,31 +100,21 @@
                                             </h5>
                                         </div>
                                         <div class="col-12 col-sm-2">
-
-                                            <j:choose>
-                                                <j:when test="${currentChallenge.name == 'Dummy'}">
-                                                    <button type="button" class="btn btn-danger m-2" disabled="true">
-                                                        Reject</button>
-                                                </j:when>
-                                                <j:otherwise>
-                                                    <button type="button" class="btn btn-danger m-2"
-                                                            data-toggle="modal" data-target="#rejectModal"
-                                                            data-challenge-id="${index + 1}"
-                                                            data-descriptor-url="${it.descriptor.descriptorFullUrl}">
-                                                        Reject</button>
-                                                </j:otherwise>
-                                            </j:choose>
-
+                                            <button type="button" class="btn btn-danger m-2 py-1"
+                                                    style="font-size: 14px;"
+                                                    data-toggle="modal" data-target="#rejectModal"
+                                                    data-challenge-id="${index + 1}"
+                                                    data-descriptor-url="${it.descriptor.descriptorFullUrl}">
+                                                Reject
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div id="challenge${index}" class="collapse" aria-labelledby="heading${index}"
+                                <div id="challenge${index + 1}" class="collapse" aria-labelledby="heading${index + 1}"
                                      data-parent="#accordion">
                                     <div class="card-body" style="font-size:15px;">
-                                    <?jelly escape-by-default='false'?>
-                                            ${currentChallenge.snippet}
-
+      ${currentChallenge.snippet}
                                     </div>
                                 </div>
                             </div>
@@ -131,8 +122,8 @@
                         </j:forEach>
                     </div>
                 </div>
-
-                <div class="modal fade" id="rejectModal" tabindex="-1" role="dialog" aria-labelledby="rejectModalLabel" aria-hidden="true">
+                <div class="modal fade" id="rejectModal" tabindex="-1" role="dialog" aria-labelledby="rejectModalLabel"
+                     aria-hidden="true">
                     <div class="modal-dialog modal-dialog-centered" role="document">
                         <div class="modal-content">
                             <div class="modal-header">
@@ -160,7 +151,7 @@
 
                 <div class="row container-fluid py-3 px-4 justify-content-center">
                     <div class="col-12 col-md-6 table-responsive p-4">
-                        <table class="mt-3 shadow table-hover table pane sortable bigtable">
+                        <table class="mt-3 shadow table-hover table pane sortable bigtable" id="completedTable">
                             <thead class="thead-dark">
                             <tr>
                                 <th scope="col" class="text-left"><h5>#</h5></th>
@@ -183,7 +174,7 @@
                         </table>
                     </div>
                     <div class="col-12 col-md-6 table-responsive p-4" style="height: 600px;">
-                        <table class="mt-3 shadow table-hover table pane sortable bigtable">
+                        <table class="mt-3 shadow table-hover table pane sortable bigtable" id="rejectedTable">
                             <thead class="thead-dark">
                             <tr>
                                 <th scope="col" class="text-left"><h5>#</h5></th>
@@ -196,7 +187,8 @@
                                     <tr>
                                         <td>${index + 1}</td>
                                         <td
-                                            data-toggle="tooltip" data-placement="left" title="${rejectedChallenge.second}">
+                                                data-toggle="tooltip" data-placement="left"
+                                                title="${rejectedChallenge.second}">
                                             ${rejectedChallenge.first}
                                             <span class="ml-2 badge badge-warning">${rejectedChallenge.name}</span>
                                         </td>
@@ -266,18 +258,11 @@
                 </ul>
             </j:if>
 
-            <script src="${rootURL}/plugin/gamekins/vendor/prettify.js"/>
-
             <script>
-                function showReject(index) {
-                    let div = document.getElementById("currentChallengeDiv" + index)
-                    if (div.style.display === "none") {
-                        div.style.display = "block"
-                    } else {
-                        div.style.display = "none"
-                    }
-                }
-                window.onload = (function(){ prettyPrint(); });
+                window.onload = (function () {
+                    prettyPrint();
+                });
+
 
                 jQuery3("#rejectModal").on('show.bs.modal', function (event) {
                     var button = jQuery3(event.relatedTarget)
@@ -302,6 +287,17 @@
                                     return false;
                                 } else {
                                     modal.find('#error-text')[0].innerHTML = ""
+                                    modal.find('#reason-text').val("")
+                                    // Update UI after successful rejection
+                                    var temp = jQuery3("#heading" + challengeID)
+                                    var challengeText = temp.find("#currentChallengeText" + challengeID).html()
+                                    var appendedVal = '<tr>' +
+                                                      '<td>' + challengeID + '</td>' +
+                                                      '<td data-toggle="tooltip" data-placement="left" title="' + reason + '">' + challengeText + '</td>' +
+                                                      '</tr>'
+
+                                    jQuery3("#rejectedTable").append(appendedVal)
+                                    temp.parent().remove()
                                     modal.modal("hide")
                                 }
                             }

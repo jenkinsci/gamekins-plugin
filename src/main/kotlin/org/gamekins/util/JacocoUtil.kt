@@ -27,6 +27,7 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import org.jsoup.parser.Parser
+import org.jsoup.safety.Whitelist
 import org.jsoup.select.Elements
 import java.io.File
 import java.io.IOException
@@ -134,6 +135,7 @@ object JacocoUtil {
         var methodName = ""
         var lines = 0
         var missedLines = 0
+        var firstLineID = ""
 
         for (node in element.childNodes()) {
             for ((key, value) in node.attributes()) {
@@ -141,6 +143,8 @@ object JacocoUtil {
                     when {
                         value.matches(Regex("a\\d+")) -> {
                             methodName = node.childNode(0).childNode(0).toString()
+                            val temp = node.childNode(0).attributes().find { it.key == "href" && it.value.endsWith("#L\\d+") }
+                            firstLineID = temp?.value?.substringAfterLast("#") ?: ""
                         }
                         value.matches(Regex("h\\d+")) -> {
                             missedLines = node.childNode(0).toString().toInt()
@@ -154,7 +158,7 @@ object JacocoUtil {
             }
         }
 
-        return CoverageMethod(methodName, lines, missedLines)
+        return CoverageMethod(methodName, lines, missedLines, firstLineID)
     }
 
     /**
@@ -272,15 +276,37 @@ object JacocoUtil {
      */
     @JvmStatic
     @Throws(IOException::class, InterruptedException::class)
-    fun getLinesInRange(jacocoSourceFile: FilePath, range: Pair<Int, Int>): String {
-        if (range.first > range.second) return ""
+    fun getLinesInRange(jacocoSourceFile: FilePath, target: Any, linesAround: Int): String {
         val document = Jsoup.parse(jacocoSourceFile.readToString())
-        var elements = ""
-        for (l in range.first..range.second) {
-            val line: String = document.select("#L$l").text()
-            elements += line
+        val lines: List<String> = document.html().lines()
+        val outputSettings = Document.OutputSettings()
+        outputSettings.prettyPrint(false)
+        document.outputSettings(outputSettings)
+        document.select("br").before("\\n")
+        document.select("p").before("\\n")
+
+        val lineIndex: Int = when (target) {
+            is Int -> {
+                if (target < 0) { return "" }
+                val line = document.selectFirst("#L$target") ?: return ""
+                lines.indexOfFirst { it == line.toString() }
+            }
+            is String -> { lines.indexOfFirst { it.contains(target) } }
+            else ->  return ""
         }
-        return elements
+
+        if (lineIndex < 0) { return "" }
+
+        var res = ""
+        val offset = if (linesAround % 2 != 0) 1 else 0
+        for (i in (lineIndex - (linesAround/2))..(lineIndex + (linesAround/2 + offset))) {
+            val temp = lines.getOrNull(i)
+            if (temp != null) {
+                res += Jsoup.clean(temp, "", Whitelist.none(), outputSettings) + System.lineSeparator()
+
+            }
+        }
+        return res
     }
 
     /**
@@ -405,7 +431,7 @@ object JacocoUtil {
      * @author Philipp Straubinger
      * @since 1.0
      */
-    class CoverageMethod internal constructor(val methodName: String, val lines: Int, val missedLines: Int)
+    class CoverageMethod internal constructor(val methodName: String, val lines: Int, val missedLines: Int, val firstLineID: String)
 
     /**
      * The internal representation of a class from JaCoCo.

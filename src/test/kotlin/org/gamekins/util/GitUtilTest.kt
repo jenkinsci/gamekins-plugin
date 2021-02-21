@@ -57,6 +57,7 @@ class GitUtilTest : AnnotationSpec() {
         constants["projectName"] = "test-project"
         constants["jacocoResultsPath"] = "**/target/site/jacoco/"
         constants["jacocoCSVPath"] = "**/target/site/jacoco/jacoco.csv"
+        constants["mocoJSONPath"] = "**/target/site/moco/mutation/"
 
         every { user.id } returns id
         every { user.fullName } returns name

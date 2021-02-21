@@ -322,12 +322,10 @@ object ChallengeFactory {
         classDetails: ClassDetails, branch: String?,
         listener: TaskListener, workspace: FilePath
     ): MutationTestChallenge? {
-        listener.logger.println(classDetails.mocoJSONFile)
 
         val jsonFilePath = JacocoUtil.calculateCurrentFilePath(
                 workspace, classDetails.mocoJSONFile, classDetails.workspace
             )
-        listener.logger.println(jsonFilePath)
 
         val relevantMutationResultsByClass: Map<String, List<MutationInfo>>? =
             MutationResults.retrievedMutationsFromJson(jsonFilePath, listener

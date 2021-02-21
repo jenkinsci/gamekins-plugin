@@ -17,6 +17,7 @@
 package org.gamekins.challenge
 
 import hudson.FilePath
+import hudson.model.TaskListener
 import org.gamekins.util.JacocoUtil
 import org.gamekins.util.JacocoUtil.ClassDetails
 import org.jsoup.nodes.Element
@@ -87,7 +88,7 @@ abstract class CoverageChallenge(val classDetails: ClassDetails, workspace: File
         solved = newSolved
     }
 
-    open fun createCodeSnippet(classDetails: ClassDetails, lineOfCode: Int, workspace: FilePath): String {
+    open fun createCodeSnippet(classDetails: ClassDetails, target: Any, workspace: FilePath): String {
         return ""
     }
 

@@ -51,7 +51,10 @@ object ActionUtil {
         val projectName = job.name
         var challenge: Challenge? = null
         for (chal in property.getCurrentChallenges(projectName)) {
-            if (chal.toString() == reject) {
+            println(chal.toString())
+            println(reject)
+
+            if (chal.toString().replace("<b>", ""). replace("</b>", "") == reject) {
                 challenge = chal
                 break
             }

@@ -23,7 +23,6 @@ import org.gamekins.mutation.MutationInfo
 import org.gamekins.mutation.MutationResults
 import org.gamekins.util.JacocoUtil
 import org.gamekins.util.JacocoUtil.ClassDetails
-import org.jsoup.nodes.Element
 
 
 /**
@@ -43,7 +42,7 @@ class MutationTestChallenge(val mutationInfo: MutationInfo, val classDetails: Cl
     private val mutationDescription = mutationInfo.mutationDetails.mutationDescription
     private val lineOfCode = mutationInfo.mutationDetails.loc
     val uniqueID = mutationInfo.uniqueID
-    private val codeSnippet = getCodeSnippet(classDetails, lineOfCode, workspace)
+    private val codeSnippet = createCodeSnippet(classDetails, lineOfCode, workspace)
     private var mutationStillInJson = true
     private var classStillInJson = true
 
@@ -155,12 +154,16 @@ class MutationTestChallenge(val mutationInfo: MutationInfo, val classDetails: Cl
     }
 
     override fun toString(): String {
-        return ("Write a test to kill this mutant at line $lineOfCode of method " +
-                "$methodName in class $className in package ${classDetails.packageName}" +
-                " (created for branch " + branch + ") code snippet: $codeSnippet")
+        return ("Write a test to kill the mutant <b>$mutationDescription</b> at line <b>$lineOfCode</b> " +
+                "of method <b>$methodName</b> in class <b>${classDetails.className}</b> in package " +
+                "<b>${classDetails.packageName}</b> (created for branch " + branch + ")")
     }
 
-    fun getCodeSnippet(classDetails: ClassDetails, lineOfCode: Int, workspace: FilePath): String {
+    fun getSnippet(): String {
+        return if (codeSnippet.isNotEmpty()) codeSnippet else "Code snippet is not available"
+    }
+
+    fun createCodeSnippet(classDetails: ClassDetails, lineOfCode: Int, workspace: FilePath): String {
         if (lineOfCode < 0) {
             return ""
         }
@@ -168,9 +171,14 @@ class MutationTestChallenge(val mutationInfo: MutationInfo, val classDetails: Cl
             val javaHtmlPath = JacocoUtil.calculateCurrentFilePath(
                 workspace, classDetails.jacocoSourceFile, classDetails.workspace
             )
-            val range = if (lineOfCode > 0) Pair(lineOfCode - 1, lineOfCode + 1) else Pair(lineOfCode, lineOfCode + 2)
-            val snippetElements = JacocoUtil.getLinesInRange(javaHtmlPath, range)
-            return snippetElements
+            val snippetElements = JacocoUtil.getLinesInRange(javaHtmlPath, lineOfCode, 4)
+            if (snippetElements == "") {
+                return ""
+            }
+            return "Write tests to kill this mutant when we make a" +
+                    " <b>'${this.mutationDescription.toLowerCase()}'</b> at the mentioned location." +
+                    "<pre class='prettyprint linenums:${lineOfCode - 2}'><code class='language-java'>" + snippetElements +
+                    "</code></pre>"
         }
         return ""
     }

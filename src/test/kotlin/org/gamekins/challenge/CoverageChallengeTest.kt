@@ -32,6 +32,7 @@ class CoverageChallengeTest : AnnotationSpec() {
     private val shortFilePath = "src/main/java/io/jenkins/plugins/gamekins/challenge/$className.kt"
     private val shortJacocoPath = "**/target/site/jacoco/"
     private val shortJacocoCSVPath = "**/target/site/jacoco/csv"
+    private val mocoJSONPath = "**/target/site/moco/mutation/"
     private lateinit var details : JacocoUtil.ClassDetails
     private lateinit var challenge : ClassCoverageChallenge
     private val coverage = 0.0
@@ -51,7 +52,7 @@ class CoverageChallengeTest : AnnotationSpec() {
         every { JacocoUtil.calculateCoveredLines(any(), any()) } returns 0
         val map = HashMap<String, String>()
         map["branch"] = "master"
-        details = JacocoUtil.ClassDetails(path, shortFilePath, shortJacocoPath, shortJacocoCSVPath, map,
+        details = JacocoUtil.ClassDetails(path, shortFilePath, shortJacocoPath, shortJacocoCSVPath, mocoJSONPath, map,
                 TaskListener.NULL)
         val data = mockkClass(Challenge.ChallengeGenerationData::class)
         every { data.selectedClass } returns details

@@ -54,6 +54,7 @@ class ChallengeFactoryTest : AnnotationSpec() {
     private val shortFilePath = "src/main/java/io/jenkins/plugins/gamekins/challenge/$className.kt"
     private val shortJacocoPath = "**/target/site/jacoco/"
     private val shortJacocoCSVPath = "**/target/site/jacoco/csv"
+    private val mocoJSONPath = "**/target/site/moco/mutation/"
     private val coverage = 0.0
     private val testCount = 10
     private lateinit var details : JacocoUtil.ClassDetails
@@ -89,7 +90,7 @@ class ChallengeFactoryTest : AnnotationSpec() {
         every { path.act(ofType(JacocoUtil.FilesOfAllSubDirectoriesCallable::class)) } returns arrayListOf()
         every { path.remote } returns "/home/test/workspace"
         every { path.channel } returns null
-        details = JacocoUtil.ClassDetails(path, shortFilePath, shortJacocoPath, shortJacocoCSVPath, map, listener)
+        details = JacocoUtil.ClassDetails(path, shortFilePath, shortJacocoPath, shortJacocoCSVPath, mocoJSONPath, map, listener)
     }
 
     @AfterAll
@@ -180,7 +181,7 @@ class ChallengeFactoryTest : AnnotationSpec() {
         GamePublisherDescriptor.challenges[MethodCoverageChallenge::class.java] = 1
         every { Random.nextInt(1) } returns 0
         every { JacocoUtil.calculateCoveredLines(any(), "nc") } returns 10
-        val method = JacocoUtil.CoverageMethod("toString", 10, 10)
+        val method = JacocoUtil.CoverageMethod("toString", 10, 10, "")
         every { JacocoUtil.getMethodEntries(any()) } returns arrayListOf(method)
         ChallengeFactory.generateChallenge(user, map, listener, arrayListOf(details), path) should
                 beOfType(MethodCoverageChallenge::class)

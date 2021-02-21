@@ -43,7 +43,8 @@ class ClassCoverageChallenge(data: Challenge.ChallengeGenerationData)
     }
 
     override fun getSnippet(): String {
-        TODO("Not yet implemented")
+        // No code snippet is collected for a ClassCoverageChallenge
+        return ""
     }
 
     override fun getScore(): Int {

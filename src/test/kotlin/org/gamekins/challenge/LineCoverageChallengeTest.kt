@@ -34,6 +34,7 @@ class LineCoverageChallengeTest : AnnotationSpec() {
     private val shortFilePath = "src/main/java/org/gamekins/challenge/$className.kt"
     private val shortJacocoPath = "**/target/site/jacoco/"
     private val shortJacocoCSVPath = "**/target/site/jacoco/csv"
+    private val mocoJSONPath = "**/target/site/moco/mutation/"
     private lateinit var details : JacocoUtil.ClassDetails
     private lateinit var challenge : LineCoverageChallenge
     private val document = mockkClass(Document::class)
@@ -59,7 +60,7 @@ class LineCoverageChallengeTest : AnnotationSpec() {
         every { element.attr("class") } returns "nc"
         every { element.attr("title") } returns ""
         every { element.text() } returns "toString();"
-        details = JacocoUtil.ClassDetails(path, shortFilePath, shortJacocoPath, shortJacocoCSVPath, map,
+        details = JacocoUtil.ClassDetails(path, shortFilePath, shortJacocoPath, shortJacocoCSVPath, mocoJSONPath, map,
                 TaskListener.NULL)
         every { data.selectedClass } returns details
         every { data.workspace } returns path
@@ -90,35 +91,35 @@ class LineCoverageChallengeTest : AnnotationSpec() {
     fun getScore() {
         challenge.getScore() shouldBe 2
         every { JacocoUtil.getCoverageInPercentageFromJacoco(any(), any()) } returns 0.9
-        details = JacocoUtil.ClassDetails(path, shortFilePath, shortJacocoPath, shortJacocoCSVPath, map,
+        details = JacocoUtil.ClassDetails(path, shortFilePath, shortJacocoPath, shortJacocoCSVPath, mocoJSONPath, map,
                 TaskListener.NULL)
         every { data.selectedClass } returns details
         challenge = LineCoverageChallenge(data)
         challenge.getScore() shouldBe 3
-        challenge.toString() shouldBe "Write a test to fully cover line 5 in class $className in package " +
+        challenge.toString().replace("<b>", "").replace("</b>", "") shouldBe "Write a test to fully cover line 5 in class $className in package " +
                 "org.gamekins.challenge (created for branch $branch)"
         every { element.attr("class") } returns "pc"
         every { JacocoUtil.getCoverageInPercentageFromJacoco(any(), any()) } returns coverage
-        details = JacocoUtil.ClassDetails(path, shortFilePath, shortJacocoPath, shortJacocoCSVPath, map,
+        details = JacocoUtil.ClassDetails(path, shortFilePath, shortJacocoPath, shortJacocoCSVPath, mocoJSONPath, map,
                 TaskListener.NULL)
         every { data.selectedClass } returns details
         challenge = LineCoverageChallenge(data)
         challenge.getScore() shouldBe 3
-        challenge.toString() shouldBe "Write a test to fully cover line 5 in class $className in package " +
+        challenge.toString().replace("<b>", "").replace("</b>", "") shouldBe "Write a test to fully cover line 5 in class $className in package " +
                 "org.gamekins.challenge (created for branch $branch)"
         challenge.getName() shouldBe "LineCoverageChallenge"
         every { element.attr("title") } returns "1 of 2 branches missed."
         every { data.line } returns element
         challenge = LineCoverageChallenge(data)
         challenge.getScore() shouldBe 3
-        challenge.toString() shouldBe "Write a test to cover more branches (currently 1 of 2 covered) of line 5 in " +
+        challenge.toString().replace("<b>", "").replace("</b>", "") shouldBe "Write a test to cover more branches (currently 1 of 2 covered) of line 5 in " +
                 "class $className in package org.gamekins.challenge (created for branch $branch)"
         every { element.attr("title") } returns "All 2 branches missed."
         every { element.attr("class") } returns "nc"
         every { data.line } returns element
         challenge = LineCoverageChallenge(data)
         challenge.getScore() shouldBe 2
-        challenge.toString() shouldBe "Write a test to cover more branches (currently 0 of 2 covered) of line 5 in " +
+        challenge.toString().replace("<b>", "").replace("</b>", "") shouldBe "Write a test to cover more branches (currently 0 of 2 covered) of line 5 in " +
                 "class $className in package org.gamekins.challenge (created for branch $branch)"
     }
 

@@ -32,6 +32,7 @@ class ClassCoverageChallengeTest : AnnotationSpec() {
     private val shortFilePath = "src/main/java/org/gamekins/challenge/$className.kt"
     private val shortJacocoPath = "**/target/site/jacoco/"
     private val shortJacocoCSVPath = "**/target/site/jacoco/csv"
+    private val mocoJSONPath = "**/target/site/moco/mutation/"
     private lateinit var details : JacocoUtil.ClassDetails
     private lateinit var challenge : ClassCoverageChallenge
     private val coverage = 0.0
@@ -50,7 +51,7 @@ class ClassCoverageChallengeTest : AnnotationSpec() {
         every { JacocoUtil.getCoverageInPercentageFromJacoco(any(), any()) } returns coverage
         every { JacocoUtil.generateDocument(any()) } returns document
         every { JacocoUtil.calculateCoveredLines(any(), any()) } returns 0
-        details = JacocoUtil.ClassDetails(path, shortFilePath, shortJacocoPath, shortJacocoCSVPath, map,
+        details = JacocoUtil.ClassDetails(path, shortFilePath, shortJacocoPath, shortJacocoCSVPath, mocoJSONPath, map,
                 TaskListener.NULL)
         every { data.selectedClass } returns details
         every { data.workspace } returns path
@@ -66,7 +67,7 @@ class ClassCoverageChallengeTest : AnnotationSpec() {
     fun getScore() {
         challenge.getScore() shouldBe 1
         every { JacocoUtil.getCoverageInPercentageFromJacoco(any(), any()) } returns 0.9
-        details = JacocoUtil.ClassDetails(path, shortFilePath, shortJacocoPath, shortJacocoCSVPath, map,
+        details = JacocoUtil.ClassDetails(path, shortFilePath, shortJacocoPath, shortJacocoCSVPath, mocoJSONPath, map,
                 TaskListener.NULL)
         every { data.selectedClass } returns details
         challenge = ClassCoverageChallenge(data)

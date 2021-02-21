@@ -33,6 +33,12 @@ class MethodCoverageChallenge(data: ChallengeGenerationData) : CoverageChallenge
     private val lines = data.method!!.lines
     private val methodName = data.method!!.methodName
     private val missedLines = data.method!!.missedLines
+    private val firstLineID = data.method!!.firstLineID
+
+
+    init {
+        codeSnippet = createCodeSnippet(classDetails, "#$firstLineID", data.workspace)
+    }
 
     override fun equals(other: Any?): Boolean {
         if (other == null) return false
@@ -44,10 +50,6 @@ class MethodCoverageChallenge(data: ChallengeGenerationData) : CoverageChallenge
 
     override fun getName(): String {
         return "MethodCoverageChallenge"
-    }
-
-    override fun getSnippet(): String {
-        TODO("Not yet implemented")
     }
 
     override fun getScore(): Int {
@@ -137,8 +139,27 @@ class MethodCoverageChallenge(data: ChallengeGenerationData) : CoverageChallenge
     }
 
     override fun toString(): String {
-        return ("Write a test to cover more lines of method " + methodName + " in class "
-                + classDetails.className + " in package " + classDetails.packageName
-                + " (created for branch " + classDetails.constants["branch"] + ")")
+        return ("Write a test to cover more lines of method <b>" + methodName + "</b> in class <b>"
+                + classDetails.className + "</b> in package <b>" + classDetails.packageName
+                + "</b> (created for branch " + classDetails.constants["branch"] + ")")
+    }
+
+    override fun getSnippet(): String {
+        return if (codeSnippet.isNotEmpty()) codeSnippet else "Code snippet is not available"
+    }
+
+    override fun createCodeSnippet(classDetails: JacocoUtil.ClassDetails, target: Any, workspace: FilePath): String {
+        if (classDetails.jacocoSourceFile.exists()) {
+            val javaHtmlPath = JacocoUtil.calculateCurrentFilePath(
+                workspace, classDetails.jacocoSourceFile, classDetails.workspace
+            )
+            val snippetElements = JacocoUtil.getLinesInRange(javaHtmlPath, target, 4)
+            if (snippetElements == "") {
+                return ""
+            }
+            return "<pre class='prettyprint'><code class='language-java'>" + snippetElements +
+                    "</code></pre>"
+        }
+        return ""
     }
 }

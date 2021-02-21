@@ -193,6 +193,8 @@ class JacocoUtilTest : AnnotationSpec() {
         val shortFilePath = "src/main/java/com/example/$className.java"
         val shortJacocoPath = "**/target/site/jacoco/"
         val shortJacocoCSVPath = "**/target/site/jacoco/jacoco.csv"
+        val mocoJSONPath = "**/target/site/moco/mutation/"
+
         val coverage = 0.0
         val testCount = 10
         mockkStatic(JacocoUtil::class)
@@ -208,7 +210,7 @@ class JacocoUtilTest : AnnotationSpec() {
         every { path.act(ofType(JacocoUtil.FilesOfAllSubDirectoriesCallable::class)) } returns arrayListOf()
         every { path.remote } returns this.path.remote
         every { path.channel } returns null
-        val details = JacocoUtil.ClassDetails(path, shortFilePath, shortJacocoPath, shortJacocoCSVPath, hashMapOf(),
+        val details = JacocoUtil.ClassDetails(path, shortFilePath, shortJacocoPath, shortJacocoCSVPath, mocoJSONPath, hashMapOf(),
                 TaskListener.NULL)
 
         details.filesExists() shouldBe true

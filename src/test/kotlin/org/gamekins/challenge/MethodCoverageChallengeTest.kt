@@ -32,6 +32,7 @@ class MethodCoverageChallengeTest : AnnotationSpec() {
     private val shortFilePath = "src/main/java/org/gamekins/challenge/$className.kt"
     private val shortJacocoPath = "**/target/site/jacoco/"
     private val shortJacocoCSVPath = "**/target/site/jacoco/csv"
+    private val mocoJSONPath = "**/target/site/moco/mutation/"
     private lateinit var details : JacocoUtil.ClassDetails
     private lateinit var challenge : MethodCoverageChallenge
     private lateinit var method : JacocoUtil.CoverageMethod
@@ -48,14 +49,14 @@ class MethodCoverageChallengeTest : AnnotationSpec() {
         map["branch"] = branch
         mockkStatic(JacocoUtil::class)
         val document = mockkClass(Document::class)
-        method = JacocoUtil.CoverageMethod(methodName, 10, 10)
+        method = JacocoUtil.CoverageMethod(methodName, 10, 10, "")
         every { JacocoUtil.calculateCurrentFilePath(any(), any()) } returns path
         every { JacocoUtil.getCoverageInPercentageFromJacoco(any(), any()) } returns coverage
         every { JacocoUtil.generateDocument(any()) } returns document
         every { JacocoUtil.calculateCoveredLines(any(), any()) } returns 0
         every { JacocoUtil.getNotFullyCoveredMethodEntries(any()) } returns arrayListOf(method)
         every { JacocoUtil.getMethodEntries(any()) } returns arrayListOf()
-        details = JacocoUtil.ClassDetails(path, shortFilePath, shortJacocoPath, shortJacocoCSVPath, map,
+        details = JacocoUtil.ClassDetails(path, shortFilePath, shortJacocoPath, shortJacocoCSVPath, mocoJSONPath,  map,
                 TaskListener.NULL)
         every { data.selectedClass } returns details
         every { data.workspace } returns path
@@ -71,12 +72,12 @@ class MethodCoverageChallengeTest : AnnotationSpec() {
     @Test
     fun getScore() {
         challenge.getScore() shouldBe 2
-        method = JacocoUtil.CoverageMethod(methodName, 10, 1)
+        method = JacocoUtil.CoverageMethod(methodName, 10, 1, "")
         every { JacocoUtil.getNotFullyCoveredMethodEntries(any()) } returns arrayListOf(method)
         every { data.method } returns method
         challenge = MethodCoverageChallenge(data)
         challenge.getScore() shouldBe 3
-        challenge.toString() shouldBe "Write a test to cover more lines of method $methodName in class " +
+        challenge.toString().replace("<b>", "").replace("</b>", "") shouldBe "Write a test to cover more lines of method $methodName in class " +
                 "$className in package org.gamekins.challenge (created for branch $branch)"
         challenge.getName() shouldBe "MethodCoverageChallenge"
     }
@@ -92,7 +93,7 @@ class MethodCoverageChallengeTest : AnnotationSpec() {
         challenge.isSolvable(map, run, listener, pathMock) shouldBe false
         every { JacocoUtil.getMethodEntries(any()) } returns arrayListOf(method)
         challenge.isSolvable(map, run, listener, pathMock) shouldBe true
-        method = JacocoUtil.CoverageMethod(methodName, 10, 0)
+        method = JacocoUtil.CoverageMethod(methodName, 10, 0, "")
         every { JacocoUtil.getMethodEntries(any()) } returns arrayListOf(method)
         challenge.isSolvable(map, run, listener, pathMock) shouldBe false
     }
@@ -108,7 +109,7 @@ class MethodCoverageChallengeTest : AnnotationSpec() {
         challenge.isSolved(map, run, listener, path) shouldBe false
         every { JacocoUtil.getMethodEntries(any()) } returns arrayListOf(method)
         challenge.isSolved(map, run, listener, path) shouldBe false
-        method = JacocoUtil.CoverageMethod(methodName, 10, 0)
+        method = JacocoUtil.CoverageMethod(methodName, 10, 0, "")
         every { JacocoUtil.getMethodEntries(any()) } returns arrayListOf(method)
         challenge.isSolved(map, run, listener, path) shouldBe true
     }
