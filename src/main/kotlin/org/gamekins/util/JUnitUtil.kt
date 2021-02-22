@@ -78,6 +78,6 @@ object JUnitUtil {
                 return action.failCount
             }
         }
-        return if (workspace == null) 0 else getTestCount(workspace)
+        return if (workspace == null) 0 else getTestFailCount(workspace)
     }
 }
