@@ -268,13 +268,39 @@ class AchievementUtilTest: AnnotationSpec() {
     }
 
     @Test
+    fun improveClassCoverageByX() {
+        additionalParameters.clear()
+        every { challenge.coverage } returns 0.0
+        every { challenge.solvedCoverage } returns 0.0
+        AchievementUtil.improveClassCoverageByX(classes, constants, run, property, workspace, TaskListener.NULL,
+            additionalParameters) shouldBe false
+
+        additionalParameters["haveCoverage"] = "0.1"
+        AchievementUtil.improveClassCoverageByX(classes, constants, run, property, workspace, TaskListener.NULL,
+            additionalParameters) shouldBe false
+
+        every { challenge.coverage } returns 0.7
+        every { challenge.solvedCoverage } returns 0.75
+        AchievementUtil.improveClassCoverageByX(classes, constants, run, property, workspace, TaskListener.NULL,
+            additionalParameters) shouldBe false
+
+        every { challenge.solvedCoverage } returns 0.8
+        AchievementUtil.improveClassCoverageByX(classes, constants, run, property, workspace, TaskListener.NULL,
+            additionalParameters) shouldBe true
+
+        every { challenge.solvedCoverage } returns 0.85
+        AchievementUtil.improveClassCoverageByX(classes, constants, run, property, workspace, TaskListener.NULL,
+            additionalParameters) shouldBe true
+    }
+
+    @Test
     fun improveProjectCoverageByX() {
         additionalParameters.clear()
         mockkStatic(GitUtil::class)
-        mockkStatic(hudson.model.User::class)
+        mockkStatic(User::class)
         val head = mockkClass(RevCommit::class)
-        val user = mockkClass(hudson.model.User::class)
-        val user2 = mockkClass(hudson.model.User::class)
+        val user = mockkClass(User::class)
+        val user2 = mockkClass(User::class)
         val userList = arrayListOf(user)
         every { User.getAll() } returns userList
         every { head.authorIdent } returns mockkClass(PersonIdent::class)

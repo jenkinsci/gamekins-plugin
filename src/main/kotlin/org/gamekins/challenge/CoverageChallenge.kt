@@ -29,7 +29,7 @@ import org.gamekins.util.JacocoUtil.ClassDetails
 abstract class CoverageChallenge(val classDetails: ClassDetails, workspace: FilePath?)
     : Challenge {
 
-    protected val coverage: Double
+    val coverage: Double
     protected val fullyCoveredLines: Int
     protected val notCoveredLines: Int
     protected val partiallyCoveredLines: Int

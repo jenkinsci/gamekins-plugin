@@ -1,0 +1,46 @@
+[
+  {
+    "badgePath": "/plugin/gamekins/icons/trophy.png",
+    "unsolvedBadgePath": "/plugin/gamekins/icons/trophy.png",
+    "description": "Improve the coverage of a class with a CoverageChallenge by 10%",
+    "title": "Well done!",
+    "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::improveClassCoverageByX",
+    "secret": false,
+    "additionalParameters": {
+      "haveCoverage": 0.1
+    }
+  },
+  {
+    "badgePath": "/plugin/gamekins/icons/trophy.png",
+    "unsolvedBadgePath": "/plugin/gamekins/icons/trophy.png",
+    "description": "Improve the coverage of a class with a CoverageChallenge by 25%",
+    "title": "That was a quarter!",
+    "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::improveClassCoverageByX",
+    "secret": false,
+    "additionalParameters": {
+      "haveCoverage": 0.25
+    }
+  },
+  {
+    "badgePath": "/plugin/gamekins/icons/trophy.png",
+    "unsolvedBadgePath": "/plugin/gamekins/icons/trophy.png",
+    "description": "Improve the coverage of a class with a CoverageChallenge by 50%",
+    "title": "Well, that class was not really tested yet",
+    "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::improveClassCoverageByX",
+    "secret": false,
+    "additionalParameters": {
+      "haveCoverage": 0.5
+    }
+  },
+  {
+    "badgePath": "/plugin/gamekins/icons/trophy.png",
+    "unsolvedBadgePath": "/plugin/gamekins/icons/trophy.png",
+    "description": "Improve the coverage of a class with a CoverageChallenge by 100%",
+    "title": "Fresh out of the keyboard",
+    "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::improveClassCoverageByX",
+    "secret": false,
+    "additionalParameters": {
+      "haveCoverage": 1.0
+    }
+  }
+]

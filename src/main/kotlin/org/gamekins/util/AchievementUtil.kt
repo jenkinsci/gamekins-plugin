@@ -166,6 +166,19 @@ object AchievementUtil {
     }
 
     /**
+     * Solves the achievements with description: Improve the coverage of a class with a CoverageChallenge by X%.
+     * Needs the key 'haveCoverage' in the map [additionalParameters] with a positive Double value.
+     */
+    fun improveClassCoverageByX(classes: ArrayList<JacocoUtil.ClassDetails>, constants: HashMap<String, String>,
+                                  run: Run<*, *>, property: GameUserProperty, workspace: FilePath,
+                                  listener: TaskListener, additionalParameters: HashMap<String, String>): Boolean {
+        return property.getCompletedChallenges(constants["projectName"])
+            .filterIsInstance<CoverageChallenge>()
+            .any { it.solvedCoverage.toBigDecimal() - it.coverage.toBigDecimal() >=
+                    additionalParameters["haveCoverage"]?.toBigDecimal() ?: Double.MAX_VALUE.toBigDecimal()}
+    }
+
+    /**
      * Solves the achievements with description: Improve the coverage of the project by X%. Needs the
      * key 'haveCoverage' in the map [additionalParameters] with a positive Double value.
      */
