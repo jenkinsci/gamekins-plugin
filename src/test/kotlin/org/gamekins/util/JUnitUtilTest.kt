@@ -93,6 +93,6 @@ class JUnitUtilTest : AnnotationSpec() {
         every { run.getAction(TestResultAction::class.java) } returns action
         JUnitUtil.getTestFailCount(null, run) shouldBe 1
 
-        JUnitUtil.getTestFailCount(path, null) shouldBe 5
+        JUnitUtil.getTestFailCount(path, null) shouldBe 0
     }
 }
