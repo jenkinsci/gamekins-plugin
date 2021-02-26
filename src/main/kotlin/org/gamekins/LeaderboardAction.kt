@@ -62,7 +62,7 @@ class LeaderboardAction(val job: AbstractItem) : ProminentProjectAction, Describ
     }
 
     override fun getIconFileName(): String {
-        return "document.png"
+        return "/plugin/gamekins/icons/leaderboard.png"
     }
 
     /**
