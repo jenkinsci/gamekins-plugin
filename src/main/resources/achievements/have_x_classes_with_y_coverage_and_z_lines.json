@@ -1,8 +1,8 @@
 [
   {
-    "badgePath": "/plugin/gamekins/icons/trophy.png",
-    "unsolvedBadgePath": "/plugin/gamekins/icons/trophy.png",
-    "description": "Solve one CoverageChallenges with 100% coverage in the required class with at least 200 LOC",
+    "badgePath": "/plugin/gamekins/achievements/colour/opposite-arrows-colour.png",
+    "unsolvedBadgePath": "/plugin/gamekins/achievements/blackwhite/opposite-arrows.png",
+    "description": "Solve one CoverageChallenge with 100% coverage in the required class with at least 200 LOC",
     "title": "Short class - check",
     "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::haveXClassesWithYCoverageAndZLines",
     "secret": false,
@@ -13,9 +13,9 @@
     }
   },
   {
-    "badgePath": "/plugin/gamekins/icons/trophy.png",
-    "unsolvedBadgePath": "/plugin/gamekins/icons/trophy.png",
-    "description": "Solve one CoverageChallenges with 100% coverage in the required class with at least 500 LOC",
+    "badgePath": "/plugin/gamekins/achievements/colour/increase-colour.png",
+    "unsolvedBadgePath": "/plugin/gamekins/achievements/blackwhite/increase.png",
+    "description": "Solve one CoverageChallenge with 100% coverage in the required class with at least 500 LOC",
     "title": "The classes are getting longer",
     "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::haveXClassesWithYCoverageAndZLines",
     "secret": false,
@@ -26,9 +26,9 @@
     }
   },
   {
-    "badgePath": "/plugin/gamekins/icons/trophy.png",
-    "unsolvedBadgePath": "/plugin/gamekins/icons/trophy.png",
-    "description": "Solve one CoverageChallenges with 100% coverage in the required class with at least 1000 LOC",
+    "badgePath": "/plugin/gamekins/achievements/colour/ghosts-colour.png",
+    "unsolvedBadgePath": "/plugin/gamekins/achievements/blackwhite/ghosts.png",
+    "description": "Solve one CoverageChallenge with 100% coverage in the required class with at least 1000 LOC",
     "title": "I ain't afraid of no classes!",
     "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::haveXClassesWithYCoverageAndZLines",
     "secret": false,
@@ -39,9 +39,9 @@
     }
   },
   {
-    "badgePath": "/plugin/gamekins/icons/trophy.png",
-    "unsolvedBadgePath": "/plugin/gamekins/icons/trophy.png",
-    "description": "Solve one CoverageChallenges with 100% coverage in the required class with at least 1500 LOC",
+    "badgePath": "/plugin/gamekins/achievements/colour/split-colour.png",
+    "unsolvedBadgePath": "/plugin/gamekins/achievements/blackwhite/split.png",
+    "description": "Solve one CoverageChallenge with 100% coverage in the required class with at least 1500 LOC",
     "title": "Split the class",
     "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::haveXClassesWithYCoverageAndZLines",
     "secret": true,
@@ -52,9 +52,9 @@
     }
   },
   {
-    "badgePath": "/plugin/gamekins/icons/trophy.png",
-    "unsolvedBadgePath": "/plugin/gamekins/icons/trophy.png",
-    "description": "Solve one CoverageChallenges with 100% coverage in the required class with at least 2000 LOC",
+    "badgePath": "/plugin/gamekins/achievements/colour/split-three-colour.png",
+    "unsolvedBadgePath": "/plugin/gamekins/achievements/blackwhite/split-three.png",
+    "description": "Solve one CoverageChallenge with 100% coverage in the required class with at least 2000 LOC",
     "title": "Seriously - Split the class!",
     "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::haveXClassesWithYCoverageAndZLines",
     "secret": true,

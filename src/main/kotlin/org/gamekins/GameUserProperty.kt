@@ -473,24 +473,59 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
     }
 
     /**
-     * Updates achievements with changed fullyQualifiedFunctionName or secret. Only for unsolved achievements.
+     * Updates changed achievements.
      */
     private fun updateAchievements() {
         for (project in participation.keys) {
             for (achievement in GamePublisherDescriptor.achievements) {
 
-                val ach = unsolvedAchievements[project]!!.find { it == achievement }
+                var ach = unsolvedAchievements[project]!!.find { it == achievement }
                 if (ach != null && (ach.fullyQualifiedFunctionName != achievement.fullyQualifiedFunctionName
                             || ach.secret != achievement.secret
                             || ach.additionalParameters != achievement.additionalParameters
-                            || ach.unsolvedBadgePath != achievement.unsolvedBadgePath)) {
+                            || ach.unsolvedBadgePath != achievement.unsolvedBadgePath
+                            || ach.badgePath != achievement.badgePath)) {
 
                     val list = unsolvedAchievements[project]!!
                     list.remove(ach)
                     list.add(achievement.clone())
                     unsolvedAchievements[project] = list
                 }
+
+                ach = completedAchievements[project]!!.find { it == achievement }
+                if (ach != null
+                    && (ach.unsolvedBadgePath != achievement.unsolvedBadgePath
+                            || ach.badgePath != achievement.badgePath)) {
+
+                    ach.updateBadgePaths(badgePath = achievement.badgePath,
+                        unsolvedBadgePath = achievement.unsolvedBadgePath)
+                }
+
+                ach = unsolvedAchievements[project]!!.find {
+                    (it.title == achievement.title && it.description != achievement.description)
+                            || (it.title != achievement.title && it.description == achievement.description) }
+                if (ach != null) {
+                    val list = unsolvedAchievements[project]!!
+                    list.remove(ach)
+                    list.add(achievement.clone())
+                    unsolvedAchievements[project] = list
+                }
+
+                ach = completedAchievements[project]!!.find {
+                    (it.title == achievement.title && it.description != achievement.description)
+                            || (it.title != achievement.title && it.description == achievement.description) }
+                if (ach != null) {
+                    val list = completedAchievements[project]!!
+                    list.remove(ach)
+                    list.add(achievement.clone(ach))
+                    completedAchievements[project] = list
+                }
             }
+
+            var list = unsolvedAchievements[project]!!
+            list.removeAll(list.intersect(completedAchievements[project]!!))
+            list = CopyOnWriteArrayList(list.distinct())
+            unsolvedAchievements[project] = list
         }
     }
 }

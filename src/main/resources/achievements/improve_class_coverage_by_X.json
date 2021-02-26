@@ -1,7 +1,7 @@
 [
   {
-    "badgePath": "/plugin/gamekins/icons/trophy.png",
-    "unsolvedBadgePath": "/plugin/gamekins/icons/trophy.png",
+    "badgePath": "/plugin/gamekins/achievements/colour/steak-colour.png",
+    "unsolvedBadgePath": "/plugin/gamekins/achievements/blackwhite/steak.png",
     "description": "Improve the coverage of a class with a CoverageChallenge by 10%",
     "title": "Well done!",
     "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::improveClassCoverageByX",
@@ -11,8 +11,8 @@
     }
   },
   {
-    "badgePath": "/plugin/gamekins/icons/trophy.png",
-    "unsolvedBadgePath": "/plugin/gamekins/icons/trophy.png",
+    "badgePath": "/plugin/gamekins/achievements/colour/quarter-colour.png",
+    "unsolvedBadgePath": "/plugin/gamekins/achievements/blackwhite/quarter.png",
     "description": "Improve the coverage of a class with a CoverageChallenge by 25%",
     "title": "That was a quarter!",
     "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::improveClassCoverageByX",
@@ -22,8 +22,8 @@
     }
   },
   {
-    "badgePath": "/plugin/gamekins/icons/trophy.png",
-    "unsolvedBadgePath": "/plugin/gamekins/icons/trophy.png",
+    "badgePath": "/plugin/gamekins/achievements/colour/half-colour.png",
+    "unsolvedBadgePath": "/plugin/gamekins/achievements/blackwhite/half.png",
     "description": "Improve the coverage of a class with a CoverageChallenge by 50%",
     "title": "Well, that class was not really tested yet",
     "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::improveClassCoverageByX",
@@ -33,8 +33,8 @@
     }
   },
   {
-    "badgePath": "/plugin/gamekins/icons/trophy.png",
-    "unsolvedBadgePath": "/plugin/gamekins/icons/trophy.png",
+    "badgePath": "/plugin/gamekins/achievements/colour/keyboard-colour.png",
+    "unsolvedBadgePath": "/plugin/gamekins/achievements/blackwhite/keyboard.png",
     "description": "Improve the coverage of a class with a CoverageChallenge by 100%",
     "title": "Fresh out of the keyboard",
     "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::improveClassCoverageByX",

@@ -1,7 +1,7 @@
 [
   {
-    "badgePath": "/plugin/gamekins/icons/trophy.png",
-    "unsolvedBadgePath": "/plugin/gamekins/icons/trophy.png",
+    "badgePath": "/plugin/gamekins/achievements/colour/beer-bottle-colour.png",
+    "unsolvedBadgePath": "/plugin/gamekins/achievements/blackwhite/beer-bottle.png",
     "description": "Solve a LineCoverageChallenge with at least six branches in the required line",
     "title": "Six pack",
     "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::coverLineWithXBranches",
@@ -11,8 +11,8 @@
     }
   },
   {
-    "badgePath": "/plugin/gamekins/icons/trophy.png",
-    "unsolvedBadgePath": "/plugin/gamekins/icons/trophy.png",
+    "badgePath": "/plugin/gamekins/achievements/colour/breathing-colour.png",
+    "unsolvedBadgePath": "/plugin/gamekins/achievements/blackwhite/breathing.png",
     "description": "Solve a LineCoverageChallenge with at least eight branches in the required line",
     "title": "The element to breath",
     "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::coverLineWithXBranches",
@@ -22,8 +22,8 @@
     }
   },
   {
-    "badgePath": "/plugin/gamekins/icons/trophy.png",
-    "unsolvedBadgePath": "/plugin/gamekins/icons/trophy.png",
+    "badgePath": "/plugin/gamekins/achievements/colour/data-transformation-colour.png",
+    "unsolvedBadgePath": "/plugin/gamekins/achievements/blackwhite/data-transformation.png",
     "description": "Solve a LineCoverageChallenge with at least ten branches in the required line",
     "title": "Neon sign for refactoring",
     "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::coverLineWithXBranches",
@@ -33,8 +33,8 @@
     }
   },
   {
-    "badgePath": "/plugin/gamekins/icons/trophy.png",
-    "unsolvedBadgePath": "/plugin/gamekins/icons/trophy.png",
+    "badgePath": "/plugin/gamekins/achievements/colour/refactoring-colour.png",
+    "unsolvedBadgePath": "/plugin/gamekins/achievements/blackwhite/refactoring.png",
     "description": "Solve a LineCoverageChallenge with at least twelve branches in the required line",
     "title": "A dozen reasons for refactoring",
     "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::coverLineWithXBranches",
@@ -44,10 +44,10 @@
     }
   },
   {
-    "badgePath": "/plugin/gamekins/icons/trophy.png",
-    "unsolvedBadgePath": "/plugin/gamekins/icons/trophy.png",
+    "badgePath": "/plugin/gamekins/achievements/colour/probability-colour.png",
+    "unsolvedBadgePath": "/plugin/gamekins/achievements/blackwhite/probability.png",
     "description": "Solve a LineCoverageChallenge with at least 16 branches in the required line",
-    "title": "256 possibilities",
+    "title": "So many possibilities",
     "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::coverLineWithXBranches",
     "secret": true,
     "additionalParameters": {
@@ -55,8 +55,8 @@
     }
   },
   {
-    "badgePath": "/plugin/gamekins/icons/trophy.png",
-    "unsolvedBadgePath": "/plugin/gamekins/icons/trophy.png",
+    "badgePath": "/plugin/gamekins/achievements/colour/crate-colour.png",
+    "unsolvedBadgePath": "/plugin/gamekins/achievements/blackwhite/crate.png",
     "description": "Solve a LineCoverageChallenge with at least 20 branches in the required line",
     "title": "You need a bottle crate of beer for refactoring",
     "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::coverLineWithXBranches",

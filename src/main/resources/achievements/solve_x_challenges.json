@@ -1,7 +1,7 @@
 [
   {
-    "badgePath": "/plugin/gamekins/icons/trophy.png",
-    "unsolvedBadgePath": "/plugin/gamekins/icons/trophy.png",
+    "badgePath": "/plugin/gamekins/achievements/colour/checklist-colour.png",
+    "unsolvedBadgePath": "/plugin/gamekins/achievements/blackwhite/checklist.png",
     "description": "Solve your first Challenge",
     "title": "I took the first Challenge",
     "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::solveXChallenges",
@@ -11,8 +11,8 @@
     }
   },
   {
-    "badgePath": "/plugin/gamekins/icons/trophy.png",
-    "unsolvedBadgePath": "/plugin/gamekins/icons/trophy.png",
+    "badgePath": "/plugin/gamekins/achievements/colour/document-colour.png",
+    "unsolvedBadgePath": "/plugin/gamekins/achievements/blackwhite/document.png",
     "description": "Solve three Challenges",
     "title": "Triple",
     "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::solveXChallenges",
@@ -22,8 +22,8 @@
     }
   },
   {
-    "badgePath": "/plugin/gamekins/icons/trophy.png",
-    "unsolvedBadgePath": "/plugin/gamekins/icons/trophy.png",
+    "badgePath": "/plugin/gamekins/achievements/colour/exercise-colour.png",
+    "unsolvedBadgePath": "/plugin/gamekins/achievements/blackwhite/exercise.png",
     "description": "Solve ten Challenges",
     "title": "Newcomer",
     "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::solveXChallenges",
@@ -33,8 +33,8 @@
     }
   },
   {
-    "badgePath": "/plugin/gamekins/icons/trophy.png",
-    "unsolvedBadgePath": "/plugin/gamekins/icons/trophy.png",
+    "badgePath": "/plugin/gamekins/achievements/colour/cross-colour.png",
+    "unsolvedBadgePath": "/plugin/gamekins/achievements/blackwhite/cross.png",
     "description": "Solve 20 Challenges",
     "title": "Double Cross",
     "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::solveXChallenges",
@@ -44,8 +44,8 @@
     }
   },
   {
-    "badgePath": "/plugin/gamekins/icons/trophy.png",
-    "unsolvedBadgePath": "/plugin/gamekins/icons/trophy.png",
+    "badgePath": "/plugin/gamekins/achievements/colour/answer-colour.png",
+    "unsolvedBadgePath": "/plugin/gamekins/achievements/blackwhite/answer.png",
     "description": "Solve 42 Challenges",
     "title": "The answer",
     "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::solveXChallenges",
@@ -55,8 +55,8 @@
     }
   },
   {
-    "badgePath": "/plugin/gamekins/icons/trophy.png",
-    "unsolvedBadgePath": "/plugin/gamekins/icons/trophy.png",
+    "badgePath": "/plugin/gamekins/achievements/colour/military-colour.png",
+    "unsolvedBadgePath": "/plugin/gamekins/achievements/blackwhite/military.png",
     "description": "Solve 50 Challenges",
     "title": "Tin soldier",
     "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::solveXChallenges",
@@ -66,8 +66,8 @@
     }
   },
   {
-    "badgePath": "/plugin/gamekins/icons/trophy.png",
-    "unsolvedBadgePath": "/plugin/gamekins/icons/trophy.png",
+    "badgePath": "/plugin/gamekins/achievements/colour/life-insurance-colour.png",
+    "unsolvedBadgePath": "/plugin/gamekins/achievements/blackwhite/life-insurance.png",
     "description": "Solve 84 Challenges",
     "title": "I got the answer - twice",
     "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::solveXChallenges",
@@ -77,8 +77,8 @@
     }
   },
   {
-    "badgePath": "/plugin/gamekins/icons/trophy.png",
-    "unsolvedBadgePath": "/plugin/gamekins/icons/trophy.png",
+    "badgePath": "/plugin/gamekins/achievements/colour/continue-colour.png",
+    "unsolvedBadgePath": "/plugin/gamekins/achievements/blackwhite/continue.png",
     "description": "Solve 100 Challenges",
     "title": "100 Continue",
     "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::solveXChallenges",

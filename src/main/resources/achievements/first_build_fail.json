@@ -1,7 +1,7 @@
 [
   {
-    "badgePath": "/plugin/gamekins/icons/trophy.png",
-    "unsolvedBadgePath": "/plugin/gamekins/icons/trophy.png",
+    "badgePath": "/plugin/gamekins/achievements/colour/error-colour.png",
+    "unsolvedBadgePath": "/plugin/gamekins/achievements/blackwhite/error.png",
     "description": "Let the build pass after it failed with one of your commits as head",
     "title": "Fixing my own mistake",
     "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::solveFirstBuildFail",

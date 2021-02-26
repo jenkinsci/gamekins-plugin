@@ -1,7 +1,7 @@
 [
   {
-    "badgePath": "/plugin/gamekins/icons/trophy.png",
-    "unsolvedBadgePath": "/plugin/gamekins/icons/trophy.png",
+    "badgePath": "/plugin/gamekins/achievements/colour/problem-colour.png",
+    "unsolvedBadgePath": "/plugin/gamekins/achievements/blackwhite/problem.png",
     "description": "Have one test in your project",
     "title": "What is testing?",
     "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::haveXProjectTests",
@@ -11,10 +11,10 @@
     }
   },
   {
-    "badgePath": "/plugin/gamekins/icons/trophy.png",
-    "unsolvedBadgePath": "/plugin/gamekins/icons/trophy.png",
+    "badgePath": "/plugin/gamekins/achievements/colour/ten-commandments-colour.png",
+    "unsolvedBadgePath": "/plugin/gamekins/achievements/blackwhite/ten-commandments.png",
     "description": "Have ten tests in your project",
-    "title": "Why haven't I tested more before?",
+    "title": "Ten Commandments",
     "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::haveXProjectTests",
     "secret": false,
     "additionalParameters": {
@@ -22,8 +22,8 @@
     }
   },
   {
-    "badgePath": "/plugin/gamekins/icons/trophy.png",
-    "unsolvedBadgePath": "/plugin/gamekins/icons/trophy.png",
+    "badgePath": "/plugin/gamekins/achievements/colour/centipede-colour.png",
+    "unsolvedBadgePath": "/plugin/gamekins/achievements/blackwhite/centipede.png",
     "description": "Have 100 tests in your project",
     "title": "Centipede",
     "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::haveXProjectTests",
@@ -33,8 +33,8 @@
     }
   },
   {
-    "badgePath": "/plugin/gamekins/icons/trophy.png",
-    "unsolvedBadgePath": "/plugin/gamekins/icons/trophy.png",
+    "badgePath": "/plugin/gamekins/achievements/colour/conference-colour.png",
+    "unsolvedBadgePath": "/plugin/gamekins/achievements/blackwhite/conference.png",
     "description": "Have 300 tests in your project",
     "title": "C3",
     "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::haveXProjectTests",
@@ -44,8 +44,8 @@
     }
   },
   {
-    "badgePath": "/plugin/gamekins/icons/trophy.png",
-    "unsolvedBadgePath": "/plugin/gamekins/icons/trophy.png",
+    "badgePath": "/plugin/gamekins/achievements/colour/magazine-colour.png",
+    "unsolvedBadgePath": "/plugin/gamekins/achievements/blackwhite/magazine.png",
     "description": "Have 500 tests in your project",
     "title": "Forbes 500",
     "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::haveXProjectTests",
@@ -55,8 +55,8 @@
     }
   },
   {
-    "badgePath": "/plugin/gamekins/icons/trophy.png",
-    "unsolvedBadgePath": "/plugin/gamekins/icons/trophy.png",
+    "badgePath": "/plugin/gamekins/achievements/colour/body-mass-index-colour.png",
+    "unsolvedBadgePath": "/plugin/gamekins/achievements/blackwhite/body-mass-index.png",
     "description": "Have 1000 tests in your project",
     "title": "Kilo-tests",
     "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::haveXProjectTests",
@@ -66,8 +66,8 @@
     }
   },
   {
-    "badgePath": "/plugin/gamekins/icons/trophy.png",
-    "unsolvedBadgePath": "/plugin/gamekins/icons/trophy.png",
+    "badgePath": "/plugin/gamekins/achievements/colour/liquor-colour.png",
+    "unsolvedBadgePath": "/plugin/gamekins/achievements/blackwhite/liquor.png",
     "description": "Have 1111 tests in your project",
     "title": "Schnapszahl",
     "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::haveXProjectTests",

@@ -1,7 +1,7 @@
 [
   {
-    "badgePath": "/plugin/gamekins/icons/trophy.png",
-    "unsolvedBadgePath": "/plugin/gamekins/icons/trophy.png",
+    "badgePath": "/plugin/gamekins/achievements/colour/support-colour.png",
+    "unsolvedBadgePath": "/plugin/gamekins/achievements/blackwhite/support.png",
     "description": "Start a successful build with more than one hour duration",
     "title": "Upgrades, People, Upgrades",
     "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::haveBuildWithXSeconds",
@@ -12,9 +12,9 @@
     }
   },
   {
-    "badgePath": "/plugin/gamekins/icons/trophy.png",
-    "unsolvedBadgePath": "/plugin/gamekins/icons/trophy.png",
-    "description": "Start a successful build with more than one hour duration",
+    "badgePath": "/plugin/gamekins/achievements/colour/lunch-time-colour.png",
+    "unsolvedBadgePath": "/plugin/gamekins/achievements/blackwhite/lunch-time.png",
+    "description": "Start a successful build with more than 30 minutes duration",
     "title": "Lunch break",
     "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::haveBuildWithXSeconds",
     "secret": false,
@@ -24,8 +24,8 @@
     }
   },
   {
-    "badgePath": "/plugin/gamekins/icons/trophy.png",
-    "unsolvedBadgePath": "/plugin/gamekins/icons/trophy.png",
+    "badgePath": "/plugin/gamekins/achievements/colour/coffee-break-colour.png",
+    "unsolvedBadgePath": "/plugin/gamekins/achievements/blackwhite/coffee-break.png",
     "description": "Start a successful build with more than 15 minutes duration",
     "title": "Coffee break",
     "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::haveBuildWithXSeconds",
@@ -36,8 +36,8 @@
     }
   },
   {
-    "badgePath": "/plugin/gamekins/icons/trophy.png",
-    "unsolvedBadgePath": "/plugin/gamekins/icons/trophy.png",
+    "badgePath": "/plugin/gamekins/achievements/colour/coffee-colour.png",
+    "unsolvedBadgePath": "/plugin/gamekins/achievements/blackwhite/coffee.png",
     "description": "Start a successful build with more than five minutes duration",
     "title": "Grab a cup of coffee",
     "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::haveBuildWithXSeconds",
@@ -48,8 +48,8 @@
     }
   },
   {
-    "badgePath": "/plugin/gamekins/icons/trophy.png",
-    "unsolvedBadgePath": "/plugin/gamekins/icons/trophy.png",
+    "badgePath": "/plugin/gamekins/achievements/colour/hourglass-colour.png",
+    "unsolvedBadgePath": "/plugin/gamekins/achievements/blackwhite/hourglass.png",
     "description": "Start a successful build with less than one minute duration",
     "title": "Just wait for it",
     "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::haveBuildWithXSeconds",
@@ -60,8 +60,8 @@
     }
   },
   {
-    "badgePath": "/plugin/gamekins/icons/trophy.png",
-    "unsolvedBadgePath": "/plugin/gamekins/icons/trophy.png",
+    "badgePath": "/plugin/gamekins/achievements/colour/auge-colour.png",
+    "unsolvedBadgePath": "/plugin/gamekins/achievements/blackwhite/auge.png",
     "description": "Start a successful build with less than ten seconds duration",
     "title": "Don't blink!",
     "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::haveBuildWithXSeconds",

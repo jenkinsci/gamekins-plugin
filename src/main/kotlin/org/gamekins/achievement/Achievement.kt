@@ -34,7 +34,7 @@ import kotlin.reflect.KClass
  * @author Philipp Straubinger
  * @since 1.0
  */
-class Achievement(val badgePath: String, var unsolvedBadgePath: String, val fullyQualifiedFunctionName: String,
+class Achievement(var badgePath: String, var unsolvedBadgePath: String, val fullyQualifiedFunctionName: String,
                   val description: String, val title: String, val secret: Boolean,
                   val additionalParameters: HashMap<String, String>) {
 
@@ -86,14 +86,20 @@ class Achievement(val badgePath: String, var unsolvedBadgePath: String, val full
     }
 
     fun clone(): Achievement {
-        return Achievement(badgePath, unsolvedBadgePath, fullyQualifiedFunctionName, description, title,
+        return clone(this)
+    }
+
+    fun clone(ach: Achievement): Achievement {
+        val achievement = Achievement(badgePath, unsolvedBadgePath, fullyQualifiedFunctionName, description, title,
             secret, additionalParameters)
+        achievement.solvedTime = ach.solvedTime
+        return achievement
     }
 
     override fun equals(other: Any?): Boolean {
         if (other == null) return false
         if (other !is Achievement) return false
-        return other.badgePath == this.badgePath && other.description == this.description && other.title == this.title
+        return other.description == this.description && other.title == this.title
     }
 
     override fun hashCode(): Int {
@@ -151,5 +157,13 @@ class Achievement(val badgePath: String, var unsolvedBadgePath: String, val full
 
     override fun toString(): String {
         return "$title: $description"
+    }
+
+    /**
+     * Sets a new [badgePath] and/or [unsolvedBadgePath].
+     */
+    fun updateBadgePaths(badgePath: String = this.badgePath, unsolvedBadgePath: String = this.unsolvedBadgePath) {
+        this.badgePath = badgePath
+        this.unsolvedBadgePath = unsolvedBadgePath
     }
 }
