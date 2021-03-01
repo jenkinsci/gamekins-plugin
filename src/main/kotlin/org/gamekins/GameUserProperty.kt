@@ -366,7 +366,7 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
         //Add achievements if newly introduced
         if (participation.size != 0) {
             if (completedAchievements.size == 0) {
-                for (project in participation.keys) {
+                participation.keys.forEach { project ->
                     completedAchievements[project] = CopyOnWriteArrayList()
                 }
             }
@@ -501,31 +501,38 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
                         unsolvedBadgePath = achievement.unsolvedBadgePath)
                 }
 
-                ach = unsolvedAchievements[project]!!.find {
-                    (it.title == achievement.title && it.description != achievement.description)
-                            || (it.title != achievement.title && it.description == achievement.description) }
-                if (ach != null) {
-                    val list = unsolvedAchievements[project]!!
-                    list.remove(ach)
-                    list.add(achievement.clone())
-                    unsolvedAchievements[project] = list
-                }
-
-                ach = completedAchievements[project]!!.find {
-                    (it.title == achievement.title && it.description != achievement.description)
-                            || (it.title != achievement.title && it.description == achievement.description) }
-                if (ach != null) {
-                    val list = completedAchievements[project]!!
-                    list.remove(ach)
-                    list.add(achievement.clone(ach))
-                    completedAchievements[project] = list
-                }
+                updateChangedTitleDescription(project, achievement)
             }
 
             var list = unsolvedAchievements[project]!!
             list.removeAll(list.intersect(completedAchievements[project]!!))
             list = CopyOnWriteArrayList(list.distinct())
             unsolvedAchievements[project] = list
+        }
+    }
+
+    /**
+     * Updates achievements with changed title or description.
+     */
+    private fun updateChangedTitleDescription(project: String, achievement: Achievement) {
+        var ach = unsolvedAchievements[project]!!.find {
+            (it.title == achievement.title && it.description != achievement.description)
+                    || (it.title != achievement.title && it.description == achievement.description) }
+        if (ach != null) {
+            val list = unsolvedAchievements[project]!!
+            list.remove(ach)
+            list.add(achievement.clone())
+            unsolvedAchievements[project] = list
+        }
+
+        ach = completedAchievements[project]!!.find {
+            (it.title == achievement.title && it.description != achievement.description)
+                    || (it.title != achievement.title && it.description == achievement.description) }
+        if (ach != null) {
+            val list = completedAchievements[project]!!
+            list.remove(ach)
+            list.add(achievement.clone(ach))
+            completedAchievements[project] = list
         }
     }
 }
