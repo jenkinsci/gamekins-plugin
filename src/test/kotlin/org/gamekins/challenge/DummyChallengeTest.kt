@@ -53,6 +53,6 @@ class DummyChallengeTest : AnnotationSpec() {
         challenge.printToXML("", "") shouldBe "<DummyChallenge>"
         challenge.printToXML("", "    ") shouldStartWith "    <"
         challenge.printToXML("test", "") shouldBe "<DummyChallenge>"
-        challenge.toString() shouldBe "You have nothing developed recently"
+        challenge.toString() shouldBe "You haven't developed anything lately"
     }
 }
