@@ -80,7 +80,7 @@
                                         let header = document.createElement("h5")
                                         header.style.display = "block"
                                         header.style.textAlign = "center"
-                                        header.innerText = "You have nothing solved yet"
+                                        header.innerText = "You have not solved any achievements yet"
                                         div.appendChild(header)
                                     } else {
                                         for(var i = 0; i &lt; list.length; i++) {
