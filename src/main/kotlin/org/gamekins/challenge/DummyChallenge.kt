@@ -114,6 +114,6 @@ class DummyChallenge(private var constants: HashMap<String, String>) : Challenge
      * @see Challenge
      */
     override fun toString(): String {
-        return "You have nothing developed recently"
+        return "You haven't developed anything lately"
     }
 }
