@@ -21,6 +21,7 @@ import hudson.model.Run
 import hudson.model.TaskListener
 import org.gamekins.mutation.MutationInfo
 import org.gamekins.mutation.MutationResults
+import org.gamekins.util.GitUtil
 import org.gamekins.util.JacocoUtil
 import org.gamekins.util.JacocoUtil.ClassDetails
 
@@ -31,8 +32,9 @@ import org.gamekins.util.JacocoUtil.ClassDetails
  * @author Tran Phan
  * @since 1.0
  */
-class MutationTestChallenge(val mutationInfo: MutationInfo, val classDetails: ClassDetails,
-                            val branch: String?, workspace: FilePath
+class MutationTestChallenge(
+    val mutationInfo: MutationInfo, val classDetails: ClassDetails,
+    val branch: String?, workspace: FilePath, val commitID: String
 ) : Challenge {
 
     private val created = System.currentTimeMillis()
@@ -45,8 +47,6 @@ class MutationTestChallenge(val mutationInfo: MutationInfo, val classDetails: Cl
     private val fileName = mutationDetails.fileName
     val uniqueID = mutationInfo.uniqueID
     private val codeSnippet = createCodeSnippet(classDetails, lineOfCode, workspace)
-    private var mutationStillInJson = true
-    private var classStillInJson = true
 
     override fun getCreated(): Long {
         return created
@@ -126,10 +126,11 @@ class MutationTestChallenge(val mutationInfo: MutationInfo, val classDetails: Cl
         constants: HashMap<String, String>, run: Run<*, *>, listener: TaskListener,
         workspace: FilePath
     ): Boolean {
-        // Check if a class is no longer in JSON file, thus unsolvable
-        // This assumes that isSolved is always called before isSolvable in checkUser method
-        // This logic needs to be changed if the call order is changed or they are invoked somewhere else
-        return classStillInJson and mutationStillInJson
+        // a mutation challenge is discarded if the source file has changed since last commit
+        val changedClasses =  workspace.act(GitUtil.DiffFromHeadCallable(workspace, commitID,
+                                                classDetails.packageName, listener))
+        return changedClasses?.any { it.replace("/", ".") ==
+                                     "${classDetails.packageName}.${classDetails.className}" } == false
     }
 
     /**
@@ -147,24 +148,18 @@ class MutationTestChallenge(val mutationInfo: MutationInfo, val classDetails: Cl
         val mutationResults = MutationResults.retrievedMutationsFromJson(jsonFilePath, listener)
         val filteredByClass = mutationResults?.entries?.filter { it.key == this.className }
         if (!filteredByClass.isNullOrEmpty()) {
-            val filteredByDetails =  filteredByClass.filter {
-                it.value.any { it1 -> ((it1.uniqueID == uniqueID) ||
-                        (it1.mutationDetails == mutationInfo.mutationDetails)) }
+            return filteredByClass.any {
+                it.value.any { it1 ->
+                    ((it1.uniqueID == uniqueID || it1.mutationDetails == mutationDetails)
+                            && it1.result == "killed")
+                }
             }
-            if (filteredByDetails.isNullOrEmpty()) {
-                mutationStillInJson  = false
-                return false
-            } else {
-                return filteredByDetails.any { it.value.any { it1 -> it1.result == "killed" } }
-            }
-        } else {
-            classStillInJson = false
         }
         return false
     }
 
     override fun toString(): String {
-        return ("Write a test to kill the mutant <b>$mutationDescription</b> at line <b>$lineOfCode</b> " +
+        return ("Write a test to kill the mutant \"<b>$mutationDescription</b>\" at line <b>$lineOfCode</b> " +
                 "of method <b>$methodName</b> in class <b>${classDetails.className}</b> in package " +
                 "<b>${classDetails.packageName}</b> (created for branch " + branch + ")")
     }

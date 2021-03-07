@@ -116,7 +116,7 @@
                                     <div class="card-body" style="font-size:15px;">
 
                                 <j:if test='${currentChallenge.name == "MutationTestChallenge"}'>
-                                    <p>Write or update tests so that they fail when we make a <b>${currentChallenge.mutationDescription}</b> at the mentioned location</p>
+                                    <p>Write or update tests so that they fail when we <b>${currentChallenge.mutationDescription}</b> at the mentioned location</p>
                                     <h6>${currentChallenge.fileName}</h6>
                                 </j:if>
 

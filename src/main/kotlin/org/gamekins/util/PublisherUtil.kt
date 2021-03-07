@@ -82,7 +82,7 @@ object PublisherUtil {
             if (challenge.isSolved(constants, run, listener, workspace)) {
                 property.completeChallenge(constants["projectName"]!!, challenge)
                 property.addScore(constants["projectName"]!!, challenge.getScore())
-                listener.logger.println("[Gamekins] Solved challenge $challenge")
+                listener.logger.println("[Gamekins] Solved challenge $challenge.")
                 if (challenge !is DummyChallenge) solved++
             }
         }

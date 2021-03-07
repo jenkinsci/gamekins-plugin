@@ -30,6 +30,7 @@ import org.eclipse.jgit.lib.ObjectId
 import org.eclipse.jgit.lib.PersonIdent
 import org.eclipse.jgit.lib.Repository
 import org.eclipse.jgit.revwalk.RevCommit
+import org.eclipse.jgit.revwalk.RevTree
 import org.eclipse.jgit.revwalk.RevWalk
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder
 import org.eclipse.jgit.treewalk.AbstractTreeIterator
@@ -129,8 +130,10 @@ object GitUtil {
      */
     @JvmStatic
     @Throws(IOException::class)
-    fun getLastChangedClasses(count: Int, constants: HashMap<String, String>, listener: TaskListener,
-                              users: ArrayList<GameUser>, workspace: FilePath): ArrayList<ClassDetails> {
+    fun getLastChangedClasses(
+        count: Int, constants: HashMap<String, String>, listener: TaskListener,
+        users: ArrayList<GameUser>, workspace: FilePath
+    ): ArrayList<ClassDetails> {
         val builder = FileRepositoryBuilder()
         val repo = builder.setGitDir(File(workspace.remote + "/.git")).setMustExist(true).build()
         val walk = RevWalk(repo)
@@ -186,9 +189,11 @@ object GitUtil {
 
                         //Add a new class
                         if (!found && user != null) {
-                            val details = ClassDetails(workspace, path, constants["jacocoResultsPath"]!!,
-                                    constants["jacocoCSVPath"]!!,  constants["mocoJSONPath"]!!,
-                                    constants, listener)
+                            val details = ClassDetails(
+                                workspace, path, constants["jacocoResultsPath"]!!,
+                                constants["jacocoCSVPath"]!!, constants["mocoJSONPath"]!!,
+                                constants, listener
+                            )
                             details.addUser(user)
                             classes.add(details)
                         }
@@ -198,7 +203,8 @@ object GitUtil {
                 //Add the next commits if they have not been analysed before
                 for (parent in commit.parents) {
                     if (!searchedCommits.contains(parent) && !newCommits.contains(parent)
-                            && !currentCommits.contains(parent)) {
+                        && !currentCommits.contains(parent)
+                    ) {
                         newCommits.add(walk.parseCommit(repo.resolve(parent.name)))
                     }
                     //Reset the tree
@@ -218,8 +224,10 @@ object GitUtil {
      */
     @JvmStatic
     @Throws(IOException::class)
-    private fun getLastChangedFilesOfUser(workspace: String, user: GameUser, commitCount: Int,
-                                          commitHash: String, users: ArrayList<GameUser>): Set<String> {
+    private fun getLastChangedFilesOfUser(
+        workspace: String, user: GameUser, commitCount: Int,
+        commitHash: String, users: ArrayList<GameUser>
+    ): Set<String> {
         var commitSearchCount = commitCount
         if (commitSearchCount <= 0) commitSearchCount = DEFAULT_SEARCH_COMMIT_COUNT
 
@@ -261,7 +269,7 @@ object GitUtil {
                     val diff = getDiffOfCommit(git, repo, commit)
                     val lines = diff.split("\n".toRegex())
                     lines.filter { it.contains("diff --git") }
-                            .forEach { pathsToFiles.add(it.split(" ".toRegex())[2].substring(1)) }
+                        .forEach { pathsToFiles.add(it.split(" ".toRegex())[2].substring(1)) }
                     countUserCommit++
                 }
 
@@ -285,12 +293,15 @@ object GitUtil {
      */
     @JvmStatic
     @Throws(IOException::class, InterruptedException::class)
-    fun getLastChangedSourceFilesOfUser(workspace: FilePath, user: User, commitCount: Int,
-                                        commitHash: String, users: Collection<User>): Set<String> {
+    fun getLastChangedSourceFilesOfUser(
+        workspace: FilePath, user: User, commitCount: Int,
+        commitHash: String, users: Collection<User>
+    ): Set<String> {
         val pathsToFiles: MutableSet<String> = workspace.act(
-                LastChangedFilesCallable(
-                        workspace.remote, GameUser(user), commitCount, commitHash, mapUsersToGameUsers(users)
-                )) as MutableSet<String>
+            LastChangedFilesCallable(
+                workspace.remote, GameUser(user), commitCount, commitHash, mapUsersToGameUsers(users)
+            )
+        ) as MutableSet<String>
         if (pathsToFiles.isNotEmpty()) {
             pathsToFiles.removeIf { path: String -> path.split("/".toRegex()).contains("test") }
             pathsToFiles.removeIf { path: String -> !(path.contains(".java") || path.contains(".kt")) }
@@ -303,12 +314,15 @@ object GitUtil {
      */
     @JvmStatic
     @Throws(IOException::class, InterruptedException::class)
-    fun getLastChangedTestFilesOfUser(workspace: FilePath, user: User, commitCount: Int,
-                                      commitHash: String, users: Collection<User>): Set<String> {
+    fun getLastChangedTestFilesOfUser(
+        workspace: FilePath, user: User, commitCount: Int,
+        commitHash: String, users: Collection<User>
+    ): Set<String> {
         val pathsToFiles: MutableSet<String> = workspace.act(
-                LastChangedFilesCallable(
-                        workspace.remote, GameUser(user), commitCount, commitHash, mapUsersToGameUsers(users)
-                )) as MutableSet<String>
+            LastChangedFilesCallable(
+                workspace.remote, GameUser(user), commitCount, commitHash, mapUsersToGameUsers(users)
+            )
+        ) as MutableSet<String>
         if (pathsToFiles.isNotEmpty()) {
             pathsToFiles.removeIf { path: String -> !path.split("/".toRegex()).contains("test") }
             pathsToFiles.removeIf { path: String -> !(path.contains(".java") || path.contains(".kt")) }
@@ -338,7 +352,7 @@ object GitUtil {
     /**
      * Checks whether the [line] contains the information needed for generating a [ClassDetails].
      */
-    private fun interestedInDiffLine(line: String, nextLine:String): Boolean {
+    private fun interestedInDiffLine(line: String, nextLine: String): Boolean {
 
         //Not interested in deleted classes
         if (line.contains("diff --git") && !nextLine.contains("deleted")) {
@@ -363,9 +377,10 @@ object GitUtil {
             if (!PropertyUtil.realUser(user)) continue
             val property = user.getProperty(GameUserProperty::class.java)
             if (property != null && property.getGitNames().contains(ident.name)
-                    || user.fullName.contains(split[0]) && user.fullName.contains(split[split.size - 1])
-                    || (user.getProperty(UserProperty::class.java) != null
-                            && ident.emailAddress == user.getProperty(UserProperty::class.java).address)) {
+                || user.fullName.contains(split[0]) && user.fullName.contains(split[split.size - 1])
+                || (user.getProperty(UserProperty::class.java) != null
+                        && ident.emailAddress == user.getProperty(UserProperty::class.java).address)
+            ) {
                 return user
             }
         }
@@ -381,8 +396,9 @@ object GitUtil {
         val split = ident.name.split(" ".toRegex())
         for (user in users) {
             if (user.gitNames.contains(ident.name)
-                    || user.fullName.contains(split[0]) && user.fullName.contains(split[split.size - 1])
-                    || ident.emailAddress == user.mail) {
+                || user.fullName.contains(split[0]) && user.fullName.contains(split[split.size - 1])
+                || ident.emailAddress == user.mail
+            ) {
                 return user
             }
         }
@@ -452,10 +468,11 @@ object GitUtil {
      * @author Philipp Straubinger
      * @since 1.0
      */
-    class LastChangedClassesCallable(private val count: Int, private val constants: HashMap<String, String>,
-                                     private val listener: TaskListener, private val users: ArrayList<GameUser>,
-                                     private val workspace: FilePath)
-        : MasterToSlaveCallable<ArrayList<ClassDetails>, IOException?>() {
+    class LastChangedClassesCallable(
+        private val count: Int, private val constants: HashMap<String, String>,
+        private val listener: TaskListener, private val users: ArrayList<GameUser>,
+        private val workspace: FilePath
+    ) : MasterToSlaveCallable<ArrayList<ClassDetails>, IOException?>() {
 
         /**
          * Performs computation and returns the result,
@@ -463,10 +480,80 @@ object GitUtil {
          */
         @Throws(IOException::class)
         override fun call(): ArrayList<ClassDetails> {
-            return getLastChangedClasses(count, constants, listener, users,
-                    workspace)
+            return getLastChangedClasses(
+                count, constants, listener, users,
+                workspace
+            )
         }
     }
+
+    /**
+     * Returns the difference in classes of a commit with the head commit of a repository on a remote machine.
+     *
+     * @author Tran Phan
+     * @since 1.0
+     */
+    class DiffFromHeadCallable(
+        private val workspace: FilePath, private val targetCommitID: String,
+        private val packageName: String, private val listener: TaskListener
+    ) : MasterToSlaveCallable<List<String>, IOException?>() {
+        @Throws(IOException::class)
+        override fun call(): List<String>? {
+            return getChangedClsSinceLastStoredCommit(workspace, targetCommitID, packageName, listener)
+        }
+    }
+
+    fun getChangedClsSinceLastStoredCommit(workspace: FilePath, targetID: String,
+                                           packageName: String, listener: TaskListener): List<String>? {
+        val builder = FileRepositoryBuilder()
+        val repo = builder.setGitDir(File(workspace.remote + "/.git")).setMustExist(true).build()
+        val headCommit: RevCommit = getHead(repo)
+        val git = Git(repo)
+        val commits = git.log().all().call()
+        for (commit in commits) {
+            if (targetID == commit.name) {
+                return listDiff(repo, git, targetID, headCommit.name, packageName, listener)
+            }
+        }
+        return null
+    }
+
+    private fun listDiff(repository: Repository, git: Git, oldCommit: String,
+                         newCommit: String, packageName: String, listener: TaskListener
+    ): List<String>? {
+
+        val diff = git.diff()
+            .setOldTree(prepareTreeParser(repository, oldCommit))
+            .setNewTree(prepareTreeParser(repository, newCommit))
+            .call()
+        val classFiles = diff.map { it.newPath }.filter { it.endsWith(".java") }
+        val res = mutableListOf<String>()
+        classFiles.map {
+            try {
+                val startIndex = it.indexOf(packageName.replace(".", "/"), 0)
+                if (startIndex > -1) {
+                    res.add(it.substring(startIndex, it.length - 5))
+                }
+            } catch (ex: java.lang.Exception) {
+                return null
+            }
+        }
+        return res
+    }
+
+    private fun prepareTreeParser(repository: Repository, objectId: String): AbstractTreeIterator? {
+        // from the commit we can build the tree which allows us to construct the TreeParser
+        val revWalk = RevWalk(repository)
+        val commit: RevCommit = revWalk.parseCommit(repository.resolve(objectId))
+        val tree: RevTree = revWalk.parseTree(commit.tree.id)
+        val treeParser = CanonicalTreeParser()
+        val reader = repository.newObjectReader()
+        treeParser.reset(reader, tree.id)
+        reader.close()
+        revWalk.dispose()
+        return treeParser
+    }
+
 
     /**
      * Returns the last changed files of a repository on a remote machine.
@@ -474,10 +561,11 @@ object GitUtil {
      * @author Philipp Straubinger
      * @since 1.0
      */
-    private class LastChangedFilesCallable constructor(private val workspace: String, private val user: GameUser,
-                                                       private val commitCount: Int, private val commitHash: String,
-                                                       private val users: ArrayList<GameUser>)
-        : MasterToSlaveCallable<Set<String>, IOException?>() {
+    private class LastChangedFilesCallable constructor(
+        private val workspace: String, private val user: GameUser,
+        private val commitCount: Int, private val commitHash: String,
+        private val users: ArrayList<GameUser>
+    ) : MasterToSlaveCallable<Set<String>, IOException?>() {
 
         /**
          * Performs computation and returns the result,
@@ -500,11 +588,11 @@ object GitUtil {
         val id: String = user.id
         val fullName: String = user.fullName
         val mail: String =
-                if (user.getProperty(UserProperty::class.java) == null) ""
-                else user.getProperty(UserProperty::class.java).address
+            if (user.getProperty(UserProperty::class.java) == null) ""
+            else user.getProperty(UserProperty::class.java).address
         val gitNames: HashSet<String> =
-                if (user.getProperty(GameUserProperty::class.java) == null) HashSet()
-                else HashSet(user.getProperty(GameUserProperty::class.java).getGitNames())
+            if (user.getProperty(GameUserProperty::class.java) == null) HashSet()
+            else HashSet(user.getProperty(GameUserProperty::class.java).getGitNames())
 
         override fun equals(other: Any?): Boolean {
             if (this === other) return true

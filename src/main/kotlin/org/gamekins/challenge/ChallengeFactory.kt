@@ -333,10 +333,9 @@ object ChallengeFactory {
                 it.key == "${classDetails.packageName}.${classDetails.className}"
                         && it.value.any { it1 -> it1.result == "survived" }
             }
-
         if (relevantMutationResultsByClass.isNullOrEmpty()) {
             listener.logger.println("[Gamekins] Mutation test challenge - " +
-                    "no mutation information for class $${classDetails.className}")
+                    "no mutation information for class ${classDetails.className}")
             return null
         }
         // Choose a survived mutation randomly
@@ -349,7 +348,8 @@ object ChallengeFactory {
                     "be generated for class ${classDetails.className} since all were killed")
             return null
         }
-        return MutationTestChallenge(chosenMutation, classDetails, branch, workspace)
+        val commitID = workspace.act(HeadCommitCallable(workspace.remote)).name
+        return MutationTestChallenge(chosenMutation, classDetails, branch, workspace, commitID)
     }
 
     /**

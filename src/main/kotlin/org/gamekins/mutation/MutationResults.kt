@@ -11,12 +11,12 @@ import java.nio.file.Paths
 
 data class MutationResults(val entries: Map<String, List<MutationInfo>>) : Serializable {
 
-    class GetMutationResultsCallable(private val jsonFilePath: FilePath)
-        : MasterToSlaveCallable<String, IOException?>() {
+    class GetMutationResultsCallable(private val jsonFilePath: FilePath) :
+        MasterToSlaveCallable<String, IOException?>() {
 
         /**
          * Get json moco content from remote and return as string
-         * or throws some exception.
+         * or throws an exception.
          */
         override fun call(): String {
             return String(Files.readAllBytes(Paths.get(jsonFilePath.toURI())))
@@ -24,7 +24,7 @@ data class MutationResults(val entries: Map<String, List<MutationInfo>>) : Seria
     }
 
     companion object {
-        var retrievedResults: MutationResults? = null
+        private var retrievedResults: MutationResults? = null
         val mapper = jacksonObjectMapper()
 
         fun retrievedMutationsFromJson(
@@ -33,9 +33,7 @@ data class MutationResults(val entries: Map<String, List<MutationInfo>>) : Seria
             return try {
                 // Get json contents as string
                 val jsonString: String = remotePath.act(GetMutationResultsCallable(remotePath))
-                if (retrievedResults == null) {
-                    retrievedResults = mapper.readValue(jsonString, MutationResults::class.java)
-                }
+                retrievedResults = mapper.readValue(jsonString, MutationResults::class.java)
                 retrievedResults
             } catch (e: Exception) {
                 listener.logger.println("Error while reading mutation results from json file, please check MoCo JSON path")
