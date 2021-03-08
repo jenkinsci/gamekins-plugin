@@ -521,13 +521,13 @@ object GitUtil {
     private fun listDiff(repository: Repository, git: Git, oldCommit: String,
                          newCommit: String, packageName: String, listener: TaskListener
     ): List<String>? {
-
         val diff = git.diff()
             .setOldTree(prepareTreeParser(repository, oldCommit))
             .setNewTree(prepareTreeParser(repository, newCommit))
             .call()
         val classFiles = diff.map { it.newPath }.filter { it.endsWith(".java") }
         val res = mutableListOf<String>()
+        classFiles.toMutableList().removeIf{ path: String -> path.split("/".toRegex()).contains("test") }
         classFiles.map {
             try {
                 val startIndex = it.indexOf(packageName.replace(".", "/"), 0)
