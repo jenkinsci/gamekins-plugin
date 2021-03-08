@@ -103,4 +103,8 @@ class BuildChallenge(private var constants: HashMap<String, String>) : Challenge
     override fun toString(): String {
         return "Let the Build run successfully"
     }
+
+    override fun toEscapedString(): String {
+        return toString()
+    }
 }

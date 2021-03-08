@@ -107,6 +107,8 @@ interface Challenge {
      */
     override fun toString(): String
 
+    fun toEscapedString(): String
+
     /**
      * Data class for the initialisation of a Challenge. Every val variable will be non-null with the desired data.
      */

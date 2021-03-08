@@ -72,7 +72,7 @@ class ClassCoverageChallengeTest : AnnotationSpec() {
         every { data.selectedClass } returns details
         challenge = ClassCoverageChallenge(data)
         challenge.getScore() shouldBe 2
-        challenge.toString() shouldBe "Write a test to cover more lines in class $className in package " +
+        challenge.toEscapedString() shouldBe "Write a test to cover more lines in class $className in package " +
                 "org.gamekins.challenge (created for branch $branch)"
     }
 

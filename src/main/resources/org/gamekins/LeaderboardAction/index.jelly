@@ -24,19 +24,17 @@
                     <table class="mt-3 shadow table-hover table pane sortable bigtable">
                         <thead class="thead-dark">
                         <tr>
-
                             <th scope="col" class="text-center">#</th>
                             <th scope="col" class="text-center">Participant</th>
                             <th scope="col" class="text-center">Team</th>
                             <th scope="col" class="text-center">Completed Challenges</th>
                             <th initialSortDir="up" class="text-center" scope="col">Score</th>
-
                         </tr>
                         </thead>
                         <j:forEach indexVar="index" var="userDetail" items="${it.userDetails}">
                             <tr>
                                 <td class="text-center">${index + 1}</td>
-                                <td class="text-center"><a href="${userDetail.url}">${userDetail.userName}</a></td>
+                                <td><a href="${userDetail.url}/achievements">${userDetail.userName}</a></td>
                                 <td class="text-center">${userDetail.teamName}</td>
                                 <td class="text-center">${userDetail.completedChallenges}</td>
                                 <td class="text-center">${userDetail.score}</td>

@@ -112,8 +112,8 @@ class ClassCoverageChallenge(data: Challenge.ChallengeGenerationData)
     }
 
     override fun toString(): String {
-        return ("Write a test to cover more lines in class " + classDetails.className
-                + " in package " + classDetails.packageName + " (created for branch "
+        return ("Write a test to cover more lines in class <b>" + classDetails.className
+                + "</b> in package <b>" + classDetails.packageName + "</b> (created for branch "
                 + classDetails.constants["branch"] + ")")
     }
 }

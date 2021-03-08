@@ -216,20 +216,15 @@ class LineCoverageChallenge(data: Challenge.ChallengeGenerationData)
 
     override fun createCodeSnippet(classDetails: JacocoUtil.ClassDetails,
                                    target: Any, workspace: FilePath): String {
-        if (target !is Int) {
-            return ""
-        } else if (target < 0){
-            return ""
-        }
-
+        if (target !is Int) return ""
+        else if (target < 0) return ""
         if (classDetails.jacocoSourceFile.exists()) {
             val javaHtmlPath = JacocoUtil.calculateCurrentFilePath(
                 workspace, classDetails.jacocoSourceFile, classDetails.workspace
             )
             val snippetElements = JacocoUtil.getLinesInRange(javaHtmlPath, target, 2)
-            if (snippetElements == "") {
-                return ""
-            }
+            if (snippetElements == "") return ""
+
             return "<pre class='prettyprint linenums:${target - 1} mt-2'><code class='language-java'>" + snippetElements +
                    "</code></pre>"
         }

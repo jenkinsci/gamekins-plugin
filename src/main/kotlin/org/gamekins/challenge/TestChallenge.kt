@@ -141,4 +141,8 @@ class TestChallenge(data: Challenge.ChallengeGenerationData) : Challenge {
     override fun toString(): String {
         return "Write a new test in branch ${constants["branch"]}"
     }
+
+    override fun toEscapedString(): String {
+        return toString()
+    }
 }

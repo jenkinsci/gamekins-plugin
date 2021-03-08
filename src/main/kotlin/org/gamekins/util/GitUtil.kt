@@ -488,7 +488,7 @@ object GitUtil {
     }
 
     /**
-     * Returns the difference in classes of a commit with the head commit of a repository on a remote machine.
+     * Returns the difference in source classes of a commit from the head commit of a repository on a remote machine.
      *
      * @author Tran Phan
      * @since 1.0

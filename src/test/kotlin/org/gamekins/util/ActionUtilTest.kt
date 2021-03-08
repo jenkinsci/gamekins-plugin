@@ -55,6 +55,7 @@ class ActionUtilTest: AnnotationSpec() {
         every { job.save() } returns Unit
         every { user.save() } returns Unit
         every { challenge.toString() } returns stringChallenge
+        every { challenge.toEscapedString() } returns stringChallenge
         every { userProperty.rejectChallenge(any(), any(), any()) } returns Unit
         every { userProperty.newChallenge(any(), any()) } returns Unit
 

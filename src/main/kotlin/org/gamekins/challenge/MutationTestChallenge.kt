@@ -185,4 +185,8 @@ class MutationTestChallenge(
         }
         return ""
     }
+
+    override fun toEscapedString(): String {
+        return toString().replace(Regex("<.+?>"), "")
+    }
 }

@@ -17,10 +17,8 @@
 package org.gamekins.challenge
 
 import hudson.FilePath
-import hudson.model.TaskListener
 import org.gamekins.util.JacocoUtil
 import org.gamekins.util.JacocoUtil.ClassDetails
-import org.jsoup.nodes.Element
 
 /**
  * Abstract class to generate basic information about the class used for generating a [CoverageChallenge].
@@ -93,4 +91,8 @@ abstract class CoverageChallenge(val classDetails: ClassDetails, workspace: File
     }
 
     abstract fun getSnippet(): String
+
+    override fun toEscapedString(): String {
+        return toString().replace(Regex("<.+?>"), "")
+    }
 }

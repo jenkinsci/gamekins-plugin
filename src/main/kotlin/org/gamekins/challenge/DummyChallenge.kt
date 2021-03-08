@@ -117,6 +117,10 @@ class DummyChallenge(private var constants: HashMap<String, String>) : Challenge
         return "You haven't developed anything lately"
     }
 
+    override fun toEscapedString(): String {
+        return toString()
+    }
+
     fun getName(): String {
         return "Dummy"
     }

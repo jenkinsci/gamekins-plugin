@@ -132,7 +132,7 @@ class ChallengeFactoryTest : AnnotationSpec() {
         every { newDetails.changedByUsers } returns hashSetOf(GitUtil.GameUser(user))
         mockkStatic(ChallengeFactory::class)
         every { ChallengeFactory.generateChallenge(any(), any(), any(), any(), any()) } returns mockkClass(TestChallenge::class)
-        ChallengeFactory.generateNewChallenges(user, property, map, arrayListOf(newDetails), path) shouldBe 3
+        ChallengeFactory.generateNewChallenges(user, property, map, arrayListOf(newDetails), path) shouldBe 0
         mockkStatic(ChallengeFactory::class)
     }
 

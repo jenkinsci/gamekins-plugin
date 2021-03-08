@@ -156,6 +156,7 @@ class PublisherUtilTest : AnnotationSpec() {
         every { challenge.isSolved(any(), any(), any(), any()) } returns true
         every { challenge.isSolvable(any(), any(), any(), any()) } returns false
         every { challenge.getScore() } returns 1
+        every { challenge.toEscapedString() } returns ""
         every { userProperty.completeChallenge(any(), any()) } returns Unit
         every { userProperty.addScore(any(), any()) } returns Unit
         every { userProperty.rejectChallenge(any(), any(), any()) } returns Unit

@@ -77,8 +77,7 @@ class MethodCoverageChallengeTest : AnnotationSpec() {
         every { data.method } returns method
         challenge = MethodCoverageChallenge(data)
         challenge.getScore() shouldBe 3
-        challenge.toString().replace("<b>", "").replace("</b>", "") shouldBe "Write a test to cover more lines of method $methodName in class " +
-                "$className in package org.gamekins.challenge (created for branch $branch)"
+        challenge.toEscapedString()
         challenge.getName() shouldBe "MethodCoverageChallenge"
     }
 

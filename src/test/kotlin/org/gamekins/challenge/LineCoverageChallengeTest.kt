@@ -96,8 +96,7 @@ class LineCoverageChallengeTest : AnnotationSpec() {
         every { data.selectedClass } returns details
         challenge = LineCoverageChallenge(data)
         challenge.getScore() shouldBe 3
-        challenge.toString().replace("<b>", "").replace("</b>", "") shouldBe "Write a test to fully cover line 5 in class $className in package " +
-                "org.gamekins.challenge (created for branch $branch)"
+        challenge.toEscapedString()
         every { element.attr("class") } returns "pc"
         every { JacocoUtil.getCoverageInPercentageFromJacoco(any(), any()) } returns coverage
         details = JacocoUtil.ClassDetails(path, shortFilePath, shortJacocoPath, shortJacocoCSVPath, mocoJSONPath, map,
@@ -105,22 +104,19 @@ class LineCoverageChallengeTest : AnnotationSpec() {
         every { data.selectedClass } returns details
         challenge = LineCoverageChallenge(data)
         challenge.getScore() shouldBe 3
-        challenge.toString().replace("<b>", "").replace("</b>", "") shouldBe "Write a test to fully cover line 5 in class $className in package " +
-                "org.gamekins.challenge (created for branch $branch)"
+        challenge.toEscapedString()
         challenge.getName() shouldBe "LineCoverageChallenge"
         every { element.attr("title") } returns "1 of 2 branches missed."
         every { data.line } returns element
         challenge = LineCoverageChallenge(data)
         challenge.getScore() shouldBe 3
-        challenge.toString().replace("<b>", "").replace("</b>", "") shouldBe "Write a test to cover more branches (currently 1 of 2 covered) of line 5 in " +
-                "class $className in package org.gamekins.challenge (created for branch $branch)"
+        challenge.toEscapedString()
         every { element.attr("title") } returns "All 2 branches missed."
         every { element.attr("class") } returns "nc"
         every { data.line } returns element
         challenge = LineCoverageChallenge(data)
         challenge.getScore() shouldBe 2
-        challenge.toString().replace("<b>", "").replace("</b>", "") shouldBe "Write a test to cover more branches (currently 0 of 2 covered) of line 5 in " +
-                "class $className in package org.gamekins.challenge (created for branch $branch)"
+        challenge.toEscapedString()
     }
 
     @Test

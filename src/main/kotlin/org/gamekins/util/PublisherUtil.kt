@@ -21,6 +21,7 @@ import hudson.model.*
 import org.gamekins.GameUserProperty
 import org.gamekins.challenge.ChallengeFactory
 import org.gamekins.challenge.DummyChallenge
+import org.gamekins.challenge.MutationTestChallenge
 import org.gamekins.property.GameJobProperty
 import org.gamekins.property.GameMultiBranchProperty
 import org.gamekins.property.GameProperty
@@ -65,8 +66,10 @@ object PublisherUtil {
 
         for (challenge in property.getCurrentChallenges(constants["projectName"])) {
             if (!challenge.isSolvable(constants, run, listener, workspace)) {
-                property.rejectChallenge(constants["projectName"]!!, challenge, "Not solvable")
-                listener.logger.println("[Gamekins] Challenge $challenge can not be solved anymore")
+                var reason = "Not solvable"
+                if (challenge is MutationTestChallenge) reason = "Source file changed"
+                property.rejectChallenge(constants["projectName"]!!, challenge, reason)
+                listener.logger.println("[Gamekins] Challenge ${challenge?.toEscapedString()} can not be solved anymore")
             }
         }
     }
@@ -82,7 +85,7 @@ object PublisherUtil {
             if (challenge.isSolved(constants, run, listener, workspace)) {
                 property.completeChallenge(constants["projectName"]!!, challenge)
                 property.addScore(constants["projectName"]!!, challenge.getScore())
-                listener.logger.println("[Gamekins] Solved challenge $challenge.")
+                listener.logger.println("[Gamekins] Solved challenge ${challenge?.toEscapedString()}.")
                 if (challenge !is DummyChallenge) solved++
             }
         }

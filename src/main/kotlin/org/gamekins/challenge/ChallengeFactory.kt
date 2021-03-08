@@ -158,12 +158,12 @@ object ChallengeFactory {
             }
 
             if (rejectedChallenges.contains(challenge)) {
-                listener.logger.println("[Gamekins] Challenge $challenge was already rejected previously")
+                listener.logger.println("[Gamekins] Challenge ${challenge?.toEscapedString()} was already rejected previously")
                 challenge = null
             }
 
             if (challenge != null && !challenge.builtCorrectly) {
-                listener.logger.println("[Gamekins] Challenge $challenge was not built correctly")
+                listener.logger.println("[Gamekins] Challenge ${challenge.toEscapedString()} was not built correctly")
                 challenge = null
             }
         } while (challenge == null)
@@ -286,7 +286,7 @@ object ChallengeFactory {
                 listener.logger.println("[Gamekins] Started to generate challenge")
                 challenge = generateChallenge(user, constants, listener, userClasses, workspace)
 
-                listener.logger.println("[Gamekins] Generated challenge $challenge")
+                listener.logger.println("[Gamekins] Generated challenge ${challenge.toEscapedString()}")
                 if (challenge is DummyChallenge) break
 
                 for (currentChallenge in property.getCurrentChallenges(constants["projectName"])) {
@@ -300,7 +300,7 @@ object ChallengeFactory {
             } while (!isChallengeUnique)
 
             property.newChallenge(constants["projectName"]!!, challenge)
-            listener.logger.println("[Gamekins] Added challenge $challenge")
+            listener.logger.println("[Gamekins] Added challenge ${challenge.toEscapedString()}")
             generated++
         } catch (e: Exception) {
             e.printStackTrace(listener.logger)
