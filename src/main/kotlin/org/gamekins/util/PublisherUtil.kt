@@ -176,7 +176,10 @@ object PublisherUtil {
      * Checks whether the path of the moco json file [mocoJSONPath] exists in the [workspace].
      */
     @JvmStatic
-    fun doCheckMocoJSONPath(workspace: FilePath, mocoJSONPath: String): Boolean {
+    fun doCheckMocoJSONPath(workspace: FilePath, mocoJSONPath: String?): Boolean {
+        if (mocoJSONPath.isNullOrEmpty()) {
+            return false
+        }
         var jsonPath = mocoJSONPath
         if (!jsonPath.endsWith(".json")) return false
         if (jsonPath.startsWith("**")) jsonPath = jsonPath.substring(2)

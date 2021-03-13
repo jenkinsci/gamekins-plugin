@@ -154,12 +154,13 @@ class MethodCoverageChallenge(data: ChallengeGenerationData) : CoverageChallenge
                 workspace, classDetails.jacocoSourceFile, classDetails.workspace
             )
             val snippetElements = JacocoUtil.getLinesInRange(javaHtmlPath, target, 4)
-            if (snippetElements == "") {
+            if (snippetElements.first == "") {
                 return ""
             }
             val loc = (target as String).substring(1)
             val linenums = if (loc.toIntOrNull() is Int) "linenums:${loc.toInt() - 2}" else ""
-            return "<pre class='prettyprint mt-2 ${linenums}'><code class='language-java'>" + snippetElements +
+            return "<pre class='prettyprint mt-2 ${linenums}'><code class='language-java'>" +
+                    snippetElements.first +
                     "</code></pre>"
         }
         return ""

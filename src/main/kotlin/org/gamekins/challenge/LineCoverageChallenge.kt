@@ -223,9 +223,10 @@ class LineCoverageChallenge(data: Challenge.ChallengeGenerationData)
                 workspace, classDetails.jacocoSourceFile, classDetails.workspace
             )
             val snippetElements = JacocoUtil.getLinesInRange(javaHtmlPath, target, 2)
-            if (snippetElements == "") return ""
+            if (snippetElements.first == "") return ""
 
-            return "<pre class='prettyprint linenums:${target - 1} mt-2'><code class='language-java'>" + snippetElements +
+            return "<pre class='prettyprint linenums:${target - 1} mt-2'><code class='language-java'>" +
+                    snippetElements.first +
                    "</code></pre>"
         }
         return ""

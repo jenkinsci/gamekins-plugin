@@ -19,7 +19,6 @@ package org.gamekins.util
 import hudson.FilePath
 import hudson.model.Run
 import hudson.model.TaskListener
-import hudson.tasks.junit.TestResultAction
 import org.gamekins.util.GitUtil.GameUser
 import jenkins.security.MasterToSlaveCallable
 import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject
@@ -272,11 +271,15 @@ object JacocoUtil {
 
 
     /**
-     * Returns lines of code within specific lines of code range the [jacocoSourceFile].
+     * Returns lines of code within specific lines of code range in the [jacocoSourceFile].
+     * The return value is a pair with the first element is the target code snippet and
+     * the second element is the target line as normal string. The target line as normal string (cleaned) is needed
+     * to create mutated line of code for mutation test challenge
+     * [target]: could be Int or String
      */
     @JvmStatic
     @Throws(IOException::class, InterruptedException::class)
-    fun getLinesInRange(jacocoSourceFile: FilePath, target: Any, linesAround: Int): String {
+    fun getLinesInRange(jacocoSourceFile: FilePath, target: Any, linesAround: Int): Pair<String, String> {
         val document = Jsoup.parse(jacocoSourceFile.readToString())
         val lines: List<String> = document.html().lines()
         val outputSettings = Document.OutputSettings()
@@ -284,18 +287,21 @@ object JacocoUtil {
         document.outputSettings(outputSettings)
         document.select("br").before("\\n")
         document.select("p").before("\\n")
-
+        var targetLine = ""
         val lineIndex: Int = when (target) {
             is Int -> {
-                if (target < 0) { return "" }
-                val line = document.selectFirst("#L$target") ?: return ""
-                lines.indexOfFirst { it == line.toString() }
+                if (target < 0) { return Pair("", "") }
+                val elem = document.selectFirst("#L$target") ?: return Pair("", "")
+                targetLine = elem.toString()
+                lines.indexOfFirst { it == elem.toString() }
             }
-            is String -> { lines.indexOfFirst { it.contains(target) } }
-            else ->  return ""
+            is String -> {
+                lines.indexOfFirst { it.contains(target) }
+            }
+            else ->  return Pair("", "")
         }
 
-        if (lineIndex < 0) { return "" }
+        if (lineIndex < 0) { return Pair("", "") }
 
         var res = ""
         val offset = if (linesAround % 2 != 0) 1 else 0
@@ -303,10 +309,10 @@ object JacocoUtil {
             val temp = lines.getOrNull(i)
             if (temp != null) {
                 res += Jsoup.clean(temp, "", Whitelist.none(), outputSettings) + System.lineSeparator()
-
             }
         }
-        return res
+        val cleanTargetLine = Jsoup.clean(targetLine, "", Whitelist.none(), outputSettings)
+        return Pair(res, Parser.unescapeEntities(cleanTargetLine, true))
     }
 
     /**

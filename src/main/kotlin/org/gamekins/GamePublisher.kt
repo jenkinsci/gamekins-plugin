@@ -85,8 +85,15 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
             listener.logger.println("[Gamekins] JaCoCo csv file could not be found")
             return
         }
-        if (!PublisherUtil.doCheckMocoJSONPath(workspace, mocoJSONPath!!)) {
-            listener.logger.println("[Gamekins] MoCo json file could not be found")
+        if (mocoJSONPath.isNullOrEmpty()) {
+            // mocoJSONPath is not specified, try the default path of MoCo plugin
+            if (jacocoCSVPath!!.startsWith("**/")) {
+                val buildFolder = jacocoCSVPath!!.substring(3, ).substringBefore("/")
+                mocoJSONPath = "**/$buildFolder/moco/mutation/moco.json"
+            }
+        }
+        if (!PublisherUtil.doCheckMocoJSONPath(workspace, mocoJSONPath)) {
+            listener.logger.println("[Gamekins] MoCo JSON file could not be found, please check the configuration")
             return
         }
         constants["jacocoResultsPath"] = jacocoResultsPath!!

@@ -34,19 +34,20 @@ import org.gamekins.util.JacocoUtil.ClassDetails
  */
 class MutationTestChallenge(
     val mutationInfo: MutationInfo, val classDetails: ClassDetails,
-    val branch: String?, workspace: FilePath, val commitID: String
+    val branch: String?, workspace: FilePath, val commitID: String, snippet: String, mutatedLoc: String
 ) : Challenge {
 
     private val created = System.currentTimeMillis()
     private var solved: Long = 0
     private var mutationDetails = mutationInfo.mutationDetails
-    private val methodName = mutationDetails.methodInfo["methodName"]
+    val methodName = mutationDetails.methodInfo["methodName"]
     private val className = mutationDetails.methodInfo["className"]?.replace("/", ".")
     private val mutationDescription = mutationDetails.mutationDescription
-    private val lineOfCode = mutationDetails.loc
+    val lineOfCode = mutationDetails.loc
     private val fileName = mutationDetails.fileName
     val uniqueID = mutationInfo.uniqueID
-    private val codeSnippet = createCodeSnippet(classDetails, lineOfCode, workspace)
+    private val codeSnippet = snippet
+    private val mutatedLine = mutatedLoc
 
     override fun getCreated(): Long {
         return created
@@ -121,22 +122,32 @@ class MutationTestChallenge(
      * Checks whether the [MutationTestChallenge] is solvable if the [run] was in the [branch] (taken from
      * [constants]), where it has been generated. The [workspace] is the folder with the code and execution rights,
      * and the [listener] reports the events to the console output of Jenkins.
+     *
+     * A mutation challenge is discarded if its source file has changed (using git info)
      */
     override fun isSolvable(
         constants: HashMap<String, String>, run: Run<*, *>, listener: TaskListener,
         workspace: FilePath
     ): Boolean {
-        // a mutation challenge is discarded if the source file has changed since last commit
-        val changedClasses =  workspace.act(GitUtil.DiffFromHeadCallable(workspace, commitID,
-                                                classDetails.packageName, listener))
-        return changedClasses?.any { it.replace("/", ".") ==
-                                     "${classDetails.packageName}.${classDetails.className}" } == false
+        val changedClasses = workspace.act(
+            GitUtil.DiffFromHeadCallable(
+                workspace, commitID,
+                classDetails.packageName, listener
+            )
+        )
+        return changedClasses?.any {
+            it.replace("/", ".") ==
+                    "${classDetails.packageName}.${classDetails.className}"
+        } == false
     }
 
     /**
      * The [MutationTestChallenge] is solved if mutation status is killed.
      * The [workspace] is the folder with the code and execution rights, and
      * the [listener] reports the events to the console output of Jenkins.
+     *
+     * A mutation challenge is solved if it exists in MoCo JSON file and has result as "killed"
+     *
      */
     override fun isSolved(
         constants: HashMap<String, String>, run: Run<*, *>, listener: TaskListener,
@@ -168,22 +179,30 @@ class MutationTestChallenge(
         return codeSnippet
     }
 
-    fun createCodeSnippet(classDetails: ClassDetails, lineOfCode: Int, workspace: FilePath): String {
-        if (lineOfCode < 0) {
-            return ""
-        }
-        if (classDetails.jacocoSourceFile.exists()) {
-            val javaHtmlPath = JacocoUtil.calculateCurrentFilePath(
-                workspace, classDetails.jacocoSourceFile, classDetails.workspace
-            )
-            val snippetElements = JacocoUtil.getLinesInRange(javaHtmlPath, lineOfCode, 4)
-            if (snippetElements == "") {
-                return ""
+    fun getMutatedLine(): String {
+        return mutatedLine
+    }
+
+    companion object {
+        fun createCodeSnippet(classDetails: ClassDetails, lineOfCode: Int, workspace: FilePath): Pair<String, String> {
+            if (lineOfCode < 0) {
+                return Pair("", "")
             }
-            return "<pre class='prettyprint linenums:${lineOfCode - 2} mt-2'><code class='language-java'>" + snippetElements +
-                    "</code></pre>"
+            if (classDetails.jacocoSourceFile.exists()) {
+                val javaHtmlPath = JacocoUtil.calculateCurrentFilePath(
+                    workspace, classDetails.jacocoSourceFile, classDetails.workspace
+                )
+                val snippetElements = JacocoUtil.getLinesInRange(javaHtmlPath, lineOfCode, 4)
+                if (snippetElements.first == "") {
+                    return Pair("", "")
+                }
+                return Pair(
+                    "<pre class='prettyprint linenums:${lineOfCode - 2} mt-2'><code class='language-java'>" +
+                            snippetElements.first + "</code></pre>", snippetElements.second
+                )
+            }
+            return Pair("", "")
         }
-        return ""
     }
 
     override fun toEscapedString(): String {
