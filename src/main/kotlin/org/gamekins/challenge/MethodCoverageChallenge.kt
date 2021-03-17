@@ -138,6 +138,15 @@ class MethodCoverageChallenge(data: ChallengeGenerationData) : CoverageChallenge
         return false
     }
 
+    /**
+     * Called by Jenkins after the object has been created from his XML representation. Used for data migration.
+     */
+    @Suppress("unused", "SENSELESS_COMPARISON")
+    private fun readResolve(): Any {
+        if (codeSnippet == null) codeSnippet = ""
+        return this
+    }
+
     override fun toString(): String {
         return ("Write a test to cover more lines of method <b>" + methodName + "</b> in class <b>"
                 + classDetails.className + "</b> in package <b>" + classDetails.packageName

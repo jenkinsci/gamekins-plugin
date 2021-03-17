@@ -178,6 +178,7 @@ class LineCoverageChallenge(data: Challenge.ChallengeGenerationData)
     @Suppress("unused", "SENSELESS_COMPARISON")
     private fun readResolve(): Any {
         if (solvedCoveredBranches == null) solvedCoveredBranches = 0
+        if (codeSnippet == null) codeSnippet = ""
         return this
     }
 
