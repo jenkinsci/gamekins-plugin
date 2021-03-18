@@ -50,6 +50,7 @@ data class MutationResults(val entries: Map<String, List<MutationInfo>>) : Seria
     companion object {
         private var retrievedResults: MutationResults? = null
         var mapper = jacksonObjectMapper()
+        var mocoJSONAvailable = true
 
         fun retrievedMutationsFromJson(
             remotePath: FilePath, listener: TaskListener

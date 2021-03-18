@@ -28,6 +28,7 @@ import org.gamekins.property.GameMultiBranchProperty
 import org.gamekins.util.GitUtil
 import org.gamekins.util.PublisherUtil
 import jenkins.tasks.SimpleBuildStep
+import org.gamekins.mutation.MutationResults
 import org.gamekins.util.JUnitUtil
 import org.gamekins.util.JacocoUtil
 import org.jenkinsci.plugins.workflow.job.WorkflowJob
@@ -92,13 +93,19 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
                 mocoJSONPath = "**/$buildFolder/moco/mutation/moco.json"
             }
         }
+
         if (!PublisherUtil.doCheckMocoJSONPath(workspace, mocoJSONPath)) {
-            listener.logger.println("[Gamekins] MoCo JSON file could not be found, please check the configuration")
-            return
+            constants["mocoJSONPath"] = ""
+            MutationResults.mocoJSONAvailable = false
+            listener.logger.println("[Gamekins] MoCo JSON file could not be found, mutation test challenge will not be created")
+            listener.logger.println("[Gamekins] Please check moco.json file path configuration to enable mutation test challenge feature")
+        } else {
+            MutationResults.mocoJSONAvailable = true
+            constants["mocoJSONPath"] = mocoJSONPath!!
         }
+
         constants["jacocoResultsPath"] = jacocoResultsPath!!
         constants["jacocoCSVPath"] = jacocoCSVPath!!
-        constants["mocoJSONPath"] = mocoJSONPath!!
         constants["workspace"] = workspace.remote
 
         //Extracts the branch

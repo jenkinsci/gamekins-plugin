@@ -53,7 +53,11 @@ object ChallengeFactory {
      */
     private fun chooseChallengeType(): Class<out Challenge> {
         val weightList = arrayListOf<Class<out Challenge>>()
-        GamePublisherDescriptor.challenges.forEach { (clazz, weight) ->
+        var challengeTypes = GamePublisherDescriptor.challenges
+        if (!MutationResults.mocoJSONAvailable) {
+            challengeTypes = challengeTypes.filter { it.key != MutationTestChallenge::class.java } as HashMap<Class<out Challenge>, Int>
+        }
+        challengeTypes.forEach { (clazz, weight) ->
             (0 until weight).forEach { _ ->
                 weightList.add(clazz)
             }
@@ -299,9 +303,7 @@ object ChallengeFactory {
         user: User, property: GameUserProperty, constants: HashMap<String, String>,
         userClasses: ArrayList<ClassDetails>, workspace: FilePath,
         listener: TaskListener
-    )
-            : Int {
-
+    ): Int {
         var generated = 0
         try {
             //Try to generate a new unique Challenge three times. because it can fail
@@ -356,7 +358,7 @@ object ChallengeFactory {
     ): MutationTestChallenge? {
         MutationUtils.mutationBlackList.clear()
         val jsonFilePath = JacocoUtil.calculateCurrentFilePath(
-            workspace, classDetails.mocoJSONFile, classDetails.workspace
+            workspace, classDetails.mocoJSONFile!!, classDetails.workspace
         )
         val commitID = workspace.act(HeadCommitCallable(workspace.remote)).name
         val fullClassName = "${classDetails.packageName}.${classDetails.className}"

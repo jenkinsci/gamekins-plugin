@@ -134,7 +134,7 @@ class ChallengeFactoryTest : AnnotationSpec() {
         every { path.remote } returns "/home/test/workspace"
         every { path.channel } returns null
         details = JacocoUtil.ClassDetails(path, shortFilePath, shortJacocoPath, shortJacocoCSVPath, mocoJSONPath, map, listener)
-
+        MutationResults.mocoJSONAvailable = true
         challenge = MutationTestChallenge(mutation1, details, branch, path, "commitID", "snippet", "line")
         challenge1 = MutationTestChallenge(mutation2, details, branch, path, "commitID", "snippet", "")
         challenge2 = MutationTestChallenge(mutation3, details, branch, path, "commitID", "snippet", "line")

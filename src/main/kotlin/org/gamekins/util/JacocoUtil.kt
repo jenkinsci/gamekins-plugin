@@ -21,6 +21,7 @@ import hudson.model.Run
 import hudson.model.TaskListener
 import org.gamekins.util.GitUtil.GameUser
 import jenkins.security.MasterToSlaveCallable
+import org.gamekins.mutation.MutationResults
 import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
@@ -465,7 +466,7 @@ object JacocoUtil {
         val jacocoMethodFile: File
         val jacocoSourceFile: File
         val jacocoCSVFile: File
-        val mocoJSONFile: File
+        val mocoJSONFile: File?
         val coverage: Double
         val changedByUsers: HashSet<GameUser>
         val workspace: String = workspace.remote
@@ -490,10 +491,14 @@ object JacocoUtil {
                         + EXISTS + jacocoCSVFile.exists())
             }
 
-            mocoJSONFile = File(StringBuilder(workspace.remote).toString() + shortMocoJSONPath.substring(2))
-            if (!mocoJSONFile.exists()) {
-                listener.logger.println("[Gamekins] MoCoJSONPath: " + mocoJSONFile.absolutePath
-                        + EXISTS + mocoJSONFile.exists())
+            if (MutationResults.mocoJSONAvailable) {
+                mocoJSONFile = File(StringBuilder(workspace.remote).toString() + shortMocoJSONPath.substring(2))
+                if (!mocoJSONFile.exists()) {
+                    listener.logger.println("[Gamekins] MoCoJSONPath: " + mocoJSONFile.absolutePath
+                            + EXISTS + mocoJSONFile.exists())
+                }
+            } else {
+                mocoJSONFile = null
             }
 
             jacocoPath.append(shortJacocoPath.substring(2))
