@@ -51,6 +51,7 @@ class PublisherUtilTest : AnnotationSpec() {
     private lateinit var path : FilePath
     private val jacocoResultsPath = "**/target/site/jacoco/"
     private val jacocoCSVPath = "**/target/site/jacoco/jacoco.csv"
+    private val mocoJSONPath = "**/target/moco/mutation/moco.json"
     private val run = mockkClass(hudson.model.Run::class)
     private val constants = HashMap<String, String>()
     private val job = mockkClass(Job::class)
@@ -167,6 +168,12 @@ class PublisherUtilTest : AnnotationSpec() {
     fun doCheckJacocoCSVPath() {
         PublisherUtil.doCheckJacocoCSVPath(path, jacocoCSVPath) shouldBe true
         PublisherUtil.doCheckJacocoCSVPath(FilePath(null, path.remote + "/src"), jacocoCSVPath) shouldBe false
+    }
+
+    @Test
+    fun doCheckMocoJSONPath() {
+        PublisherUtil.doCheckMocoJSONPath(path, mocoJSONPath) shouldBe false
+        PublisherUtil.doCheckMocoJSONPath(FilePath(null, path.remote + "/src"), mocoJSONPath) shouldBe false
     }
 
     @Test

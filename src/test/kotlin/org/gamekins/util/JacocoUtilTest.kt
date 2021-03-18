@@ -32,6 +32,7 @@ import io.mockk.mockkStatic
 import io.mockk.unmockkAll
 import org.eclipse.jgit.revwalk.RevCommit
 import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject
+import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.jsoup.select.Elements
 import java.io.File
@@ -224,5 +225,23 @@ class JacocoUtilTest : AnnotationSpec() {
         details.toString() shouldBe
                 "ClassDetails{className='Complex', extension='java', packageName='com.example', " +
                 "changedByUsers=Philipp Straubinger}"
+    }
+
+    @Test
+    fun isGetLinesInRange() {
+        JacocoUtil.getLinesInRange(jacocoSourceFile, 41, 4) shouldBe Pair("    double ns = a * a + b * b;\n" +
+                "    double dArg = d / 2;\n" +
+                "    double cArg = c * arg();\n" +
+                "    double dDenom = Math.pow(Math.E, d * arg());\n" +
+                "\n", "    double cArg = c * arg();")
+
+
+        JacocoUtil.getLinesInRange(jacocoSourceFile, "dDenom", 4) shouldBe Pair("    double dArg = d / 2;\n" +
+                "    double cArg = c * arg();\n" +
+                "    double dDenom = Math.pow(Math.E, d * arg());\n" +
+                "\n" +
+                "    double newReal =\n", "")
+
+        JacocoUtil.getLinesInRange(jacocoSourceFile, 5.0, 4) shouldBe Pair("", "")
     }
 }

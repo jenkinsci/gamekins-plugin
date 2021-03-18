@@ -49,7 +49,7 @@ data class MutationResults(val entries: Map<String, List<MutationInfo>>) : Seria
 
     companion object {
         private var retrievedResults: MutationResults? = null
-        val mapper = jacksonObjectMapper()
+        var mapper = jacksonObjectMapper()
 
         fun retrievedMutationsFromJson(
             remotePath: FilePath, listener: TaskListener
@@ -61,7 +61,6 @@ data class MutationResults(val entries: Map<String, List<MutationInfo>>) : Seria
                 retrievedResults
             } catch (e: Exception) {
                 listener.logger.println("Error while reading mutation results from json file, please check MoCo JSON path")
-                listener.logger.println(e.printStackTrace())
                 null
             }
         }

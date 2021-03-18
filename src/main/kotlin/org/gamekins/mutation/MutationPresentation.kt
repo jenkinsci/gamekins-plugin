@@ -49,7 +49,7 @@ object MutationPresentation {
     /**
      * Create mutated line for mutation of replacement operator
      */
-    private fun getReplacementMutatedLine(originalLine: String, mutation: MutationInfo): String {
+    fun getReplacementMutatedLine(originalLine: String, mutation: MutationInfo): String {
         // MoCo use "-" to separate old opcode and new opcode for mutator ID of replacement operator
         // Example: IAND-IOR -> this mutator id denotes replacement of IAND with IOR
         val temp = mutation.mutationDetails.mutatorID.split("-")
@@ -89,7 +89,7 @@ object MutationPresentation {
                 originalLine.substring(operatorIndices.last + 1)
     }
 
-    private fun getReplacementText(newOpcode: String): String {
+    fun getReplacementText(newOpcode: String): String {
         return when (newOpcode.substring(1)) {
             "AND" -> "&"
             "OR" -> "|"
@@ -104,7 +104,7 @@ object MutationPresentation {
     /**
      * Create mutated line for mutation of insertion operator
      */
-    private fun getInsertionMutatedLine(originalLine: String, mutation: MutationInfo): String {
+    fun getInsertionMutatedLine(originalLine: String, mutation: MutationInfo): String {
         // Insertion mutator id format: [OPCODE]-[MutationTYPE]-[I for increment or D for decrement]-[lineNo]
         // Example: GETFIELD-PRUOI-D-51, ILOAD-PRUOI-I-3"
         val temp = mutation.mutationDetails.mutatorID.split("-")
@@ -137,7 +137,7 @@ object MutationPresentation {
     /**
      * Create mutated line for mutation of deletion operator
      */
-    private fun getDeletionMutatedLine(originalLine: String, mutation: MutationInfo): String {
+    fun getDeletionMutatedLine(originalLine: String, mutation: MutationInfo): String {
         // MoCo use "-" to separate old opcode and new opcode for mutator ID
         // Example: IAND-IOR -> this mutator id denotes replacement of IAND with IOR
         val opcode: String
@@ -174,16 +174,17 @@ object MutationPresentation {
         }
         // Deletion
         val deleteRange = getDeleteRange(originalLine, textIndices, position) ?: return ""
-        return originalLine.substring(0, deleteRange.first).trimEnd() +
-                if (deleteRange.second < originalLine.length) originalLine.substring(deleteRange.second + 1)
-                else ""
+        return if (deleteRange.second < originalLine.length) {
+            originalLine.substring(0, deleteRange.first).trimEnd() +
+                    originalLine.substring(deleteRange.second + 1)
+        } else ""
     }
 
     /**
      * Find the range (start and end index) of the substring to be deleted
      * We need to distinguish between deletion of the first operand and second operand (F or S in mutator ID)
      */
-    private fun getDeleteRange(originalLine: String, operatorRange: IntRange, removedPosition: String): Pair<Int, Int>? {
+    fun getDeleteRange(originalLine: String, operatorRange: IntRange, removedPosition: String): Pair<Int, Int>? {
         // Reg to find java variable names
         val reg = Regex("((\\+{2}|-{2})?)([\\w\$.])+((\\+{2}|-{2})?)")
         val hits = reg.findAll(originalLine).iterator()
@@ -224,17 +225,17 @@ object MutationPresentation {
         return null
     }
 
-    private val operatorNameToType: Map<String, String> = mapOf(
+    val operatorNameToType: Map<String, String> = mapOf(
         "PRUOI" to "insertion", "POUOI" to "insertion",
         "AOD" to "deletion", "BLD" to "deletion",
         "AOR" to "replacement", "BLR" to "replacement", "ROR" to "replacement",
     )
 
-    private val insertionTypeToText: Map<String, String> = mapOf(
+    val insertionTypeToText: Map<String, String> = mapOf(
         "I" to "++", "D" to "--"
     )
 
-    private val opcodeToRegexPattern: Map<String, String> = mapOf(
+    val opcodeToRegexPattern: Map<String, String> = mapOf(
         /**
          * AOR - Arithmetic Operator Replacement
          */

@@ -61,7 +61,7 @@ object MutationUtils {
     /**
      * Put entries into currentLinesOperatorMap
      * an entry in currentLinesOperatorMap is mapping from line of code to mutation operators of current challenges
-    */
+     */
     fun getCurrentLinesOperatorMapping(
         currentChallenges: List<MutationTestChallenge>, fullClassName: String,
         currentLinesOperatorMap: MutableMap<Int, MutableSet<String>>
@@ -121,7 +121,7 @@ object MutationUtils {
     /**
      * We prioritize mutation with operators which are different from those in current challenges
      */
-    private fun handleMutationInNewMethods(
+    fun handleMutationInNewMethods(
         muList: List<MutationInfo?>,
         classDetails: JacocoUtil.ClassDetails, workspace: FilePath,
         currentLinesOperatorMap: Map<Int, Set<String>>,
@@ -142,7 +142,7 @@ object MutationUtils {
      * We prioritize mutation with operators which are different from those in current challenges
      * and mutation on different lines of code
      */
-    private fun handleMutationInOldMethods(
+    fun handleMutationInOldMethods(
         muList: List<MutationInfo?>,
         classDetails: JacocoUtil.ClassDetails, workspace: FilePath,
         currentLinesOperatorMap: Map<Int, Set<String>>
@@ -189,7 +189,7 @@ object MutationUtils {
         var mutatedLine = ""
 
         val temp = muList.groupBy { it?.mutationDetails?.mutationOperatorName }
-        val sorted = temp.toList().sortedBy { (_, value) -> value.size}.toMap().values.flatten()
+        val sorted = temp.toList().sortedBy { (_, value) -> value.size }.toMap().values.flatten()
 
         for (mutation in sorted) {
             val relatedSource = MutationTestChallenge.createCodeSnippet(
