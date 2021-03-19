@@ -212,6 +212,12 @@
             <version>${kotlin.version}</version>
             <scope>compile</scope>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.jetbrains.kotlinx/kotlinx-coroutines-core -->
+        <dependency>
+            <groupId>org.jetbrains.kotlinx</groupId>
+            <artifactId>kotlinx-coroutines-core</artifactId>
+            <version>1.4.0</version>
+        </dependency>
         <!-- Mutation Test dependencies -->
         <dependency>
             <groupId>com.fasterxml.jackson.module</groupId>
