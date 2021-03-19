@@ -28,7 +28,7 @@ import kotlin.jvm.Throws
  * Interface for all Properties of Gamekins.
  *
  * @author Philipp Straubinger
- * @since 1.0
+ * @since 0.1
  */
 interface GameProperty {
 

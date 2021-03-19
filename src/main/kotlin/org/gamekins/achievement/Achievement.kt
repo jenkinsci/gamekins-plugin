@@ -32,7 +32,7 @@ import kotlin.reflect.KClass
  * initialized with [AchievementInitializer].
  *
  * @author Philipp Straubinger
- * @since 1.0
+ * @since 0.2
  */
 class Achievement(var badgePath: String, var unsolvedBadgePath: String, val fullyQualifiedFunctionName: String,
                   val description: String, val title: String, val secret: Boolean,

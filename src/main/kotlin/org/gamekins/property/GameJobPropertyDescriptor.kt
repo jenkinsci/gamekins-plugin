@@ -34,7 +34,7 @@ import javax.annotation.Nonnull
  * Jetty server and the [GameJobProperty].
  *
  * @author Philipp Straubinger
- * @since 1.0
+ * @since 0.1
  */
 @Extension
 class GameJobPropertyDescriptor : JobPropertyDescriptor(GameJobProperty::class.java) {

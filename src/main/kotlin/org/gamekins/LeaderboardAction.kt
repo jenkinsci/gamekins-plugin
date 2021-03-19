@@ -29,7 +29,7 @@ import java.util.concurrent.CopyOnWriteArrayList
  * Represents the Leaderboard displayed in the side panel of the job. Used to send the data to the Jetty server.
  *
  * @author Philipp Straubinger
- * @since 1.0
+ * @since 0.1
  */
 class LeaderboardAction(val job: AbstractItem) : ProminentProjectAction, Describable<LeaderboardAction>, StaplerProxy {
 

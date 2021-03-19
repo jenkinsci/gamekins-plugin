@@ -35,7 +35,7 @@ import kotlin.jvm.Throws
  * Adds the configuration for Gamekins to the configuration page of a [FreeStyleProject].
  *
  * @author Philipp Straubinger
- * @since 1.0
+ * @since 0.1
  */
 class GameJobProperty
 @DataBoundConstructor constructor(job: AbstractItem, @set:DataBoundSetter var activated: Boolean,

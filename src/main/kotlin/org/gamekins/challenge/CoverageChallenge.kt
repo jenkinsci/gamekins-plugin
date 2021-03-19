@@ -24,7 +24,7 @@ import org.gamekins.util.JacocoUtil.ClassDetails
  * Abstract class to generate basic information about the class used for generating a [CoverageChallenge].
  *
  * @author Philipp Straubinger
- * @since 1.0
+ * @since 0.1
  */
 abstract class CoverageChallenge(val classDetails: ClassDetails, workspace: FilePath?)
     : Challenge {

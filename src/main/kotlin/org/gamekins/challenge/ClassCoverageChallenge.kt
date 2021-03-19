@@ -26,7 +26,7 @@ import org.jsoup.nodes.Document
  * Specific [Challenge] to motivate the user to cover more lines in a specific class.
  *
  * @author Philipp Straubinger
- * @since 1.0
+ * @since 0.1
  */
 class ClassCoverageChallenge(data: Challenge.ChallengeGenerationData)
     : CoverageChallenge(data.selectedClass, data.workspace) {

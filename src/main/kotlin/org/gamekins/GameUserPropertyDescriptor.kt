@@ -27,7 +27,7 @@ import javax.annotation.Nonnull
  * Jetty server and the [GameUserProperty].
  *
  * @author Philipp Straubinger
- * @since 1.0
+ * @since 0.1
  */
 @Extension
 class GameUserPropertyDescriptor : UserPropertyDescriptor(GameUserProperty::class.java) {

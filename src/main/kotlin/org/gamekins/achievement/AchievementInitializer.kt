@@ -22,7 +22,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
  * Object to initialize an [Achievement] from its json representation.
  *
  * @author Philipp Straubinger
- * @since 1.0
+ * @since 0.2
  */
 @Suppress("RECEIVER_NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
 object AchievementInitializer {

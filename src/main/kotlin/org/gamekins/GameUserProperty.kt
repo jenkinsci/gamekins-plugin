@@ -37,7 +37,7 @@ import kotlin.collections.HashMap
  * rejected [Challenge]s, author names in git, score and participation information.
  *
  * @author Philipp Straubinger
- * @since 1.0
+ * @since 0.1
  */
 class GameUserProperty : UserProperty(), Action, StaplerProxy {
 

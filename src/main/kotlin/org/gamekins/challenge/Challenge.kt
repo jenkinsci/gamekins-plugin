@@ -33,7 +33,7 @@ import kotlin.collections.HashMap
  * Each third party [Challenge] must have a constructor with [ChallengeGenerationData] as only input parameter.
  *
  * @author Philipp Straubinger
- * @since 1.0
+ * @since 0.1
  */
 interface Challenge {
 

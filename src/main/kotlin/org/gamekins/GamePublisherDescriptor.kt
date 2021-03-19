@@ -45,7 +45,7 @@ import kotlin.collections.HashMap
  * point between the Jetty server and the [GamePublisher]. Also serves as a Pipeline identifier.
  *
  * @author Philipp Straubinger
- * @since 1.0
+ * @since 0.1
  */
 @Extension
 @Symbol("gamekins")

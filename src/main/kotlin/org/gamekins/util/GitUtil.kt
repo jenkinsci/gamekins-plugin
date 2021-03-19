@@ -52,7 +52,7 @@ import kotlin.jvm.Throws
  * Util object for interaction with git and JGit.
  *
  * @author Philipp Straubinger
- * @since 1.0
+ * @since 0.1
  */
 object GitUtil {
 

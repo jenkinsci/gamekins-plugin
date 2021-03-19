@@ -32,7 +32,7 @@ import java.util.HashMap
  * Object to check whether an achievement is solved or not.
  *
  * @author Philipp Straubinger
- * @since 1.0
+ * @since 0.2
  */
 @Suppress("UNUSED_PARAMETER", "unused")
 object AchievementUtil {

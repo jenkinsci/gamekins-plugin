@@ -27,7 +27,7 @@ import org.gamekins.util.JacocoUtil
  * Contains all utility functions that ChallengeFactory needs to create a MutationTestChallenge
  *
  * @author Tran Phan
- * @since 1.0
+ * @since 0.3
  */
 
 object MutationUtils {

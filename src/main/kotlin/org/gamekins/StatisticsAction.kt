@@ -35,7 +35,7 @@ import org.kohsuke.stapler.StaplerProxy
  * Action to display the [Statistics] XML representation on the left side panel of a job for evaluation purposes.
  *
  * @author Philipp Straubinger
- * @since 1.0
+ * @since 0.1
  */
 class StatisticsAction(val job: AbstractItem) : ProminentProjectAction, StaplerProxy {
 

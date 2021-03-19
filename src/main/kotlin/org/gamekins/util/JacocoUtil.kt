@@ -40,7 +40,7 @@ import kotlin.random.Random
  * Util object for interaction with JaCoCo and Jsoup.
  *
  * @author Philipp Straubinger
- * @since 1.0
+ * @since 0.1
  */
 object JacocoUtil {
 

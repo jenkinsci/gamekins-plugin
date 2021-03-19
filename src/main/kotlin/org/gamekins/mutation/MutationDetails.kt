@@ -36,7 +36,7 @@ import java.io.Serializable
  * [additionalInfo]: Other info that are necessary to construct mutated line of code such as mutated variable names, etc.
  *
  * @author Tran Phan
- * @since 1.0
+ * @since 0.3
  */
 data class MutationDetails(
     val methodInfo: Map<String, String>,

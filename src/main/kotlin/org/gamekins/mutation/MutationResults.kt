@@ -31,7 +31,7 @@ import java.nio.file.Paths
  * Return result from remote is a map from class name to list of its corresponding collected mutations
  *
  * @author Tran Phan
- * @since 1.0
+ * @since 0.3
  */
 data class MutationResults(val entries: Map<String, List<MutationInfo>>) : Serializable {
 

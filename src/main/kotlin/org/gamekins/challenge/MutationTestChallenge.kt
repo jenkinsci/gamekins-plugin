@@ -30,7 +30,7 @@ import org.gamekins.util.JacocoUtil.ClassDetails
  * Specific [Challenge] to motivate users to write test cases to kill a generated mutant.
  *
  * @author Tran Phan
- * @since 1.0
+ * @since 0.3
  */
 class MutationTestChallenge(
     val mutationInfo: MutationInfo, val classDetails: ClassDetails,

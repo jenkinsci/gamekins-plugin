@@ -42,7 +42,7 @@ import kotlin.jvm.Throws
  * Adds the configuration for Gamekins to the configuration page of a [WorkflowMultiBranchProject].
  *
  * @author Philipp Straubinger
- * @since 1.0
+ * @since 0.1
  */
 class GameMultiBranchProperty
 @DataBoundConstructor constructor(job: AbstractItem?, @set:DataBoundSetter var activated: Boolean,

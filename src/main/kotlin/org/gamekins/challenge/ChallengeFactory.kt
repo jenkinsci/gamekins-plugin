@@ -44,7 +44,7 @@ import kotlin.random.Random
  * Factory for generating [Challenge]s.
  *
  * @author Philipp Straubinger
- * @since 1.0
+ * @since 0.1
  */
 object ChallengeFactory {
 

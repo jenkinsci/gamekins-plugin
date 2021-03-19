@@ -30,6 +30,9 @@ import javax.annotation.Nonnull
  * Registers the [LeaderboardAction] to Jenkins as an extension and also works as an communication point between the
  * Jetty server and the [LeaderboardAction]. Actions normally have no [Descriptor], but it can be added. In this case
  * for rejecting Challenges.
+ *
+ * @author Philipp Straubinger
+ * @since 0.1
  */
 @Extension
 class LeaderboardActionDescriptor : Descriptor<LeaderboardAction>(LeaderboardAction::class.java) {

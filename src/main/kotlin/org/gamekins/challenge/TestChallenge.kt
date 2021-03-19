@@ -30,7 +30,7 @@ import kotlin.collections.HashMap
  * Specific [Challenge] to motivate the user to write a new test.
  *
  * @author Philipp Straubinger
- * @since 1.0
+ * @since 0.1
  */
 class TestChallenge(data: Challenge.ChallengeGenerationData) : Challenge {
 

@@ -26,7 +26,7 @@ import kotlin.collections.HashMap
  * Specific [Challenge] to motivate the user to fix a failing build in Jenkins.
  *
  * @author Philipp Straubinger
- * @since 1.0
+ * @since 0.1
  */
 class BuildChallenge(private var constants: HashMap<String, String>) : Challenge {
 

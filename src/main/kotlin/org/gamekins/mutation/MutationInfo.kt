@@ -25,7 +25,7 @@ import java.io.Serializable
  * [uniqueID]: created from hash value of a mutation in MoCo
  *
  * @author Tran Phan
- * @since 1.0
+ * @since 0.3
  */
 
 data class MutationInfo (

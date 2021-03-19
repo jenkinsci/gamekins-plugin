@@ -46,7 +46,7 @@ import javax.annotation.Nonnull
  * [GamePublisher] with null when Gamekins is not activated.
  *
  * @author Philipp Straubinger
- * @since 1.0
+ * @since 0.1
  */
 
 class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var jacocoResultsPath: String?,

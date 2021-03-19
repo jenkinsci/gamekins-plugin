@@ -26,7 +26,7 @@ import org.gamekins.util.JacocoUtil
  * Specific [Challenge] to motivate the user to cover more lines in a random method of a specific class.
  *
  * @author Philipp Straubinger
- * @since 1.0
+ * @since 0.1
  */
 class MethodCoverageChallenge(data: ChallengeGenerationData) : CoverageChallenge(data.selectedClass, data.workspace) {
 

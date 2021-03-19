@@ -30,7 +30,7 @@ import kotlin.collections.ArrayList
  * Class for evaluation purposes. Displays the information about the users and the runs in an XML format.
  *
  * @author Philipp Straubinger
- * @since 1.0
+ * @since 0.1
  */
 class Statistics(job: AbstractItem) {
 

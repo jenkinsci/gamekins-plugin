@@ -30,7 +30,7 @@ import java.io.IOException
  * Util object for interaction with actions.
  *
  * @author Philipp Straubinger
- * @since 1.0
+ * @since 0.1
  */
 object ActionUtil {
 

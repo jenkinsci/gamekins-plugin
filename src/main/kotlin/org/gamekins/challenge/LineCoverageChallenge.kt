@@ -27,7 +27,7 @@ import kotlin.math.abs
  * Specific [Challenge] to motivate the user to cover a random line of a specific class.
  *
  * @author Philipp Straubinger
- * @since 1.0
+ * @since 0.1
  */
 class LineCoverageChallenge(data: Challenge.ChallengeGenerationData)
     : CoverageChallenge(data.selectedClass, data.workspace) {

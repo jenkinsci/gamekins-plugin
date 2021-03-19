@@ -25,7 +25,7 @@ import kotlin.collections.HashMap
  * Generated [Challenge] if the user has not developed something in the last commits. Only for information purposes.
  *
  * @author Philipp Straubinger
- * @since 1.0
+ * @since 0.1
  */
 class DummyChallenge(private var constants: HashMap<String, String>) : Challenge {
 

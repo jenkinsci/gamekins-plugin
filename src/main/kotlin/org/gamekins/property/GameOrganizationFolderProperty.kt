@@ -39,7 +39,7 @@ import javax.annotation.Nonnull
  * [OrganizationFolder] contains multiple [WorkflowMultiBranchProject]s, there is no functionality in the class.
  *
  * @author Philipp Straubinger
- * @since 1.0
+ * @since 0.1
  */
 class GameOrganizationFolderProperty private constructor()
     : AbstractFolderProperty<AbstractFolder<*>?>(), StaplerProxy {
