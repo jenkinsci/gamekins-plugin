@@ -132,8 +132,9 @@ object AchievementUtil {
     fun haveXFailedTests(classes: ArrayList<JacocoUtil.ClassDetails>, constants: HashMap<String, String>,
                          run: Run<*, *>, property: GameUserProperty, workspace: FilePath, listener: TaskListener,
                          additionalParameters: HashMap<String, String>): Boolean {
-        if (additionalParameters["failedTests"]?.toInt() == 0) {
-            return JUnitUtil.getTestCount(workspace, run) == JUnitUtil.getTestFailCount(workspace, run)
+        val testCount = JUnitUtil.getTestCount(workspace, run)
+        if (additionalParameters["failedTests"]?.toInt() == 0 && testCount != 0) {
+            return testCount == JUnitUtil.getTestFailCount(workspace, run)
         } else if (run.result == Result.FAILURE) {
             return JUnitUtil.getTestFailCount(workspace, run) == additionalParameters["failedTests"]?.toInt()
         }

@@ -20,6 +20,7 @@ import hudson.FilePath
 import hudson.model.Result
 import hudson.model.TaskListener
 import hudson.model.User
+import hudson.tasks.junit.TestResultAction
 import io.kotest.core.spec.style.AnnotationSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -208,6 +209,7 @@ class AchievementUtilTest: AnnotationSpec() {
     fun haveXFailedTests() {
         additionalParameters.clear()
         every { run.result } returns Result.SUCCESS
+        every { run.getAction(TestResultAction::class.java) } returns null
         AchievementUtil.haveXFailedTests(classes, constants, run, property, workspace, TaskListener.NULL,
             additionalParameters) shouldBe false
 
@@ -233,6 +235,10 @@ class AchievementUtilTest: AnnotationSpec() {
         every { JUnitUtil.getTestCount(any(), any()) } returns 1
         AchievementUtil.haveXFailedTests(classes, constants, run, property, workspace, TaskListener.NULL,
             additionalParameters) shouldBe true
+
+        every { JUnitUtil.getTestCount(any(), any()) } returns 0
+        AchievementUtil.haveXFailedTests(classes, constants, run, property, workspace, TaskListener.NULL,
+            additionalParameters) shouldBe false
     }
 
     @Test
