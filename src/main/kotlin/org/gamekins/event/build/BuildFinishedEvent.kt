@@ -19,6 +19,15 @@ package org.gamekins.event.build
 import hudson.model.Run
 import hudson.model.User
 import hudson.tasks.MailAddressResolver
+import hudson.tasks.Mailer
+import org.gamekins.event.EventHandler
+import org.gamekins.event.user.UserEvent
+import java.util.*
+import javax.mail.Message
+import javax.mail.Transport
+import javax.mail.internet.InternetAddress
+import javax.mail.internet.MimeMessage
+import kotlin.collections.ArrayList
 
 /**
  * Created when a build is finished. Sends notification mails to the participants.
@@ -30,7 +39,29 @@ class BuildFinishedEvent(projectName: String, branch: String, build: Run<*, *>)
     : BuildEvent(projectName, branch, build) {
 
     override fun run() {
-        //TODO: Send mail
+        val events = EventHandler.getEvents()
+            .filterIsInstance<UserEvent>()
+            .filter { it.projectName == this.projectName && it.branch == this.branch }
+        val userEvents = hashMapOf<User, ArrayList<UserEvent>>()
+        events.forEach {
+            var list = userEvents[it.user]
+            if (list == null) list = arrayListOf()
+            list.add(it)
+            userEvents[it.user] = list
+        }
+
+        val mailer = Mailer.descriptor()
+        for ((user, list) in userEvents) {
+            val mail = MailAddressResolver.resolve(user)
+            val msg = MimeMessage(mailer.createSession())
+            msg.subject = "Gamekins results"
+            msg.setFrom(InternetAddress("results@gamekins.org", "Gamekins"))
+            msg.sentDate = Date()
+            msg.addRecipient(Message.RecipientType.TO, Mailer.stringToAddress(mail, mailer.charset))
+            msg.setText("Test")
+            Transport.send(msg)
+        }
+
         this.delete = true
     }
 }
