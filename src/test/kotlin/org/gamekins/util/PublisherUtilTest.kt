@@ -161,6 +161,7 @@ class PublisherUtilTest : AnnotationSpec() {
         every { userProperty.completeChallenge(any(), any()) } returns Unit
         every { userProperty.addScore(any(), any()) } returns Unit
         every { userProperty.rejectChallenge(any(), any(), any()) } returns Unit
+        every { userProperty.getUser() } returns user
         PublisherUtil.checkUser(user, run, arrayListOf(classDetails), constants, Result.SUCCESS, path) shouldBe hashMapOf("generated" to 0, "solved" to 1, "solvedAchievements" to 0)
     }
 

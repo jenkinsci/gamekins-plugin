@@ -32,6 +32,7 @@ object EventHandler {
     /**
      * Deletes old events, adds a new [event] to the list of [events] and runs it.
      */
+    @JvmStatic
     fun addEvent(event: Event) {
         events.removeIf { it.delete }
         events.add(event)

@@ -32,6 +32,7 @@ import org.eclipse.jgit.lib.PersonIdent
 import org.eclipse.jgit.revwalk.RevCommit
 import org.gamekins.GamePublisherDescriptor
 import org.gamekins.achievement.AchievementInitializer
+import org.gamekins.event.EventHandler
 import org.gamekins.mutation.MutationDetails
 import org.gamekins.mutation.MutationInfo
 import org.gamekins.mutation.MutationResults
@@ -138,6 +139,8 @@ class ChallengeFactoryTest : AnnotationSpec() {
         challenge = MutationTestChallenge(mutation1, details, branch, path, "commitID", "snippet", "line")
         challenge1 = MutationTestChallenge(mutation2, details, branch, path, "commitID", "snippet", "")
         challenge2 = MutationTestChallenge(mutation3, details, branch, path, "commitID", "snippet", "line")
+        mockkStatic(EventHandler::class)
+        every { EventHandler.addEvent(any()) } returns Unit
     }
 
     @AfterAll
@@ -163,6 +166,7 @@ class ChallengeFactoryTest : AnnotationSpec() {
 
         every { property.getCurrentChallenges(any()) } returns CopyOnWriteArrayList()
         every { property.newChallenge(any(), any()) } returns Unit
+        every { property.getUser() } returns user
         every { user.save() } returns Unit
         ChallengeFactory.generateBuildChallenge(Result.FAILURE, user, path, property, map) shouldBe true
     }
