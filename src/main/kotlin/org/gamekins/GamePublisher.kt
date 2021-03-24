@@ -28,6 +28,9 @@ import org.gamekins.property.GameMultiBranchProperty
 import org.gamekins.util.GitUtil
 import org.gamekins.util.PublisherUtil
 import jenkins.tasks.SimpleBuildStep
+import org.gamekins.event.EventHandler
+import org.gamekins.event.build.BuildFinishedEvent
+import org.gamekins.event.build.BuildStartedEvent
 import org.gamekins.mutation.MutationResults
 import org.gamekins.util.JUnitUtil
 import org.gamekins.util.JacocoUtil
@@ -86,19 +89,19 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
             listener.logger.println("[Gamekins] JaCoCo csv file could not be found")
             return
         }
-        if (mocoJSONPath.isNullOrEmpty()) {
-            // mocoJSONPath is not specified, try the default path of MoCo plugin
-            if (jacocoCSVPath!!.startsWith("**/")) {
-                val buildFolder = jacocoCSVPath!!.substring(3, ).substringBefore("/")
-                mocoJSONPath = "**/$buildFolder/moco/mutation/moco.json"
-            }
+        // mocoJSONPath is not specified, try the default path of MoCo plugin
+        if (mocoJSONPath.isNullOrEmpty() && jacocoCSVPath!!.startsWith("**/")) {
+            val buildFolder = jacocoCSVPath!!.substring(3).substringBefore("/")
+            mocoJSONPath = "**/$buildFolder/moco/mutation/moco.json"
         }
 
         if (!PublisherUtil.doCheckMocoJSONPath(workspace, mocoJSONPath)) {
             constants["mocoJSONPath"] = ""
             MutationResults.mocoJSONAvailable = false
-            listener.logger.println("[Gamekins] MoCo JSON file could not be found, mutation test challenge will not be created")
-            listener.logger.println("[Gamekins] Please check moco.json file path configuration to enable mutation test challenge feature")
+            listener.logger.println("[Gamekins] MoCo JSON file could not be found, mutation test challenge will " +
+                    "not be created")
+            listener.logger.println("[Gamekins] Please check moco.json file path configuration to enable mutation " +
+                    "test challenge feature")
         } else {
             MutationResults.mocoJSONAvailable = true
             constants["mocoJSONPath"] = mocoJSONPath!!
@@ -114,6 +117,8 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
         } else {
             constants["branch"] = GitUtil.getBranch(workspace)
         }
+
+        EventHandler.addEvent(BuildStartedEvent(constants["projectName"]!!, constants["branch"]!!, run))
 
         listener.logger.println("[Gamekins] Start")
         listener.logger.println("[Gamekins] Solve Challenges and generate new Challenges")
@@ -145,6 +150,8 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
 
         //Updates the Statistics
         PublisherUtil.updateStatistics(run, constants, generated, solved, solvedAchievements, listener)
+
+        EventHandler.addEvent(BuildFinishedEvent(constants["projectName"]!!, constants["branch"]!!, run))
 
         listener.logger.println("[Gamekins] Finished")
     }

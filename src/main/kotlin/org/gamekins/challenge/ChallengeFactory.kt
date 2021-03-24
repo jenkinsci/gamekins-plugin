@@ -23,6 +23,8 @@ import hudson.model.User
 import org.gamekins.GamePublisherDescriptor
 import org.gamekins.GameUserProperty
 import org.gamekins.challenge.Challenge.ChallengeGenerationData
+import org.gamekins.event.EventHandler
+import org.gamekins.event.user.ChallengeGeneratedEvent
 import org.gamekins.mutation.MutationInfo
 import org.gamekins.mutation.MutationResults
 import org.gamekins.mutation.MutationUtils
@@ -55,7 +57,8 @@ object ChallengeFactory {
         val weightList = arrayListOf<Class<out Challenge>>()
         var challengeTypes = GamePublisherDescriptor.challenges
         if (!MutationResults.mocoJSONAvailable) {
-            challengeTypes = challengeTypes.filter { it.key != MutationTestChallenge::class.java } as HashMap<Class<out Challenge>, Int>
+            challengeTypes = challengeTypes.filter { it.key != MutationTestChallenge::class.java }
+                    as HashMap<Class<out Challenge>, Int>
         }
         challengeTypes.forEach { (clazz, weight) ->
             (0 until weight).forEach { _ ->
@@ -86,6 +89,8 @@ object ChallengeFactory {
                     && !property.getCurrentChallenges(constants["projectName"]).contains(challenge)
                 ) {
                     property.newChallenge(constants["projectName"]!!, challenge)
+                    EventHandler.addEvent(ChallengeGeneratedEvent(constants["projectName"]!!, constants["branch"]!!,
+                        property.getUser(), challenge))
                     listener.logger.println("[Gamekins] Generated new BuildChallenge")
                     user.save()
                     return true
@@ -183,7 +188,8 @@ object ChallengeFactory {
             }
 
             if (rejectedChallenges.any { it.first == challenge }) {
-                listener.logger.println("[Gamekins] Challenge ${challenge?.toEscapedString()} was already rejected previously")
+                listener.logger.println("[Gamekins] Challenge ${challenge?.toEscapedString()} was already " +
+                        "rejected previously")
                 challenge = null
             }
 
@@ -271,6 +277,8 @@ object ChallengeFactory {
             for (i in property.getCurrentChallenges(constants["projectName"]).size..2) {
                 if (userClasses.size == 0) {
                     property.newChallenge(constants["projectName"]!!, DummyChallenge(constants))
+                    EventHandler.addEvent(ChallengeGeneratedEvent(constants["projectName"]!!, constants["branch"]!!,
+                        property.getUser(), DummyChallenge(constants)))
                     break
                 }
 
@@ -335,6 +343,8 @@ object ChallengeFactory {
 
             property.newChallenge(constants["projectName"]!!, challenge)
             listener.logger.println("[Gamekins] Added challenge ${challenge.toEscapedString()}")
+            EventHandler.addEvent(ChallengeGeneratedEvent(constants["projectName"]!!, constants["branch"]!!,
+                property.getUser(), challenge))
             generated++
         } catch (e: Exception) {
             e.printStackTrace(listener.logger)

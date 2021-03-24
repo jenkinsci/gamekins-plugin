@@ -22,6 +22,10 @@ import org.gamekins.GameUserProperty
 import org.gamekins.challenge.ChallengeFactory
 import org.gamekins.challenge.DummyChallenge
 import org.gamekins.challenge.MutationTestChallenge
+import org.gamekins.event.EventHandler
+import org.gamekins.event.user.AchievementSolvedEvent
+import org.gamekins.event.user.ChallengeSolvedEvent
+import org.gamekins.event.user.ChallengeUnsolvableEvent
 import org.gamekins.mutation.MutationResults
 import org.gamekins.property.GameJobProperty
 import org.gamekins.property.GameMultiBranchProperty
@@ -51,6 +55,8 @@ object PublisherUtil {
         for (achievement in property.getUnsolvedAchievements(constants["projectName"]!!)) {
             if (achievement.isSolved(classes, constants, run, property, workspace, listener)) {
                 property.completeAchievement(constants["projectName"]!!, achievement)
+                EventHandler.addEvent(AchievementSolvedEvent(constants["projectName"]!!, constants["branch"]!!,
+                    property.getUser(), achievement))
                 listener.logger.println("[Gamekins] Solved achievement $achievement")
                 solved++
             }
@@ -70,7 +76,10 @@ object PublisherUtil {
                 var reason = "Not solvable"
                 if (challenge is MutationTestChallenge) reason = "Source file changed"
                 property.rejectChallenge(constants["projectName"]!!, challenge, reason)
-                listener.logger.println("[Gamekins] Challenge ${challenge?.toEscapedString()} can not be solved anymore")
+                EventHandler.addEvent(ChallengeUnsolvableEvent(constants["projectName"]!!, constants["branch"]!!,
+                    property.getUser(), challenge))
+                listener.logger.println("[Gamekins] Challenge ${challenge?.toEscapedString()} " +
+                        "can not be solved anymore")
             }
         }
     }
@@ -84,12 +93,15 @@ object PublisherUtil {
         var solved = 0
         for (challenge in property.getCurrentChallenges(constants["projectName"])) {
             if (challenge is MutationTestChallenge && !MutationResults.mocoJSONAvailable) {
-                listener.logger.println("[Gamekins] Cannot check this mutation test challenge is solved or not because moco.json can't be found - ${challenge.toEscapedString()}")
+                listener.logger.println("[Gamekins] Cannot check this mutation test challenge is solved or not " +
+                        "because moco.json can't be found - ${challenge.toEscapedString()}")
                 continue
             }
             if (challenge.isSolved(constants, run, listener, workspace)) {
                 property.completeChallenge(constants["projectName"]!!, challenge)
                 property.addScore(constants["projectName"]!!, challenge.getScore())
+                EventHandler.addEvent(ChallengeSolvedEvent(constants["projectName"]!!, constants["branch"]!!,
+                    property.getUser(), challenge))
                 listener.logger.println("[Gamekins] Solved challenge ${challenge?.toEscapedString()}.")
                 if (challenge !is DummyChallenge) solved++
             }

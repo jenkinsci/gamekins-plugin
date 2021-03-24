@@ -14,23 +14,19 @@
  * limitations under the License.
  */
 
-package org.gamekins.event.build
+package org.gamekins.event.user
 
-import hudson.model.Run
 import hudson.model.User
-import hudson.tasks.MailAddressResolver
+import org.gamekins.challenge.Challenge
 
 /**
- * Created when a build is finished. Sends notification mails to the participants.
+ * Created when a Challenge of a participant is not solvable anymore.
  *
  * @author Philipp Straubinger
  * @since 0.3
  */
-class BuildFinishedEvent(projectName: String, branch: String, build: Run<*, *>)
-    : BuildEvent(projectName, branch, build) {
+class ChallengeUnsolvableEvent(projectName: String, branch: String, user: User, val challenge: Challenge)
+    : UserEvent(projectName, branch, user) {
 
-    override fun run() {
-        //TODO: Send mail
-        this.delete = true
-    }
+    override fun run() = Unit
 }

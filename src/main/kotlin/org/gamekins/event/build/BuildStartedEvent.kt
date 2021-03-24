@@ -29,7 +29,7 @@ class BuildStartedEvent(projectName: String, branch: String, build: Run<*, *>): 
 
     override fun run() {
         EventHandler.getEvents()
-            .filter { it.projectName == projectName && it.branch == branch }
+            .filter { it.projectName == projectName && it.branch == branch && it != this }
             .forEach { it.delete = true }
     }
 }
