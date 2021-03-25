@@ -21,9 +21,10 @@ import hudson.model.User
 import hudson.tasks.MailAddressResolver
 import hudson.tasks.Mailer
 import org.gamekins.event.EventHandler
-import org.gamekins.event.user.UserEvent
+import org.gamekins.event.user.*
 import java.util.*
 import javax.mail.Message
+import javax.mail.MessagingException
 import javax.mail.Transport
 import javax.mail.internet.InternetAddress
 import javax.mail.internet.MimeMessage
@@ -58,10 +59,58 @@ class BuildFinishedEvent(projectName: String, branch: String, build: Run<*, *>)
             msg.setFrom(InternetAddress("results@gamekins.org", "Gamekins"))
             msg.sentDate = Date()
             msg.addRecipient(Message.RecipientType.TO, Mailer.stringToAddress(mail, mailer.charset))
-            msg.setText("Test")
-            Transport.send(msg)
+            msg.setText(generateMailText(user, list))
+            try {
+                Transport.send(msg)
+            } catch (e: MessagingException) {
+                e.printStackTrace()
+            }
+
         }
 
         this.delete = true
+    }
+
+    private fun generateMailText(user: User, list: ArrayList<UserEvent>): String {
+        var text = "Hello ${user.fullName},\n\n"
+        text += "here are your Gamekins results from run ${build.number} of project $projectName:\n\n"
+
+        if (list.find { it is ChallengeSolvedEvent } != null) {
+            text += "Challenges solved:\n"
+            for (event in list.filterIsInstance<ChallengeSolvedEvent>()) {
+                text += "- ${event.challenge.toEscapedString()}\n"
+            }
+            text += "\n"
+        }
+
+        if (list.find { it is ChallengeUnsolvableEvent } != null) {
+            text += "New unsolvable Challenges:\n"
+            for (event in list.filterIsInstance<ChallengeUnsolvableEvent>()) {
+                text += "- ${event.challenge.toEscapedString()}\n"
+            }
+            text += "\n"
+        }
+
+        if (list.find { it is ChallengeGeneratedEvent } != null) {
+            text += "Challenges generated:\n"
+            for (event in list.filterIsInstance<ChallengeGeneratedEvent>()) {
+                text += "- ${event.challenge.toEscapedString()}\n"
+            }
+            text += "\n"
+        }
+
+        if (list.find { it is AchievementSolvedEvent } != null) {
+            text += "Achievements solved:\n"
+            for (event in list.filterIsInstance<AchievementSolvedEvent>()) {
+                text += "- ${event.achievement}\n"
+            }
+            text += "\n"
+        }
+
+        text += "View the build on ${build.absoluteUrl}\n"
+        text += "View the leaderboard on ${build.parent.absoluteUrl}leaderboard/\n"
+        text += "View your achievements on ${user.absoluteUrl}/achievements/"
+
+        return text
     }
 }
