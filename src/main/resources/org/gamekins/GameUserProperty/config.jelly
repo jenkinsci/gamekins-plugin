@@ -7,4 +7,7 @@
     <f:entry title="Git Names" field="names" description="The names the user is using for committing in git (call 'git show -s' in the git folder), one per line">
         <f:textarea field="names" name="names"/>
     </f:entry>
+    <f:entry title="Send Notifications" field="notifications">
+        <f:checkbox  />
+    </f:entry>
 </j:jelly>

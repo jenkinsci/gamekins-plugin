@@ -50,6 +50,7 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
     private val pseudonym: UUID = UUID.randomUUID()
     private val rejectedChallenges: HashMap<String, CopyOnWriteArrayList<Pair<Challenge, String>>> = HashMap()
     private val score: HashMap<String, Int> = HashMap()
+    private var sendNotifications: Boolean = true
     private var unsolvedAchievements: HashMap<String, CopyOnWriteArrayList<Achievement>> = HashMap()
 
     companion object {
@@ -233,6 +234,13 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
     }
 
     /**
+     * Returns the [sendNotifications].
+     */
+    fun getNotifications(): Boolean {
+        return this.sendNotifications
+    }
+
+    /**
      * Returns the [pseudonym] of the user for [Statistics].
      */
     fun getPseudonym(): String {
@@ -401,10 +409,13 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
     }
 
     /**
-     * Updates the git names if the user configuration is saved.
+     * Updates the git names and notifications preferences if the user configuration is saved.
      */
     override fun reconfigure(req: StaplerRequest, form: JSONObject?): UserProperty {
-        if (form != null) setNames(form.getString("names"))
+        if (form != null) {
+            setNames(form.getString("names"))
+            setNotifications(form.getBoolean("notifications"))
+        }
         return this
     }
 
@@ -449,6 +460,14 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
     fun setNames(names: String) {
         val split = names.split("\n".toRegex())
         gitNames = CopyOnWriteArraySet(split)
+    }
+
+    /**
+     * Sets the option, whether the user wants to receive notifications.
+     */
+    @DataBoundSetter
+    fun setNotifications(notifications: Boolean) {
+        this.sendNotifications = notifications
     }
 
     /**

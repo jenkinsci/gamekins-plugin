@@ -53,24 +53,28 @@ class BuildFinishedEvent(projectName: String, branch: String, build: Run<*, *>)
 
         val mailer = Mailer.descriptor()
         for ((user, list) in userEvents) {
-            val mail = MailAddressResolver.resolve(user)
-            val msg = MimeMessage(mailer.createSession())
-            msg.subject = "Gamekins results"
-            msg.setFrom(InternetAddress("results@gamekins.org", "Gamekins"))
-            msg.sentDate = Date()
-            msg.addRecipient(Message.RecipientType.TO, Mailer.stringToAddress(mail, mailer.charset))
-            msg.setText(generateMailText(user, list))
-            try {
-                Transport.send(msg)
-            } catch (e: MessagingException) {
-                e.printStackTrace()
+            if (user.getProperty(org.gamekins.GameUserProperty::class.java).getNotifications()) {
+                val mail = MailAddressResolver.resolve(user)
+                val msg = MimeMessage(mailer.createSession())
+                msg.subject = "Gamekins results"
+                msg.setFrom(InternetAddress("results@gamekins.org", "Gamekins"))
+                msg.sentDate = Date()
+                msg.addRecipient(Message.RecipientType.TO, Mailer.stringToAddress(mail, mailer.charset))
+                msg.setText(generateMailText(user, list))
+                try {
+                    Transport.send(msg)
+                } catch (e: MessagingException) {
+                    e.printStackTrace()
+                }
             }
-
         }
 
         this.delete = true
     }
 
+    /**
+     * Generates the mail text based on the current events.
+     */
     private fun generateMailText(user: User, list: ArrayList<UserEvent>): String {
         var text = "Hello ${user.fullName},\n\n"
         text += "here are your Gamekins results from run ${build.number} of project $projectName:\n\n"
