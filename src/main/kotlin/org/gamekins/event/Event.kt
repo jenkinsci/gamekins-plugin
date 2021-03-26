@@ -23,7 +23,4 @@ package org.gamekins.event
  * @since 0.3
  */
 abstract class Event(val projectName: String, val branch: String, val entryTime: Long = System.currentTimeMillis())
-    : Runnable {
-
-    var delete: Boolean = false
-}
+    : Runnable

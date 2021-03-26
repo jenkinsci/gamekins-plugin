@@ -16,8 +16,12 @@
 
 package org.gamekins.event
 
+import hudson.model.Run
+import hudson.model.User
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import org.gamekins.event.user.*
+import java.util.concurrent.CopyOnWriteArrayList
 
 /**
  * Handler that stores all events happening in the context of Gamekins. Runs the event after adding it to the list.
@@ -27,22 +31,60 @@ import kotlinx.coroutines.launch
  */
 object EventHandler {
 
-    private val events: ArrayList<Event> = arrayListOf()
+    val events: CopyOnWriteArrayList<Event> = CopyOnWriteArrayList()
 
     /**
      * Deletes old events, adds a new [event] to the list of [events] and runs it.
      */
     @JvmStatic
     fun addEvent(event: Event) {
-        events.removeIf { it.delete }
         events.add(event)
         GlobalScope.launch { event.run() }
     }
 
     /**
-     * Returns a new list of [events].
+     * Generates the mail text based on the current events.
      */
-    fun getEvents(): List<Event> {
-        return events.toList()
+    fun generateMailText(projectName: String, build: Run<*, *>, user: User, list: ArrayList<UserEvent>): String {
+        var text = "Hello ${user.fullName},\n\n"
+        text += "here are your Gamekins results from run ${build.number} of project $projectName:\n\n"
+
+        if (list.find { it is ChallengeSolvedEvent } != null) {
+            text += "Challenges solved:\n"
+            for (event in list.filterIsInstance<ChallengeSolvedEvent>()) {
+                text += "- ${event.challenge.toEscapedString()}\n"
+            }
+            text += "\n"
+        }
+
+        if (list.find { it is ChallengeUnsolvableEvent } != null) {
+            text += "New unsolvable Challenges:\n"
+            for (event in list.filterIsInstance<ChallengeUnsolvableEvent>()) {
+                text += "- ${event.challenge.toEscapedString()}\n"
+            }
+            text += "\n"
+        }
+
+        if (list.find { it is ChallengeGeneratedEvent } != null) {
+            text += "Challenges generated:\n"
+            for (event in list.filterIsInstance<ChallengeGeneratedEvent>()) {
+                text += "- ${event.challenge.toEscapedString()}\n"
+            }
+            text += "\n"
+        }
+
+        if (list.find { it is AchievementSolvedEvent } != null) {
+            text += "Achievements solved:\n"
+            for (event in list.filterIsInstance<AchievementSolvedEvent>()) {
+                text += "- ${event.achievement}\n"
+            }
+            text += "\n"
+        }
+
+        text += "View the build on ${build.absoluteUrl}\n"
+        text += "View the leaderboard on ${build.parent.absoluteUrl}leaderboard/\n"
+        text += "View your achievements on ${user.absoluteUrl}/achievements/"
+
+        return text
     }
 }

@@ -28,8 +28,8 @@ import org.gamekins.event.EventHandler
 class BuildStartedEvent(projectName: String, branch: String, build: Run<*, *>): BuildEvent(projectName, branch, build) {
 
     override fun run() {
-        EventHandler.getEvents()
+        EventHandler.events
             .filter { it.projectName == projectName && it.branch == branch && it != this }
-            .forEach { it.delete = true }
+            .forEach { EventHandler.events.remove(it) }
     }
 }
