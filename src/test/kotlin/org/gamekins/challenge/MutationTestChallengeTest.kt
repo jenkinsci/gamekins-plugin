@@ -84,8 +84,8 @@ class MutationTestChallengeTest : AnnotationSpec() {
         listOf("30"), mapOf())
     private val mutation3 = MutationInfo(mutationDetails3, "survived", -1547277782)
 
-    private val entries = mapOf("org.example.Feature" to listOf(mutation1, mutation2, mutation3))
-    private val emptyEntries = mapOf<String, List<MutationInfo>>()
+    private val entries = mapOf("org.example.Feature" to setOf(mutation1, mutation2, mutation3))
+    private val emptyEntries = mapOf<String, Set<MutationInfo>>()
 
 
     @BeforeEach
@@ -98,7 +98,7 @@ class MutationTestChallengeTest : AnnotationSpec() {
         every { JacocoUtil.calculateCoveredLines(any(), any()) } returns 0
         every { JacocoUtil.getLines(any()) }  returns elements
         mockkObject(MutationResults.Companion)
-        every { MutationResults.retrievedMutationsFromJson(any(), any()) }  returns MutationResults(entries)
+        every { MutationResults.retrievedMutationsFromJson(any(), any()) }  returns MutationResults(entries, "")
         details = JacocoUtil.ClassDetails(path, shortFilePath, shortJacocoPath, shortJacocoCSVPath, mocoJSONPath, map,
             TaskListener.NULL)
 
@@ -207,9 +207,9 @@ class MutationTestChallengeTest : AnnotationSpec() {
 
         challenge.isSolved(map, run, listener, path1) shouldBe false
         challenge1.isSolved(map, run, listener, path1) shouldBe true
-        every { MutationResults.retrievedMutationsFromJson(any(), any()) }  returns MutationResults(emptyEntries)
+        every { MutationResults.retrievedMutationsFromJson(any(), any()) }  returns MutationResults(emptyEntries, "")
         challenge1.isSolved(map, run, listener, path1) shouldBe false
-        every { MutationResults.retrievedMutationsFromJson(any(), any()) }  returns MutationResults(entries)
+        every { MutationResults.retrievedMutationsFromJson(any(), any()) }  returns MutationResults(entries, "")
     }
 
     @Test

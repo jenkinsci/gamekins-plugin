@@ -48,6 +48,7 @@ class MutationTestChallenge(
     val uniqueID = mutationInfo.uniqueID
     private val codeSnippet = snippet
     private val mutatedLine = mutatedLoc
+    private var killedByTest = mutationInfo.killedByTest
 
     override fun getCreated(): Long {
         return created
@@ -159,12 +160,19 @@ class MutationTestChallenge(
         val mutationResults = MutationResults.retrievedMutationsFromJson(jsonFilePath, listener)
         val filteredByClass = mutationResults?.entries?.filter { it.key == this.className }
         if (!filteredByClass.isNullOrEmpty()) {
-            return filteredByClass.any {
-                it.value.any { it1 ->
-                    ((it1.uniqueID == uniqueID || it1.mutationDetails == mutationDetails)
-                            && it1.result == "killed")
-                }
+
+            val foundInfo = filteredByClass[this.className]?.find {
+                (it.uniqueID == uniqueID || it.mutationDetails == mutationDetails) && it.result == "killed"
             }
+
+            var solved = false
+            if (foundInfo != null) {
+                mutationInfo.killedByTest = foundInfo.killedByTest
+                killedByTest = foundInfo.killedByTest
+                solved = true
+            }
+
+            return solved
         }
         return false
     }
@@ -177,6 +185,10 @@ class MutationTestChallenge(
 
     fun getSnippet(): String {
         return codeSnippet
+    }
+
+    fun getKilledByTest(): String {
+        return killedByTest
     }
 
     fun getMutatedLine(): String {

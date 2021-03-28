@@ -188,10 +188,19 @@
                                 <j:forEach indexVar="index" var="completedChallenge" items="${it.completedChallenges}">
                                     <j:if test="${!completedChallenge.first.toString().contains(' nothing developed recently')}">
                                         <tr>
-                                            <td class="p-4" style="background-color: #dbffe0;">${completedChallenge}
-                                                <span class="ml-2 badge badge-success">${completedChallenge.score} points</span>
-                                                <span class="ml-2 badge badge-warning">${completedChallenge.name}</span>
-                                            </td>
+                                            <j:if test='${completedChallenge.name == "MutationTestChallenge"}'>
+                                                <td data-toggle="tooltip" data-placement="right" title="Killed by test: ${completedChallenge.killedByTest}"
+                                                    class="p-4" style="background-color: #dbffe0;">${completedChallenge}
+                                                    <span class="ml-2 badge badge-success">${completedChallenge.score} points</span>
+                                                    <span class="ml-2 badge badge-warning">${completedChallenge.name}</span>
+                                                </td>
+                                            </j:if>
+                                            <j:if test='${completedChallenge.name != "MutationTestChallenge"}'>
+                                                <td class="p-4" style="background-color: #dbffe0;">${completedChallenge}
+                                                    <span class="ml-2 badge badge-success">${completedChallenge.score} points</span>
+                                                    <span class="ml-2 badge badge-warning">${completedChallenge.name}</span>
+                                                </td>
+                                            </j:if>
                                         </tr>
                                     </j:if>
                                 </j:forEach>
@@ -211,7 +220,7 @@
                                     <j:if test="${!rejectedChallenge.first.toString().contains(' nothing developed recently')}">
                                         <tr>
                                             <td data-toggle="tooltip" data-placement="right"
-                                                title="${rejectedChallenge.second}" class="p-4"
+                                                title="Reason: ${rejectedChallenge.second}" class="p-4"
                                                 style="background-color: #fff4e8;">
                                                 ${rejectedChallenge.first}
                                                 <span class="ml-2 badge badge-warning">${rejectedChallenge.first.name}</span>

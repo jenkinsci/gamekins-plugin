@@ -372,7 +372,7 @@ object ChallengeFactory {
         )
         val commitID = workspace.act(HeadCommitCallable(workspace.remote)).name
         val fullClassName = "${classDetails.packageName}.${classDetails.className}"
-        val relevantMutationResultsByClass: Map<String, List<MutationInfo>>? =
+        val relevantMutationResultsByClass: Map<String, Set<MutationInfo>>? =
             MutationResults.retrievedMutationsFromJson(jsonFilePath, listener)?.entries?.filter {
                 it.key == fullClassName
                         && it.value.any { it1 -> it1.result == "survived" }

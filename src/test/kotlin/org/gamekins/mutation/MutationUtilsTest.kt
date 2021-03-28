@@ -55,11 +55,11 @@ class MutationUtilsTest: AnnotationSpec()  {
     fun testGetSurvivedMutationList() {
         val user = mockkClass(User::class)
         every { user.getProperty(GameUserProperty::class.java).getRejectedChallenges("abcd") } returns CopyOnWriteArrayList<Pair<Challenge, String>>()
-        MutationUtils.getSurvivedMutationList(listOf(mutation1, mutation2), "abc", listOf(), user, "abcd") shouldBe listOf(mutation1)
+        MutationUtils.getSurvivedMutationList(setOf(mutation1, mutation2), "abc", listOf(), user, "abcd") shouldBe listOf(mutation1)
 
         every { user.getProperty(GameUserProperty::class.java).getRejectedChallenges("abcd") } returns CopyOnWriteArrayList<Pair<Challenge, String>>(
             listOf(Pair(challenge as Challenge, "")))
-        MutationUtils.getSurvivedMutationList(listOf(mutation1, mutation2), "abc", listOf(), user, "abcd") shouldBe listOf()
+        MutationUtils.getSurvivedMutationList(setOf(mutation1, mutation2), "abc", listOf(), user, "abcd") shouldBe listOf()
     }
 
     @Test

@@ -53,12 +53,12 @@ class MutationResultsTest : AnnotationSpec() {
             listOf("30"), mapOf()
         )
         val mutation = MutationInfo(mutationDetails, "survived", -1547277782)
-        val entries = mapOf("org.example.Feature" to listOf(mutation))
+        val entries = mapOf("org.example.Feature" to setOf(mutation))
 
         mockkObject(MutationResults.mapper)
-        every { MutationResults.mapper.readValue(any<String>(), any<Class<*>>()) } returns MutationResults(entries)
+        every { MutationResults.mapper.readValue(any<String>(), any<Class<*>>()) } returns MutationResults(entries, "")
 
-        MutationResults.retrievedMutationsFromJson(remotePath, listener) shouldBe MutationResults(entries)
+        MutationResults.retrievedMutationsFromJson(remotePath, listener) shouldBe MutationResults(entries, "")
     }
 
     @Test

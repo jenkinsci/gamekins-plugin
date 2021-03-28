@@ -116,7 +116,7 @@ object MutationPresentation {
             val varName = mutation.mutationDetails.additionalInfo["varName"] ?: return ""
             reg = Regex(varName)
         }
-        val insertOperator = insertionTypeToText.get(temp.getOrNull(2)) ?: return ""
+        val insertOperator = insertionTypeToText[temp.getOrNull(2)] ?: return ""
 
         val hits = reg.findAll(originalLine).iterator()
         var foundVar: MatchResult? = null
@@ -124,6 +124,7 @@ object MutationPresentation {
             foundVar = hits.next()
         }
         if (foundVar == null) return ""
+        if (originalLine.substring(0, foundVar.range.first).all { it.isWhitespace() }) return ""
         val replacement = when (temp[1]) {
             "PRUOI" -> "($insertOperator${foundVar.value})"
             "POUOI" -> "(${foundVar.value}$insertOperator)"

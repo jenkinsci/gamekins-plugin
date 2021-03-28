@@ -33,7 +33,7 @@ import java.nio.file.Paths
  * @author Tran Phan
  * @since 0.3
  */
-data class MutationResults(val entries: Map<String, List<MutationInfo>>) : Serializable {
+data class MutationResults(val entries: Map<String, Set<MutationInfo>>, val runID: String) : Serializable {
 
     class GetMutationResultsCallable(private val jsonFilePath: FilePath) :
         MasterToSlaveCallable<String, IOException?>() {

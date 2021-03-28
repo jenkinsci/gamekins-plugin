@@ -97,8 +97,8 @@ class ChallengeFactoryTest : AnnotationSpec() {
         listOf("30"), mapOf())
     private val mutation3 = MutationInfo(mutationDetails3, "survived", -1547277782)
 
-    private val entries = mapOf("io.jenkins.plugins.gamekins.challenge.Challenge" to listOf(mutation1, mutation2),
-        "org.example.Feature" to listOf(mutation3))
+    private val entries = mapOf("io.jenkins.plugins.gamekins.challenge.Challenge" to setOf(mutation1, mutation2),
+        "org.example.Feature" to setOf(mutation3))
 
 
 
@@ -256,7 +256,7 @@ class ChallengeFactoryTest : AnnotationSpec() {
         GamePublisherDescriptor.challenges.clear()
         GamePublisherDescriptor.challenges[MutationTestChallenge::class.java] = 1
         every { Random.nextInt(1) } returns 0
-        every { MutationResults.retrievedMutationsFromJson(any(), any()) }  returns MutationResults(entries)
+        every { MutationResults.retrievedMutationsFromJson(any(), any()) }  returns MutationResults(entries, "")
         every { property.getCurrentChallenges(any()) } returns CopyOnWriteArrayList(listOf())
 
         ChallengeFactory.generateChallenge(user, map, listener, arrayListOf(details), path) should

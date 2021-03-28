@@ -41,7 +41,7 @@ object MutationUtils {
      *
      */
     fun getSurvivedMutationList(
-        initialList: List<MutationInfo>?, commitID: String,
+        initialList: Set<MutationInfo>?, commitID: String,
         currentChallenges: List<MutationTestChallenge>,
         user: User, projectName: String?
     ): List<MutationInfo?>? {
@@ -188,10 +188,12 @@ object MutationUtils {
         var codeSnippet = ""
         var mutatedLine = ""
 
-        val temp = muList.groupBy { it?.mutationDetails?.mutationOperatorName }
-        val sorted = temp.toList().sortedBy { (_, value) -> value.size }.toMap().values.flatten()
+        //  val temp = muList.groupBy { it?.mutationDetails?.mutationOperatorName }
+        //  val sorted = temp.toList().sortedBy { (_, value) -> value.size }.toMap().values.flatten()
 
-        for (mutation in sorted) {
+        // Change strategy, shuffle instead of prioritizing minority mutation types
+        val temp = muList.shuffled()
+        for (mutation in temp) {
             val relatedSource = MutationTestChallenge.createCodeSnippet(
                 classDetails, mutation?.mutationDetails!!.loc, workspace
             )
@@ -202,6 +204,7 @@ object MutationUtils {
             }
             if (mutatedLine.isNotEmpty()) {
                 chosenMutation = mutation
+                // Return as soon as a mutation with completed mutated source code can be created
                 break
             }
         }
