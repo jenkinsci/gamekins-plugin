@@ -58,6 +58,8 @@ object ActionUtil {
         }
 
         if (challenge == null) return FormValidation.error("The challenge does not exist")
+        if (challenge is DummyChallenge) return FormValidation.error("Dummies cannot be rejected " +
+                "- please run another build")
         property.rejectChallenge(projectName, challenge, rejectReason)
 
         val generatedText = generateChallengeAfterRejection(challenge, user, property, job)
