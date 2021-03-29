@@ -187,11 +187,12 @@ class MutationTestChallenge(
     }
 
     override fun printToXML(reason: String, indentation: String): String {
+        val mName = if (methodName == "<init>") "init" else methodName
         var print = (indentation + "<" + this::class.simpleName
                 + " created=\"" + created
                 + "\" solved=\"" + solved
                 + "\" class=\"" + className
-                + "\" method=\"" + methodName
+                + "\" method=\"" + mName
                 + "\" lineOfCode=\"" + lineOfCode
                 + "\" mutationDescription=\"" + mutationDescription
                 + "\" result=\"" + mutationInfo.result)
@@ -215,8 +216,9 @@ class MutationTestChallenge(
     }
 
     override fun toString(): String {
+        val mName = if (methodName == "<init>") "init" else methodName
         return ("Write a test to kill the mutant \"<b>$mutationDescription</b>\" at line <b>$lineOfCode</b> " +
-                "of method <b>$methodName</b> in class <b>${classDetails.className}</b> in package " +
+                "of method <b>$mName</b> in class <b>${classDetails.className}</b> in package " +
                 "<b>${classDetails.packageName}</b> (created for branch " + branch + ")")
     }
 }
