@@ -59,6 +59,24 @@ class LineCoverageChallenge(data: Challenge.ChallengeGenerationData)
         }
     }
 
+    override fun createCodeSnippet(classDetails: JacocoUtil.ClassDetails,
+                                   target: Any, workspace: FilePath): String {
+        if (target !is Int) return ""
+        else if (target < 0) return ""
+        if (classDetails.jacocoSourceFile.exists()) {
+            val javaHtmlPath = JacocoUtil.calculateCurrentFilePath(
+                workspace, classDetails.jacocoSourceFile, classDetails.workspace
+            )
+            val snippetElements = JacocoUtil.getLinesInRange(javaHtmlPath, target, 2)
+            if (snippetElements.first == "") return ""
+
+            return "<pre class='prettyprint linenums:${target - 1} mt-2'><code class='language-java'>" +
+                    snippetElements.first +
+                    "</code></pre>"
+        }
+        return ""
+    }
+
     override fun equals(other: Any?): Boolean {
         if (other == null) return false
         if (other !is LineCoverageChallenge) return false
@@ -74,7 +92,7 @@ class LineCoverageChallenge(data: Challenge.ChallengeGenerationData)
     }
 
     override fun getName(): String {
-        return "LineCoverageChallenge"
+        return "Line Coverage"
     }
 
     override fun getScore(): Int {
@@ -213,23 +231,5 @@ class LineCoverageChallenge(data: Challenge.ChallengeGenerationData)
         return (prefix + "<b>" + lineNumber + "</b> in class <b>" + classDetails.className
                 + "</b> in package <b>" + classDetails.packageName + "</b> (created for branch "
                 + classDetails.constants["branch"] + ")")
-    }
-
-    override fun createCodeSnippet(classDetails: JacocoUtil.ClassDetails,
-                                   target: Any, workspace: FilePath): String {
-        if (target !is Int) return ""
-        else if (target < 0) return ""
-        if (classDetails.jacocoSourceFile.exists()) {
-            val javaHtmlPath = JacocoUtil.calculateCurrentFilePath(
-                workspace, classDetails.jacocoSourceFile, classDetails.workspace
-            )
-            val snippetElements = JacocoUtil.getLinesInRange(javaHtmlPath, target, 2)
-            if (snippetElements.first == "") return ""
-
-            return "<pre class='prettyprint linenums:${target - 1} mt-2'><code class='language-java'>" +
-                    snippetElements.first +
-                   "</code></pre>"
-        }
-        return ""
     }
 }

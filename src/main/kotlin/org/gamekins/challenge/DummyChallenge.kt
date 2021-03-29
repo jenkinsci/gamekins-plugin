@@ -48,6 +48,10 @@ class DummyChallenge(private var constants: HashMap<String, String>) : Challenge
         return 0
     }
 
+    override fun getName(): String {
+        return "Dummy"
+    }
+
     /**
      * Only for dummy purposes, no need for further information.
      *
@@ -119,9 +123,5 @@ class DummyChallenge(private var constants: HashMap<String, String>) : Challenge
 
     override fun toEscapedString(): String {
         return toString()
-    }
-
-    fun getName(): String {
-        return "Dummy"
     }
 }

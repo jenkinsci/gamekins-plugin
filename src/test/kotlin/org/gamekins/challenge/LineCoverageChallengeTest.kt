@@ -105,7 +105,7 @@ class LineCoverageChallengeTest : AnnotationSpec() {
         challenge = LineCoverageChallenge(data)
         challenge.getScore() shouldBe 3
         challenge.toEscapedString()
-        challenge.getName() shouldBe "LineCoverageChallenge"
+        challenge.getName() shouldBe "Line Coverage"
         every { element.attr("title") } returns "1 of 2 branches missed."
         every { data.line } returns element
         challenge = LineCoverageChallenge(data)

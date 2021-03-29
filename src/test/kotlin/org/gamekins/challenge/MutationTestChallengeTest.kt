@@ -130,7 +130,7 @@ class MutationTestChallengeTest : AnnotationSpec() {
 
     @Test
     fun getName() {
-        challenge.getName() shouldBe "MutationTestChallenge"
+        challenge.getName() shouldBe "Mutation"
     }
 
 

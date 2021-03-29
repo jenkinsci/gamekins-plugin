@@ -78,7 +78,7 @@ class MethodCoverageChallengeTest : AnnotationSpec() {
         challenge = MethodCoverageChallenge(data)
         challenge.getScore() shouldBe 3
         challenge.toEscapedString()
-        challenge.getName() shouldBe "MethodCoverageChallenge"
+        challenge.getName() shouldBe "Method Coverage"
     }
 
     @Test

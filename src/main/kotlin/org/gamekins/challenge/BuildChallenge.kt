@@ -47,6 +47,10 @@ class BuildChallenge(private var constants: HashMap<String, String>) : Challenge
         return created
     }
 
+    override fun getName(): String {
+        return "Build"
+    }
+
     override fun getScore(): Int {
         return 1
     }
@@ -100,11 +104,11 @@ class BuildChallenge(private var constants: HashMap<String, String>) : Challenge
         return this
     }
 
-    override fun toString(): String {
-        return "Let the Build run successfully"
-    }
-
     override fun toEscapedString(): String {
         return toString()
+    }
+
+    override fun toString(): String {
+        return "Let the Build run successfully"
     }
 }

@@ -56,6 +56,10 @@ class TestChallenge(data: Challenge.ChallengeGenerationData) : Challenge {
         return created
     }
 
+    override fun getName(): String {
+        return "Test"
+    }
+
     override fun getScore(): Int {
         return 1
     }
@@ -138,11 +142,11 @@ class TestChallenge(data: Challenge.ChallengeGenerationData) : Challenge {
         return this
     }
 
-    override fun toString(): String {
-        return "Write a new test in branch ${constants["branch"]}"
-    }
-
     override fun toEscapedString(): String {
         return toString()
+    }
+
+    override fun toString(): String {
+        return "Write a new test in branch ${constants["branch"]}"
     }
 }

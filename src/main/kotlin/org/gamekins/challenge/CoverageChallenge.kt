@@ -51,6 +51,10 @@ abstract class CoverageChallenge(val classDetails: ClassDetails, workspace: File
         coverage = classDetails.coverage
     }
 
+    open fun createCodeSnippet(classDetails: ClassDetails, target: Any, workspace: FilePath): String {
+        return ""
+    }
+
     override fun getConstants(): HashMap<String, String> {
         return classDetails.constants
     }
@@ -59,17 +63,14 @@ abstract class CoverageChallenge(val classDetails: ClassDetails, workspace: File
         return created
     }
 
-    /**
-     * Returns the name of the class of the current [CoverageChallenge].
-     */
-    abstract fun getName(): String
+    abstract fun getSnippet(): String
 
     override fun getSolved(): Long {
         return solved
     }
 
     override fun printToXML(reason: String, indentation: String): String {
-        var print = (indentation + "<" + getName() + " created=\"" + created + "\" solved=\"" + solved
+        var print = (indentation + "<" + this::class.simpleName + " created=\"" + created + "\" solved=\"" + solved
                 + "\" class=\"" + classDetails.className + "\" coverage=\"" + coverage
                 + "\" coverageAtSolved=\"" + solvedCoverage)
         if (reason.isNotEmpty()) {
@@ -85,12 +86,6 @@ abstract class CoverageChallenge(val classDetails: ClassDetails, workspace: File
     fun setSolved(newSolved: Long) {
         solved = newSolved
     }
-
-    open fun createCodeSnippet(classDetails: ClassDetails, target: Any, workspace: FilePath): String {
-        return ""
-    }
-
-    abstract fun getSnippet(): String
 
     override fun toEscapedString(): String {
         return toString().replace(Regex("<.+?>"), "")

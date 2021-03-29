@@ -50,50 +50,27 @@ class MutationTestChallenge(
     private val mutatedLine = mutatedLoc
     private var killedByTest = mutationInfo.killedByTest
 
-    override fun getCreated(): Long {
-        return created
-    }
-
-    fun getName(): String {
-        return "MutationTestChallenge"
-    }
-
-    fun getMutationDescription(): String {
-        return mutationDescription
-    }
-
-    fun getFileName(): String {
-        return if (codeSnippet.isNotEmpty()) fileName else ""
-    }
-
-    override fun getSolved(): Long {
-        return solved
-    }
-
-    override fun printToXML(reason: String, indentation: String): String {
-        var print = (indentation + "<" + getName()
-                + " created=\"" + created
-                + "\" solved=\"" + solved
-                + "\" class=\"" + className
-                + "\" method=\"" + methodName
-                + "\" lineOfCode=\"" + lineOfCode
-                + "\" mutationDescription=\"" + mutationDescription
-                + "\" result=\"" + mutationInfo.result)
-
-        if (reason.isNotEmpty()) {
-            print += "\" reason=\"$reason"
+    companion object {
+        fun createCodeSnippet(classDetails: ClassDetails, lineOfCode: Int, workspace: FilePath): Pair<String, String> {
+            if (lineOfCode < 0) {
+                return Pair("", "")
+            }
+            if (classDetails.jacocoSourceFile.exists()) {
+                val javaHtmlPath = JacocoUtil.calculateCurrentFilePath(
+                    workspace, classDetails.jacocoSourceFile, classDetails.workspace
+                )
+                val snippetElements = JacocoUtil.getLinesInRange(javaHtmlPath, lineOfCode, 4)
+                if (snippetElements.first == "") {
+                    return Pair("", "")
+                }
+                return Pair(
+                    "<pre class='prettyprint linenums:${lineOfCode - 2} mt-2'><code class='language-java'>" +
+                            snippetElements.first + "</code></pre>", snippetElements.second
+                )
+            }
+            return Pair("", "")
         }
-        print += "\"/>"
-        return print
     }
-
-    /**
-     * Needed because of automatically generated getter and setter in Kotlin.
-     */
-    fun setSolved(newSolved: Long) {
-        solved = newSolved
-    }
-
 
     override fun equals(other: Any?): Boolean {
         if (other == null) return false
@@ -109,10 +86,41 @@ class MutationTestChallenge(
         return classDetails.constants
     }
 
+    override fun getCreated(): Long {
+        return created
+    }
+
+    fun getFileName(): String {
+        return if (codeSnippet.isNotEmpty()) fileName else ""
+    }
+
+    fun getKilledByTest(): String {
+        return killedByTest
+    }
+
+    fun getMutatedLine(): String {
+        return mutatedLine
+    }
+
+    fun getMutationDescription(): String {
+        return mutationDescription
+    }
+
+    override fun getName(): String {
+        return "Mutation"
+    }
 
     override fun getScore(): Int {
         //fixme: find a way to determine mutation score - could be based on complexity compared to original code
         return 4
+    }
+
+    fun getSnippet(): String {
+        return codeSnippet
+    }
+
+    override fun getSolved(): Long {
+        return solved
     }
 
     override fun hashCode(): Int {
@@ -177,47 +185,37 @@ class MutationTestChallenge(
         return false
     }
 
-    override fun toString(): String {
-        return ("Write a test to kill the mutant \"<b>$mutationDescription</b>\" at line <b>$lineOfCode</b> " +
-                "of method <b>$methodName</b> in class <b>${classDetails.className}</b> in package " +
-                "<b>${classDetails.packageName}</b> (created for branch " + branch + ")")
-    }
+    override fun printToXML(reason: String, indentation: String): String {
+        var print = (indentation + "<" + this::class.simpleName
+                + " created=\"" + created
+                + "\" solved=\"" + solved
+                + "\" class=\"" + className
+                + "\" method=\"" + methodName
+                + "\" lineOfCode=\"" + lineOfCode
+                + "\" mutationDescription=\"" + mutationDescription
+                + "\" result=\"" + mutationInfo.result)
 
-    fun getSnippet(): String {
-        return codeSnippet
-    }
-
-    fun getKilledByTest(): String {
-        return killedByTest
-    }
-
-    fun getMutatedLine(): String {
-        return mutatedLine
-    }
-
-    companion object {
-        fun createCodeSnippet(classDetails: ClassDetails, lineOfCode: Int, workspace: FilePath): Pair<String, String> {
-            if (lineOfCode < 0) {
-                return Pair("", "")
-            }
-            if (classDetails.jacocoSourceFile.exists()) {
-                val javaHtmlPath = JacocoUtil.calculateCurrentFilePath(
-                    workspace, classDetails.jacocoSourceFile, classDetails.workspace
-                )
-                val snippetElements = JacocoUtil.getLinesInRange(javaHtmlPath, lineOfCode, 4)
-                if (snippetElements.first == "") {
-                    return Pair("", "")
-                }
-                return Pair(
-                    "<pre class='prettyprint linenums:${lineOfCode - 2} mt-2'><code class='language-java'>" +
-                            snippetElements.first + "</code></pre>", snippetElements.second
-                )
-            }
-            return Pair("", "")
+        if (reason.isNotEmpty()) {
+            print += "\" reason=\"$reason"
         }
+        print += "\"/>"
+        return print
+    }
+
+    /**
+     * Needed because of automatically generated getter and setter in Kotlin.
+     */
+    fun setSolved(newSolved: Long) {
+        solved = newSolved
     }
 
     override fun toEscapedString(): String {
         return toString().replace(Regex("<.+?>"), "")
+    }
+
+    override fun toString(): String {
+        return ("Write a test to kill the mutant \"<b>$mutationDescription</b>\" at line <b>$lineOfCode</b> " +
+                "of method <b>$methodName</b> in class <b>${classDetails.className}</b> in package " +
+                "<b>${classDetails.packageName}</b> (created for branch " + branch + ")")
     }
 }

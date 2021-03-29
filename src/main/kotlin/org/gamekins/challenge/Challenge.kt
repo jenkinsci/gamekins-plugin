@@ -60,6 +60,11 @@ interface Challenge {
     fun getCreated(): Long
 
     /**
+     * Returns the name of the category of the current [Challenge].
+     */
+    fun getName(): String
+
+    /**
      * Returns the score for the specific [Challenge].
      */
     fun getScore(): Int
@@ -102,12 +107,12 @@ interface Challenge {
      */
     fun printToXML(reason: String, indentation: String): String?
 
+    fun toEscapedString(): String
+
     /**
      * Returns the String representation of the [Challenge] for the [LeaderboardAction].
      */
     override fun toString(): String
-
-    fun toEscapedString(): String
 
     /**
      * Data class for the initialisation of a Challenge. Every val variable will be non-null with the desired data.

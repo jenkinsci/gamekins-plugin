@@ -39,12 +39,12 @@ class ClassCoverageChallenge(data: Challenge.ChallengeGenerationData)
     }
 
     override fun getName(): String {
-        return "ClassCoverageChallenge"
+        return "Class Coverage"
     }
 
     override fun getSnippet(): String {
         // No code snippet is collected for a ClassCoverageChallenge
-        return ""
+        return "No code snippet collected"
     }
 
     override fun getScore(): Int {
