@@ -162,8 +162,9 @@ class MutationTestChallenge(
         constants: HashMap<String, String>, run: Run<*, *>, listener: TaskListener,
         workspace: FilePath
     ): Boolean {
+        if (classDetails.mocoJSONFile == null) return false
         val jsonFilePath = JacocoUtil.calculateCurrentFilePath(
-            workspace, classDetails.mocoJSONFile!!, classDetails.workspace
+            workspace, classDetails.mocoJSONFile, classDetails.workspace
         )
         val mutationResults = MutationResults.retrievedMutationsFromJson(jsonFilePath, listener)
         val filteredByClass = mutationResults?.entries?.filter { it.key == this.className }

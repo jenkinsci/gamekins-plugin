@@ -81,6 +81,9 @@ object MutationPresentation {
                         (originalOpcode.substring(1) == "SUB" && originalLine.contains("--"))) {
                 MutationUtils.mutationBlackList.add(mutation)
             }
+            if (((originalOpcode == "IFEQ" || originalOpcode == "IFNE") && originalLine.contains(".equals("))) {
+                MutationUtils.mutationBlackList.add(mutation)
+            }
             return ""
         }
         // Replacement

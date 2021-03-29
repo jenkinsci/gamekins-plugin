@@ -53,10 +53,10 @@ object ChallengeFactory {
     /**
      * Chooses the type of [Challenge] to be generated.
      */
-    private fun chooseChallengeType(): Class<out Challenge> {
+    private fun chooseChallengeType(mocoJSONPath: String?): Class<out Challenge> {
         val weightList = arrayListOf<Class<out Challenge>>()
         var challengeTypes = GamePublisherDescriptor.challenges
-        if (!MutationResults.mocoJSONAvailable) {
+        if (mocoJSONPath.isNullOrEmpty()) {
             challengeTypes = challengeTypes.filter { it.key != MutationTestChallenge::class.java }
                     as HashMap<Class<out Challenge>, Int>
         }
@@ -153,7 +153,7 @@ object ChallengeFactory {
                 continue
             }
 
-            val challengeClass = chooseChallengeType()
+            val challengeClass = chooseChallengeType(constants["mocoJSONPath"])
             val data = ChallengeGenerationData(constants, user, selectedClass, workspace, listener)
 
             when {

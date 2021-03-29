@@ -491,7 +491,7 @@ object JacocoUtil {
                         + EXISTS + jacocoCSVFile.exists())
             }
 
-            if (MutationResults.mocoJSONAvailable) {
+            if (!shortMocoJSONPath.isNullOrEmpty()) {
                 mocoJSONFile = File(StringBuilder(workspace.remote).toString() + shortMocoJSONPath.substring(2))
                 if (!mocoJSONFile.exists()) {
                     listener.logger.println("[Gamekins] MoCoJSONPath: " + mocoJSONFile.absolutePath

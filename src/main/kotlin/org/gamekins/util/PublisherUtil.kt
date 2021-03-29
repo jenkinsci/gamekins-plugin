@@ -92,7 +92,7 @@ object PublisherUtil {
 
         var solved = 0
         for (challenge in property.getCurrentChallenges(constants["projectName"])) {
-            if (challenge is MutationTestChallenge && !MutationResults.mocoJSONAvailable) {
+            if (challenge is MutationTestChallenge && constants["mocoJSONPath"].isNullOrEmpty()) {
                 listener.logger.println("[Gamekins] Cannot check this mutation test challenge is solved or not " +
                         "because moco.json can't be found - ${challenge.toEscapedString()}")
                 continue
