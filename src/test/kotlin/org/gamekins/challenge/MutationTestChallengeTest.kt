@@ -148,7 +148,7 @@ class MutationTestChallengeTest : AnnotationSpec() {
     @Test
     fun printToXML() {
         challenge.printToXML("abc", "") shouldBe
-                ("<" + challenge.getName()
+                ("<" + challenge::class.simpleName
                         + " created=\"" + challenge.getCreated()
                         + "\" solved=\"" + challenge.getSolved()
                         + "\" class=\"" + challenge.className
