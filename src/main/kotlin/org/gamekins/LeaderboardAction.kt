@@ -97,23 +97,25 @@ class LeaderboardAction(val job: AbstractItem) : ProminentProjectAction, Describ
                 }
 
                 if (index != -1) {
+                    details[index].addCompletedAchievements(property.getCompletedAchievements(job.name).size)
                     details[index].addCompletedChallenges(property.getCompletedChallenges(job.name).size)
                     details[index].addScore(property.getScore(job.name))
                 } else {
                     details.add(
-                            TeamDetails(
-                                    property.getTeamName(job.name),
-                                    property.getScore(job.name),
-                                    property.getCompletedChallenges(job.name).size
-                            )
+                        TeamDetails(
+                            property.getTeamName(job.name),
+                            property.getScore(job.name),
+                            property.getCompletedChallenges(job.name).size,
+                            property.getCompletedAchievements(job.name).size
+                        )
                     )
                 }
             }
         }
 
-        details.sortWith(Comparator.comparingInt { obj: TeamDetails -> obj.score })
-        details.reverse()
         return details
+            .sortedWith(compareBy({it.score}, {it.completedChallenges}, {it.completedAchievements}))
+            .reversed()
     }
 
     override fun getUrlName(): String {
@@ -130,18 +132,21 @@ class LeaderboardAction(val job: AbstractItem) : ProminentProjectAction, Describ
             val property = user.getProperty(GameUserProperty::class.java)
             if (property != null && property.isParticipating(job.name)) {
                 details.add(
-                        UserDetails(
-                                user.fullName,
-                                property.getTeamName(job.name),
-                                property.getScore(job.name),
-                                property.getCompletedChallenges(job.name).size,
-                                user.absoluteUrl
-                        )
+                    UserDetails(
+                        user.fullName,
+                        property.getTeamName(job.name),
+                        property.getScore(job.name),
+                        property.getCompletedChallenges(job.name).size,
+                        property.getCompletedAchievements(job.name).size,
+                        user.absoluteUrl
+                    )
                 )
             }
         }
 
-        return details.sortedWith(compareBy({it.score}, {it.completedChallenges})).reversed()
+        return details
+            .sortedWith(compareBy({it.score}, {it.completedChallenges}, {it.completedAchievements}))
+            .reversed()
     }
 
     /**
@@ -163,7 +168,7 @@ class LeaderboardAction(val job: AbstractItem) : ProminentProjectAction, Describ
     @ExportedBean(defaultVisibility = 999)
     class UserDetails(@get:Exported val userName: String, @get:Exported val teamName: String,
                       @get:Exported val score: Int, @get:Exported val completedChallenges: Int,
-                      @get:Exported val url: String)
+                      @get:Exported val completedAchievements: Int, @get:Exported val url: String)
 
     /**
      * Container for the details of a team displayed on the Leaderboard.
@@ -173,10 +178,18 @@ class LeaderboardAction(val job: AbstractItem) : ProminentProjectAction, Describ
      */
     @ExportedBean(defaultVisibility = 999)
     class TeamDetails(@get:Exported val teamName: String, @get:Exported var score: Int,
-                      @get:Exported var completedChallenges: Int) {
+                      @get:Exported var completedChallenges: Int, @get:Exported var completedAchievements: Int) {
 
         /**
-         * Adds one additional completed Challenge to the team.
+         * Adds additional completed Achievements to the team.
+         */
+        @Exported
+        fun addCompletedAchievements(completedAchievements: Int) {
+            this.completedAchievements += completedAchievements
+        }
+
+        /**
+         * Adds additional completed Challenges to the team.
          */
         @Exported
         fun addCompletedChallenges(completedChallenges: Int) {
