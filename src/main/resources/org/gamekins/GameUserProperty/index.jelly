@@ -8,6 +8,8 @@
             <div>
                 <label for="projects" style="display: block; text-align: center">Choose your project</label>
                 <select id="projects" style="display: block; margin-left: auto; margin-right: auto"/>
+                <br/>
+                <a id="projectLink" style="display: block; text-align: center"/>
             </div>
             <br/>
             <div id="completedAchievements">
@@ -37,14 +39,23 @@
                                 projects.add(option)
                             }
 
+                            changeProjectURL()
                             loadAchievements()
                         }
                     })
                 }
 
                 projects.addEventListener("change", function () {
+                    changeProjectURL()
                     loadAchievements()
                 })
+
+                function changeProjectURL() {
+                    let link = document.getElementById("projectLink")
+                    let baseURL = window.location.origin + window.location.href.substring(window.location.origin.length, window.location.href.indexOf("user"))
+                    link.href = baseURL + "job/" + projects.value + "/leaderboard/"
+                    link.innerText = "Go to leaderboard"
+                }
 
                 function loadAchievements() {
                     let urlUnsolved = window.location.href + "getUnsolvedAchievements"
