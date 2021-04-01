@@ -5,7 +5,7 @@
     "description": "Let the build pass after it failed with one of your commits as head",
     "title": "Fixing my own mistake",
     "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::solveFirstBuildFail",
-    "secret": false,
+    "secret": true,
     "additionalParameters": {}
   }
 ]
