@@ -141,9 +141,7 @@ class LeaderboardAction(val job: AbstractItem) : ProminentProjectAction, Describ
             }
         }
 
-        details.sortWith(Comparator.comparingInt { obj: UserDetails -> obj.score })
-        details.reverse()
-        return details
+        return details.sortedWith(compareBy({it.score}, {it.completedChallenges})).reversed()
     }
 
     /**
