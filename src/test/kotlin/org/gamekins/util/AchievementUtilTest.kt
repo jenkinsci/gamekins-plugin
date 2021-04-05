@@ -98,6 +98,14 @@ class AchievementUtilTest: AnnotationSpec() {
         AchievementUtil.coverLineWithXBranches(classes, constants, run, property, workspace, TaskListener.NULL,
             additionalParameters) shouldBe true
 
+        additionalParameters["maxBranches"] = "3"
+        AchievementUtil.coverLineWithXBranches(classes, constants, run, property, workspace, TaskListener.NULL,
+            additionalParameters) shouldBe false
+
+        additionalParameters["maxBranches"] = "4"
+        AchievementUtil.coverLineWithXBranches(classes, constants, run, property, workspace, TaskListener.NULL,
+            additionalParameters) shouldBe true
+
         every { property.getCompletedChallenges(any()) } returns CopyOnWriteArrayList(listOf(challenge))
     }
 
@@ -136,6 +144,27 @@ class AchievementUtilTest: AnnotationSpec() {
             additionalParameters) shouldBe false
 
         every { run.duration } returns 99999999999
+        AchievementUtil.haveBuildWithXSeconds(classes, constants, run, property, workspace, TaskListener.NULL,
+            additionalParameters) shouldBe true
+
+        every { run.duration } returns 99999999998
+        additionalParameters["minDuration"] = "99999999999"
+        AchievementUtil.haveBuildWithXSeconds(classes, constants, run, property, workspace, TaskListener.NULL,
+            additionalParameters) shouldBe false
+
+        every { run.duration } returns 99999999998
+        additionalParameters["minDuration"] = "99999999997"
+        AchievementUtil.haveBuildWithXSeconds(classes, constants, run, property, workspace, TaskListener.NULL,
+            additionalParameters) shouldBe true
+
+        every { run.duration } returns 100000000002
+        additionalParameters["more"] = "true"
+        additionalParameters["maxDuration"] = "100000000001"
+        AchievementUtil.haveBuildWithXSeconds(classes, constants, run, property, workspace, TaskListener.NULL,
+            additionalParameters) shouldBe false
+
+        every { run.duration } returns 100000000002
+        additionalParameters["maxDuration"] = "100000000003"
         AchievementUtil.haveBuildWithXSeconds(classes, constants, run, property, workspace, TaskListener.NULL,
             additionalParameters) shouldBe true
     }
@@ -297,6 +326,14 @@ class AchievementUtilTest: AnnotationSpec() {
         every { challenge.solvedCoverage } returns 0.85
         AchievementUtil.improveClassCoverageByX(classes, constants, run, property, workspace, TaskListener.NULL,
             additionalParameters) shouldBe true
+
+        additionalParameters["maxCoverage"] = "0.15"
+        AchievementUtil.improveClassCoverageByX(classes, constants, run, property, workspace, TaskListener.NULL,
+            additionalParameters) shouldBe false
+
+        additionalParameters["maxCoverage"] = "0.2"
+        AchievementUtil.improveClassCoverageByX(classes, constants, run, property, workspace, TaskListener.NULL,
+            additionalParameters) shouldBe true
     }
 
     @Test
@@ -346,6 +383,14 @@ class AchievementUtilTest: AnnotationSpec() {
         additionalParameters["haveCoverage"] = "0.05"
         AchievementUtil.improveProjectCoverageByX(classes, constants, run, property, path, TaskListener.NULL,
             additionalParameters) shouldBe true
+
+        additionalParameters["maxCoverage"] = "0.09"
+        AchievementUtil.improveProjectCoverageByX(classes, constants, run, property, path, TaskListener.NULL,
+            additionalParameters) shouldBe false
+
+        additionalParameters["maxCoverage"] = "0.2"
+        AchievementUtil.improveProjectCoverageByX(classes, constants, run, property, path, TaskListener.NULL,
+            additionalParameters) shouldBe true
     }
 
     @Test
@@ -360,11 +405,15 @@ class AchievementUtilTest: AnnotationSpec() {
         AchievementUtil.solveChallengeInXSeconds(classes, constants, run, property, workspace, TaskListener.NULL,
             additionalParameters) shouldBe false
 
+        additionalParameters["minTimeDifference"] = "3000"
+        AchievementUtil.solveChallengeInXSeconds(classes, constants, run, property, workspace, TaskListener.NULL,
+            additionalParameters) shouldBe false
+
         every { challenge.getCreated() } returns 99996400
         AchievementUtil.solveChallengeInXSeconds(classes, constants, run, property, workspace, TaskListener.NULL,
-            additionalParameters) shouldBe true
+            additionalParameters) shouldBe false
 
-        every { challenge.getCreated() } returns 99999999
+        every { challenge.getCreated() } returns 96990000
         AchievementUtil.solveChallengeInXSeconds(classes, constants, run, property, workspace, TaskListener.NULL,
             additionalParameters) shouldBe true
     }

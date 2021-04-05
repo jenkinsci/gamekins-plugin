@@ -40,6 +40,7 @@ object AchievementUtil {
     /**
      * Solves the achievements with description: Solve a LineCoverageChallenge with at least X branches in the
      * required line. Needs the key 'branches' in the map [additionalParameters] with a positive Int value.
+     * Optional parameter is 'maxBranches' with a positive and exclusive Int value.
      */
     fun coverLineWithXBranches(classes: ArrayList<JacocoUtil.ClassDetails>, constants: HashMap<String, String>,
                                run: Run<*, *>, property: GameUserProperty, workspace: FilePath, listener: TaskListener,
@@ -47,6 +48,8 @@ object AchievementUtil {
         return property.getCompletedChallenges(constants["projectName"])
             .filterIsInstance<LineCoverageChallenge>()
             .any { it.getMaxCoveredBranchesIfFullyCovered() >= additionalParameters["branches"]?.toInt()
+                    ?: Int.MAX_VALUE
+                    && it.getMaxCoveredBranchesIfFullyCovered() < additionalParameters["maxBranches"]?.toInt()
                     ?: Int.MAX_VALUE }
     }
 
@@ -64,16 +67,25 @@ object AchievementUtil {
     /**
      * Solves the achievements with description: Start a successful build with more than X minutes duration. Needs the
      * key 'more' in the map [additionalParameters] with a Boolean value and the key 'duration' with a Long value.
+     * Optional parameters are 'minDuration' and 'maxDuration', only one at a time and value exclusively.
      */
     fun haveBuildWithXSeconds(classes: ArrayList<JacocoUtil.ClassDetails>, constants: HashMap<String, String>,
                               run: Run<*, *>, property: GameUserProperty, workspace: FilePath, listener: TaskListener,
                               additionalParameters: HashMap<String, String>): Boolean {
         if (additionalParameters["more"].isNullOrEmpty()) return false
-        return if (additionalParameters["more"].toBoolean()) {
+        var retVal = if (additionalParameters["more"].toBoolean()) {
             run.duration > additionalParameters["duration"]?.toLong()?.times(1000) ?: Long.MAX_VALUE
         } else {
             run.duration < additionalParameters["duration"]?.toLong()?.times(1000) ?: 0
         }
+
+        if (!additionalParameters["maxDuration"].isNullOrEmpty()) {
+            retVal = retVal && run.duration < additionalParameters["maxDuration"]!!.toLong()
+        } else if (!additionalParameters["minDuration"].isNullOrEmpty()) {
+            retVal = retVal && run.duration > additionalParameters["minDuration"]!!.toLong()
+        }
+
+        return retVal
     }
 
     /**
@@ -169,6 +181,7 @@ object AchievementUtil {
     /**
      * Solves the achievements with description: Improve the coverage of a class with a CoverageChallenge by X%.
      * Needs the key 'haveCoverage' in the map [additionalParameters] with a positive Double value.
+     * Optional parameter 'maxCoverage' with an positive and exclusive Int value.
      */
     fun improveClassCoverageByX(classes: ArrayList<JacocoUtil.ClassDetails>, constants: HashMap<String, String>,
                                   run: Run<*, *>, property: GameUserProperty, workspace: FilePath,
@@ -176,12 +189,15 @@ object AchievementUtil {
         return property.getCompletedChallenges(constants["projectName"])
             .filterIsInstance<CoverageChallenge>()
             .any { it.solvedCoverage.toBigDecimal() - it.coverage.toBigDecimal() >=
-                    additionalParameters["haveCoverage"]?.toBigDecimal() ?: Double.MAX_VALUE.toBigDecimal()}
+                    additionalParameters["haveCoverage"]?.toBigDecimal() ?: Double.MAX_VALUE.toBigDecimal()
+                    && it.solvedCoverage.toBigDecimal() - it.coverage.toBigDecimal() <
+                    additionalParameters["maxCoverage"]?.toBigDecimal() ?: Double.MAX_VALUE.toBigDecimal() }
     }
 
     /**
      * Solves the achievements with description: Improve the coverage of the project by X%. Needs the
      * key 'haveCoverage' in the map [additionalParameters] with a positive Double value.
+     * Optional parameter 'maxCoverage' with an positive and exclusive Int value.
      */
     fun improveProjectCoverageByX(classes: ArrayList<JacocoUtil.ClassDetails>, constants: HashMap<String, String>,
                                   run: Run<*, *>, property: GameUserProperty, workspace: FilePath,
@@ -193,7 +209,9 @@ object AchievementUtil {
                 .getLastRun(constants["branch"]!!)
             if (lastRun != null) {
                 return (constants["projectCoverage"]!!.toBigDecimal().minus(lastRun.coverage.toBigDecimal())
-                        >= additionalParameters["haveCoverage"]?.toBigDecimal() ?: Double.MAX_VALUE.toBigDecimal())
+                        >= additionalParameters["haveCoverage"]?.toBigDecimal() ?: Double.MAX_VALUE.toBigDecimal()
+                        && constants["projectCoverage"]!!.toBigDecimal().minus(lastRun.coverage.toBigDecimal())
+                        < additionalParameters["maxCoverage"]?.toBigDecimal() ?: Double.MAX_VALUE.toBigDecimal())
             }
         }
         return false
@@ -201,14 +219,16 @@ object AchievementUtil {
 
     /**
      * Solves the achievements with description: Solve a Challenge a maximum of X hours after generation. Needs the
-     * key 'timeDifference' in the map [additionalParameters] with a positive Long value.
+     * key 'timeDifference' and 'minTimeDifference' in the map [additionalParameters] with a positive Long value.
      */
     fun solveChallengeInXSeconds(classes: ArrayList<JacocoUtil.ClassDetails>, constants: HashMap<String, String>,
                                  run: Run<*, *>, property: GameUserProperty, workspace: FilePath,
                                  listener: TaskListener, additionalParameters: HashMap<String, String>): Boolean {
         return property.getCompletedChallenges(constants["projectName"])
             .any { (it.getSolved() - it.getCreated()).div(1000) <=
-                    additionalParameters["timeDifference"]?.toLong() ?: 0}
+                    additionalParameters["timeDifference"]?.toLong() ?: 0
+                    && (it.getSolved() - it.getCreated()).div(1000) >
+                    additionalParameters["minTimeDifference"]?.toLong() ?: Long.MAX_VALUE }
     }
 
     /**

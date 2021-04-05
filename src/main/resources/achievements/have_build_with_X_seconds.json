@@ -19,8 +19,9 @@
     "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::haveBuildWithXSeconds",
     "secret": false,
     "additionalParameters": {
-      "duration": 3600,
-      "more": true
+      "duration": 1800,
+      "more": true,
+      "maxDuration": 3600
     }
   },
   {
@@ -32,7 +33,8 @@
     "secret": false,
     "additionalParameters": {
       "duration": 900,
-      "more": true
+      "more": true,
+      "maxDuration": 1800
     }
   },
   {
@@ -44,7 +46,8 @@
     "secret": false,
     "additionalParameters": {
       "duration": 300,
-      "more": true
+      "more": true,
+      "maxDuration": 900
     }
   },
   {
@@ -56,7 +59,8 @@
     "secret": false,
     "additionalParameters": {
       "duration": 60,
-      "more": false
+      "more": false,
+      "minDuration": 10
     }
   },
   {

@@ -117,35 +117,36 @@
                                      data-parent="#accordion">
                                     <div class="card-body" style="font-size:15px;">
 
-                                <j:if test='${currentChallenge.name == "Mutation"}'>
-                                    <p>Write or update tests so that they fail when we <b>${currentChallenge.mutationDescription}</b> at the mentioned location</p>
-                                    <h6>${currentChallenge.fileName}</h6>
-                                </j:if>
-      <j:if test='${currentChallenge.name == "Mutation"}'>
-          <j:if test='${currentChallenge.snippet != ""}'>
-              <h6>Original code snippet</h6>
-          </j:if>
-          <j:if test='${currentChallenge.snippet == ""}'>
-              <h6>Original code snippet is not available</h6>
-          </j:if>
-      </j:if>
+                                        <j:if test='${currentChallenge.name == "Mutation"}'>
+                                            <p>Write or update tests so that they fail when we <b>${currentChallenge.mutationDescription}</b> at the mentioned location</p>
+                                            <h6>${currentChallenge.fileName}</h6>
+                                        </j:if>
+                                        <j:if test='${currentChallenge.name == "Mutation"}'>
+                                            <j:if test='${currentChallenge.snippet != ""}'>
+                                                <h6>Original code snippet</h6>
+                                            </j:if>
+                                            <j:if test='${currentChallenge.snippet == ""}'>
+                                                <h6>Original code snippet is not available</h6>
+                                            </j:if>
+                                        </j:if>
 
-      <j:if test='${currentChallenge.snippet != ""}'>
-          ${currentChallenge.snippet}
-      </j:if>
+                                        <j:if test='${currentChallenge.snippet != ""}'>
+                                            ${currentChallenge.snippet}
+                                        </j:if>
 
-      <j:if test='${currentChallenge.name == "Mutation"}'>
-            <j:if test='${currentChallenge.mutatedLine != ""}'>
-                <h6>Mutated line of code</h6>
-                ${currentChallenge.mutatedLine}
-            </j:if>
-            <j:if test='${currentChallenge.mutatedLine == ""}'>
-                <h6 class="pt-3">Mutated line of code is not available</h6>
-            </j:if>
-            <p class="font-italic font-weight-light">The mutated line is built from
-                            byte code information and could be syntactically invalid. Please use along with the description in that case
-            </p>
-      </j:if>
+                                        <j:if test='${currentChallenge.name == "Mutation"}'>
+                                              <j:if test='${currentChallenge.mutatedLine != ""}'>
+                                                  <h6>Mutated line of code</h6>
+                                                  ${currentChallenge.mutatedLine}
+                                              </j:if>
+                                              <j:if test='${currentChallenge.mutatedLine == ""}'>
+                                                  <h6 class="pt-3">Mutated line of code is not available</h6>
+                                              </j:if>
+                                              <p class="font-italic font-weight-light">The mutated line is built from
+                                                  byte code information and could be syntactically invalid. Please use along with the description in that case
+                                              </p>
+                                        </j:if>
+
                                     </div>
                                 </div>
                             </div>

@@ -7,7 +7,8 @@
     "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::solveChallengeInXSeconds",
     "secret": false,
     "additionalParameters": {
-      "timeDifference": 86400
+      "timeDifference": 86400,
+      "minTimeDifference": 28800
     }
   },
   {
@@ -18,7 +19,8 @@
     "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::solveChallengeInXSeconds",
     "secret": false,
     "additionalParameters": {
-      "timeDifference": 28800
+      "timeDifference": 28800,
+      "minTimeDifference": 7200
     }
   },
   {
@@ -29,7 +31,8 @@
     "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::solveChallengeInXSeconds",
     "secret": false,
     "additionalParameters": {
-      "timeDifference": 7200
+      "timeDifference": 7200,
+      "minTimeDifference": 3600
     }
   },
   {
@@ -40,7 +43,8 @@
     "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::solveChallengeInXSeconds",
     "secret": false,
     "additionalParameters": {
-      "timeDifference": 3600
+      "timeDifference": 3600,
+      "minTimeDifference": 900
     }
   },
   {
@@ -51,7 +55,8 @@
     "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::solveChallengeInXSeconds",
     "secret": true,
     "additionalParameters": {
-      "timeDifference": 900
+      "timeDifference": 900,
+      "minTimeDifference": 0
     }
   }
 ]

@@ -7,7 +7,8 @@
     "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::improveProjectCoverageByX",
     "secret": false,
     "additionalParameters": {
-      "haveCoverage": 0.001
+      "haveCoverage": 0.001,
+      "maxCoverage": 0.005
     }
   },
   {
@@ -18,7 +19,8 @@
     "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::improveProjectCoverageByX",
     "secret": false,
     "additionalParameters": {
-      "haveCoverage": 0.005
+      "haveCoverage": 0.005,
+      "maxCoverage": 0.01
     }
   },
   {
@@ -29,7 +31,8 @@
     "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::improveProjectCoverageByX",
     "secret": false,
     "additionalParameters": {
-      "haveCoverage": 0.01
+      "haveCoverage": 0.01,
+      "maxCoverage": 0.02
     }
   },
   {
