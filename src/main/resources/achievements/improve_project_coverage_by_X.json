@@ -2,7 +2,7 @@
   {
     "badgePath": "/plugin/gamekins/achievements/colour/helping-hand-colour.png",
     "unsolvedBadgePath": "/plugin/gamekins/achievements/blackwhite/helping-hand.png",
-    "description": "Improve the coverage of the project by 0.1% in one build",
+    "description": "Improve the coverage of the project by 0.1% to 0.4% in one build",
     "title": "Helpful",
     "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::improveProjectCoverageByX",
     "secret": false,
@@ -14,7 +14,7 @@
   {
     "badgePath": "/plugin/gamekins/achievements/colour/performance-colour.png",
     "unsolvedBadgePath": "/plugin/gamekins/achievements/blackwhite/performance.png",
-    "description": "Improve the coverage of the project by 0.5% in one build",
+    "description": "Improve the coverage of the project by 0.5% to 0.9% in one build",
     "title": "Improvement",
     "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::improveProjectCoverageByX",
     "secret": false,
@@ -26,7 +26,7 @@
   {
     "badgePath": "/plugin/gamekins/achievements/colour/arrows-colour.png",
     "unsolvedBadgePath": "/plugin/gamekins/achievements/blackwhite/arrows.png",
-    "description": "Improve the coverage of the project by 1.0% in one build",
+    "description": "Improve the coverage of the project by 1.0% to 1.9% in one build",
     "title": "Progress",
     "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::improveProjectCoverageByX",
     "secret": false,

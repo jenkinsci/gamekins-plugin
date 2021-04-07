@@ -2,7 +2,7 @@
   {
     "badgePath": "/plugin/gamekins/achievements/colour/beer-bottle-colour.png",
     "unsolvedBadgePath": "/plugin/gamekins/achievements/blackwhite/beer-bottle.png",
-    "description": "Solve a LineCoverageChallenge with at least six branches in the required line",
+    "description": "Solve a LineCoverageChallenge with at least six and less than eight branches in the required line",
     "title": "Six pack",
     "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::coverLineWithXBranches",
     "secret": false,
@@ -14,7 +14,7 @@
   {
     "badgePath": "/plugin/gamekins/achievements/colour/breathing-colour.png",
     "unsolvedBadgePath": "/plugin/gamekins/achievements/blackwhite/breathing.png",
-    "description": "Solve a LineCoverageChallenge with at least eight branches in the required line",
+    "description": "Solve a LineCoverageChallenge with at least eight and less than ten branches in the required line",
     "title": "The element to breath",
     "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::coverLineWithXBranches",
     "secret": false,
@@ -26,7 +26,7 @@
   {
     "badgePath": "/plugin/gamekins/achievements/colour/data-transformation-colour.png",
     "unsolvedBadgePath": "/plugin/gamekins/achievements/blackwhite/data-transformation.png",
-    "description": "Solve a LineCoverageChallenge with at least ten branches in the required line",
+    "description": "Solve a LineCoverageChallenge with at least ten and less than twelve branches in the required line",
     "title": "Neon sign for refactoring",
     "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::coverLineWithXBranches",
     "secret": false,

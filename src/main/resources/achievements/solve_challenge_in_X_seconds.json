@@ -2,7 +2,7 @@
   {
     "badgePath": "/plugin/gamekins/achievements/colour/24-hours-colour.png",
     "unsolvedBadgePath": "/plugin/gamekins/achievements/blackwhite/24-hours.png",
-    "description": "Solve a Challenge a maximum of 24 hours after generation",
+    "description": "Solve a Challenge a maximum of 24 and more than eight hours after generation",
     "title": "It took me one day",
     "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::solveChallengeInXSeconds",
     "secret": false,
@@ -14,7 +14,7 @@
   {
     "badgePath": "/plugin/gamekins/achievements/colour/working-hours-colour.png",
     "unsolvedBadgePath": "/plugin/gamekins/achievements/blackwhite/working-hours.png",
-    "description": "Solve a Challenge a maximum of eight hours after generation",
+    "description": "Solve a Challenge a maximum of eight and more than two hours after generation",
     "title": "All I could do in one working day",
     "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::solveChallengeInXSeconds",
     "secret": false,
@@ -26,7 +26,7 @@
   {
     "badgePath": "/plugin/gamekins/achievements/colour/thumb-up-colour.png",
     "unsolvedBadgePath": "/plugin/gamekins/achievements/blackwhite/thumb-up.png",
-    "description": "Solve a Challenge a maximum of two hours after generation",
+    "description": "Solve a Challenge a maximum of two hours and more than one after generation",
     "title": "Not that difficult",
     "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::solveChallengeInXSeconds",
     "secret": false,
