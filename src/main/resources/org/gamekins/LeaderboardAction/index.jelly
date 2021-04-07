@@ -352,8 +352,8 @@
                                     }
                                 }
                             }
-                            temp.parent().remove()
                             modal.modal("hide")
+                            location.reload()
                         }
                     })
                 })
