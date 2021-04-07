@@ -162,7 +162,7 @@ class Statistics(job: AbstractItem) {
     fun addRunEntry(job: AbstractItem, branch: String, entry: RunEntry, listener: TaskListener) {
         addPreviousEntries(job, branch, entry.runNumber - 1, listener)
         runEntries!!.add(entry)
-        listener.logger.println(entry.printToXML(""))
+        listener.logger.println("[Gamekins] ${entry.printToXML("")}")
         runEntries.sortWith(Comparator { obj: RunEntry, o: RunEntry -> obj.compareTo(o) })
     }
 

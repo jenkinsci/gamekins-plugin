@@ -21,7 +21,6 @@ import hudson.model.AbstractProject
 import hudson.tasks.BuildStepDescriptor
 import hudson.tasks.Publisher
 import hudson.util.FormValidation
-import org.apache.http.client.utils.URIBuilder
 import org.gamekins.achievement.Achievement
 import org.gamekins.achievement.AchievementInitializer
 import org.gamekins.challenge.*
@@ -30,10 +29,8 @@ import org.jenkinsci.Symbol
 import org.kohsuke.stapler.AncestorInPath
 import org.kohsuke.stapler.QueryParameter
 import java.io.File
-import java.lang.IllegalArgumentException
 import java.net.URI
 import java.util.*
-import java.util.jar.JarFile
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 import javax.annotation.Nonnull

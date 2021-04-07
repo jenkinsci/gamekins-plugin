@@ -34,7 +34,7 @@ import org.gamekins.util.JacocoUtil.ClassDetails
  */
 class MutationTestChallenge(
     val mutationInfo: MutationInfo, val classDetails: ClassDetails,
-    val branch: String?, workspace: FilePath, val commitID: String, snippet: String, mutatedLoc: String
+    val branch: String?, val commitID: String, snippet: String, mutatedLoc: String
 ) : Challenge {
 
     private val created = System.currentTimeMillis()
@@ -141,7 +141,7 @@ class MutationTestChallenge(
         val changedClasses = workspace.act(
             GitUtil.DiffFromHeadCallable(
                 workspace, commitID,
-                classDetails.packageName, listener
+                classDetails.packageName
             )
         )
         return changedClasses?.any {

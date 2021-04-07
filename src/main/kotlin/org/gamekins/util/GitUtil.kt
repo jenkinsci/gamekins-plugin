@@ -494,17 +494,16 @@ object GitUtil {
      * @since 1.0
      */
     class DiffFromHeadCallable(
-        private val workspace: FilePath, private val targetCommitID: String,
-        private val packageName: String, private val listener: TaskListener
+        private val workspace: FilePath, private val targetCommitID: String, private val packageName: String
     ) : MasterToSlaveCallable<List<String>, IOException?>() {
         @Throws(IOException::class)
         override fun call(): List<String>? {
-            return getChangedClsSinceLastStoredCommit(workspace, targetCommitID, packageName, listener)
+            return getChangedClsSinceLastStoredCommit(workspace, targetCommitID, packageName)
         }
     }
 
     fun getChangedClsSinceLastStoredCommit(workspace: FilePath, targetID: String,
-                                           packageName: String, listener: TaskListener): List<String>? {
+                                           packageName: String): List<String>? {
         val builder = FileRepositoryBuilder()
         val repo = builder.setGitDir(File(workspace.remote + "/.git")).setMustExist(true).build()
         val headCommit: RevCommit = getHead(repo)
@@ -512,14 +511,14 @@ object GitUtil {
         val commits = git.log().all().call()
         for (commit in commits) {
             if (targetID == commit.name) {
-                return listDiff(repo, git, targetID, headCommit.name, packageName, listener)
+                return listDiff(repo, git, targetID, headCommit.name, packageName)
             }
         }
         return null
     }
 
     private fun listDiff(repository: Repository, git: Git, oldCommit: String,
-                         newCommit: String, packageName: String, listener: TaskListener
+                         newCommit: String, packageName: String
     ): List<String>? {
         val diff = git.diff()
             .setOldTree(prepareTreeParser(repository, oldCommit))
@@ -541,7 +540,7 @@ object GitUtil {
         return res
     }
 
-    private fun prepareTreeParser(repository: Repository, objectId: String): AbstractTreeIterator? {
+    private fun prepareTreeParser(repository: Repository, objectId: String): AbstractTreeIterator {
         // from the commit we can build the tree which allows us to construct the TreeParser
         val revWalk = RevWalk(repository)
         val commit: RevCommit = revWalk.parseCommit(repository.resolve(objectId))

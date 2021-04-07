@@ -21,7 +21,6 @@ import hudson.model.Run
 import hudson.model.TaskListener
 import org.gamekins.util.GitUtil.GameUser
 import jenkins.security.MasterToSlaveCallable
-import org.gamekins.mutation.MutationResults
 import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
@@ -143,7 +142,8 @@ object JacocoUtil {
                     when {
                         value.matches(Regex("a\\d+")) -> {
                             methodName = node.childNode(0).childNode(0).toString()
-                            val temp = node.childNode(0).attributes().find { it.key == "href" && it.value.matches(Regex(".*#L\\d+")) }
+                            val temp = node.childNode(0).attributes()
+                                .find { it.key == "href" && it.value.matches(Regex(".*#L\\d+")) }
                             firstLineID = temp?.value?.substringAfterLast("#") ?: ""
                         }
                         value.matches(Regex("h\\d+")) -> {
@@ -438,7 +438,8 @@ object JacocoUtil {
      * @author Philipp Straubinger
      * @since 1.0
      */
-    class CoverageMethod internal constructor(val methodName: String, val lines: Int, val missedLines: Int, val firstLineID: String)
+    class CoverageMethod internal constructor(val methodName: String, val lines: Int, val missedLines: Int,
+                                              val firstLineID: String)
 
     /**
      * The internal representation of a class from JaCoCo.

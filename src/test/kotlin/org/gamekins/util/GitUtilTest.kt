@@ -334,9 +334,9 @@ class GitUtilTest : AnnotationSpec() {
         unmockkAll()
         mockkObject(GitUtil)
         val temp = GitUtil.DiffFromHeadCallable(path,
-            "123", "org.example", TaskListener.NULL)
+            "123", "org.example")
         every { GitUtil.getChangedClsSinceLastStoredCommit(path, "123",
-            "org.example", TaskListener.NULL) } returns listOf("abc")
+            "org.example") } returns listOf("abc")
         temp.call() shouldBe listOf("abc")
     }
 
@@ -344,8 +344,8 @@ class GitUtilTest : AnnotationSpec() {
     fun testGetChangedClsSinceLastStoredCommit() {
         unmockkAll()
         GitUtil.getChangedClsSinceLastStoredCommit(path, "4a642f65855c8a6d28a1602258ebfde143df52e4",
-            "org.example", TaskListener.NULL) shouldBe listOf()
+            "org.example") shouldBe listOf()
         GitUtil.getChangedClsSinceLastStoredCommit(path, "123",
-            "org.example", TaskListener.NULL) shouldBe null
+            "org.example") shouldBe null
     }
 }

@@ -33,7 +33,7 @@ import java.io.Serializable
  * [loc]: line of code
  * [mutationDescription]: textual description of the mutation
  * [instructionsOrder]: This is recorded by MoCo to identify the exact position of the mutated instruction
- * [additionalInfo]: Other info that are necessary to construct mutated line of code such as mutated variable names, etc.
+ * [additionalInfo]: Other info that are necessary to construct mutated line of code such as mutated variable names etc.
  *
  * @author Tran Phan
  * @since 0.3

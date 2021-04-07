@@ -31,7 +31,6 @@ import jenkins.tasks.SimpleBuildStep
 import org.gamekins.event.EventHandler
 import org.gamekins.event.build.BuildFinishedEvent
 import org.gamekins.event.build.BuildStartedEvent
-import org.gamekins.mutation.MutationResults
 import org.gamekins.util.JUnitUtil
 import org.gamekins.util.JacocoUtil
 import org.jenkinsci.plugins.workflow.job.WorkflowJob

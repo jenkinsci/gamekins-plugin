@@ -60,7 +60,8 @@ data class MutationResults(val entries: Map<String, Set<MutationInfo>>, val runI
                 retrievedResults = mapper.readValue(jsonString, MutationResults::class.java)
                 retrievedResults
             } catch (e: Exception) {
-                listener.logger.println("Error while reading mutation results from json file, please check MoCo JSON path")
+                listener.logger.println("Error while reading mutation results from json file, please check " +
+                        "MoCo JSON path")
                 null
             }
         }

@@ -22,7 +22,6 @@ import hudson.model.TaskListener
 import hudson.model.User
 import org.gamekins.util.GitUtil
 import org.gamekins.util.JUnitUtil
-import org.gamekins.util.JacocoUtil
 import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject
 import kotlin.collections.HashMap
 

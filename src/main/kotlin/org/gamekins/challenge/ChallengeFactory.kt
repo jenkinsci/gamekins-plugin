@@ -420,7 +420,7 @@ object ChallengeFactory {
         }
         // Commit id is persisted with mutation info to later determine the solvability of a mutation challenge
         return MutationTestChallenge(
-            chosenMutation, classDetails, branch, workspace, commitID, codeSnippet, mutatedLine
+            chosenMutation, classDetails, branch, commitID, codeSnippet, mutatedLine
         )
     }
 

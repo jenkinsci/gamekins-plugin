@@ -49,7 +49,7 @@ class MutationUtilsTest: AnnotationSpec()  {
     private val entries = mapOf("org.example.Feature" to listOf(mutation1, mutation2, mutation3))
     private val details = mockkClass(JacocoUtil.ClassDetails::class)
     private val path = FilePath(null, "/home/test/workspace")
-    private val challenge = MutationTestChallenge(mutation1, details, "branch", path, "commitID", "snippet", "line")
+    private val challenge = MutationTestChallenge(mutation1, details, "branch", "commitID", "snippet", "line")
 
     @Test
     fun testGetSurvivedMutationList() {
@@ -66,7 +66,7 @@ class MutationUtilsTest: AnnotationSpec()  {
     fun testGetCurrentLinesOperatorMapping() {
         every { details.packageName } returns "org.example"
         every { details.className } returns "Example"
-        val challenge1 = MutationTestChallenge(mutation1, details, "branch", path, "commitID", "snippet", "line")
+        val challenge1 = MutationTestChallenge(mutation1, details, "branch", "commitID", "snippet", "line")
 
         val currentChallenges = listOf(challenge1)
         val fullClassName = "org.example.Example"

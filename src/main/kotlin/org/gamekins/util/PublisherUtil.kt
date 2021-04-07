@@ -26,7 +26,6 @@ import org.gamekins.event.EventHandler
 import org.gamekins.event.user.AchievementSolvedEvent
 import org.gamekins.event.user.ChallengeSolvedEvent
 import org.gamekins.event.user.ChallengeUnsolvableEvent
-import org.gamekins.mutation.MutationResults
 import org.gamekins.property.GameJobProperty
 import org.gamekins.property.GameMultiBranchProperty
 import org.gamekins.property.GameProperty
