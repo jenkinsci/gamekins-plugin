@@ -19,6 +19,7 @@ package org.gamekins.challenge
 import hudson.FilePath
 import org.gamekins.util.JacocoUtil
 import org.gamekins.util.JacocoUtil.ClassDetails
+import java.io.File
 
 /**
  * Abstract class to generate basic information about the class used for generating a [CoverageChallenge].
@@ -51,7 +52,30 @@ abstract class CoverageChallenge(val classDetails: ClassDetails, workspace: File
         coverage = classDetails.coverage
     }
 
+    /**
+     * Creates the code snippet to be displayed in the leaderboard for each [Challenge]. [target] is either the
+     * line number or the line content.
+     */
     open fun createCodeSnippet(classDetails: ClassDetails, target: Any, workspace: FilePath): String {
+        if (classDetails.jacocoSourceFile.exists()) {
+            val javaHtmlPath = JacocoUtil.calculateCurrentFilePath(
+                workspace, classDetails.jacocoSourceFile, classDetails.workspace
+            )
+            val snippetElements = JacocoUtil.getLinesInRange(javaHtmlPath, target, 4)
+            if (snippetElements.first == "") {
+                return ""
+            }
+            val loc = (target as String).substring(1)
+            val linenums = if (loc.toIntOrNull() is Int) "linenums:${loc.toInt() - 2}" else
+                "linenums:${
+                    File("${workspace.remote}${classDetails.sourceFilePath}")
+                    .readLines().indexOfFirst { it.contains(target) } - 1}"
+
+            return "<pre class='prettyprint mt-2 ${linenums}'><code class='language-java'>" +
+                    snippetElements.first +
+                    "</code></pre>"
+        }
+
         return ""
     }
 

@@ -40,24 +40,6 @@ class MethodCoverageChallenge(data: ChallengeGenerationData) : CoverageChallenge
         codeSnippet = createCodeSnippet(classDetails, firstLineID, data.workspace)
     }
 
-    override fun createCodeSnippet(classDetails: JacocoUtil.ClassDetails, target: Any, workspace: FilePath): String {
-        if (classDetails.jacocoSourceFile.exists()) {
-            val javaHtmlPath = JacocoUtil.calculateCurrentFilePath(
-                workspace, classDetails.jacocoSourceFile, classDetails.workspace
-            )
-            val snippetElements = JacocoUtil.getLinesInRange(javaHtmlPath, target, 4)
-            if (snippetElements.first == "") {
-                return ""
-            }
-            val loc = (target as String).substring(1)
-            val linenums = if (loc.toIntOrNull() is Int) "linenums:${loc.toInt() - 2}" else ""
-            return "<pre class='prettyprint mt-2 ${linenums}'><code class='language-java'>" +
-                    snippetElements.first +
-                    "</code></pre>"
-        }
-        return ""
-    }
-
     override fun equals(other: Any?): Boolean {
         if (other == null) return false
         if (other !is MethodCoverageChallenge) return false

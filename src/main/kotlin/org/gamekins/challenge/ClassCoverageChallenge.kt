@@ -31,6 +31,10 @@ import org.jsoup.nodes.Document
 class ClassCoverageChallenge(data: Challenge.ChallengeGenerationData)
     : CoverageChallenge(data.selectedClass, data.workspace) {
 
+    init {
+        codeSnippet = createCodeSnippet(data.selectedClass, "class ${data.selectedClass.className}", data.workspace)
+    }
+
     override fun equals(other: Any?): Boolean {
         if (other == null) return false
         if (other !is ClassCoverageChallenge) return false
@@ -44,7 +48,7 @@ class ClassCoverageChallenge(data: Challenge.ChallengeGenerationData)
 
     override fun getSnippet(): String {
         // No code snippet is collected for a ClassCoverageChallenge
-        return "No code snippet collected"
+        return codeSnippet
     }
 
     override fun getScore(): Int {

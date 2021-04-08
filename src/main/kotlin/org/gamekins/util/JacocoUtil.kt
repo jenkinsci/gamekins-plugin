@@ -270,7 +270,6 @@ object JacocoUtil {
         return elements
     }
 
-
     /**
      * Returns lines of code within specific lines of code range in the [jacocoSourceFile].
      * The return value is a pair with the first element is the target code snippet and
