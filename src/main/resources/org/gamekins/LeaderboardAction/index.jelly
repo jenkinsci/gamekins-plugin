@@ -317,6 +317,10 @@
                     rejectBtnConfirm.data("url", descriptorFullUrl)
                 })
 
+                jQuery3("#rejectModal").on('shown.bs.modal', function () {
+                    jQuery3(this).find('#reason-text').focus()
+                })
+
                 jQuery3('#rejectButtonConfirm').on('click', function () {
                     let btn = jQuery3(this)
                     let challengeID = btn.data('cid')
