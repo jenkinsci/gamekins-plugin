@@ -480,6 +480,7 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
         currentChallenges.putIfAbsent(projectName, CopyOnWriteArrayList())
         rejectedChallenges.putIfAbsent(projectName, CopyOnWriteArrayList())
         unsolvedAchievements.putIfAbsent(projectName, CopyOnWriteArrayList(GamePublisherDescriptor.achievements))
+        completedAchievements.putIfAbsent(projectName, CopyOnWriteArrayList())
     }
 
     /**
