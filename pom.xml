@@ -18,7 +18,8 @@
         <!-- Error occurs which should already be solved https://issues.jenkins-ci.org/browse/JENKINS-46602 -->
         <!-- <maven.compiler.release>11</maven.compiler.release> -->
         <java.level>8</java.level>
-        <kotlin.version>1.4.10</kotlin.version>
+        <!-- JaCoCo 0.8.6 does not work with Kotlin 1.5.0 https://youtrack.jetbrains.com/issue/KT-44757 -->
+        <kotlin.version>1.4.32</kotlin.version>
         <maven.compiler.debug>true</maven.compiler.debug>
         <maven.compiler.debuglevel>lines,source</maven.compiler.debuglevel>
         <!-- <maven.test.skip>true</maven.test.skip> -->
@@ -57,7 +58,7 @@
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>structs</artifactId>
-            <version>1.20</version>
+            <version>1.22</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.jenkins-ci</groupId>
@@ -68,7 +69,7 @@
         <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-cps</artifactId>
-            <version>2.83</version>
+            <version>2.90</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -79,24 +80,24 @@
         <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-basic-steps</artifactId>
-            <version>2.22</version>
+            <version>2.23</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-durable-task-step</artifactId>
-            <version>2.36</version>
+            <version>2.38</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-support</artifactId>
-            <version>3.5</version>
+            <version>3.8</version>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-scm-step</artifactId>
-            <version>2.11</version>
+            <version>2.12</version>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
@@ -106,12 +107,12 @@
         <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-api</artifactId>
-            <version>2.40</version>
+            <version>2.42</version>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>script-security</artifactId>
-            <version>1.75</version>
+            <version>1.76</version>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
@@ -121,41 +122,61 @@
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>git-client</artifactId>
-            <version>3.5.1</version>
+            <version>3.7.1</version>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>trilead-api</artifactId>
-            <version>1.0.11</version>
+            <version>1.0.13</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.json</groupId>
+                    <artifactId>json</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>credentials</artifactId>
-            <version>2.3.13</version>
+            <version>2.3.18</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.eclipse.jgit/org.eclipse.jgit -->
         <dependency>
             <groupId>org.eclipse.jgit</groupId>
             <artifactId>org.eclipse.jgit</artifactId>
-            <version>5.9.0.202009080501-r</version>
+            <version>5.11.0.202103091610-r</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.jenkins-ci.plugins/git -->
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>git</artifactId>
-            <version>4.4.4</version>
+            <version>4.7.0</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.jenkins-ci.main/maven-plugin -->
         <dependency>
             <groupId>org.jenkins-ci.main</groupId>
             <artifactId>maven-plugin</artifactId>
-            <version>3.7</version>
+            <version>3.10</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.jenkins-ci</groupId>
+                    <artifactId>symbol-annotation</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.jenkins-ci.plugins</groupId>
+                    <artifactId>mailer</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.jenkins-ci.plugins</groupId>
+                    <artifactId>apache-httpcomponents-client-4-api</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.jenkins-ci.plugins/junit -->
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>junit</artifactId>
-            <version>1.37</version>
+            <version>1.49</version>
             <exclusions>
                 <exclusion>
                     <groupId>com.github.spotbugs</groupId>
@@ -169,27 +190,35 @@
                     <groupId>org.apache.commons</groupId>
                     <artifactId>commons-lang3</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>io.jenkins.plugins</groupId>
+                    <artifactId>plugin-util-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.fasterxml.jackson.core</groupId>
+                    <artifactId>jackson-core</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <!-- https://mvnrepository.com/artifact/io.kotest/kotest-runner-junit5-jvm -->
         <dependency>
             <groupId>io.kotest</groupId>
             <artifactId>kotest-runner-junit5-jvm</artifactId>
-            <version>4.3.0</version>
+            <version>4.4.3</version>
             <scope>test</scope>
         </dependency>
         <!-- https://mvnrepository.com/artifact/io.kotest/kotest-assertions-core-jvm -->
         <dependency>
             <groupId>io.kotest</groupId>
             <artifactId>kotest-assertions-core-jvm</artifactId>
-            <version>4.3.0</version>
+            <version>4.4.3</version>
             <scope>test</scope>
         </dependency>
         <!-- https://mvnrepository.com/artifact/io.mockk/mockk -->
         <dependency>
             <groupId>io.mockk</groupId>
             <artifactId>mockk</artifactId>
-            <version>1.10.2</version>
+            <version>1.11.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -198,10 +227,11 @@
             <version>${kotlin.version}</version>
             <scope>test</scope>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/io.kotest/kotest-framework-engine-jvm -->
         <dependency>
             <groupId>io.kotest</groupId>
             <artifactId>kotest-framework-engine-jvm</artifactId>
-            <version>4.3.0</version>
+            <version>4.4.3</version>
             <scope>test</scope>
         </dependency>
 
@@ -216,24 +246,24 @@
         <dependency>
             <groupId>org.jetbrains.kotlinx</groupId>
             <artifactId>kotlinx-coroutines-core</artifactId>
-            <version>1.4.0</version>
+            <version>1.4.3</version>
         </dependency>
         <!-- Mutation Test dependencies -->
         <dependency>
             <groupId>com.fasterxml.jackson.module</groupId>
             <artifactId>jackson-module-kotlin</artifactId>
-            <version>2.12.0</version>
+            <version>2.12.3</version>
         </dependency>
         <!-- New UI dependencies -->
         <dependency>
             <groupId>io.jenkins.plugins</groupId>
             <artifactId>popper-api</artifactId>
-            <version>1.16.1-1</version>
+            <version>1.16.1-2</version>
         </dependency>
         <dependency>
             <groupId>io.jenkins.plugins</groupId>
             <artifactId>font-awesome-api</artifactId>
-            <version>5.15.2-1</version>
+            <version>5.15.2-2</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.apache.commons</groupId>
@@ -244,7 +274,7 @@
         <dependency>
             <groupId>io.jenkins.plugins</groupId>
             <artifactId>bootstrap4-api</artifactId>
-            <version>4.6.0-1</version>
+            <version>4.6.0-3</version>
             <exclusions>
                 <exclusion>
                     <groupId>com.github.spotbugs</groupId>
@@ -259,7 +289,7 @@
         <dependency>
             <groupId>io.jenkins.plugins</groupId>
             <artifactId>jquery3-api</artifactId>
-            <version>3.5.1-2</version>
+            <version>3.6.0-1</version>
         </dependency>
 
 
