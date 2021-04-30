@@ -34,6 +34,7 @@ import org.jenkinsci.plugins.workflow.job.WorkflowJob
 import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject
 import java.io.IOException
 import java.util.function.Consumer
+import hudson.security.HudsonPrivateSecurityRealm.Details as Details
 
 /**
  * Util object for interaction with properties.
@@ -218,11 +219,12 @@ object PropertyUtil {
     }
 
     /**
-     * Checks whether the provided user contains login information or not
+     * Checks whether the provided user contains login information or not. Compatible with Jenkins < 2.277.1
+     * with [UserDetails] and with Jenkins >= 2.2771 with [Details].
      */
     @JvmStatic
     fun realUser(user: User): Boolean {
-        return !user.properties.values.filter { it is UserDetails }.isNullOrEmpty()
+        return !user.properties.values.filter { it is UserDetails || it is Details }.isNullOrEmpty()
     }
 
     /**
@@ -241,7 +243,7 @@ object PropertyUtil {
 
     /**
      * Adds or removes a [LeaderboardAction] or [StatisticsAction] with the help of the according methods of the
-     * [job]
+     * [job].
      */
     private fun reconfigureWorkFlowJob(job: WorkflowJob, activated: Boolean, showStatistics: Boolean) {
 
@@ -264,7 +266,7 @@ object PropertyUtil {
 
     /**
      * Adds or removes a [LeaderboardAction] or [StatisticsAction] with the help of the according methods of the
-     * [job]
+     * [job].
      */
     private fun reconfigureAbstractItem(job: AbstractItem, activated: Boolean, showStatistics: Boolean) {
 
