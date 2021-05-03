@@ -13,8 +13,13 @@ pipeline {
         }
         stage('Package') {
             steps {
-                sh 'mvn -B package'
+                sh 'mvn -B hpi:hpi'
             }
+        }
+    }
+    post {
+        always {
+            gamekins jacocoCSVPath: '**/target/site/jacoco/jacoco.csv', jacocoResultsPath: '**/target/site/jacoco/', mocoJSONPath: '**/target/moco/mutation/moco.json', searchCommitCount: 50
         }
     }
 }
