@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>4.12</version>
+        <version>4.16</version>
     </parent>
     <groupId>org.gamekins</groupId>
     <artifactId>gamekins</artifactId>
@@ -16,6 +16,7 @@
         <!-- Baseline Jenkins version you use to build the plugin. Users must have this version or newer to run. -->
         <jenkins.version>2.277.3</jenkins.version>
         <!-- Error occurs which should already be solved https://issues.jenkins-ci.org/browse/JENKINS-46602 -->
+        <!-- Parent pom uses 1.${java.level}, see to resolve: https://www.baeldung.com/maven-plugin-override-parent -->
         <!-- <maven.compiler.release>11</maven.compiler.release> -->
         <java.level>8</java.level>
         <!-- JaCoCo 0.8.6 does not work with Kotlin 1.5.0 https://youtrack.jetbrains.com/issue/KT-44757 -->
