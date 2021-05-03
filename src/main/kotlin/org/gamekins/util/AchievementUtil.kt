@@ -25,7 +25,6 @@ import org.gamekins.GameUserProperty
 import org.gamekins.challenge.BuildChallenge
 import org.gamekins.challenge.CoverageChallenge
 import org.gamekins.challenge.LineCoverageChallenge
-import org.gamekins.property.GameJobProperty
 import java.util.HashMap
 
 /**
@@ -205,8 +204,8 @@ object AchievementUtil {
         val mapUser: User? = GitUtil.mapUser(workspace.act(GitUtil.HeadCommitCallable(workspace.remote)).authorIdent,
             User.getAll())
         if (mapUser == property.getUser()) {
-            val lastRun = run.parent.getProperty(GameJobProperty::class.java).getStatistics()
-                .getLastRun(constants["branch"]!!)
+            val lastRun = PropertyUtil.retrieveGamePropertyFromRun(run)?.getStatistics()
+                ?.getLastRun(constants["branch"]!!)
             if (lastRun != null) {
                 return (constants["projectCoverage"]!!.toBigDecimal().minus(lastRun.coverage.toBigDecimal())
                         >= additionalParameters["haveCoverage"]?.toBigDecimal() ?: Double.MAX_VALUE.toBigDecimal()

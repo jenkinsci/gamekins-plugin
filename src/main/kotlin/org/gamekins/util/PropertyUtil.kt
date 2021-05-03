@@ -17,10 +17,7 @@
 package org.gamekins.util
 
 import hudson.maven.AbstractMavenProject
-import hudson.model.AbstractItem
-import hudson.model.Action
-import hudson.model.Actionable
-import hudson.model.User
+import hudson.model.*
 import hudson.util.FormValidation
 import hudson.util.ListBoxModel
 import org.gamekins.GameUserProperty
@@ -302,6 +299,17 @@ object PropertyUtil {
         }
 
         return if (property == null) null else property as GameProperty
+    }
+
+    /**
+     * Retrieves the corresponding [GameProperty] of the [run] depending on its type.
+     */
+    fun retrieveGamePropertyFromRun(run: Run<*, *>): GameProperty? {
+        return if (run.parent.parent is WorkflowMultiBranchProject) {
+            retrieveGameProperty(run.parent.parent as WorkflowMultiBranchProject)
+        } else {
+            retrieveGameProperty(run.parent)
+        }
     }
 
     /**
