@@ -17,6 +17,7 @@
 package org.gamekins.util
 
 import hudson.FilePath
+import hudson.model.ItemGroup
 import hudson.model.Result
 import hudson.model.TaskListener
 import hudson.model.User
@@ -359,7 +360,8 @@ class AchievementUtilTest: AnnotationSpec() {
         val statistics = mockkClass(Statistics::class)
         constants["branch"] = "master"
         every { run.parent } returns job
-        every { job.getProperty(GameJobProperty::class.java) } returns jobProperty
+        every { job.parent } returns mockkClass(ItemGroup::class)
+        every { job.getProperty(any()) } returns jobProperty
         every { jobProperty.getStatistics() } returns statistics
         every { statistics.getLastRun("master") } returns null
         AchievementUtil.improveProjectCoverageByX(classes, constants, run, property, path, TaskListener.NULL,

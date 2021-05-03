@@ -295,7 +295,7 @@ object PropertyUtil {
         val property = if (job is WorkflowMultiBranchProject) {
             job.properties.get(GameMultiBranchProperty::class.java)
         } else {
-            (job as hudson.model.Job<*, *>).getProperty(GameJobProperty::class.java.name)
+            (job as Job<*, *>).getProperty(GameJobProperty::class.java.name)
         }
 
         return if (property == null) null else property as GameProperty

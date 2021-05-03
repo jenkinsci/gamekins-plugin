@@ -117,7 +117,7 @@ object JacocoUtil {
         val pathSplit = shortFilePath.split("/".toRegex())
         var packageName = StringBuilder()
         for (i in pathSplit.size - 2 downTo 0) {
-            if ((pathSplit[i] == "src" || pathSplit[i] == "main" || pathSplit[i] == "java")
+            if ((pathSplit[i] == "src" || pathSplit[i] == "main" || pathSplit[i] == "java" || pathSplit[i] == "kotlin")
                     && packageName.isNotEmpty()) {
                 packageName = StringBuilder(packageName.substring(1))
                 break
