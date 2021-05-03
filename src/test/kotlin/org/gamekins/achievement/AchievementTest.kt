@@ -73,14 +73,18 @@ class AchievementTest: AnnotationSpec() {
         achievement.equals(classes) shouldBe false
 
         val achievement2 = mockkClass(Achievement::class)
-        every { achievement2.badgePath } returns ""
         every { achievement2.description } returns ""
         every { achievement2.title } returns ""
         (achievement == achievement2) shouldBe false
 
-        every { achievement2.badgePath } returns "/plugin/gamekins/icons/trophy.png"
         every { achievement2.description } returns "Solve your first Challenge"
+        (achievement == achievement2) shouldBe false
+
+        every { achievement2.description } returns ""
         every { achievement2.title } returns "I took the first Challenge"
+        (achievement == achievement2) shouldBe false
+
+        every { achievement2.description } returns "Solve your first Challenge"
         (achievement == achievement2) shouldBe true
     }
 
