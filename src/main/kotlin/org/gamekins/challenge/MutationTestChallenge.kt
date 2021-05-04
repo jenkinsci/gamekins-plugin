@@ -111,8 +111,12 @@ class MutationTestChallenge(
     }
 
     override fun getScore(): Int {
-        //fixme: find a way to determine mutation score - could be based on complexity compared to original code
-        return 4
+        //TODO: Include coverage of line and/or mutation score
+        return when {
+            classDetails.coverage < 0.8 -> 3
+            classDetails.coverage < 1.0 -> 4
+            else -> 5
+        }
     }
 
     fun getSnippet(): String {

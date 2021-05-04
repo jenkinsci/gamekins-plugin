@@ -114,7 +114,7 @@ class MutationTestChallengeTest : AnnotationSpec() {
 
     @Test
     fun getScore() {
-        challenge.getScore() shouldBe 4
+        challenge.getScore() shouldBe 3
     }
 
     @Test
