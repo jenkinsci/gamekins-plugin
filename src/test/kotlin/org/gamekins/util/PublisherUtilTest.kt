@@ -40,6 +40,7 @@ import io.mockk.mockkClass
 import io.mockk.mockkStatic
 import io.mockk.unmockkAll
 import jenkins.branch.MultiBranchProject
+import org.gamekins.achievement.Achievement
 import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject
 import java.io.File
 import java.lang.NullPointerException
@@ -163,6 +164,15 @@ class PublisherUtilTest : AnnotationSpec() {
         every { userProperty.rejectChallenge(any(), any(), any()) } returns Unit
         every { userProperty.getUser() } returns user
         PublisherUtil.checkUser(user, run, arrayListOf(classDetails), constants, Result.SUCCESS, path) shouldBe hashMapOf("generated" to 0, "solved" to 1, "solvedAchievements" to 0)
+
+        val achievement = mockkClass(Achievement::class)
+        every { achievement.isSolved(any(), any(), any(), any(), any()) } returns false
+        every { userProperty.getUnsolvedAchievements(any()) } returns CopyOnWriteArrayList(listOf(achievement))
+        every { userProperty.completeAchievement(any(), any()) } returns Unit
+        PublisherUtil.checkUser(user, run, arrayListOf(classDetails), constants, Result.SUCCESS, path) shouldBe hashMapOf("generated" to 0, "solved" to 1, "solvedAchievements" to 0)
+
+        every { achievement.isSolved(any(), any(), any(), any(), any()) } returns true
+        PublisherUtil.checkUser(user, run, arrayListOf(classDetails), constants, Result.SUCCESS, path) shouldBe hashMapOf("generated" to 0, "solved" to 1, "solvedAchievements" to 1)
     }
 
     @Test

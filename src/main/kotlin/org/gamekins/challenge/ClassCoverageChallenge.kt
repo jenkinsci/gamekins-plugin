@@ -32,6 +32,7 @@ class ClassCoverageChallenge(data: Challenge.ChallengeGenerationData)
     : CoverageChallenge(data.selectedClass, data.workspace) {
 
     init {
+        //TODO: Optimize for Kotlin objects
         codeSnippet = createCodeSnippet(data.selectedClass, "class ${data.selectedClass.className}", data.workspace)
     }
 
