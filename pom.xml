@@ -14,7 +14,7 @@
 
     <properties>
         <!-- Baseline Jenkins version you use to build the plugin. Users must have this version or newer to run. -->
-        <jenkins.version>2.277.3</jenkins.version>
+        <jenkins.version>2.277.4</jenkins.version>
         <!-- Error occurs which should already be solved https://issues.jenkins-ci.org/browse/JENKINS-46602 -->
         <!-- Parent pom uses 1.${java.level}, see to resolve: https://www.baeldung.com/maven-plugin-override-parent -->
         <!-- <maven.compiler.release>11</maven.compiler.release> -->
