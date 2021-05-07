@@ -39,10 +39,6 @@ import javax.annotation.Nonnull
 @Extension
 class GameJobPropertyDescriptor : JobPropertyDescriptor(GameJobProperty::class.java) {
 
-    init {
-        load()
-    }
-
     /**
      * Called from the Jetty server if the button to add a new team is pressed. Only allows a non-empty [teamName] and
      * adds them to the [job], from which the button has been clicked, via the method [PropertyUtil.doAddTeam].

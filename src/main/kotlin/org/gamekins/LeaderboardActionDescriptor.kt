@@ -37,10 +37,6 @@ import javax.annotation.Nonnull
 @Extension
 class LeaderboardActionDescriptor : Descriptor<LeaderboardAction>(LeaderboardAction::class.java) {
 
-    init {
-        load()
-    }
-
     /**
      * Rejects a [Challenge] with the String representation [reject] and a [reason].
      */

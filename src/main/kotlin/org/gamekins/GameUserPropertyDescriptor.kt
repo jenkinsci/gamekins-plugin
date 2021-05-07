@@ -32,10 +32,6 @@ import javax.annotation.Nonnull
 @Extension
 class GameUserPropertyDescriptor : UserPropertyDescriptor(GameUserProperty::class.java) {
 
-    init {
-        load()
-    }
-
     @Nonnull
     override fun getDisplayName(): String {
         return "Gamekins"

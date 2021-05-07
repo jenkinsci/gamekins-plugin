@@ -63,10 +63,6 @@ class GameOrganizationFolderProperty private constructor()
     @Extension
     class GameOrganizationFolderPropertyDescriptor : AbstractFolderPropertyDescriptor() {
 
-        init {
-            load()
-        }
-
         /**
          * Called from the Jetty server when the configuration page is displayed. Fills the combo box of subprojects
          * of the [job].
