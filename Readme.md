@@ -2,11 +2,11 @@
 This is the repository of the Gamekins Plugin for Jenkins to add Gamifcation to Jenkins.
 
 ### Software requirements
-- Java Version 8 or 11
+- Java Version 11
 - Apache Maven
 
 ### Project requirements
-- Java or Kotlin
+- Java (fully supported) or Kotlin (partially supported)
 - JaCoCo
 - JUnit
 
@@ -81,14 +81,6 @@ In the configuration page of the job underneath the checkboxes of the Gamekins s
 removed. The newly added team is only displayed after reloading the page. No information will be lost in the Gamekins 
 section, even if a popup says otherwise. To add or remove a user to a team, choose both the team and the user in the 
 dropdown menus and click on  the corresponding button. Team members can be looked up in the Leaderboard (more later).
- 
-=======
-
-#### Organization folders
-
-Since a organization folder consists of multiple projects, which configuration cannot (easily) be changed, Gamekins has
-to be enabled for each project. To do this, enable Gamekins for the project in the main configuration page of the
-folder. It can be disabled in the same way and now configured in the desired project as described before.
 
 #### Execution
 
@@ -111,6 +103,53 @@ instance and privacy promises.
 #### Additional help
 Users who have been added to a team in the job can access a **Help** section in the Leaderboard with a short 
 explanation of the Leaderboard itself, and the game in total.
+
+#### Mutation challenges
+For generating mutation challenges, the Maven plugin MoCo must be added to the project. It is currently available on 
+[Github](https://github.com/phantran/mvn-moco-repo/tree/mvn-repo), but will be added to Maven Central in the future.
+To add MoCo to a Maven project, the following configurations in the ```pom.xml``` must be done:
+
+```xml
+<project>
+  <repositories>
+    <repository>
+      <id>m0c0-maven-plugin</id>
+      <url>https://raw.github.com/phantran/mvn-moco-repo/mvn-repo/</url>
+    </repository>
+  </repositories>
+
+  <dependencies>
+    <dependency>
+      <groupId>io.moco</groupId>
+      <artifactId>m0c0-maven-plugin</artifactId>
+      <version>1.0-SNAPSHOT</version>
+    </dependency>
+  </dependencies>
+  
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>io.moco</groupId>
+        <artifactId>m0c0-maven-plugin</artifactId>
+        <version>1.0-SNAPSHOT</version>
+        <configuration>
+          <preprocessTestTimeout>500</preprocessTestTimeout>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>moco</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>
+```
+
+MoCo can be triggered manually with ```mvn m0c0:moco```. A better explanation and description of MoCo will be available
+soon.
 
 ### Extensibility
 There are two possible ways to add Challenges to the current version of Gamekins:
@@ -193,8 +232,3 @@ always a String, but it can be converted in the method if necessary.
 This project is funded by the [German Research Foundation](https://www.dfg.de/en/) and developed on the
 [Chair of Software Engineering II](https://www.fim.uni-passau.de/lehrstuhl-fuer-software-engineering-ii/) at the 
 University of Passau.
-
-In the background, data about the usage of the project and the participants is logged for evaluation purposes. By
-activating the **Statistics** checkbox, another entry on the left side panel is displayed. Currently, the information is
-not send to the developers, which will come in future with the consent of the owner of the Jenkins instance and privacy
-promises.
