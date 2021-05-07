@@ -123,7 +123,12 @@ class AchievementUtilTest: AnnotationSpec() {
         AchievementUtil.haveBuildWithXSeconds(classes, constants, run, property, workspace, TaskListener.NULL,
             additionalParameters) shouldBe false
 
+        every { run.result } returns Result.FAILURE
+        AchievementUtil.haveBuildWithXSeconds(classes, constants, run, property, workspace, TaskListener.NULL,
+            additionalParameters) shouldBe false
+
         additionalParameters["more"] = "false"
+        every { run.result } returns Result.SUCCESS
         AchievementUtil.haveBuildWithXSeconds(classes, constants, run, property, workspace, TaskListener.NULL,
             additionalParameters) shouldBe false
 
