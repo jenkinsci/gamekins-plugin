@@ -26,6 +26,7 @@ import org.gamekins.challenge.BuildChallenge
 import org.gamekins.challenge.CoverageChallenge
 import org.gamekins.challenge.LineCoverageChallenge
 import java.util.HashMap
+import kotlin.math.max
 
 /**
  * Object to check whether an achievement is solved or not.
@@ -72,16 +73,19 @@ object AchievementUtil {
                               run: Run<*, *>, property: GameUserProperty, workspace: FilePath, listener: TaskListener,
                               additionalParameters: HashMap<String, String>): Boolean {
         if (additionalParameters["more"].isNullOrEmpty()) return false
+        if (run.result != Result.SUCCESS) return false
+        val duration = if (run.duration != 0L) run.duration else
+            max(0, System.currentTimeMillis() - run.startTimeInMillis)
         var retVal = if (additionalParameters["more"].toBoolean()) {
-            run.duration > additionalParameters["duration"]?.toLong()?.times(1000) ?: Long.MAX_VALUE
+            duration > additionalParameters["duration"]?.toLong()?.times(1000) ?: Long.MAX_VALUE
         } else {
-            run.duration < additionalParameters["duration"]?.toLong()?.times(1000) ?: 0
+            duration < additionalParameters["duration"]?.toLong()?.times(1000) ?: 0
         }
 
         if (!additionalParameters["maxDuration"].isNullOrEmpty()) {
-            retVal = retVal && run.duration < additionalParameters["maxDuration"]!!.toLong()
+            retVal = retVal && duration < additionalParameters["maxDuration"]!!.toLong()
         } else if (!additionalParameters["minDuration"].isNullOrEmpty()) {
-            retVal = retVal && run.duration > additionalParameters["minDuration"]!!.toLong()
+            retVal = retVal && duration > additionalParameters["minDuration"]!!.toLong()
         }
 
         return retVal
