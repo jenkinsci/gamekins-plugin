@@ -105,51 +105,10 @@ Users who have been added to a team in the job can access a **Help** section in 
 explanation of the Leaderboard itself, and the game in total.
 
 #### Mutation challenges
-For generating mutation challenges, the Maven plugin MoCo must be added to the project. It is currently available on 
-[Github](https://github.com/phantran/mvn-moco-repo/tree/mvn-repo), but will be added to Maven Central in the future.
-To add MoCo to a Maven project, the following configurations in the ```pom.xml``` must be done:
-
-```xml
-<project>
-  <repositories>
-    <repository>
-      <id>m0c0-maven-plugin</id>
-      <url>https://raw.github.com/phantran/mvn-moco-repo/mvn-repo/</url>
-    </repository>
-  </repositories>
-
-  <dependencies>
-    <dependency>
-      <groupId>io.moco</groupId>
-      <artifactId>m0c0-maven-plugin</artifactId>
-      <version>1.0-SNAPSHOT</version>
-    </dependency>
-  </dependencies>
-  
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>io.moco</groupId>
-        <artifactId>m0c0-maven-plugin</artifactId>
-        <version>1.0-SNAPSHOT</version>
-        <configuration>
-          <preprocessTestTimeout>500</preprocessTestTimeout>
-        </configuration>
-        <executions>
-          <execution>
-            <goals>
-              <goal>moco</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-    </plugins>
-  </build>
-</project>
-```
-
-MoCo can be triggered manually with ```mvn m0c0:moco```. A better explanation and description of MoCo will be available
-soon.
+For generating mutation challenges, the Maven plugin MoCo must be added to the project. MoCo ist available on 
+[Github](https://github.com/phantran/moco) and 
+[Maven Central](https://search.maven.org/artifact/io.github.phantran/m0c0-maven-plugin). Please have a look at the 
+configuration on Github.
 
 ### Extensibility
 There are two possible ways to add Challenges to the current version of Gamekins:
