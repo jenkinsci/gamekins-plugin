@@ -82,7 +82,7 @@ object AchievementInitializer {
      * Data class for mapping the json to an [Achievement]
      *
      * @author Philipp Straubinger
-     * @since 1.0
+     * @since 0.1
      */
     data class AchievementData(val badgePath: String,
                                val unsolvedBadgePath: String,

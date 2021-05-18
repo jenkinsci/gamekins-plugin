@@ -118,7 +118,7 @@ class GameMultiBranchProperty
      * does not take the base class like the [JobPropertyDescriptor].
      *
      * @author Philipp Straubinger
-     * @since 1.0
+     * @since 0.1
      */
     @Extension
     class GameMultiBranchPropertyDescriptor : AbstractFolderPropertyDescriptor() {

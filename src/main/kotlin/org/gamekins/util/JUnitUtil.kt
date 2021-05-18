@@ -41,9 +41,7 @@ object JUnitUtil {
             )
             var testCount = 0
             for (file in files) {
-                val document = Jsoup.parse(file.readToString(), "", Parser.xmlParser())
-                val elements = document.select("testsuite")
-                testCount += elements.first().attr("tests").toInt()
+                testCount += getTestCountOfSingleJUnitResult(file)
             }
             return testCount
         } catch (e: Exception) {
@@ -67,6 +65,15 @@ object JUnitUtil {
     }
 
     /**
+     * Returns the number of test of a specific test class, specified by the JUnit result [file].
+     */
+    fun getTestCountOfSingleJUnitResult(file: FilePath): Int {
+        val document = Jsoup.parse(file.readToString(), "", Parser.xmlParser())
+        val elements = document.select("testsuite")
+        return elements.first().attr("tests").toInt()
+    }
+
+    /**
      * Returns the number of failed tests of a project in the [workspace] according to the JUnit results.
      */
     @JvmStatic
@@ -77,10 +84,7 @@ object JUnitUtil {
             )
             var testCount = 0
             for (file in files) {
-                val document = Jsoup.parse(file.readToString(), "", Parser.xmlParser())
-                val elements = document.select("testsuite")
-                testCount += elements.first().attr("failures").toInt()
-                testCount += elements.first().attr("errors").toInt()
+                testCount += getTestFailCountOfSingleJUnitResult(file)
             }
             return testCount
         } catch (e: Exception) {
@@ -101,5 +105,25 @@ object JUnitUtil {
             }
         }
         return if (workspace == null) 0 else getTestFailCount(workspace)
+    }
+
+    /**
+     * Returns the number of failed test of a specific test class, specified by the JUnit result [file].
+     */
+    fun getTestFailCountOfSingleJUnitResult(file: FilePath): Int {
+        val document = Jsoup.parse(file.readToString(), "", Parser.xmlParser())
+        val elements = document.select("testsuite")
+        return elements.first().attr("failures").toInt() + elements.first().attr("errors").toInt()
+    }
+
+    /**
+     * Returns the list of test names (= methods) of a specific test class, specified by the JUnit result [file].
+     */
+    fun getTestNames(file: FilePath): HashSet<String> {
+        val document = Jsoup.parse(file.readToString(), "", Parser.xmlParser())
+        val elements = document.select("testcase")
+        val set = hashSetOf<String>()
+        elements.forEach { set.add(it.attr("name")) }
+        return set
     }
 }

@@ -95,4 +95,10 @@ class JUnitUtilTest : AnnotationSpec() {
 
         JUnitUtil.getTestFailCount(path, null) shouldBe 0
     }
+
+    @Test
+    fun getTestNames() {
+        val set = hashSetOf("nestedWhileForLoops", "nestedForLoops")
+        JUnitUtil.getTestNames(FilePath(File("$root/target/surefire-reports/TEST-com.example.NestedLoopTest.xml"))) shouldBe set
+    }
 }

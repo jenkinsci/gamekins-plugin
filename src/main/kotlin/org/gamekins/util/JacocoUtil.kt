@@ -417,7 +417,7 @@ object JacocoUtil {
      * Returns the last changed files of a repository on a remote machine.
      *
      * @author Philipp Straubinger
-     * @since 1.0
+     * @since 0.1
      */
     class FilesOfAllSubDirectoriesCallable(private val directory: FilePath, private val regex: String)
         : MasterToSlaveCallable<ArrayList<FilePath>, IOException?>() {
@@ -435,7 +435,7 @@ object JacocoUtil {
      * The internal representation of a method from JaCoCo.
      *
      * @author Philipp Straubinger
-     * @since 1.0
+     * @since 0.1
      */
     class CoverageMethod internal constructor(val methodName: String, val lines: Int, val missedLines: Int,
                                               val firstLineID: String)
@@ -449,8 +449,11 @@ object JacocoUtil {
      * @param shortJacocoCSVPath Path of the JaCoCo csv file, beginning with ** / (without space)
      *
      * @author Philipp Straubinger
-     * @since 1.0
+     * @since 0.1
+     * @deprecated since 0.4
      */
+    @Deprecated("Use implementation of new file structure",
+        replaceWith = ReplaceWith("SourceFileDetails", imports = ["org.gamekins.file.SourceFileDetails"]))
     class ClassDetails(workspace: FilePath,
                        var sourceFilePath: String,
                        shortJacocoPath: String,

@@ -163,7 +163,7 @@ class LeaderboardAction(val job: AbstractItem) : ProminentProjectAction, Describ
      * Container for the details of a user displayed on the Leaderboard.
      *
      * @author Philipp Straubinger
-     * @since 1.0
+     * @since 0.1
      */
     @ExportedBean(defaultVisibility = 999)
     class UserDetails(@get:Exported val userName: String, @get:Exported val teamName: String,
@@ -174,7 +174,7 @@ class LeaderboardAction(val job: AbstractItem) : ProminentProjectAction, Describ
      * Container for the details of a team displayed on the Leaderboard.
      *
      * @author Philipp Straubinger
-     * @since 1.0
+     * @since 0.1
      */
     @ExportedBean(defaultVisibility = 999)
     class TeamDetails(@get:Exported val teamName: String, @get:Exported var score: Int,

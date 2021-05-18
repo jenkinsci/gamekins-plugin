@@ -32,7 +32,6 @@ import io.mockk.mockkStatic
 import io.mockk.unmockkAll
 import org.eclipse.jgit.revwalk.RevCommit
 import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject
-import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.jsoup.select.Elements
 import java.io.File

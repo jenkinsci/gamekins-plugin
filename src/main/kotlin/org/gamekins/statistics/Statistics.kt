@@ -324,7 +324,7 @@ class Statistics(job: AbstractItem) {
      * Represents a run of Jenkins job.
      *
      * @author Philipp Straubinger
-     * @since 1.0
+     * @since 0.1
      */
     class RunEntry(val runNumber: Int, val branch: String, val result: Result?, val startTime: Long,
                    var generatedChallenges: Int, val solvedChallenges: Int, var solvedAchievements: Int,

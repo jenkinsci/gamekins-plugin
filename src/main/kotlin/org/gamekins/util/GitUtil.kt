@@ -422,7 +422,7 @@ object GitUtil {
      * Returns the branch of a repository on a remote machine.
      *
      * @author Philipp Straubinger
-     * @since 1.0
+     * @since 0.1
      */
     private class BranchCallable(private val workspace: String) : MasterToSlaveCallable<String, IOException?>() {
 
@@ -446,7 +446,7 @@ object GitUtil {
      * Returns the head of a repository on a remote machine.
      *
      * @author Philipp Straubinger
-     * @since 1.0
+     * @since 0.1
      */
     class HeadCommitCallable(private val workspace: String) : MasterToSlaveCallable<RevCommit, IOException?>() {
 
@@ -466,7 +466,7 @@ object GitUtil {
      * Returns the last changed files of a repository on a remote machine.
      *
      * @author Philipp Straubinger
-     * @since 1.0
+     * @since 0.1
      */
     class LastChangedClassesCallable(
         private val count: Int, private val constants: HashMap<String, String>,
@@ -491,7 +491,7 @@ object GitUtil {
      * Returns the difference in source classes of a commit from the head commit of a repository on a remote machine.
      *
      * @author Tran Phan
-     * @since 1.0
+     * @since 0.1
      */
     class DiffFromHeadCallable(
         private val workspace: FilePath, private val targetCommitID: String, private val packageName: String
@@ -558,7 +558,7 @@ object GitUtil {
      * Returns the last changed files of a repository on a remote machine.
      *
      * @author Philipp Straubinger
-     * @since 1.0
+     * @since 0.1
      */
     private class LastChangedFilesCallable constructor(
         private val workspace: String, private val user: GameUser,
@@ -580,7 +580,7 @@ object GitUtil {
      * The internal representation of a [User] in Jenkins since it cannot be serialised and sent to a remote machine.
      *
      * @author Philipp Straubinger
-     * @since 1.0
+     * @since 0.1
      */
     class GameUser(user: User) : Serializable {
 
