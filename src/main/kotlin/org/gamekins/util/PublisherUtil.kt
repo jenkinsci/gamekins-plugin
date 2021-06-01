@@ -253,8 +253,8 @@ object PublisherUtil {
 
         val classes: ArrayList<SourceFileDetails>
         try {
-            classes = ArrayList(workspace.act(GitUtil.LastChangedClassesCallable(searchCommitCount, "",
-                constants, listener, GitUtil.mapUsersToGameUsers(users), workspace)))
+            classes = ArrayList(GitUtil.getLastChangedClasses(searchCommitCount, "",
+                constants, listener, GitUtil.mapUsersToGameUsers(users), workspace))
             listener.logger.println("[Gamekins] Found ${classes.size} last changed files")
 
             if (removeFullCoveredClasses) {

@@ -95,11 +95,6 @@ class GitUtilTest : AnnotationSpec() {
     fun getLastChangedClasses() {
         GitUtil.getLastChangedClasses(50, "", constants, TaskListener.NULL, arrayListOf(user), path).size shouldBe 8
         GitUtil.getLastChangedClasses(1, "", constants, TaskListener.NULL, arrayListOf(user), path) should beEmpty()
-
-        GitUtil.LastChangedClassesCallable(50, "", constants, TaskListener.NULL, arrayListOf(user), path)
-                .call().size shouldBe 8
-        GitUtil.LastChangedClassesCallable(1, "", constants, TaskListener.NULL, arrayListOf(user), path)
-                .call() should beEmpty()
     }
 
     @Test

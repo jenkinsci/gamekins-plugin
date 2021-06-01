@@ -125,21 +125,27 @@ object GitUtil {
     }
 
     /**
-     * Returns a list of last changed classes. It searches the last [count] of commits in the history in the
-     * [workspace] and assigns the classes changed in these commits to the according [users]. [constants] are needed
-     * for information about the JaCoCo paths and the [listener] reports the events to the console output of Jenkins.
+     * Returns a list of last changed classes. It searches the last [count] of commits in the history
+     * (or until a certain [commitHash]) in the [workspace] and assigns the files changed in these commits to the
+     * according [users]. [constants] are needed for information about the JaCoCo paths and the [listener] reports
+     * the events to the console output of Jenkins.
      */
     @JvmStatic
-    @Throws(IOException::class)
     fun getLastChangedClasses(
         count: Int, commitHash: String, constants: HashMap<String, String>, listener: TaskListener,
         users: ArrayList<GameUser>, workspace: FilePath
     ): List<SourceFileDetails> {
 
-        return getLastChangedFiles(count, commitHash, constants, users, workspace, listener)
+        return workspace.act(LastChangedFilesCallable(constants, workspace, count, commitHash, users, listener))
             .filterIsInstance<SourceFileDetails>()
     }
 
+    /**
+     * Returns a list of last changed files of a [user]. It searches the last [count] of commits in the history
+     * (or until a certain [commitHash]) in the [workspace] and assigns the files changed in these commits to the
+     * according [users]. [constants] are needed for information about the JaCoCo paths and the [listener] reports
+     * the events to the console output of Jenkins.
+     */
     @JvmStatic
     fun getLastChangedClassesOfUser(count: Int, commitHash: String, constants: HashMap<String, String>,
                                     listener: TaskListener, user: GameUser, users: ArrayList<GameUser>,
@@ -149,6 +155,12 @@ object GitUtil {
             .filter { it.changedByUsers.contains(user) }
     }
 
+    /**
+     * Returns a list of last changed files. It searches the last [count] of commits in the history
+     * (or until a certain [commitHash]) in the [workspace] and assigns the files changed in these commits to the
+     * according [users]. [constants] are needed for information about the JaCoCo paths and the [listener] reports
+     * the events to the console output of Jenkins.
+     */
     @JvmStatic
     fun getLastChangedFiles(count: Int, commitHash: String, constants: HashMap<String, String>,
                             users: ArrayList<GameUser>, workspace: FilePath, listener: TaskListener
@@ -260,16 +272,28 @@ object GitUtil {
         return files
     }
 
+    /**
+     * Returns a list of last changed tests. It searches the last [count] of commits in the history
+     * (or until a certain [commitHash]) in the [workspace] and assigns the files changed in these commits to the
+     * according [users]. [constants] are needed for information about the JaCoCo paths and the [listener] reports
+     * the events to the console output of Jenkins.
+     */
     @JvmStatic
     fun getLastChangedTests(
         count: Int, commitHash: String, constants: HashMap<String, String>, listener: TaskListener,
         users: ArrayList<GameUser>, workspace: FilePath
     ): List<TestFileDetails> {
 
-        return getLastChangedFiles(count, commitHash, constants, users, workspace, listener)
+        return workspace.act(LastChangedFilesCallable(constants, workspace, count, commitHash, users, listener))
             .filterIsInstance<TestFileDetails>()
     }
 
+    /**
+     * Returns a list of last changed tests of a [user]. It searches the last [count] of commits in the history
+     * (or until a certain [commitHash]) in the [workspace] and assigns the files changed in these commits to the
+     * according [users]. [constants] are needed for information about the JaCoCo paths and the [listener] reports
+     * the events to the console output of Jenkins.
+     */
     @JvmStatic
     fun getLastChangedTestsOfUser(count: Int, commitHash: String, constants: HashMap<String, String>,
                                   listener: TaskListener, user: GameUser, users: ArrayList<GameUser>,
@@ -350,92 +374,6 @@ object GitUtil {
         return gameUsers
     }
 
-    /**
-     * Returns the branch of a repository on a remote machine.
-     *
-     * @author Philipp Straubinger
-     * @since 0.1
-     */
-    private class BranchCallable(private val workspace: String) : MasterToSlaveCallable<String, IOException?>() {
-
-        /**
-         * Performs computation and returns the result,
-         * or throws some exception.
-         */
-        override fun call(): String {
-            val builder = FileRepositoryBuilder()
-            try {
-                val repo = builder.setGitDir(File("$workspace/.git")).setMustExist(true).build()
-                return repo.branch
-            } catch (e: IOException) {
-                e.printStackTrace()
-            }
-            return ""
-        }
-    }
-
-    /**
-     * Returns the head of a repository on a remote machine.
-     *
-     * @author Philipp Straubinger
-     * @since 0.1
-     */
-    class HeadCommitCallable(private val workspace: String) : MasterToSlaveCallable<RevCommit, IOException?>() {
-
-        /**
-         * Performs computation and returns the result,
-         * or throws some exception.
-         */
-        @Throws(IOException::class)
-        override fun call(): RevCommit {
-            val builder = FileRepositoryBuilder()
-            val repo = builder.setGitDir(File("$workspace/.git")).setMustExist(true).build()
-            return getHead(repo)
-        }
-    }
-
-    /**
-     * Returns the last changed files of a repository on a remote machine.
-     *
-     * @author Philipp Straubinger
-     * @since 0.1
-     */
-    class LastChangedClassesCallable(
-        private val count: Int,
-        private val commitHash: String,
-        private val constants: HashMap<String, String>,
-        private val listener: TaskListener,
-        private val users: ArrayList<GameUser>,
-        private val workspace: FilePath
-    ) : MasterToSlaveCallable<List<SourceFileDetails>, IOException?>() {
-
-        /**
-         * Performs computation and returns the result,
-         * or throws some exception.
-         */
-        @Throws(IOException::class)
-        override fun call(): List<SourceFileDetails> {
-            return getLastChangedClasses(
-                count, commitHash, constants, listener, users, workspace
-            )
-        }
-    }
-
-    /**
-     * Returns the difference in source classes of a commit from the head commit of a repository on a remote machine.
-     *
-     * @author Tran Phan
-     * @since 0.1
-     */
-    class DiffFromHeadCallable(
-        private val workspace: FilePath, private val targetCommitID: String, private val packageName: String
-    ) : MasterToSlaveCallable<List<String>, IOException?>() {
-        @Throws(IOException::class)
-        override fun call(): List<String>? {
-            return getChangedClsSinceLastStoredCommit(workspace, targetCommitID, packageName)
-        }
-    }
-
     fun getChangedClsSinceLastStoredCommit(workspace: FilePath, targetID: String,
                                            packageName: String): List<String>? {
         val builder = FileRepositoryBuilder()
@@ -487,6 +425,64 @@ object GitUtil {
         return treeParser
     }
 
+    /**
+     * Returns the branch of a repository on a remote machine.
+     *
+     * @author Philipp Straubinger
+     * @since 0.1
+     */
+    private class BranchCallable(private val workspace: String) : MasterToSlaveCallable<String, IOException?>() {
+
+        /**
+         * Performs computation and returns the result,
+         * or throws some exception.
+         */
+        override fun call(): String {
+            val builder = FileRepositoryBuilder()
+            try {
+                val repo = builder.setGitDir(File("$workspace/.git")).setMustExist(true).build()
+                return repo.branch
+            } catch (e: IOException) {
+                e.printStackTrace()
+            }
+            return ""
+        }
+    }
+
+    /**
+     * Returns the head of a repository on a remote machine.
+     *
+     * @author Philipp Straubinger
+     * @since 0.1
+     */
+    class HeadCommitCallable(private val workspace: String) : MasterToSlaveCallable<RevCommit, IOException?>() {
+
+        /**
+         * Performs computation and returns the result,
+         * or throws some exception.
+         */
+        @Throws(IOException::class)
+        override fun call(): RevCommit {
+            val builder = FileRepositoryBuilder()
+            val repo = builder.setGitDir(File("$workspace/.git")).setMustExist(true).build()
+            return getHead(repo)
+        }
+    }
+
+    /**
+     * Returns the difference in source classes of a commit from the head commit of a repository on a remote machine.
+     *
+     * @author Tran Phan
+     * @since 0.1
+     */
+    class DiffFromHeadCallable(
+        private val workspace: FilePath, private val targetCommitID: String, private val packageName: String
+    ) : MasterToSlaveCallable<List<String>, IOException?>() {
+        @Throws(IOException::class)
+        override fun call(): List<String>? {
+            return getChangedClsSinceLastStoredCommit(workspace, targetCommitID, packageName)
+        }
+    }
 
     /**
      * Returns the last changed files of a repository on a remote machine.
@@ -499,16 +495,16 @@ object GitUtil {
         private val workspace: FilePath,
         private val commitCount: Int,
         private val commitHash: String,
-        private val users: ArrayList<GameUser>
+        private val users: ArrayList<GameUser>,
+        private val listener: TaskListener
     ) : MasterToSlaveCallable<ArrayList<FileDetails>, IOException?>() {
 
         /**
          * Performs computation and returns the result,
          * or throws some exception.
          */
-        @Throws(IOException::class)
         override fun call(): ArrayList<FileDetails> {
-            return getLastChangedFiles(commitCount, commitHash, constants, users, workspace, TaskListener.NULL)
+            return getLastChangedFiles(commitCount, commitHash, constants, users, workspace, listener)
         }
     }
 
