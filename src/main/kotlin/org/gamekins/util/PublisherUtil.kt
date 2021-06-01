@@ -26,6 +26,7 @@ import org.gamekins.event.EventHandler
 import org.gamekins.event.user.AchievementSolvedEvent
 import org.gamekins.event.user.ChallengeSolvedEvent
 import org.gamekins.event.user.ChallengeUnsolvableEvent
+import org.gamekins.file.SourceFileDetails
 import org.gamekins.property.GameJobProperty
 import org.gamekins.property.GameMultiBranchProperty
 import org.gamekins.property.GameProperty
@@ -47,7 +48,7 @@ object PublisherUtil {
      * Checks whether one or more achievements are solved.
      */
     private fun checkAchievements(property: GameUserProperty, run: Run<*, *>,
-                                  classes: ArrayList<JacocoUtil.ClassDetails>, constants: HashMap<String, String>,
+                                  classes: ArrayList<SourceFileDetails>, constants: HashMap<String, String>,
                                   workspace: FilePath, listener: TaskListener): Int {
 
         var solved = 0
@@ -113,7 +114,7 @@ object PublisherUtil {
      * Checks the solved and solvable state of a [user] and generates new Challenges if needed. Returns a [HashMap]
      * with the number of generated and solved Challenges.
      */
-    fun checkUser(user: User, run: Run<*, *>, classes: ArrayList<JacocoUtil.ClassDetails>,
+    fun checkUser(user: User, run: Run<*, *>, classes: ArrayList<SourceFileDetails>,
                   constants: HashMap<String, String>, result: Result?, workspace: FilePath,
                   listener: TaskListener = TaskListener.NULL)
             : HashMap<String, Int> {
@@ -248,27 +249,27 @@ object PublisherUtil {
                                    users: Collection<User> = User.getAll(), listener: TaskListener = TaskListener.NULL,
                                    removeFullCoveredClasses: Boolean = true,
                                    removeClassesWithoutJacocoFiles: Boolean = true, sort: Boolean = true)
-            : ArrayList<JacocoUtil.ClassDetails> {
+            : List<SourceFileDetails> {
 
-        val classes: ArrayList<JacocoUtil.ClassDetails>
+        val classes: ArrayList<SourceFileDetails>
         try {
-            classes = workspace.act(GitUtil.LastChangedClassesCallable(searchCommitCount, constants,
-                    listener, GitUtil.mapUsersToGameUsers(users), workspace))
+            classes = ArrayList(workspace.act(GitUtil.LastChangedClassesCallable(searchCommitCount, "",
+                constants, listener, GitUtil.mapUsersToGameUsers(users), workspace)))
             listener.logger.println("[Gamekins] Found ${classes.size} last changed files")
 
             if (removeFullCoveredClasses) {
-                classes.removeIf { classDetails: JacocoUtil.ClassDetails? -> classDetails!!.coverage == 1.0 }
+                classes.removeIf { details: SourceFileDetails -> details.coverage == 1.0 }
             }
             listener.logger.println("[Gamekins] Found ${classes.size} last changed files without 100% coverage")
 
             if (removeClassesWithoutJacocoFiles) {
-                classes.removeIf { classDetails: JacocoUtil.ClassDetails? -> !classDetails!!.filesExists() }
+                classes.removeIf { details: SourceFileDetails -> !details.filesExists() }
             }
             listener.logger.println("[Gamekins] Found ${classes.size} last changed files with " +
                     "existing coverage reports")
 
             if (sort) {
-                classes.sortWith(Comparator.comparingDouble(JacocoUtil.ClassDetails::coverage))
+                classes.sortWith(Comparator.comparingDouble(SourceFileDetails::coverage))
                 classes.reverse()
             }
         } catch (e: Exception) {

@@ -20,7 +20,7 @@ import hudson.FilePath
 import hudson.model.User
 import org.gamekins.GameUserProperty
 import org.gamekins.challenge.MutationTestChallenge
-import org.gamekins.util.JacocoUtil
+import org.gamekins.file.SourceFileDetails
 
 
 /**
@@ -67,7 +67,7 @@ object MutationUtils {
         currentLinesOperatorMap: MutableMap<Int, MutableSet<String>>
     ) {
         currentChallenges.map {
-            if ("${it.classDetails.packageName}.${it.classDetails.className}" == fullClassName) {
+            if ("${it.details.packageName}.${it.details.fileName}" == fullClassName) {
                 if (!currentLinesOperatorMap.containsKey(it.lineOfCode)) {
                     currentLinesOperatorMap[it.lineOfCode] =
                         mutableSetOf(it.mutationInfo.mutationDetails.mutationOperatorName)
@@ -102,7 +102,7 @@ object MutationUtils {
      */
     fun findMutationHasCodeSnippets(
         survivedList: List<MutationInfo?>,
-        classDetails: JacocoUtil.ClassDetails, workspace: FilePath,
+        classDetails: SourceFileDetails, workspace: FilePath,
         currentLinesOperatorMap: Map<Int, Set<String>>, currentChallengeMethods: Set<String>
     ): Pair<MutationInfo?, Map<String, String>> {
         val mutationOnNewMethods = survivedList.filter {
@@ -123,7 +123,7 @@ object MutationUtils {
      */
     fun handleMutationInNewMethods(
         muList: List<MutationInfo?>,
-        classDetails: JacocoUtil.ClassDetails, workspace: FilePath,
+        classDetails: SourceFileDetails, workspace: FilePath,
         currentLinesOperatorMap: Map<Int, Set<String>>,
     ): Pair<MutationInfo?, Map<String, String>> {
         // Prioritize mutations with operators that not in current challenges
@@ -144,7 +144,7 @@ object MutationUtils {
      */
     fun handleMutationInOldMethods(
         muList: List<MutationInfo?>,
-        classDetails: JacocoUtil.ClassDetails, workspace: FilePath,
+        classDetails: SourceFileDetails, workspace: FilePath,
         currentLinesOperatorMap: Map<Int, Set<String>>
     ): Pair<MutationInfo?, Map<String, String>> {
         val mutationOnNewLines = muList.filter { !currentLinesOperatorMap.keys.contains(it?.mutationDetails?.loc) }
@@ -181,7 +181,7 @@ object MutationUtils {
      */
     fun processMutationSnippet(
         muList: List<MutationInfo?>,
-        classDetails: JacocoUtil.ClassDetails, workspace: FilePath
+        classDetails: SourceFileDetails, workspace: FilePath
     ): Pair<MutationInfo?, Map<String, String>> {
         // Prioritize mutation with available code snippet and mutated code snippet
         var chosenMutation: MutationInfo? = null

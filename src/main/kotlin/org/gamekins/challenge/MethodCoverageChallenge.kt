@@ -20,6 +20,7 @@ import hudson.FilePath
 import hudson.model.Run
 import hudson.model.TaskListener
 import org.gamekins.challenge.Challenge.ChallengeGenerationData
+import org.gamekins.file.SourceFileDetails
 import org.gamekins.util.JacocoUtil
 
 /**
@@ -37,14 +38,14 @@ class MethodCoverageChallenge(data: ChallengeGenerationData) : CoverageChallenge
 
 
     init {
-        codeSnippet = createCodeSnippet(classDetails, firstLineID, data.workspace)
+        codeSnippet = createCodeSnippet(details, firstLineID, data.workspace)
     }
 
     override fun equals(other: Any?): Boolean {
         if (other == null) return false
         if (other !is MethodCoverageChallenge) return false
-        return other.classDetails.packageName == this.classDetails.packageName
-                && other.classDetails.className == this.classDetails.className
+        return other.details.packageName == this.details.packageName
+                && other.details.fileName == this.details.fileName
                 && other.methodName == this.methodName
     }
 
@@ -75,10 +76,10 @@ class MethodCoverageChallenge(data: ChallengeGenerationData) : CoverageChallenge
      */
     override fun isSolvable(constants: HashMap<String, String>, run: Run<*, *>, listener: TaskListener,
                             workspace: FilePath): Boolean {
-        if (classDetails.constants["branch"] != constants["branch"]) return true
+        if (details.constants["branch"] != constants["branch"]) return true
 
         val jacocoMethodFile = JacocoUtil.calculateCurrentFilePath(workspace,
-                classDetails.jacocoMethodFile, classDetails.workspace)
+                details.jacocoMethodFile, details.workspace)
         try {
             if (!jacocoMethodFile.exists()) {
                 listener.logger.println("[Gamekins] JaCoCo method file "
@@ -101,18 +102,18 @@ class MethodCoverageChallenge(data: ChallengeGenerationData) : CoverageChallenge
     }
 
     /**
-     * The [MethodCoverageChallenge] is solved if the number of missed lines, according to the [classDetails] JaCoCo
+     * The [MethodCoverageChallenge] is solved if the number of missed lines, according to the [details] JaCoCo
      * files, is less than during generation. The [workspace] is the folder with the code and execution rights, and
      * the [listener] reports the events to the console output of Jenkins.
      */
     override fun isSolved(constants: HashMap<String, String>, run: Run<*, *>, listener: TaskListener,
                           workspace: FilePath): Boolean {
         val jacocoMethodFile = JacocoUtil.getJacocoFileInMultiBranchProject(run, constants,
-                JacocoUtil.calculateCurrentFilePath(workspace, classDetails.jacocoMethodFile,
-                        classDetails.workspace), classDetails.constants["branch"]!!)
+                JacocoUtil.calculateCurrentFilePath(workspace, details.jacocoMethodFile,
+                        details.workspace), details.constants["branch"]!!)
         val jacocoCSVFile = JacocoUtil.getJacocoFileInMultiBranchProject(run, constants,
-                JacocoUtil.calculateCurrentFilePath(workspace, classDetails.jacocoCSVFile,
-                        classDetails.workspace), classDetails.constants["branch"]!!)
+                JacocoUtil.calculateCurrentFilePath(workspace, details.jacocoCSVFile,
+                        details.workspace), details.constants["branch"]!!)
 
         try {
             if (!jacocoMethodFile.exists() || !jacocoCSVFile.exists()) {
@@ -129,7 +130,7 @@ class MethodCoverageChallenge(data: ChallengeGenerationData) : CoverageChallenge
                     if (method.missedLines < missedLines) {
                         super.setSolved(System.currentTimeMillis())
                         solvedCoverage = JacocoUtil.getCoverageInPercentageFromJacoco(
-                                classDetails.className, jacocoCSVFile)
+                                details.fileName, jacocoCSVFile)
                         return true
                     }
                     break
@@ -148,12 +149,16 @@ class MethodCoverageChallenge(data: ChallengeGenerationData) : CoverageChallenge
     @Suppress("unused", "SENSELESS_COMPARISON")
     private fun readResolve(): Any {
         if (codeSnippet == null) codeSnippet = ""
+        if (details == null && classDetails != null) {
+            details = SourceFileDetails.classDetailsToSourceFileDetails(classDetails)
+        }
+
         return this
     }
 
     override fun toString(): String {
         return ("Write a test to cover more lines of method <b>" + methodName + "</b> in class <b>"
-                + classDetails.className + "</b> in package <b>" + classDetails.packageName
-                + "</b> (created for branch " + classDetails.constants["branch"] + ")")
+                + details.fileName + "</b> in package <b>" + details.packageName
+                + "</b> (created for branch " + details.constants["branch"] + ")")
     }
 }

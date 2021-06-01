@@ -21,7 +21,7 @@ import hudson.model.Run
 import hudson.model.TaskListener
 import org.gamekins.GameUserProperty
 import org.gamekins.LeaderboardAction
-import org.gamekins.util.JacocoUtil
+import org.gamekins.file.SourceFileDetails
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.reflect.KCallable
@@ -128,7 +128,7 @@ class Achievement(var badgePath: String, var unsolvedBadgePath: String, val full
      * Checks whether the [Achievement] is solved. Adds all parameters to an array to be passed into a vararg
      * parameter and executes the [callFunction] of the [callClass].
      */
-    fun isSolved(classes: ArrayList<JacocoUtil.ClassDetails>, constants: HashMap<String, String>, run: Run<*, *>,
+    fun isSolved(classes: ArrayList<SourceFileDetails>, constants: HashMap<String, String>, run: Run<*, *>,
                  property: GameUserProperty, workspace: FilePath, listener: TaskListener = TaskListener.NULL): Boolean {
         val array = arrayOf(callClass.objectInstance, classes, constants, run, property, workspace, listener,
             additionalParameters)

@@ -109,8 +109,9 @@ class TestChallenge(data: Challenge.ChallengeGenerationData) : Challenge {
             if (testCountSolved <= testCount) {
                 return false
             }
-            val lastChangedFilesOfUser = GitUtil.getLastChangedTestFilesOfUser(
-                    workspace, user, 0, currentCommit, User.getAll())
+            val lastChangedFilesOfUser = GitUtil.getLastChangedTestsOfUser(
+                GitUtil.DEFAULT_SEARCH_COMMIT_COUNT, currentCommit, constants, listener, GitUtil.GameUser(user),
+                GitUtil.mapUsersToGameUsers(User.getAll()), workspace)
             if (lastChangedFilesOfUser.isNotEmpty()) {
                 solved = System.currentTimeMillis()
                 this.testCountSolved = testCountSolved

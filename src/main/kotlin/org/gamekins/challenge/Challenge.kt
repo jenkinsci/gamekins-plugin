@@ -22,7 +22,7 @@ import hudson.model.TaskListener
 import hudson.model.User
 import org.gamekins.statistics.Statistics
 import org.gamekins.LeaderboardAction
-import org.gamekins.util.JacocoUtil.ClassDetails
+import org.gamekins.file.SourceFileDetails
 import org.gamekins.util.JacocoUtil.CoverageMethod
 import org.jsoup.nodes.Element
 import kotlin.collections.HashMap
@@ -118,7 +118,7 @@ interface Challenge {
      * Data class for the initialisation of a Challenge. Every val variable will be non-null with the desired data.
      */
     data class ChallengeGenerationData(val constants: HashMap<String, String>, val user: User,
-                                       val selectedClass: ClassDetails, val workspace: FilePath,
+                                       val selectedClass: SourceFileDetails, val workspace: FilePath,
                                        val listener: TaskListener, var method: CoverageMethod? = null,
                                        var line: Element? = null, var testCount: Int? = null,
                                        var headCommitHash: String? = null)

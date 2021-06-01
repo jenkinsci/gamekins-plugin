@@ -19,6 +19,7 @@ package org.gamekins.challenge
 import hudson.FilePath
 import hudson.model.Run
 import hudson.model.TaskListener
+import org.gamekins.file.SourceFileDetails
 import org.gamekins.util.JacocoUtil
 import org.jsoup.nodes.Element
 import kotlin.math.abs
@@ -41,7 +42,7 @@ class LineCoverageChallenge(data: Challenge.ChallengeGenerationData)
 
 
     init {
-        codeSnippet = createCodeSnippet(classDetails, lineNumber,  data.workspace)
+        codeSnippet = createCodeSnippet(details, lineNumber,  data.workspace)
         val split = data.line!!.attr("title").split(" ".toRegex())
         when {
             split.isEmpty() || (split.size == 1 && split[0].isBlank()) -> {
@@ -59,7 +60,7 @@ class LineCoverageChallenge(data: Challenge.ChallengeGenerationData)
         }
     }
 
-    override fun createCodeSnippet(classDetails: JacocoUtil.ClassDetails,
+    override fun createCodeSnippet(classDetails: SourceFileDetails,
                                    target: Any, workspace: FilePath): String {
         if (target !is Int) return ""
         else if (target < 0) return ""
@@ -80,8 +81,8 @@ class LineCoverageChallenge(data: Challenge.ChallengeGenerationData)
     override fun equals(other: Any?): Boolean {
         if (other == null) return false
         if (other !is LineCoverageChallenge) return false
-        return other.classDetails.packageName == this.classDetails.packageName
-                && other.classDetails.className == this.classDetails.className
+        return other.details.packageName == this.details.packageName
+                && other.details.fileName == this.details.fileName
                 && other.lineNumber == this.lineNumber
                 && other.lineContent == this.lineContent
                 && other.coverageType == this.coverageType
@@ -124,12 +125,12 @@ class LineCoverageChallenge(data: Challenge.ChallengeGenerationData)
      */
     override fun isSolvable(constants: HashMap<String, String>, run: Run<*, *>, listener: TaskListener,
                             workspace: FilePath): Boolean {
-        if (classDetails.constants["branch"] != constants["branch"]) return true
+        if (details.constants["branch"] != constants["branch"]) return true
 
-        val jacocoSourceFile = JacocoUtil.calculateCurrentFilePath(workspace, classDetails.jacocoSourceFile,
-                classDetails.workspace)
-        val jacocoCSVFile = JacocoUtil.calculateCurrentFilePath(workspace, classDetails.jacocoCSVFile,
-                classDetails.workspace)
+        val jacocoSourceFile = JacocoUtil.calculateCurrentFilePath(workspace, details.jacocoSourceFile,
+                details.workspace)
+        val jacocoCSVFile = JacocoUtil.calculateCurrentFilePath(workspace, details.jacocoCSVFile,
+                details.workspace)
         if (!jacocoSourceFile.exists() || !jacocoCSVFile.exists()) return true
 
         val document = JacocoUtil.generateDocument(jacocoSourceFile, jacocoCSVFile, listener) ?: return false
@@ -146,18 +147,18 @@ class LineCoverageChallenge(data: Challenge.ChallengeGenerationData)
     }
 
     /**
-     * The [LineCoverageChallenge] is solved if the line, according to the [classDetails] JaCoCo files, is fully
+     * The [LineCoverageChallenge] is solved if the line, according to the [details] JaCoCo files, is fully
      * covered or partially covered (only if it was uncovered during generation). The [workspace] is the folder with
      * the code and execution rights, and the [listener] reports the events to the console output of Jenkins.
      */
     override fun isSolved(constants: HashMap<String, String>, run: Run<*, *>, listener: TaskListener,
                           workspace: FilePath): Boolean {
         val jacocoSourceFile = JacocoUtil.getJacocoFileInMultiBranchProject(run, constants,
-                JacocoUtil.calculateCurrentFilePath(workspace, classDetails.jacocoSourceFile,
-                        classDetails.workspace), classDetails.constants["branch"]!!)
+                JacocoUtil.calculateCurrentFilePath(workspace, details.jacocoSourceFile,
+                        details.workspace), details.constants["branch"]!!)
         val jacocoCSVFile = JacocoUtil.getJacocoFileInMultiBranchProject(run, constants,
-                JacocoUtil.calculateCurrentFilePath(workspace, classDetails.jacocoCSVFile,
-                        classDetails.workspace), classDetails.constants["branch"]!!)
+                JacocoUtil.calculateCurrentFilePath(workspace, details.jacocoCSVFile,
+                        details.workspace), details.constants["branch"]!!)
 
         val document = JacocoUtil.generateDocument(jacocoSourceFile, jacocoCSVFile, listener) ?: return false
 
@@ -197,6 +198,10 @@ class LineCoverageChallenge(data: Challenge.ChallengeGenerationData)
     private fun readResolve(): Any {
         if (solvedCoveredBranches == null) solvedCoveredBranches = 0
         if (codeSnippet == null) codeSnippet = ""
+        if (details == null && classDetails != null) {
+            details = SourceFileDetails.classDetailsToSourceFileDetails(classDetails)
+        }
+
         return this
     }
 
@@ -219,7 +224,7 @@ class LineCoverageChallenge(data: Challenge.ChallengeGenerationData)
             else -> maxCoveredBranches - title.toInt()
         }
         super.setSolved(System.currentTimeMillis())
-        solvedCoverage = JacocoUtil.getCoverageInPercentageFromJacoco(classDetails.className, jacocoCSVFile)
+        solvedCoverage = JacocoUtil.getCoverageInPercentageFromJacoco(details.fileName, jacocoCSVFile)
         return true
     }
 
@@ -228,8 +233,8 @@ class LineCoverageChallenge(data: Challenge.ChallengeGenerationData)
                 if (maxCoveredBranches > 1) "Write a test to cover more branches (currently $currentCoveredBranches " +
                         "of $maxCoveredBranches covered) of line "
                 else "Write a test to fully cover line "
-        return (prefix + "<b>" + lineNumber + "</b> in class <b>" + classDetails.className
-                + "</b> in package <b>" + classDetails.packageName + "</b> (created for branch "
-                + classDetails.constants["branch"] + ")")
+        return (prefix + "<b>" + lineNumber + "</b> in class <b>" + details.fileName
+                + "</b> in package <b>" + details.packageName + "</b> (created for branch "
+                + details.constants["branch"] + ")")
     }
 }

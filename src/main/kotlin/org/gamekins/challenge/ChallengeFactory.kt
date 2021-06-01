@@ -25,6 +25,7 @@ import org.gamekins.GameUserProperty
 import org.gamekins.challenge.Challenge.ChallengeGenerationData
 import org.gamekins.event.EventHandler
 import org.gamekins.event.user.ChallengeGeneratedEvent
+import org.gamekins.file.SourceFileDetails
 import org.gamekins.mutation.MutationInfo
 import org.gamekins.mutation.MutationResults
 import org.gamekins.mutation.MutationUtils
@@ -35,7 +36,6 @@ import org.gamekins.util.GitUtil
 import org.gamekins.util.GitUtil.HeadCommitCallable
 import org.gamekins.util.JUnitUtil
 import org.gamekins.util.JacocoUtil
-import org.gamekins.util.JacocoUtil.ClassDetails
 import org.jsoup.nodes.Document
 import java.io.IOException
 import kotlin.collections.ArrayList
@@ -116,7 +116,7 @@ object ChallengeFactory {
     @Throws(IOException::class, InterruptedException::class)
     fun generateChallenge(
         user: User, constants: HashMap<String, String>, listener: TaskListener,
-        classes: ArrayList<ClassDetails>, workspace: FilePath
+        classes: ArrayList<SourceFileDetails>, workspace: FilePath
     ): Challenge {
 
         val workList = ArrayList(classes)
@@ -140,13 +140,13 @@ object ChallengeFactory {
             //Remove classes where a ClassCoverageChallenge has been rejected previously
             if (!rejectedChallenges.filter {
                     it.first is ClassCoverageChallenge
-                            && (it.first as ClassCoverageChallenge).classDetails.className == selectedClass.className
+                            && (it.first as ClassCoverageChallenge).details.fileName == selectedClass.fileName
                             && (it.first as ClassCoverageChallenge)
-                        .classDetails.packageName == selectedClass.packageName
+                        .details.packageName == selectedClass.packageName
                 }
                     .isNullOrEmpty()) {
                 listener.logger.println(
-                    "[Gamekins] Class ${selectedClass.className} in package " +
+                    "[Gamekins] Class ${selectedClass.fileName} in package " +
                             "${selectedClass.packageName} was rejected previously"
                 )
                 challenge = null
@@ -167,14 +167,14 @@ object ChallengeFactory {
                 }
                 challengeClass.superclass == CoverageChallenge::class.java -> {
                     listener.logger.println(
-                        "[Gamekins] Try class " + selectedClass.className + " and type "
+                        "[Gamekins] Try class " + selectedClass.fileName + " and type "
                                 + challengeClass
                     )
                     challenge = generateCoverageChallenge(data, challengeClass)
                 }
                 challengeClass == MutationTestChallenge::class.java -> {
                     listener.logger.println(
-                        "[Gamekins] Try class " + selectedClass.className + " and type "
+                        "[Gamekins] Try class " + selectedClass.fileName + " and type "
                                 + challengeClass
                     )
                     challenge = generateMutationTestChallenge(
@@ -259,7 +259,7 @@ object ChallengeFactory {
     @JvmStatic
     fun generateNewChallenges(
         user: User, property: GameUserProperty, constants: HashMap<String, String>,
-        classes: ArrayList<ClassDetails>, workspace: FilePath,
+        classes: ArrayList<SourceFileDetails>, workspace: FilePath,
         listener: TaskListener = TaskListener.NULL, maxChallenges: Int = 3
     ): Int {
 
@@ -268,8 +268,8 @@ object ChallengeFactory {
             listener.logger.println("[Gamekins] Start generating challenges for user ${user.fullName}")
 
             val userClasses = ArrayList(classes)
-            userClasses.removeIf { classDetails: ClassDetails ->
-                !classDetails.changedByUsers.contains(GitUtil.GameUser(user))
+            userClasses.removeIf { details: SourceFileDetails ->
+                !details.changedByUsers.contains(GitUtil.GameUser(user))
             }
 
             listener.logger.println("[Gamekins] Found ${userClasses.size} last changed files of user ${user.fullName}")
@@ -309,7 +309,7 @@ object ChallengeFactory {
      */
     private fun generateUniqueChallenge(
         user: User, property: GameUserProperty, constants: HashMap<String, String>,
-        userClasses: ArrayList<ClassDetails>, workspace: FilePath,
+        userClasses: ArrayList<SourceFileDetails>, workspace: FilePath,
         listener: TaskListener
     ): Int {
         var generated = 0
@@ -363,7 +363,7 @@ object ChallengeFactory {
      */
     @Throws(IOException::class, InterruptedException::class)
     private fun generateMutationTestChallenge(
-        classDetails: ClassDetails, branch: String?, projectName: String?,
+        classDetails: SourceFileDetails, branch: String?, projectName: String?,
         listener: TaskListener, workspace: FilePath, user: User
     ): MutationTestChallenge? {
         MutationUtils.mutationBlackList.clear()
@@ -371,7 +371,7 @@ object ChallengeFactory {
             workspace, classDetails.mocoJSONFile!!, classDetails.workspace
         )
         val commitID = workspace.act(HeadCommitCallable(workspace.remote)).name
-        val fullClassName = "${classDetails.packageName}.${classDetails.className}"
+        val fullClassName = "${classDetails.packageName}.${classDetails.fileName}"
         val relevantMutationResultsByClass: Map<String, Set<MutationInfo>>? =
             MutationResults.retrievedMutationsFromJson(jsonFilePath, listener)?.entries?.filter {
                 it.key == fullClassName
@@ -427,7 +427,7 @@ object ChallengeFactory {
     /**
      * Initializes the array with the values for the Rank Selection algorithm.
      */
-    private fun initializeRankSelection(workList: List<ClassDetails>): DoubleArray {
+    private fun initializeRankSelection(workList: List<SourceFileDetails>): DoubleArray {
         val c = 1.5
         val rankValues = DoubleArray(workList.size)
         for (i in workList.indices) {
@@ -440,7 +440,7 @@ object ChallengeFactory {
     /**
      * Select a class of the [workList] with the Rank Selection algorithm ([rankValues]).
      */
-    private fun selectClass(workList: List<ClassDetails>, rankValues: DoubleArray): ClassDetails {
+    private fun selectClass(workList: List<SourceFileDetails>, rankValues: DoubleArray): SourceFileDetails {
         val probability = Random.nextDouble()
         var selectedClass = workList[workList.size - 1]
         for (i in workList.indices) {

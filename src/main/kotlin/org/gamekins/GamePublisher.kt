@@ -129,7 +129,7 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
         var solved = 0
         var solvedAchievements = 0
         for (user in User.getAll()) {
-            val results = PublisherUtil.checkUser(user, run, classes, constants, result, workspace, listener)
+            val results = PublisherUtil.checkUser(user, run, ArrayList(classes), constants, result, workspace, listener)
             generated += (if (results["generated"] != null) results["generated"] else 0)!!
             solved += (if (results["solved"] != null) results["solved"] else 0)!!
             solvedAchievements += (if (results["solvedAchievements"] != null) results["solvedAchievements"] else 0)!!

@@ -24,6 +24,7 @@ import org.gamekins.GameUserProperty
 import org.gamekins.challenge.Challenge
 import org.gamekins.challenge.ChallengeFactory
 import org.gamekins.challenge.DummyChallenge
+import org.gamekins.file.SourceFileDetails
 import java.io.IOException
 
 /**
@@ -98,7 +99,7 @@ object ActionUtil {
                 generatedText = ": New Challenge generated"
 
                 if (classes.isNotEmpty()) {
-                    generateAndUpdate(user, property, job, constants, classes, workspace)
+                    generateAndUpdate(user, property, job, constants, ArrayList(classes), workspace)
                 } else {
                     property.newChallenge(constants["projectName"]!!, DummyChallenge(constants))
                 }
@@ -114,7 +115,7 @@ object ActionUtil {
      * Generates a new [Challenge] and updates the Statistics
      */
     private fun generateAndUpdate(user: User, property: GameUserProperty, job: AbstractItem,
-                                  constants: HashMap<String, String>, classes: ArrayList<JacocoUtil.ClassDetails>,
+                                  constants: HashMap<String, String>, classes: ArrayList<SourceFileDetails>,
                                   workspace: FilePath) {
         val generated = ChallengeFactory.generateNewChallenges(
                 user, property, constants, classes, workspace)

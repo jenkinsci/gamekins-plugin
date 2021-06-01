@@ -19,6 +19,7 @@ package org.gamekins.challenge
 import hudson.FilePath
 import hudson.model.Run
 import hudson.model.TaskListener
+import org.gamekins.file.SourceFileDetails
 import org.gamekins.util.JacocoUtil
 import org.jsoup.nodes.Document
 
@@ -33,14 +34,14 @@ class ClassCoverageChallenge(data: Challenge.ChallengeGenerationData)
 
     init {
         //TODO: Optimize for Kotlin objects
-        codeSnippet = createCodeSnippet(data.selectedClass, "class ${data.selectedClass.className}", data.workspace)
+        codeSnippet = createCodeSnippet(data.selectedClass, "class ${data.selectedClass.fileName}", data.workspace)
     }
 
     override fun equals(other: Any?): Boolean {
         if (other == null) return false
         if (other !is ClassCoverageChallenge) return false
-        return other.classDetails.packageName == this.classDetails.packageName
-                && other.classDetails.className == this.classDetails.className
+        return other.details.packageName == this.details.packageName
+                && other.details.fileName == this.details.fileName
     }
 
     override fun getName(): String {
@@ -68,10 +69,10 @@ class ClassCoverageChallenge(data: Challenge.ChallengeGenerationData)
      */
     override fun isSolvable(constants: HashMap<String, String>, run: Run<*, *>, listener: TaskListener,
                             workspace: FilePath): Boolean {
-        if (classDetails.constants["branch"] != constants["branch"]) return true
+        if (details.constants["branch"] != constants["branch"]) return true
 
         val jacocoSourceFile = JacocoUtil.calculateCurrentFilePath(workspace,
-                classDetails.jacocoSourceFile, classDetails.workspace)
+                details.jacocoSourceFile, details.workspace)
         val document: Document
         document = try {
             if (!jacocoSourceFile.exists()) {
@@ -90,18 +91,18 @@ class ClassCoverageChallenge(data: Challenge.ChallengeGenerationData)
     }
 
     /**
-     * The [ClassCoverageChallenge] is solved if the coverage, according to the [classDetails] JaCoCo files, is higher
+     * The [ClassCoverageChallenge] is solved if the coverage, according to the [details] JaCoCo files, is higher
      * than during generation. The [workspace] is the folder with the code and execution rights, and the [listener]
      * reports the events to the console output of Jenkins.
      */
     override fun isSolved(constants: HashMap<String, String>, run: Run<*, *>, listener: TaskListener,
                           workspace: FilePath): Boolean {
         val jacocoSourceFile = JacocoUtil.getJacocoFileInMultiBranchProject(run, constants,
-                JacocoUtil.calculateCurrentFilePath(workspace, classDetails.jacocoSourceFile,
-                        classDetails.workspace), classDetails.constants["branch"]!!)
+                JacocoUtil.calculateCurrentFilePath(workspace, details.jacocoSourceFile,
+                        details.workspace), details.constants["branch"]!!)
         val jacocoCSVFile = JacocoUtil.getJacocoFileInMultiBranchProject(run, constants,
-                JacocoUtil.calculateCurrentFilePath(workspace, classDetails.jacocoCSVFile,
-                        classDetails.workspace), classDetails.constants["branch"]!!)
+                JacocoUtil.calculateCurrentFilePath(workspace, details.jacocoCSVFile,
+                        details.workspace), details.constants["branch"]!!)
 
         val document = JacocoUtil.generateDocument(jacocoSourceFile, jacocoCSVFile, listener) ?: return false
 
@@ -109,16 +110,28 @@ class ClassCoverageChallenge(data: Challenge.ChallengeGenerationData)
         if (fullyCoveredLines > this.fullyCoveredLines) {
             super.setSolved(System.currentTimeMillis())
             solvedCoverage = JacocoUtil.getCoverageInPercentageFromJacoco(
-                    classDetails.className, jacocoCSVFile)
+                    details.fileName, jacocoCSVFile)
             return true
         }
 
         return false
     }
 
+    /**
+     * Called by Jenkins after the object has been created from his XML representation. Used for data migration.
+     */
+    @Suppress("unused", "SENSELESS_COMPARISON")
+    private fun readResolve(): Any {
+        if (details == null && classDetails != null) {
+            details = SourceFileDetails.classDetailsToSourceFileDetails(classDetails)
+        }
+
+        return this
+    }
+
     override fun toString(): String {
-        return ("Write a test to cover more lines in class <b>" + classDetails.className
-                + "</b> in package <b>" + classDetails.packageName + "</b> (created for branch "
-                + classDetails.constants["branch"] + ")")
+        return ("Write a test to cover more lines in class <b>" + details.fileName
+                + "</b> in package <b>" + details.packageName + "</b> (created for branch "
+                + details.constants["branch"] + ")")
     }
 }

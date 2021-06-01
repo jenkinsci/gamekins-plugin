@@ -21,7 +21,6 @@ import hudson.model.TaskListener
 import hudson.model.User
 import hudson.tasks.Mailer.UserProperty
 import org.gamekins.GameUserProperty
-import org.gamekins.util.JacocoUtil.ClassDetails
 import jenkins.security.MasterToSlaveCallable
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.diff.DiffFormatter
@@ -36,6 +35,9 @@ import org.eclipse.jgit.storage.file.FileRepositoryBuilder
 import org.eclipse.jgit.treewalk.AbstractTreeIterator
 import org.eclipse.jgit.treewalk.CanonicalTreeParser
 import org.eclipse.jgit.treewalk.EmptyTreeIterator
+import org.gamekins.file.FileDetails
+import org.gamekins.file.SourceFileDetails
+import org.gamekins.file.TestFileDetails
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.IOException
@@ -45,7 +47,6 @@ import java.util.Objects
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 import kotlin.collections.HashSet
-import kotlin.collections.LinkedHashSet
 import kotlin.jvm.Throws
 
 /**
@@ -131,9 +132,28 @@ object GitUtil {
     @JvmStatic
     @Throws(IOException::class)
     fun getLastChangedClasses(
-        count: Int, constants: HashMap<String, String>, listener: TaskListener,
+        count: Int, commitHash: String, constants: HashMap<String, String>, listener: TaskListener,
         users: ArrayList<GameUser>, workspace: FilePath
-    ): ArrayList<ClassDetails> {
+    ): List<SourceFileDetails> {
+
+        return getLastChangedFiles(count, commitHash, constants, users, workspace, listener)
+            .filterIsInstance<SourceFileDetails>()
+    }
+
+    @JvmStatic
+    fun getLastChangedClassesOfUser(count: Int, commitHash: String, constants: HashMap<String, String>,
+                                    listener: TaskListener, user: GameUser, users: ArrayList<GameUser>,
+                                    workspace: FilePath
+    ): List<SourceFileDetails> {
+        return getLastChangedClasses(count, commitHash, constants, listener, users, workspace)
+            .filter { it.changedByUsers.contains(user) }
+    }
+
+    @JvmStatic
+    fun getLastChangedFiles(count: Int, commitHash: String, constants: HashMap<String, String>,
+                            users: ArrayList<GameUser>, workspace: FilePath, listener: TaskListener
+    ): ArrayList<FileDetails> {
+
         val builder = FileRepositoryBuilder()
         val repo = builder.setGitDir(File(workspace.remote + "/.git")).setMustExist(true).build()
         val walk = RevWalk(repo)
@@ -141,11 +161,26 @@ object GitUtil {
         val headCommit = getHead(repo)
         val git = Git(repo)
 
+        var targetCommit: RevCommit? = null
+        if (commitHash.isNotEmpty()) {
+            targetCommit = getCommit(repo, commitHash)
+        }
+
+        if (targetCommit == headCommit) return arrayListOf()
+
         var totalCount = 0
-        var currentCommits = HashSet<RevCommit>()
-        val searchedCommits = HashSet<RevCommit>()
+        var currentCommits = hashSetOf<RevCommit>()
+        val searchedCommits = hashSetOf<RevCommit>()
         currentCommits.add(headCommit)
-        val classes = ArrayList<ClassDetails>()
+        if (targetCommit != null) {
+            searchedCommits.add(targetCommit)
+            searchedCommits.addAll(targetCommit.parents)
+
+            targetCommit.parents.filter { it.parents != null }.forEach { searchedCommits.addAll(it.parents) }
+        }
+        val nearToLeaf = ((targetCommit?.parents?.size ?: -2) + 1) == searchedCommits.size
+
+        val files = arrayListOf<FileDetails>()
         val authorMapping = HashMap<PersonIdent, GameUser>()
 
         while (totalCount < count) {
@@ -164,7 +199,7 @@ object GitUtil {
                 for (i in lines.indices) {
                     val line = lines[i]
 
-                    if (i + 1 < lines.size && interestedInDiffLine(line, lines[i + 1])) {
+                    if (i + 1 < lines.size && (line.contains("diff --git") && !lines[i + 1].contains("deleted"))) {
                         val path = line.split(" ".toRegex())[2].substring(1)
                         val pathSplit = path.split("/".toRegex())
 
@@ -176,11 +211,11 @@ object GitUtil {
                         }
 
                         //Check whether the class was found before
-                        val classname = pathSplit[pathSplit.size - 1].split("\\.".toRegex())[0]
+                        val fileName = pathSplit[pathSplit.size - 1].split("\\.".toRegex())[0]
                         val packageName = JacocoUtil.computePackageName(path)
                         var found = false
-                        for (details in classes) {
-                            if (details.className == classname && details.packageName == packageName) {
+                        for (details in files) {
+                            if (details.fileName == fileName && details.packageName == packageName) {
                                 found = true
                                 if (user != null) details.addUser(user)
                                 break
@@ -189,13 +224,20 @@ object GitUtil {
 
                         //Add a new class
                         if (!found && user != null) {
-                            val details = ClassDetails(
-                                workspace, path, constants["jacocoResultsPath"]!!,
-                                constants["jacocoCSVPath"]!!, constants["mocoJSONPath"]!!,
-                                constants, listener
-                            )
+                            val details: FileDetails = when {
+                                pathSplit.contains("test") -> {
+                                    TestFileDetails(constants, path, workspace, listener)
+                                }
+                                path.endsWith(".java") || path.endsWith(".kt") -> {
+                                    SourceFileDetails(constants, path, workspace, constants["jacocoResultsPath"]!!,
+                                        constants["jacocoCSVPath"]!!, constants["mocoJSONPath"]!!, listener)
+                                }
+                                else -> {
+                                    FileDetails(constants, path, workspace)
+                                }
+                            }
                             details.addUser(user)
-                            classes.add(details)
+                            files.add(details)
                         }
                     }
                 }
@@ -212,122 +254,29 @@ object GitUtil {
                 }
                 totalCount++
             }
-            currentCommits = HashSet(newCommits)
-        }
-        return classes
-    }
-
-    /**
-     * Returns a list of last changed files. It searches the last [commitCount] of commits in the history in the
-     * [workspace] or until a specific [commitHash] and assigns the classes changed in these commits to the
-     * according [user].
-     */
-    @JvmStatic
-    @Throws(IOException::class)
-    private fun getLastChangedFilesOfUser(
-        workspace: String, user: GameUser, commitCount: Int,
-        commitHash: String, users: ArrayList<GameUser>
-    ): Set<String> {
-        var commitSearchCount = commitCount
-        if (commitSearchCount <= 0) commitSearchCount = DEFAULT_SEARCH_COMMIT_COUNT
-
-        val builder = FileRepositoryBuilder()
-        val repo = builder.setGitDir(File("$workspace/.git")).setMustExist(true).build()
-        val walk = RevWalk(repo)
-
-        var targetCommit: RevCommit? = null
-        if (commitHash.isNotEmpty()) {
-            targetCommit = getCommit(repo, commitHash)
-        }
-
-        val headCommit = getHead(repo)
-        val git = Git(repo)
-        if (targetCommit == headCommit || targetCommit == null) return LinkedHashSet()
-
-        var countUserCommit = 0
-        var totalCount = 0
-        var currentCommits = HashSet<RevCommit>()
-        val searchedCommits = HashSet<RevCommit>()
-        searchedCommits.add(targetCommit)
-        searchedCommits.addAll(targetCommit.parents)
-
-        targetCommit.parents.filter { it.parents != null }.forEach { searchedCommits.addAll(it.parents) }
-        val nearToLeaf = (targetCommit.parents.size + 1) == searchedCommits.size
-
-        currentCommits.add(headCommit)
-
-        val pathsToFiles = LinkedHashSet<String>()
-        while (countUserCommit < commitSearchCount && totalCount < commitSearchCount * 5) {
-            if (currentCommits.isEmpty()) break
-
-            val newCommits = ArrayList<RevCommit>()
-            for (commit in currentCommits) {
-                searchedCommits.add(commit)
-
-                val mapUser = mapUser(commit.authorIdent, users)
-                if (mapUser == user) {
-                    val diff = getDiffOfCommit(git, repo, commit)
-                    val lines = diff.split("\n".toRegex())
-                    lines.filter { it.contains("diff --git") }
-                        .forEach { pathsToFiles.add(it.split(" ".toRegex())[2].substring(1)) }
-                    countUserCommit++
-                }
-
-                for (parent in commit.parents) {
-                    newCommits.add(walk.parseCommit(repo.resolve(parent.name)))
-                    walk.dispose()
-                }
-            }
-
             if (nearToLeaf && newCommits.contains(targetCommit)) break
-            newCommits.removeAll(searchedCommits)
             currentCommits = HashSet(newCommits)
-            totalCount++
         }
-
-        return pathsToFiles
+        return files
     }
 
-    /**
-     * Return the last changed source files of a [user] only without test classes.
-     */
     @JvmStatic
-    @Throws(IOException::class, InterruptedException::class)
-    fun getLastChangedSourceFilesOfUser(
-        workspace: FilePath, user: User, commitCount: Int,
-        commitHash: String, users: Collection<User>
-    ): Set<String> {
-        val pathsToFiles: MutableSet<String> = workspace.act(
-            LastChangedFilesCallable(
-                workspace.remote, GameUser(user), commitCount, commitHash, mapUsersToGameUsers(users)
-            )
-        ) as MutableSet<String>
-        if (pathsToFiles.isNotEmpty()) {
-            pathsToFiles.removeIf { path: String -> path.split("/".toRegex()).contains("test") }
-            pathsToFiles.removeIf { path: String -> !(path.contains(".java") || path.contains(".kt")) }
-        }
-        return pathsToFiles
+    fun getLastChangedTests(
+        count: Int, commitHash: String, constants: HashMap<String, String>, listener: TaskListener,
+        users: ArrayList<GameUser>, workspace: FilePath
+    ): List<TestFileDetails> {
+
+        return getLastChangedFiles(count, commitHash, constants, users, workspace, listener)
+            .filterIsInstance<TestFileDetails>()
     }
 
-    /**
-     * Return the last changed tests of a [user] only without source files.
-     */
     @JvmStatic
-    @Throws(IOException::class, InterruptedException::class)
-    fun getLastChangedTestFilesOfUser(
-        workspace: FilePath, user: User, commitCount: Int,
-        commitHash: String, users: Collection<User>
-    ): Set<String> {
-        val pathsToFiles: MutableSet<String> = workspace.act(
-            LastChangedFilesCallable(
-                workspace.remote, GameUser(user), commitCount, commitHash, mapUsersToGameUsers(users)
-            )
-        ) as MutableSet<String>
-        if (pathsToFiles.isNotEmpty()) {
-            pathsToFiles.removeIf { path: String -> !path.split("/".toRegex()).contains("test") }
-            pathsToFiles.removeIf { path: String -> !(path.contains(".java") || path.contains(".kt")) }
-        }
-        return pathsToFiles
+    fun getLastChangedTestsOfUser(count: Int, commitHash: String, constants: HashMap<String, String>,
+                                  listener: TaskListener, user: GameUser, users: ArrayList<GameUser>,
+                                  workspace: FilePath
+    ): List<TestFileDetails> {
+        return getLastChangedTests(count, commitHash, constants, listener, users, workspace)
+            .filter { it.changedByUsers.contains(user) }
     }
 
     /**
@@ -347,23 +296,6 @@ object GitUtil {
         walk.dispose()
 
         return null
-    }
-
-    /**
-     * Checks whether the [line] contains the information needed for generating a [ClassDetails].
-     */
-    private fun interestedInDiffLine(line: String, nextLine: String): Boolean {
-
-        //Not interested in deleted classes
-        if (line.contains("diff --git") && !nextLine.contains("deleted")) {
-            val path = line.split(" ".toRegex())[2].substring(1)
-
-            //Not interested in tests and files written in languages other than Java and Kotlin
-            return !(path.split("/".toRegex()).contains("test") || !(path.contains(".java")
-                    || path.contains(".kt")))
-        }
-
-        return false
     }
 
     /**
@@ -469,20 +401,22 @@ object GitUtil {
      * @since 0.1
      */
     class LastChangedClassesCallable(
-        private val count: Int, private val constants: HashMap<String, String>,
-        private val listener: TaskListener, private val users: ArrayList<GameUser>,
+        private val count: Int,
+        private val commitHash: String,
+        private val constants: HashMap<String, String>,
+        private val listener: TaskListener,
+        private val users: ArrayList<GameUser>,
         private val workspace: FilePath
-    ) : MasterToSlaveCallable<ArrayList<ClassDetails>, IOException?>() {
+    ) : MasterToSlaveCallable<List<SourceFileDetails>, IOException?>() {
 
         /**
          * Performs computation and returns the result,
          * or throws some exception.
          */
         @Throws(IOException::class)
-        override fun call(): ArrayList<ClassDetails> {
+        override fun call(): List<SourceFileDetails> {
             return getLastChangedClasses(
-                count, constants, listener, users,
-                workspace
+                count, commitHash, constants, listener, users, workspace
             )
         }
     }
@@ -561,18 +495,20 @@ object GitUtil {
      * @since 0.1
      */
     private class LastChangedFilesCallable constructor(
-        private val workspace: String, private val user: GameUser,
-        private val commitCount: Int, private val commitHash: String,
+        private val constants: HashMap<String, String>,
+        private val workspace: FilePath,
+        private val commitCount: Int,
+        private val commitHash: String,
         private val users: ArrayList<GameUser>
-    ) : MasterToSlaveCallable<Set<String>, IOException?>() {
+    ) : MasterToSlaveCallable<ArrayList<FileDetails>, IOException?>() {
 
         /**
          * Performs computation and returns the result,
          * or throws some exception.
          */
         @Throws(IOException::class)
-        override fun call(): Set<String> {
-            return getLastChangedFilesOfUser(workspace, user, commitCount, commitHash, users)
+        override fun call(): ArrayList<FileDetails> {
+            return getLastChangedFiles(commitCount, commitHash, constants, users, workspace, TaskListener.NULL)
         }
     }
 

@@ -21,6 +21,7 @@ import hudson.model.Run
 import hudson.model.TaskListener
 import org.gamekins.util.GitUtil.GameUser
 import jenkins.security.MasterToSlaveCallable
+import org.gamekins.file.SourceFileDetails
 import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
@@ -94,7 +95,7 @@ object JacocoUtil {
     /**
      * Chooses a random not fully covered line of the given [classDetails]. Returns null if there are no such lines.
      */
-    fun chooseRandomLine(classDetails: ClassDetails, workspace: FilePath): Element? {
+    fun chooseRandomLine(classDetails: SourceFileDetails, workspace: FilePath): Element? {
         val elements = getLines(calculateCurrentFilePath(
                 workspace, classDetails.jacocoSourceFile, classDetails.workspace))
         return if (elements.isEmpty()) null else elements[Random.nextInt(elements.size)]
@@ -104,7 +105,7 @@ object JacocoUtil {
      * Chooses a random not fully covered method of the given [classDetails]. Returns null if there are no
      * such methods.
      */
-    fun chooseRandomMethod(classDetails: ClassDetails, workspace: FilePath): CoverageMethod? {
+    fun chooseRandomMethod(classDetails: SourceFileDetails, workspace: FilePath): CoverageMethod? {
         val methods = getNotFullyCoveredMethodEntries(calculateCurrentFilePath(
                 workspace, classDetails.jacocoMethodFile, classDetails.workspace))
         return if (methods.isEmpty()) null else methods[Random.nextInt(methods.size)]
@@ -115,6 +116,7 @@ object JacocoUtil {
      */
     fun computePackageName(shortFilePath: String): String {
         val pathSplit = shortFilePath.split("/".toRegex())
+        if (!pathSplit.contains("src")) return ""
         var packageName = StringBuilder()
         for (i in pathSplit.size - 2 downTo 0) {
             if ((pathSplit[i] == "src" || pathSplit[i] == "main" || pathSplit[i] == "java" || pathSplit[i] == "kotlin")

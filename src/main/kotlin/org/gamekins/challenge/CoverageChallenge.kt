@@ -17,8 +17,8 @@
 package org.gamekins.challenge
 
 import hudson.FilePath
+import org.gamekins.file.SourceFileDetails
 import org.gamekins.util.JacocoUtil
-import org.gamekins.util.JacocoUtil.ClassDetails
 import java.io.File
 
 /**
@@ -27,9 +27,11 @@ import java.io.File
  * @author Philipp Straubinger
  * @since 0.1
  */
-abstract class CoverageChallenge(val classDetails: ClassDetails, workspace: FilePath?)
+abstract class CoverageChallenge(var details: SourceFileDetails, workspace: FilePath?)
     : Challenge {
 
+    @Deprecated("Use implementation of new file structure", replaceWith = ReplaceWith("details"))
+    val classDetails: JacocoUtil.ClassDetails? = null
     val coverage: Double
     protected val fullyCoveredLines: Int
     protected val notCoveredLines: Int
@@ -45,18 +47,18 @@ abstract class CoverageChallenge(val classDetails: ClassDetails, workspace: File
      */
     init {
         val document = JacocoUtil.generateDocument(JacocoUtil.calculateCurrentFilePath(workspace!!,
-                classDetails.jacocoSourceFile, classDetails.workspace))
+                details.jacocoSourceFile, details.workspace))
         fullyCoveredLines = JacocoUtil.calculateCoveredLines(document, "fc")
         partiallyCoveredLines = JacocoUtil.calculateCoveredLines(document, "pc")
         notCoveredLines = JacocoUtil.calculateCoveredLines(document, "nc")
-        coverage = classDetails.coverage
+        coverage = details.coverage
     }
 
     /**
      * Creates the code snippet to be displayed in the leaderboard for each [Challenge]. [target] is either the
      * line number or the line content.
      */
-    open fun createCodeSnippet(classDetails: ClassDetails, target: Any, workspace: FilePath): String {
+    open fun createCodeSnippet(classDetails: SourceFileDetails, target: Any, workspace: FilePath): String {
         if (classDetails.jacocoSourceFile.exists()) {
             val javaHtmlPath = JacocoUtil.calculateCurrentFilePath(
                 workspace, classDetails.jacocoSourceFile, classDetails.workspace
@@ -68,7 +70,7 @@ abstract class CoverageChallenge(val classDetails: ClassDetails, workspace: File
             val loc = (target as String).substring(1)
             val linenums = if (loc.toIntOrNull() is Int) "linenums:${loc.toInt() - 2}" else
                 "linenums:${
-                    File("${workspace.remote}${classDetails.sourceFilePath}")
+                    File("${workspace.remote}${classDetails.filePath}")
                     .readLines().indexOfFirst { it.contains(target) } - 1}"
 
             return "<pre class='prettyprint mt-2 ${linenums}'><code class='language-java'>" +
@@ -80,7 +82,7 @@ abstract class CoverageChallenge(val classDetails: ClassDetails, workspace: File
     }
 
     override fun getConstants(): HashMap<String, String> {
-        return classDetails.constants
+        return details.constants
     }
 
     override fun getCreated(): Long {
@@ -95,13 +97,25 @@ abstract class CoverageChallenge(val classDetails: ClassDetails, workspace: File
 
     override fun printToXML(reason: String, indentation: String): String {
         var print = (indentation + "<" + this::class.simpleName + " created=\"" + created + "\" solved=\"" + solved
-                + "\" class=\"" + classDetails.className + "\" coverage=\"" + coverage
+                + "\" class=\"" + details.fileName + "\" coverage=\"" + coverage
                 + "\" coverageAtSolved=\"" + solvedCoverage)
         if (reason.isNotEmpty()) {
             print += "\" reason=\"$reason"
         }
         print += "\"/>"
         return print
+    }
+
+    /**
+     * Called by Jenkins after the object has been created from his XML representation. Used for data migration.
+     */
+    @Suppress("unused", "SENSELESS_COMPARISON")
+    private fun readResolve(): Any {
+        if (details == null && classDetails != null) {
+            details = SourceFileDetails.classDetailsToSourceFileDetails(classDetails)
+        }
+
+        return this
     }
 
     /**

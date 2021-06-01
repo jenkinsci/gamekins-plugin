@@ -19,11 +19,11 @@ package org.gamekins.challenge
 import hudson.FilePath
 import hudson.model.Run
 import hudson.model.TaskListener
+import org.gamekins.file.SourceFileDetails
 import org.gamekins.mutation.MutationInfo
 import org.gamekins.mutation.MutationResults
 import org.gamekins.util.GitUtil
 import org.gamekins.util.JacocoUtil
-import org.gamekins.util.JacocoUtil.ClassDetails
 
 
 /**
@@ -33,10 +33,12 @@ import org.gamekins.util.JacocoUtil.ClassDetails
  * @since 0.3
  */
 class MutationTestChallenge(
-    val mutationInfo: MutationInfo, val classDetails: ClassDetails,
+    val mutationInfo: MutationInfo, var details: SourceFileDetails,
     val branch: String?, val commitID: String, snippet: String, mutatedLoc: String
 ) : Challenge {
 
+    @Deprecated("Use implementation of new file structure", replaceWith = ReplaceWith("details"))
+    val classDetails: JacocoUtil.ClassDetails? = null
     private val created = System.currentTimeMillis()
     private var solved: Long = 0
     private var mutationDetails = mutationInfo.mutationDetails
@@ -51,13 +53,13 @@ class MutationTestChallenge(
     private var killedByTest = mutationInfo.killedByTest
 
     companion object {
-        fun createCodeSnippet(classDetails: ClassDetails, lineOfCode: Int, workspace: FilePath): Pair<String, String> {
+        fun createCodeSnippet(details: SourceFileDetails, lineOfCode: Int, workspace: FilePath): Pair<String, String> {
             if (lineOfCode < 0) {
                 return Pair("", "")
             }
-            if (classDetails.jacocoSourceFile.exists()) {
+            if (details.jacocoSourceFile.exists()) {
                 val javaHtmlPath = JacocoUtil.calculateCurrentFilePath(
-                    workspace, classDetails.jacocoSourceFile, classDetails.workspace
+                    workspace, details.jacocoSourceFile, details.workspace
                 )
                 val snippetElements = JacocoUtil.getLinesInRange(javaHtmlPath, lineOfCode, 4)
                 if (snippetElements.first == "") {
@@ -83,7 +85,7 @@ class MutationTestChallenge(
      * "jacocoResultsPath" and "jacocoCSVPath".
      */
     override fun getConstants(): HashMap<String, String> {
-        return classDetails.constants
+        return details.constants
     }
 
     override fun getCreated(): Long {
@@ -113,8 +115,8 @@ class MutationTestChallenge(
     override fun getScore(): Int {
         //TODO: Include coverage of line and/or mutation score
         return when {
-            classDetails.coverage < 0.8 -> 3
-            classDetails.coverage < 1.0 -> 4
+            details.coverage < 0.8 -> 3
+            details.coverage < 1.0 -> 4
             else -> 5
         }
     }
@@ -145,12 +147,12 @@ class MutationTestChallenge(
         val changedClasses = workspace.act(
             GitUtil.DiffFromHeadCallable(
                 workspace, commitID,
-                classDetails.packageName
+                details.packageName
             )
         )
         return changedClasses?.any {
             it.replace("/", ".") ==
-                    "${classDetails.packageName}.${classDetails.className}"
+                    "${details.packageName}.${details.fileName}"
         } == false
     }
 
@@ -166,9 +168,9 @@ class MutationTestChallenge(
         constants: HashMap<String, String>, run: Run<*, *>, listener: TaskListener,
         workspace: FilePath
     ): Boolean {
-        if (classDetails.mocoJSONFile == null) return false
+        if (details.mocoJSONFile == null) return false
         val jsonFilePath = JacocoUtil.calculateCurrentFilePath(
-            workspace, classDetails.mocoJSONFile, classDetails.workspace
+            workspace, details.mocoJSONFile!!, details.workspace
         )
         val mutationResults = MutationResults.retrievedMutationsFromJson(jsonFilePath, listener)
         val filteredByClass = mutationResults?.entries?.filter { it.key == this.className }
@@ -209,6 +211,18 @@ class MutationTestChallenge(
     }
 
     /**
+     * Called by Jenkins after the object has been created from his XML representation. Used for data migration.
+     */
+    @Suppress("unused", "SENSELESS_COMPARISON")
+    private fun readResolve(): Any {
+        if (details == null && classDetails != null) {
+            details = SourceFileDetails.classDetailsToSourceFileDetails(classDetails)
+        }
+
+        return this
+    }
+
+    /**
      * Needed because of automatically generated getter and setter in Kotlin.
      */
     fun setSolved(newSolved: Long) {
@@ -222,7 +236,7 @@ class MutationTestChallenge(
     override fun toString(): String {
         val mName = if (methodName == "<init>") "init" else methodName
         return ("Write a test to kill the mutant \"<b>$mutationDescription</b>\" at line <b>$lineOfCode</b> " +
-                "of method <b>$mName</b> in class <b>${classDetails.className}</b> in package " +
-                "<b>${classDetails.packageName}</b> (created for branch " + branch + ")")
+                "of method <b>$mName</b> in class <b>${details.fileName}</b> in package " +
+                "<b>${details.packageName}</b> (created for branch " + branch + ")")
     }
 }
