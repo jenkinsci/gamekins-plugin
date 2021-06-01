@@ -31,6 +31,7 @@ import io.mockk.mockkClass
 import io.mockk.mockkStatic
 import io.mockk.unmockkAll
 import org.eclipse.jgit.revwalk.RevCommit
+import org.gamekins.file.SourceFileDetails
 import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject
 import org.jsoup.nodes.Document
 import org.jsoup.select.Elements
@@ -85,7 +86,7 @@ class JacocoUtilTest : AnnotationSpec() {
 
     @Test
     fun chooseRandomLine() {
-        val classDetails = mockkClass(JacocoUtil.ClassDetails::class)
+        val classDetails = mockkClass(SourceFileDetails::class)
         every { classDetails.jacocoSourceFile } returns File(jacocoSourceFile.remote)
         every { classDetails.workspace } returns path.remote
         JacocoUtil.chooseRandomLine(classDetails, path) shouldNotBe null
@@ -97,7 +98,7 @@ class JacocoUtilTest : AnnotationSpec() {
     @Test
     fun chooseRandomMethod() {
         mockkStatic(JacocoUtil::class)
-        val classDetails = mockkClass(JacocoUtil.ClassDetails::class)
+        val classDetails = mockkClass(SourceFileDetails::class)
         every { classDetails.jacocoMethodFile } returns File(jacocoMethodFile.remote)
         every { classDetails.workspace } returns path.remote
         JacocoUtil.chooseRandomMethod(classDetails, path) shouldNotBe null

@@ -23,6 +23,7 @@ import org.gamekins.util.JacocoUtil
 import io.kotest.core.spec.style.AnnotationSpec
 import io.kotest.matchers.shouldBe
 import io.mockk.*
+import org.gamekins.file.SourceFileDetails
 import org.jsoup.nodes.Document
 
 class ClassCoverageChallengeTest : AnnotationSpec() {
@@ -33,7 +34,7 @@ class ClassCoverageChallengeTest : AnnotationSpec() {
     private val shortJacocoPath = "**/target/site/jacoco/"
     private val shortJacocoCSVPath = "**/target/site/jacoco/csv"
     private val mocoJSONPath = "**/target/site/moco/mutation/"
-    private lateinit var details : JacocoUtil.ClassDetails
+    private lateinit var details : SourceFileDetails
     private lateinit var challenge : ClassCoverageChallenge
     private val coverage = 0.0
     private val run = mockkClass(Run::class)
@@ -51,8 +52,7 @@ class ClassCoverageChallengeTest : AnnotationSpec() {
         every { JacocoUtil.getCoverageInPercentageFromJacoco(any(), any()) } returns coverage
         every { JacocoUtil.generateDocument(any()) } returns document
         every { JacocoUtil.calculateCoveredLines(any(), any()) } returns 0
-        details = JacocoUtil.ClassDetails(path, shortFilePath, shortJacocoPath, shortJacocoCSVPath, mocoJSONPath, map,
-                TaskListener.NULL)
+        details = SourceFileDetails(map, shortFilePath, path, shortJacocoPath, shortJacocoCSVPath, mocoJSONPath, listener)
         every { data.selectedClass } returns details
         every { data.workspace } returns path
         challenge = ClassCoverageChallenge(data)
@@ -67,8 +67,7 @@ class ClassCoverageChallengeTest : AnnotationSpec() {
     fun getScore() {
         challenge.getScore() shouldBe 1
         every { JacocoUtil.getCoverageInPercentageFromJacoco(any(), any()) } returns 0.9
-        details = JacocoUtil.ClassDetails(path, shortFilePath, shortJacocoPath, shortJacocoCSVPath, mocoJSONPath, map,
-                TaskListener.NULL)
+        details = SourceFileDetails(map, shortFilePath, path, shortJacocoPath, shortJacocoCSVPath, mocoJSONPath, listener)
         every { data.selectedClass } returns details
         challenge = ClassCoverageChallenge(data)
         challenge.getScore() shouldBe 2

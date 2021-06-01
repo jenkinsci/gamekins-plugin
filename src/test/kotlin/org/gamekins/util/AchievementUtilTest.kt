@@ -35,6 +35,7 @@ import org.eclipse.jgit.revwalk.RevCommit
 import org.gamekins.challenge.BuildChallenge
 import org.gamekins.challenge.ClassCoverageChallenge
 import org.gamekins.challenge.LineCoverageChallenge
+import org.gamekins.file.SourceFileDetails
 import org.gamekins.property.GameJobProperty
 import org.gamekins.statistics.Statistics
 import org.gamekins.test.TestUtils
@@ -46,7 +47,7 @@ class AchievementUtilTest: AnnotationSpec() {
 
     private lateinit var root : String
     private val challenge = mockkClass(ClassCoverageChallenge::class)
-    private val classes = arrayListOf<JacocoUtil.ClassDetails>()
+    private val classes = arrayListOf<SourceFileDetails>()
     private val constants = hashMapOf<String, String>()
     private val run = mockkClass(hudson.model.Run::class)
     private val property = mockkClass(org.gamekins.GameUserProperty::class)
@@ -214,11 +215,11 @@ class AchievementUtilTest: AnnotationSpec() {
     @Test
     fun haveXClassesWithYCoverageAndZLines() {
         additionalParameters.clear()
-        val details = mockkClass(JacocoUtil.ClassDetails::class)
-        every { details.sourceFilePath } returns "/src/main/java/com/example/Complex.java"
+        val details = mockkClass(SourceFileDetails::class)
+        every { details.filePath } returns "/src/main/java/com/example/Complex.java"
         every { workspace.remote } returns root
         every { workspace.channel } returns null
-        every { challenge.classDetails } returns details
+        every { challenge.details } returns details
         every { challenge.solvedCoverage } returns 0.9
         AchievementUtil.haveXClassesWithYCoverageAndZLines(classes, constants, run, property, workspace, TaskListener.NULL,
             additionalParameters) shouldBe false

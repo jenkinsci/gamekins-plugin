@@ -93,13 +93,32 @@ class GitUtilTest : AnnotationSpec() {
 
     @Test
     fun getLastChangedClasses() {
-        GitUtil.getLastChangedClasses(50, constants, TaskListener.NULL, arrayListOf(user), path).size shouldBe 8
-        GitUtil.getLastChangedClasses(1, constants, TaskListener.NULL, arrayListOf(user), path) should beEmpty()
+        GitUtil.getLastChangedClasses(50, "", constants, TaskListener.NULL, arrayListOf(user), path).size shouldBe 8
+        GitUtil.getLastChangedClasses(1, "", constants, TaskListener.NULL, arrayListOf(user), path) should beEmpty()
 
-        GitUtil.LastChangedClassesCallable(50, constants, TaskListener.NULL, arrayListOf(user), path)
+        GitUtil.LastChangedClassesCallable(50, "", constants, TaskListener.NULL, arrayListOf(user), path)
                 .call().size shouldBe 8
-        GitUtil.LastChangedClassesCallable(1, constants, TaskListener.NULL, arrayListOf(user), path)
+        GitUtil.LastChangedClassesCallable(1, "", constants, TaskListener.NULL, arrayListOf(user), path)
                 .call() should beEmpty()
+    }
+
+    @Test
+    fun getLastChangedFiles() {
+        val user1 = mockkClass(hudson.model.User::class)
+        every { user1.properties } returns mapOf(
+            mockkClass(hudson.security.HudsonPrivateSecurityRealm.Details.DescriptorImpl::class) to
+                    mockkClass(hudson.security.HudsonPrivateSecurityRealm.Details::class))
+
+        val property1 = mockkClass(org.gamekins.GameUserProperty::class)
+        every { property1.getGitNames() } returns CopyOnWriteArraySet(listOf(name, id))
+        every { user1.getProperty(org.gamekins.GameUserProperty::class.java) } returns property1
+        every { user1.fullName } returns name
+        every { user1.id } returns id
+        val mailProperty1 = mockkClass(UserProperty::class)
+        every { mailProperty1.address } returns mail
+        every { user1.getProperty(UserProperty::class.java) } returns mailProperty1
+
+        GitUtil.getLastChangedFiles(50, "", constants, arrayListOf(GitUtil.GameUser(user1)), path, TaskListener.NULL).size shouldBe 14
     }
 
     @Test
@@ -118,19 +137,19 @@ class GitUtilTest : AnnotationSpec() {
         every { mailProperty1.address } returns mail
         every { user1.getProperty(UserProperty::class.java) } returns mailProperty1
 
-        GitUtil.getLastChangedSourceFilesOfUser(path, user1, 50, "", listOf(user1)).size shouldBe 0
-        GitUtil.getLastChangedSourceFilesOfUser(path, user1, 50, headHash, listOf(user1)).size shouldBe 0
+        GitUtil.getLastChangedClasses(50, "", constants, TaskListener.NULL, GitUtil.mapUsersToGameUsers(listOf(user1)), path).size shouldBe 8
+        GitUtil.getLastChangedClasses(50, headHash, constants, TaskListener.NULL, GitUtil.mapUsersToGameUsers(listOf(user1)), path).size shouldBe 0
 
         val firstCommit = "d3f574e28542876d4cd243c2ac730a6b9eed8b2c"
         //TODO: Should be 8, but see GitUtil.getDiffOfCommit()
-        GitUtil.getLastChangedSourceFilesOfUser(path, user1, 50, firstCommit, listOf(user1)).size shouldBe 7
+        GitUtil.getLastChangedClasses(50, firstCommit, constants, TaskListener.NULL, GitUtil.mapUsersToGameUsers(listOf(user1)), path).size shouldBe 7
 
         val commitHash = "02c7398664cc9a15508a2d96c2b10f341f1fa4de"
-        GitUtil.getLastChangedSourceFilesOfUser(path, user1, 50, commitHash, listOf(user1)).size shouldBe 3
+        GitUtil.getLastChangedClasses(50, commitHash, constants, TaskListener.NULL, GitUtil.mapUsersToGameUsers(listOf(user1)), path).size shouldBe 3
     }
 
     @Test
-    fun getLastChangedTestFilesOfUser() {
+    fun getLastChangedTestsOfUser() {
         val user1 = mockkClass(hudson.model.User::class)
         every { user1.properties } returns mapOf(
                 mockkClass(hudson.security.HudsonPrivateSecurityRealm.Details.DescriptorImpl::class) to
@@ -144,14 +163,14 @@ class GitUtilTest : AnnotationSpec() {
         every { mailProperty1.address } returns mail
         every { user1.getProperty(UserProperty::class.java) } returns mailProperty1
 
-        GitUtil.getLastChangedTestFilesOfUser(path, user1, 50, "", listOf(user1)).size shouldBe 0
-        GitUtil.getLastChangedTestFilesOfUser(path, user1, 50, headHash, listOf(user1)).size shouldBe 0
+        GitUtil.getLastChangedTestsOfUser(50, "", constants, TaskListener.NULL,  GitUtil.GameUser(user1), GitUtil.mapUsersToGameUsers(listOf(user1)), path).size shouldBe 4
+        GitUtil.getLastChangedTestsOfUser(50, headHash, constants, TaskListener.NULL,  GitUtil.GameUser(user1), GitUtil.mapUsersToGameUsers(listOf(user1)), path).size shouldBe 0
 
         val firstCommit = "d3f574e28542876d4cd243c2ac730a6b9eed8b2c"
-        GitUtil.getLastChangedTestFilesOfUser(path, user1, 50, firstCommit, listOf(user1)).size shouldBe 4
+        GitUtil.getLastChangedTestsOfUser(50, firstCommit, constants, TaskListener.NULL,  GitUtil.GameUser(user1), GitUtil.mapUsersToGameUsers(listOf(user1)), path).size shouldBe 4
 
         val commitHash = "da1e195773389f37ff5898b10e1708707e7208ac"
-        GitUtil.getLastChangedTestFilesOfUser(path, user1, 50, commitHash, listOf(user1)).size shouldBe 3
+        GitUtil.getLastChangedTestsOfUser(50, commitHash, constants, TaskListener.NULL,  GitUtil.GameUser(user1), GitUtil.mapUsersToGameUsers(listOf(user1)), path).size shouldBe 3
     }
 
     @Test

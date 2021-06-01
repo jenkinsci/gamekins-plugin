@@ -24,6 +24,7 @@ import io.kotest.core.spec.style.AnnotationSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.mockk.*
+import org.gamekins.file.SourceFileDetails
 import org.gamekins.mutation.MutationDetails
 import org.gamekins.mutation.MutationInfo
 import org.gamekins.mutation.MutationResults
@@ -40,7 +41,7 @@ class MutationTestChallengeTest : AnnotationSpec() {
     private val shortJacocoPath = "**/target/site/jacoco/"
     private val shortJacocoCSVPath = "**/target/site/jacoco/csv"
     private val mocoJSONPath = "**/target/site/moco/mutation/"
-    private lateinit var details : JacocoUtil.ClassDetails
+    private lateinit var details : SourceFileDetails
     private lateinit var challenge : MutationTestChallenge
     private lateinit var challenge1 : MutationTestChallenge
     private lateinit var challenge2 : MutationTestChallenge
@@ -99,8 +100,7 @@ class MutationTestChallengeTest : AnnotationSpec() {
         every { JacocoUtil.getLines(any()) }  returns elements
         mockkObject(MutationResults.Companion)
         every { MutationResults.retrievedMutationsFromJson(any(), any()) }  returns MutationResults(entries, "")
-        details = JacocoUtil.ClassDetails(path, shortFilePath, shortJacocoPath, shortJacocoCSVPath, mocoJSONPath, map,
-            TaskListener.NULL)
+        details = SourceFileDetails(map, shortFilePath, path, shortJacocoPath, shortJacocoCSVPath, mocoJSONPath, listener)
 
         challenge = MutationTestChallenge(mutation1, details, branch, "commitID", "snippet", "line")
         challenge1 = MutationTestChallenge(mutation2, details, branch, "commitID", "", "line")
@@ -170,7 +170,7 @@ class MutationTestChallengeTest : AnnotationSpec() {
 
     @Test
     fun getConstants() {
-        challenge.getConstants() shouldBe challenge.classDetails.constants
+        challenge.getConstants() shouldBe challenge.details.constants
     }
 
     @Test
@@ -234,7 +234,7 @@ class MutationTestChallengeTest : AnnotationSpec() {
 
     @Test
     fun testCreateCodeSnippet() {
-        val classDetails = mockkClass(JacocoUtil.ClassDetails::class)
+        val classDetails = mockkClass(SourceFileDetails::class)
         var lineOfCode = 51
         val path1 = mockkClass(FilePath::class)
         every { classDetails.jacocoSourceFile.exists() }  returns true

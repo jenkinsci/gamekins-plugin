@@ -41,6 +41,7 @@ import io.mockk.mockkStatic
 import io.mockk.unmockkAll
 import jenkins.branch.MultiBranchProject
 import org.gamekins.achievement.Achievement
+import org.gamekins.file.SourceFileDetails
 import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject
 import java.io.File
 import java.lang.NullPointerException
@@ -63,7 +64,7 @@ class PublisherUtilTest : AnnotationSpec() {
     private val descList = mockkClass(DescribableList::class)
     private val descList2 = mockkClass(DescribableList::class)
     private val statistics = mockkClass(Statistics::class)
-    private val classDetails = mockkClass(JacocoUtil.ClassDetails::class)
+    private val classDetails = mockkClass(SourceFileDetails::class)
     private val user = mockkClass(hudson.model.User::class)
     private val userProperty = mockkClass(org.gamekins.GameUserProperty::class)
     private val challenge = mockkClass(LineCoverageChallenge::class)
@@ -109,7 +110,7 @@ class PublisherUtilTest : AnnotationSpec() {
         every { multiProject.save() } returns Unit
 
         mockkStatic(GitUtil::class)
-        every { GitUtil.getLastChangedClasses(any(), any(), any(), any(), any()) } returns arrayListOf(classDetails)
+        every { GitUtil.getLastChangedClasses(any(), any(), any(), any(), any(), any()) } returns arrayListOf(classDetails)
 
         mockkStatic(PropertyUtil::class)
         mockkStatic(ChallengeFactory::class)
@@ -212,7 +213,7 @@ class PublisherUtilTest : AnnotationSpec() {
 
         every { classDetails.coverage } returns 0.1
         every { classDetails.filesExists() } returns false
-        every { GitUtil.getLastChangedClasses(any(), any(), any(), any(), any()) } returns arrayListOf(classDetails)
+        every { GitUtil.getLastChangedClasses(any(), any(), any(), any(), any(), any()) } returns arrayListOf(classDetails)
         PublisherUtil.retrieveLastChangedClasses(path, 50, constants, listOf(),
                 removeClassesWithoutJacocoFiles = true, removeFullCoveredClasses = true, sort = true) shouldHaveSize
                 0

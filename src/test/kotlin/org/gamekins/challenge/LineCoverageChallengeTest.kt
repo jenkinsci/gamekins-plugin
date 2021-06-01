@@ -23,6 +23,7 @@ import org.gamekins.util.JacocoUtil
 import io.kotest.core.spec.style.AnnotationSpec
 import io.kotest.matchers.shouldBe
 import io.mockk.*
+import org.gamekins.file.SourceFileDetails
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import org.jsoup.select.Elements
@@ -35,7 +36,7 @@ class LineCoverageChallengeTest : AnnotationSpec() {
     private val shortJacocoPath = "**/target/site/jacoco/"
     private val shortJacocoCSVPath = "**/target/site/jacoco/csv"
     private val mocoJSONPath = "**/target/site/moco/mutation/"
-    private lateinit var details : JacocoUtil.ClassDetails
+    private lateinit var details : SourceFileDetails
     private lateinit var challenge : LineCoverageChallenge
     private val document = mockkClass(Document::class)
     private val element = mockkClass(Element::class)
@@ -60,8 +61,7 @@ class LineCoverageChallengeTest : AnnotationSpec() {
         every { element.attr("class") } returns "nc"
         every { element.attr("title") } returns ""
         every { element.text() } returns "toString();"
-        details = JacocoUtil.ClassDetails(path, shortFilePath, shortJacocoPath, shortJacocoCSVPath, mocoJSONPath, map,
-                TaskListener.NULL)
+        details = SourceFileDetails(map, shortFilePath, path, shortJacocoPath, shortJacocoCSVPath, mocoJSONPath, listener)
         every { data.selectedClass } returns details
         every { data.workspace } returns path
         every { data.line } returns element
@@ -91,16 +91,14 @@ class LineCoverageChallengeTest : AnnotationSpec() {
     fun getScore() {
         challenge.getScore() shouldBe 2
         every { JacocoUtil.getCoverageInPercentageFromJacoco(any(), any()) } returns 0.9
-        details = JacocoUtil.ClassDetails(path, shortFilePath, shortJacocoPath, shortJacocoCSVPath, mocoJSONPath, map,
-                TaskListener.NULL)
+        details = SourceFileDetails(map, shortFilePath, path, shortJacocoPath, shortJacocoCSVPath, mocoJSONPath, listener)
         every { data.selectedClass } returns details
         challenge = LineCoverageChallenge(data)
         challenge.getScore() shouldBe 3
         challenge.toEscapedString()
         every { element.attr("class") } returns "pc"
         every { JacocoUtil.getCoverageInPercentageFromJacoco(any(), any()) } returns coverage
-        details = JacocoUtil.ClassDetails(path, shortFilePath, shortJacocoPath, shortJacocoCSVPath, mocoJSONPath, map,
-                TaskListener.NULL)
+        details = SourceFileDetails(map, shortFilePath, path, shortJacocoPath, shortJacocoCSVPath, mocoJSONPath, listener)
         every { data.selectedClass } returns details
         challenge = LineCoverageChallenge(data)
         challenge.getScore() shouldBe 3

@@ -23,6 +23,7 @@ import org.gamekins.util.JacocoUtil
 import io.kotest.core.spec.style.AnnotationSpec
 import io.kotest.matchers.shouldBe
 import io.mockk.*
+import org.gamekins.file.SourceFileDetails
 import org.jsoup.nodes.Document
 
 class MethodCoverageChallengeTest : AnnotationSpec() {
@@ -33,7 +34,7 @@ class MethodCoverageChallengeTest : AnnotationSpec() {
     private val shortJacocoPath = "**/target/site/jacoco/"
     private val shortJacocoCSVPath = "**/target/site/jacoco/csv"
     private val mocoJSONPath = "**/target/site/moco/mutation/"
-    private lateinit var details : JacocoUtil.ClassDetails
+    private lateinit var details : SourceFileDetails
     private lateinit var challenge : MethodCoverageChallenge
     private lateinit var method : JacocoUtil.CoverageMethod
     private val coverage = 0.0
@@ -56,8 +57,7 @@ class MethodCoverageChallengeTest : AnnotationSpec() {
         every { JacocoUtil.calculateCoveredLines(any(), any()) } returns 0
         every { JacocoUtil.getNotFullyCoveredMethodEntries(any()) } returns arrayListOf(method)
         every { JacocoUtil.getMethodEntries(any()) } returns arrayListOf()
-        details = JacocoUtil.ClassDetails(path, shortFilePath, shortJacocoPath, shortJacocoCSVPath, mocoJSONPath,  map,
-                TaskListener.NULL)
+        details = SourceFileDetails(map, shortFilePath, path, shortJacocoPath, shortJacocoCSVPath, mocoJSONPath, listener)
         every { data.selectedClass } returns details
         every { data.workspace } returns path
         every { data.method } returns method

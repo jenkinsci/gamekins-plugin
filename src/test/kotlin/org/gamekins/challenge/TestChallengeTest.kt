@@ -31,6 +31,7 @@ import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.string.shouldStartWith
 import io.mockk.*
 import jenkins.branch.MultiBranchProject
+import org.gamekins.file.TestFileDetails
 import org.gamekins.util.JUnitUtil
 
 class TestChallengeTest : AnnotationSpec() {
@@ -46,6 +47,10 @@ class TestChallengeTest : AnnotationSpec() {
     @BeforeEach
     fun init() {
         map["branch"] = "master"
+        every { user.id } returns ""
+        every { user.fullName } returns ""
+        every { user.getProperty(hudson.tasks.Mailer.UserProperty::class.java) } returns null
+        every { user.getProperty(org.gamekins.GameUserProperty::class.java) } returns null
         val data = mockkClass(Challenge.ChallengeGenerationData::class)
         every { data.headCommitHash } returns ""
         every { data.testCount } returns testCount
@@ -92,11 +97,14 @@ class TestChallengeTest : AnnotationSpec() {
         challenge.isSolved(map, run, listener, path) shouldBe false
 
         every { JUnitUtil.getTestCount(path, run) } returns (testCount + 1)
-        every { GitUtil.getLastChangedTestFilesOfUser(path, user, 0, "", listOf()) } returns setOf()
+        every { GitUtil.getLastChangedTestsOfUser(any(), any(), any(), any(), any(), any(), any()) } returns listOf()
         every { User.getAll() } returns listOf()
         challenge.isSolved(map, run, listener, path) shouldBe false
 
-        every { GitUtil.getLastChangedTestFilesOfUser(path, user, 0, "", listOf()) } returns setOf("not empty")
+        //every { GitUtil.getLastChangedTestsOfUser(GitUtil.DEFAULT_SEARCH_COMMIT_COUNT, "", map, listener, GitUtil.GameUser(user), arrayListOf(), path) } returns listOf(
+        //    mockkClass(TestFileDetails::class))
+        every { GitUtil.getLastChangedTestsOfUser(any(), any(), any(), any(), any(), any(), any()) } returns listOf(
+            mockkClass(TestFileDetails::class))
         challenge.isSolved(map, run, listener, path) shouldBe  true
         challenge.getSolved() shouldNotBe 0
         challenge.getScore() shouldBe 1

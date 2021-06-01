@@ -34,6 +34,7 @@ import io.mockk.every
 import io.mockk.mockkClass
 import io.mockk.mockkStatic
 import io.mockk.unmockkAll
+import org.gamekins.file.SourceFileDetails
 import java.io.File
 import java.util.concurrent.CopyOnWriteArrayList
 
@@ -129,7 +130,7 @@ class ActionUtilTest: AnnotationSpec() {
         every { jobProperty1.getStatistics() } returns statistics
         every { statistics.addGeneratedAfterRejection(any(), any()) } returns Unit
         every { PublisherUtil.retrieveLastChangedClasses(any(), any(), any()) } returns
-                arrayListOf(mockkClass(JacocoUtil.ClassDetails::class))
+                arrayListOf(mockkClass(SourceFileDetails::class))
         ActionUtil.generateChallengeAfterRejection(challenge, user, userProperty, job1) shouldBe
                 ": New Challenge generated"
     }

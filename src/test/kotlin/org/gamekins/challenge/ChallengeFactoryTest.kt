@@ -33,6 +33,7 @@ import org.eclipse.jgit.revwalk.RevCommit
 import org.gamekins.GamePublisherDescriptor
 import org.gamekins.achievement.AchievementInitializer
 import org.gamekins.event.EventHandler
+import org.gamekins.file.SourceFileDetails
 import org.gamekins.mutation.MutationDetails
 import org.gamekins.mutation.MutationInfo
 import org.gamekins.mutation.MutationResults
@@ -64,7 +65,7 @@ class ChallengeFactoryTest : AnnotationSpec() {
     private lateinit var challenge : MutationTestChallenge
     private lateinit var challenge1 : MutationTestChallenge
     private lateinit var challenge2 : MutationTestChallenge
-    private lateinit var details : JacocoUtil.ClassDetails
+    private lateinit var details : SourceFileDetails
 
     private val mutationDetails1 = MutationDetails(
         mapOf("className" to "io/jenkins/plugins/gamekins/challenge/Challenge", "methodName" to "foo1", "methodDescription" to "(Ljava/lang/Integer;)Ljava/lang/Integer;"),
@@ -134,7 +135,7 @@ class ChallengeFactoryTest : AnnotationSpec() {
         every { path.act(ofType(JacocoUtil.FilesOfAllSubDirectoriesCallable::class)) } returns arrayListOf()
         every { path.remote } returns "/home/test/workspace"
         every { path.channel } returns null
-        details = JacocoUtil.ClassDetails(path, shortFilePath, shortJacocoPath, shortJacocoCSVPath, mocoJSONPath, map, listener)
+        details = SourceFileDetails(map, shortFilePath, path, shortJacocoPath, shortJacocoCSVPath, mocoJSONPath, listener)
         challenge = MutationTestChallenge(mutation1, details, branch, "commitID", "snippet", "line")
         challenge1 = MutationTestChallenge(mutation2, details, branch, "commitID", "snippet", "")
         challenge2 = MutationTestChallenge(mutation3, details, branch, "commitID", "snippet", "line")
@@ -178,7 +179,7 @@ class ChallengeFactoryTest : AnnotationSpec() {
         every { property.newChallenge(any(), any()) } returns Unit
         ChallengeFactory.generateNewChallenges(user, property, map, arrayListOf(details), path) shouldBe 0
 
-        val newDetails = mockkClass(JacocoUtil.ClassDetails::class)
+        val newDetails = mockkClass(SourceFileDetails::class)
         every { newDetails.changedByUsers } returns hashSetOf(GitUtil.GameUser(user))
         mockkStatic(ChallengeFactory::class)
         every { ChallengeFactory.generateChallenge(any(), any(), any(), any(), any()) } returns mockkClass(TestChallenge::class)

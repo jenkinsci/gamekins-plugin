@@ -23,6 +23,7 @@ import io.kotest.core.spec.style.AnnotationSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldStartWith
 import io.mockk.*
+import org.gamekins.file.SourceFileDetails
 import org.jsoup.nodes.Document
 
 class CoverageChallengeTest : AnnotationSpec() {
@@ -33,7 +34,7 @@ class CoverageChallengeTest : AnnotationSpec() {
     private val shortJacocoPath = "**/target/site/jacoco/"
     private val shortJacocoCSVPath = "**/target/site/jacoco/csv"
     private val mocoJSONPath = "**/target/site/moco/mutation/"
-    private lateinit var details : JacocoUtil.ClassDetails
+    private lateinit var details : SourceFileDetails
     private lateinit var challenge : ClassCoverageChallenge
     private val coverage = 0.0
 
@@ -52,8 +53,7 @@ class CoverageChallengeTest : AnnotationSpec() {
         every { JacocoUtil.calculateCoveredLines(any(), any()) } returns 0
         val map = HashMap<String, String>()
         map["branch"] = "master"
-        details = JacocoUtil.ClassDetails(path, shortFilePath, shortJacocoPath, shortJacocoCSVPath, mocoJSONPath, map,
-                TaskListener.NULL)
+        details = SourceFileDetails(map, shortFilePath, path, shortJacocoPath, shortJacocoCSVPath, mocoJSONPath, TaskListener.NULL)
         val data = mockkClass(Challenge.ChallengeGenerationData::class)
         every { data.selectedClass } returns details
         every { data.workspace } returns path

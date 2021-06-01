@@ -27,13 +27,13 @@ import io.mockk.mockkClass
 import io.mockk.mockkStatic
 import io.mockk.unmockkAll
 import org.gamekins.GameUserProperty
+import org.gamekins.file.SourceFileDetails
 import org.gamekins.util.AchievementUtil
-import org.gamekins.util.JacocoUtil
 
 class AchievementTest: AnnotationSpec() {
 
     private lateinit var achievement: Achievement
-    private val classes = arrayListOf<JacocoUtil.ClassDetails>()
+    private val classes = arrayListOf<SourceFileDetails>()
     private val constants = hashMapOf<String, String>()
     private val run = mockkClass(Run::class)
     private val property = mockkClass(GameUserProperty::class)
@@ -99,7 +99,8 @@ class AchievementTest: AnnotationSpec() {
 
     @Test
     fun printToXML() {
-        achievement.printToXML("") shouldBe "<Achievement title=\"I took the first Challenge\" description=\"Solve your first Challenge\" secret=\"false\" solved=\"0\"/>"
+        achievement.printToXML("") shouldBe "<Achievement title=\"I took the first Challenge\" " +
+                "description=\"Solve your first Challenge\" secret=\"false\" solved=\"0\"/>"
     }
 
     @Test

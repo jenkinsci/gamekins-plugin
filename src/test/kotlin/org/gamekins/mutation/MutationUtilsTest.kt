@@ -1,3 +1,19 @@
+/*
+ * Copyright 2021 Gamekins contributors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+
+ * http://www.apache.org/licenses/LICENSE-2.0
+
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.gamekins.mutation
 
 import hudson.FilePath
@@ -8,7 +24,7 @@ import io.mockk.*
 import org.gamekins.GameUserProperty
 import org.gamekins.challenge.Challenge
 import org.gamekins.challenge.MutationTestChallenge
-import org.gamekins.util.JacocoUtil
+import org.gamekins.file.SourceFileDetails
 import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.test.assertEquals
 
@@ -47,7 +63,7 @@ class MutationUtilsTest: AnnotationSpec()  {
     private val mutation3 = MutationInfo(mutationDetails3, "survived", -1547277782)
 
     private val entries = mapOf("org.example.Feature" to listOf(mutation1, mutation2, mutation3))
-    private val details = mockkClass(JacocoUtil.ClassDetails::class)
+    private val details = mockkClass(SourceFileDetails::class)
     private val path = FilePath(null, "/home/test/workspace")
     private val challenge = MutationTestChallenge(mutation1, details, "branch", "commitID", "snippet", "line")
 
@@ -65,7 +81,7 @@ class MutationUtilsTest: AnnotationSpec()  {
     @Test
     fun testGetCurrentLinesOperatorMapping() {
         every { details.packageName } returns "org.example"
-        every { details.className } returns "Example"
+        every { details.fileName } returns "Example"
         val challenge1 = MutationTestChallenge(mutation1, details, "branch", "commitID", "snippet", "line")
 
         val currentChallenges = listOf(challenge1)
