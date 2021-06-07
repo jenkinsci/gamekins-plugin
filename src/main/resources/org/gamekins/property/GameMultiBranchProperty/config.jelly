@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?jelly escape-by-default='true'?>
-<j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form">
+<j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form" xmlns:st="jelly:stapler" xmlns:fa="/font-awesome" xmlns:bs="/bootstrap">
+    <link rel="stylesheet" href="${rootURL}/plugin/gamekins/css/prettify.css" type="text/css"/>
+    <script src="${rootURL}/plugin/gamekins/vendor/prettify.js" type="text/javascript"/>
+    <st:adjunct includes="io.jenkins.plugins.popper"/>
+    <st:adjunct includes="io.jenkins.plugins.jquery3"/>
+    <st:adjunct includes="io.jenkins.plugins.bootstrap4"/>
     <f:section title="Gamekins">
         <f:entry title="Activate Gamekins" field="activated">
             <f:checkbox />
@@ -17,19 +22,126 @@
             </j:if>
         </j:if>
         <f:entry title="Add Team" field="teamName">
-            <f:textbox />
-            <f:validateButton title="Add" method="addTeam" with="teamName" />
+            <f:textbox id="teamName" style="width: 85%"/>
+            <input id="addTeam" type="button" value="Add" style="float: right; width: 13%" data-descriptor-url="${descriptor.descriptorFullUrl}" />
+            <div id="error-add-team" style="margin-top: 5px"/>
         </f:entry>
         <f:entry title="Choose Team" field="manageTeam">
-            <f:select field="teamsBox" />
+            <f:select id="teamsBox" field="teamsBox" />
         </f:entry>
         <f:entry title="Choose User" field="manageUser">
-            <f:select field="usersBox" />
+            <f:select id="usersBox" field="usersBox" />
         </f:entry>
         <f:entry field="buttons">
-            <f:validateButton title="Add User to Team" method="addUserToTeam" with="teamsBox,usersBox" />
-            <f:validateButton title="Remove User from Team" method="removeUserFromTeam" with="teamsBox,usersBox" />
-            <f:validateButton title="Delete Team" method="deleteTeam" with="teamsBox" />
+            <div id="error-user-team" style="margin-bottom: 5px"/>
+            <input id="addUserToTeam" type="button" value="Add User to Team" data-descriptor-url="${descriptor.descriptorFullUrl}" />
+            <input id="removeUserFromTeam" type="button" value="Remove User from Team" data-descriptor-url="${descriptor.descriptorFullUrl}" />
+            <input id="deleteTeam" type="button" value="Delete Team" data-descriptor-url="${descriptor.descriptorFullUrl}" />
         </f:entry>
     </f:section>
+
+    <script>
+        jQuery3("#addTeam").on('click', function () {
+            let teamName = jQuery3("#teamName")[0].value
+            let descriptorFullUrl = jQuery3(this).data('descriptor-url')
+            let url = descriptorFullUrl + "/addTeam"
+            let parameters = {}
+            parameters["teamName"] = teamName
+
+            new Ajax.Request(url, {
+                parameters: parameters,
+                onComplete: function (rsp) {
+                    if (!rsp.responseText.includes("class=error")) {
+                        jQuery3("#teamName")[0].value = ""
+                    }
+                    jQuery3("#error-add-team")[0].innerHTML = rsp.responseText
+                    url = descriptorFullUrl + "/fillTeamsBoxItems"
+
+                    new Ajax.Request(url, {
+                        onComplete: function (rsp) {
+                            let teamsBox = jQuery3("#teamsBox")[0]
+                            let values = rsp.responseJSON.values
+
+                            teamsBox.innerHTML = ""
+                            for (var i = 0; i &lt; values.length; i++) {
+                                var opt = values[i].name;
+                                var el = document.createElement("option");
+                                el.textContent = opt;
+                                el.value = opt;
+                                teamsBox.appendChild(el);
+                            }
+                        }
+                    })
+                }
+            })
+        })
+
+        jQuery3("#addUserToTeam").on('click', function () {
+            let teamsBox = jQuery3("#teamsBox")[0].value
+            let usersBox = jQuery3("#usersBox")[0].value
+            let descriptorFullUrl = jQuery3(this).data('descriptor-url')
+            let url = descriptorFullUrl + "/addUserToTeam"
+            let parameters = {}
+            parameters["teamsBox"] = teamsBox
+            parameters["usersBox"] = usersBox
+
+            new Ajax.Request(url, {
+                parameters: parameters,
+                onComplete: function (rsp) {
+                    jQuery3("#error-user-team")[0].innerHTML = rsp.responseText
+                }
+            })
+        })
+
+        jQuery3("#removeUserFromTeam").on('click', function () {
+            let teamsBox = jQuery3("#teamsBox")[0].value
+            let usersBox = jQuery3("#usersBox")[0].value
+            let descriptorFullUrl = jQuery3(this).data('descriptor-url')
+            let url = descriptorFullUrl + "/removeUserFromTeam"
+            let parameters = {}
+            parameters["teamsBox"] = teamsBox
+            parameters["usersBox"] = usersBox
+
+            new Ajax.Request(url, {
+                parameters: parameters,
+                onComplete: function (rsp) {
+                    jQuery3("#error-user-team")[0].innerHTML = rsp.responseText
+                }
+            })
+        })
+
+        jQuery3("#deleteTeam").on('click', function () {
+            let teamsBox = jQuery3("#teamsBox")[0].value
+            let usersBox = jQuery3("#usersBox")[0].value
+            let descriptorFullUrl = jQuery3(this).data('descriptor-url')
+            let url = descriptorFullUrl + "/deleteTeam"
+            let parameters = {}
+            parameters["teamsBox"] = teamsBox
+
+            new Ajax.Request(url, {
+                parameters: parameters,
+                onComplete: function (rsp) {
+                    jQuery3("#error-user-team")[0].innerHTML = rsp.responseText
+
+                    url = descriptorFullUrl + "/fillTeamsBoxItems"
+
+                    new Ajax.Request(url, {
+                        onComplete: function (rsp) {
+                            let teamsBox = jQuery3("#teamsBox")[0]
+                            let values = rsp.responseJSON.values
+
+                            teamsBox.innerHTML = ""
+                            for (var i = 0; i &lt; values.length; i++) {
+                                var opt = values[i].name;
+                                var el = document.createElement("option");
+                                el.textContent = opt;
+                                el.value = opt;
+                                teamsBox.appendChild(el);
+                            }
+                        }
+                    })
+                }
+            })
+        })
+    </script>
 </j:jelly>
