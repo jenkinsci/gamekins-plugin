@@ -19,10 +19,13 @@ package org.gamekins.property
 import com.cloudbees.hudson.plugins.folder.AbstractFolder
 import com.cloudbees.hudson.plugins.folder.AbstractFolderProperty
 import com.cloudbees.hudson.plugins.folder.AbstractFolderPropertyDescriptor
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import hudson.Extension
 import hudson.model.AbstractItem
 import hudson.model.Item
+import hudson.model.Job
 import hudson.model.JobPropertyDescriptor
+import hudson.model.User
 import hudson.util.FormValidation
 import hudson.util.ListBoxModel
 import jenkins.branch.OrganizationFolder
@@ -32,6 +35,7 @@ import org.gamekins.StatisticsAction
 import org.gamekins.statistics.Statistics
 import org.gamekins.util.PropertyUtil
 import net.sf.json.JSONObject
+import org.gamekins.GameUserProperty
 import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject
 import org.kohsuke.stapler.*
 import java.io.IOException
@@ -197,6 +201,13 @@ class GameMultiBranchProperty
                     if (job == null || job.properties[this] == null) null
                     else job.properties[this] as GameMultiBranchProperty
             return PropertyUtil.doReset(job, property)
+        }
+
+        fun doShowTeamMemberships(@AncestorInPath job: WorkflowMultiBranchProject?): String {
+            val property =
+                if (job == null || job.properties[this] == null) return ""
+                else job.properties[this] as GameMultiBranchProperty
+            return PropertyUtil.doShowTeamMemberships(job, property)
         }
 
         @Nonnull

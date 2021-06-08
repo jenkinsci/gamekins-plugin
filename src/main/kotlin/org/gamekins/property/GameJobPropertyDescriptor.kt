@@ -16,6 +16,7 @@
 
 package org.gamekins.property
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import hudson.Extension
 import hudson.maven.AbstractMavenProject
 import hudson.model.*
@@ -23,6 +24,7 @@ import hudson.util.FormValidation
 import hudson.util.ListBoxModel
 import org.gamekins.util.PropertyUtil
 import net.sf.json.JSONObject
+import org.gamekins.GameUserProperty
 import org.jenkinsci.plugins.workflow.job.WorkflowJob
 import org.kohsuke.stapler.AncestorInPath
 import org.kohsuke.stapler.QueryParameter
@@ -102,7 +104,7 @@ class GameJobPropertyDescriptor : JobPropertyDescriptor(GameJobProperty::class.j
     }
 
     /**
-     * Called from the Jetty server if the button to reset Gamekins in the specific [job] is called. Deletes all
+     * Called from the Jetty server if the button to reset Gamekins in the specific [job] is pressed. Deletes all
      * Challenges from all users for the current project and resets the statistics.
      */
     fun doReset(@AncestorInPath job: Job<*, *>?): FormValidation {
@@ -110,6 +112,17 @@ class GameJobPropertyDescriptor : JobPropertyDescriptor(GameJobProperty::class.j
                 if (job == null || job.properties[this] == null) null
                 else job.properties[this] as GameJobProperty?
         return PropertyUtil.doReset(job, property)
+    }
+
+    /**
+     * Called from the Jetty server if the button to show the team memberships in the specific [job] is pressed.
+     * Returns a map of teams and their members as json.
+     */
+    fun doShowTeamMemberships(@AncestorInPath job: Job<*, *>?): String {
+        val property =
+            if (job == null || job.properties[this] == null) return ""
+            else job.properties[this] as GameJobProperty
+        return PropertyUtil.doShowTeamMemberships(job, property)
     }
 
     @Nonnull

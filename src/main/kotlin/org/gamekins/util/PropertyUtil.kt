@@ -16,6 +16,7 @@
 
 package org.gamekins.util
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import hudson.maven.AbstractMavenProject
 import hudson.model.*
 import hudson.util.FormValidation
@@ -213,6 +214,29 @@ object PropertyUtil {
             }
         }
         return FormValidation.ok("Project Challenges successfully reset")
+    }
+
+    /**
+     * Returns a map of teams and their members of the [job] as json.
+     */
+    fun doShowTeamMemberships(job: AbstractItem, property: GameProperty): String {
+        val map = hashMapOf<String, ArrayList<String>>()
+        property.getTeams().forEach { map[it] = arrayListOf() }
+
+        for (user in User.getAll()) {
+            if (!realUser(user)) continue
+            val userProperty = user.getProperty(GameUserProperty::class.java)
+            if (userProperty != null && userProperty.isParticipating(job.name)) {
+                val teamName = userProperty.getTeamName(job.name)
+                val list = map[teamName]
+                if (list != null) {
+                    list.add(user.fullName)
+                    map[teamName] = list
+                }
+            }
+        }
+
+        return jacksonObjectMapper().writeValueAsString(map)
     }
 
     /**

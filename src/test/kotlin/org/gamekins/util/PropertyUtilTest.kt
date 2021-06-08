@@ -78,6 +78,7 @@ class PropertyUtilTest : AnnotationSpec() {
         every { user3.properties } returns mapOf(mockkClass(Details.DescriptorImpl::class)
                 to mockkClass(Details::class))
 
+        every { userProperty1.getTeamName(projectName2) } returns team1
         every { userProperty1.isParticipating(projectName1) } returns false
         every { userProperty1.isParticipating(projectName2) } returns true
         every { userProperty1.isParticipating(projectName1, team1) } returns false
@@ -169,6 +170,13 @@ class PropertyUtilTest : AnnotationSpec() {
         PropertyUtil.doReset(job1, property1).kind shouldBe FormValidation.Kind.OK
 
         PropertyUtil.doReset(job2, property2).kind shouldBe FormValidation.Kind.OK
+    }
+
+    @Test
+    fun doShowTeamMemberships() {
+        PropertyUtil.doShowTeamMemberships(job1, property1) shouldBe "{\"Team2\":[],\"Team1\":[]}"
+
+        PropertyUtil.doShowTeamMemberships(job2, property2) shouldBe "{\"Team1\":[\"User1\"]}"
     }
 
     @Test
