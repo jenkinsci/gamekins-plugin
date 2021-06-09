@@ -16,7 +16,8 @@
         <j:if test="${!instance.activated}">
             <j:if test="${!instance.showStatistics}">
                 <f:entry>
-                    <font style="color: red; float: right">Reset will delete all Challenges and Statistics!</font>
+                    <font style="color: red; float: right">Reset will delete all Achievements, Challenges and Statistics!</font>
+                    <br/>
                     <f:validateButton title="Reset" method="reset" />
                 </f:entry>
             </j:if>
