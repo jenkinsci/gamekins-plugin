@@ -18,8 +18,6 @@ package org.gamekins.event
 
 import hudson.model.Run
 import hudson.model.User
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import org.gamekins.event.user.*
 import java.util.concurrent.CopyOnWriteArrayList
 
@@ -39,7 +37,7 @@ object EventHandler {
     @JvmStatic
     fun addEvent(event: Event) {
         events.add(event)
-        GlobalScope.launch { event.run() }
+        Thread(event).start()
     }
 
     /**
@@ -81,7 +79,7 @@ object EventHandler {
             text += "\n"
         }
 
-        text += "View the build on ${build.absoluteUrl}\n"
+        text += "View the build on ${build.parent.absoluteUrl}${build.number}/\n"
         text += "View the leaderboard on ${build.parent.absoluteUrl}leaderboard/\n"
         text += "View your achievements on ${user.absoluteUrl}/achievements/"
 

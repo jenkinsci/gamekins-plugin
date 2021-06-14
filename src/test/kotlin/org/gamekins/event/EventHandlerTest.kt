@@ -51,7 +51,6 @@ class EventHandlerTest : AnnotationSpec() {
         every { user.absoluteUrl } returns "http://localhost:8080/jenkins/user/user"
         //Numbers other than 0 trigger a bug (?) in MockK in EventHandler.generateMailText()
         every { run.getNumber() } returns 0
-        every { run.absoluteUrl } returns "http://localhost:8080/jenkins/job/test/42/"
         every { run.parent } returns project
         every { project.absoluteUrl } returns "http://localhost:8080/jenkins/job/test/"
         every { achievement.toString() } returns "Achievement"
@@ -102,14 +101,14 @@ class EventHandlerTest : AnnotationSpec() {
                 "Achievements solved:\n" +
                 "- Achievement\n" +
                 "\n" +
-                "View the build on http://localhost:8080/jenkins/job/test/42/\n" +
+                "View the build on http://localhost:8080/jenkins/job/test/0/\n" +
                 "View the leaderboard on http://localhost:8080/jenkins/job/test/leaderboard/\n" +
                 "View your achievements on http://localhost:8080/jenkins/user/user/achievements/"
         val textEmpty = "Hello User,\n" +
                 "\n" +
                 "here are your Gamekins results from run 0 of project test:\n" +
                 "\n" +
-                "View the build on http://localhost:8080/jenkins/job/test/42/\n" +
+                "View the build on http://localhost:8080/jenkins/job/test/0/\n" +
                 "View the leaderboard on http://localhost:8080/jenkins/job/test/leaderboard/\n" +
                 "View your achievements on http://localhost:8080/jenkins/user/user/achievements/"
 
