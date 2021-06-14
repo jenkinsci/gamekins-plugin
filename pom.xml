@@ -9,7 +9,7 @@
     </parent>
     <groupId>org.gamekins</groupId>
     <artifactId>gamekins</artifactId>
-    <version>0.3</version>
+    <version>0.3.1</version>
     <packaging>hpi</packaging>
 
     <properties>
@@ -242,12 +242,6 @@
             <artifactId>kotlin-reflect</artifactId>
             <version>${kotlin.version}</version>
             <scope>compile</scope>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/org.jetbrains.kotlinx/kotlinx-coroutines-core -->
-        <dependency>
-            <groupId>org.jetbrains.kotlinx</groupId>
-            <artifactId>kotlinx-coroutines-core</artifactId>
-            <version>1.4.3</version>
         </dependency>
         <!-- Mutation Test dependencies -->
         <dependency>
