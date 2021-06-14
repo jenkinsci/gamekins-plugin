@@ -203,8 +203,19 @@ object GitUtil {
             for (commit in currentCommits) {
                 searchedCommits.add(commit)
 
+                //Add the next commits if they have not been analysed before
+                for (parent in commit.parents) {
+                    if (!searchedCommits.contains(parent) && !newCommits.contains(parent)
+                        && !currentCommits.contains(parent)
+                    ) {
+                        newCommits.add(walk.parseCommit(repo.resolve(parent.name)))
+                    }
+                    //Reset the tree
+                    walk.dispose()
+                }
+
                 //Not interested in merge commits
-                if (commit.shortMessage.toLowerCase().contains("merge")) break
+                if (commit.shortMessage.toLowerCase().contains("merge")) continue
 
                 val diff = getDiffOfCommit(git, repo, commit)
                 val lines = diff.split("\n".toRegex())
@@ -254,16 +265,6 @@ object GitUtil {
                     }
                 }
 
-                //Add the next commits if they have not been analysed before
-                for (parent in commit.parents) {
-                    if (!searchedCommits.contains(parent) && !newCommits.contains(parent)
-                        && !currentCommits.contains(parent)
-                    ) {
-                        newCommits.add(walk.parseCommit(repo.resolve(parent.name)))
-                    }
-                    //Reset the tree
-                    walk.dispose()
-                }
                 totalCount++
             }
             if (nearToLeaf && newCommits.contains(targetCommit)) break
