@@ -25,6 +25,7 @@ import org.gamekins.challenge.DummyChallenge
 import org.gamekins.statistics.Statistics
 import net.sf.json.JSONObject
 import org.gamekins.achievement.Achievement
+import org.gamekins.challenge.CoverageChallenge
 import org.gamekins.util.PropertyUtil
 import org.kohsuke.stapler.*
 import java.util.UUID
@@ -404,6 +405,27 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
 
         //Update achievements with changed fullyQualifiedFunctionName or secret
         updateAchievements()
+
+        //Remove challenges where it was not possible to generate a SourceFileDetails
+        completedChallenges.forEach { (p, challenges) ->
+            val coverageChallenges = ArrayList(challenges.filterIsInstance<CoverageChallenge>())
+            coverageChallenges.removeIf { it.details == null }
+            completedChallenges[p] = CopyOnWriteArrayList(coverageChallenges)
+        }
+
+        currentChallenges.forEach { (p, challenges) ->
+            val coverageChallenges = ArrayList(challenges.filterIsInstance<CoverageChallenge>())
+            coverageChallenges.removeIf { it.details == null }
+            currentChallenges[p] = CopyOnWriteArrayList(coverageChallenges)
+        }
+
+        rejectedChallenges.forEach { (p, challenges) ->
+            val rejChallenges = CopyOnWriteArrayList(challenges)
+            rejChallenges.removeIf { (challenge, _) ->
+                challenge is CoverageChallenge && challenge.details == null
+            }
+            rejectedChallenges[p] = CopyOnWriteArrayList(rejChallenges)
+        }
 
         return this
     }
