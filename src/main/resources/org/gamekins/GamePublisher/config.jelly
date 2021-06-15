@@ -17,7 +17,8 @@
         <f:textbox />
     </f:entry>
 
-    <f:entry title="Commits to be searched" field="searchCommitCount">
+    <f:entry title="Commits to be searched" field="searchCommitCount"
+             description="Default: 50">
         <f:number />
     </f:entry>
 </j:jelly>

@@ -20,6 +20,7 @@ import hudson.FilePath
 import hudson.model.Result
 import hudson.model.TaskListener
 import hudson.model.User
+import org.gamekins.GamePublisher
 import org.gamekins.GamePublisherDescriptor
 import org.gamekins.GameUserProperty
 import org.gamekins.challenge.Challenge.ChallengeGenerationData
@@ -260,7 +261,7 @@ object ChallengeFactory {
     fun generateNewChallenges(
         user: User, property: GameUserProperty, constants: HashMap<String, String>,
         classes: ArrayList<SourceFileDetails>, workspace: FilePath,
-        listener: TaskListener = TaskListener.NULL, maxChallenges: Int = 3
+        listener: TaskListener = TaskListener.NULL, maxChallenges: Int = GamePublisher.DEFAULT_CURRENT_CHALLENGES
     ): Int {
 
         var generated = 0
@@ -274,7 +275,7 @@ object ChallengeFactory {
 
             listener.logger.println("[Gamekins] Found ${userClasses.size} last changed files of user ${user.fullName}")
 
-            for (i in property.getCurrentChallenges(constants["projectName"]).size..2) {
+            for (i in property.getCurrentChallenges(constants["projectName"]).size until maxChallenges) {
                 if (userClasses.size == 0) {
                     property.newChallenge(constants["projectName"]!!, DummyChallenge(constants))
                     EventHandler.addEvent(ChallengeGeneratedEvent(constants["projectName"]!!, constants["branch"]!!,

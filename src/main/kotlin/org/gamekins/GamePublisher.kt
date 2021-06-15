@@ -61,6 +61,7 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
     var searchCommitCount: Int = if (searchCommitCount > 0) searchCommitCount else GitUtil.DEFAULT_SEARCH_COMMIT_COUNT
 
     companion object {
+        const val DEFAULT_CURRENT_CHALLENGES = 3
         private const val NOT_ACTIVATED = "[Gamekins] Not activated"
     }
 
@@ -171,6 +172,8 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
 
         val constants = HashMap<String, String>()
         constants["projectName"] = build.project.name
+        constants["currentChallengesCount"] = build.project.getProperty(GameJobProperty::class.java)
+            .currentChallengesCount.toString()
         executePublisher(build, constants, build.result, listener, build.workspace)
         return true
     }
@@ -195,6 +198,8 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
                 return
             }
             constants["projectName"] = project.name
+            constants["currentChallengesCount"] = project.properties.get(GameMultiBranchProperty::class.java)
+                .currentChallengesCount.toString()
         } else {
             if (run.parent.getProperty(GameJobProperty::class.java) == null
                 || !run.parent.getProperty(GameJobProperty::class.java).activated
@@ -203,6 +208,8 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
                 return
             }
             constants["projectName"] = run.parent.name
+            constants["currentChallengesCount"] = run.parent.getProperty(GameJobProperty::class.java)
+                .currentChallengesCount.toString()
         }
 
         constants["jacocoResultsPath"] = jacocoResultsPath!!

@@ -19,13 +19,10 @@ package org.gamekins.property
 import com.cloudbees.hudson.plugins.folder.AbstractFolder
 import com.cloudbees.hudson.plugins.folder.AbstractFolderProperty
 import com.cloudbees.hudson.plugins.folder.AbstractFolderPropertyDescriptor
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import hudson.Extension
 import hudson.model.AbstractItem
 import hudson.model.Item
-import hudson.model.Job
 import hudson.model.JobPropertyDescriptor
-import hudson.model.User
 import hudson.util.FormValidation
 import hudson.util.ListBoxModel
 import jenkins.branch.OrganizationFolder
@@ -35,7 +32,7 @@ import org.gamekins.StatisticsAction
 import org.gamekins.statistics.Statistics
 import org.gamekins.util.PropertyUtil
 import net.sf.json.JSONObject
-import org.gamekins.GameUserProperty
+import org.gamekins.GamePublisher
 import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject
 import org.kohsuke.stapler.*
 import java.io.IOException
@@ -49,8 +46,10 @@ import kotlin.jvm.Throws
  * @since 0.1
  */
 class GameMultiBranchProperty
-@DataBoundConstructor constructor(job: AbstractItem?, @set:DataBoundSetter var activated: Boolean,
-                                  @set:DataBoundSetter var showStatistics: Boolean)
+@DataBoundConstructor constructor(job: AbstractItem?,
+                                  @set:DataBoundSetter var activated: Boolean,
+                                  @set:DataBoundSetter var showStatistics: Boolean,
+                                  @set:DataBoundSetter var currentChallengesCount: Int)
     : AbstractFolderProperty<AbstractFolder<*>?>(), GameProperty, StaplerProxy {
 
     private var statistics: Statistics
@@ -62,6 +61,7 @@ class GameMultiBranchProperty
     init {
         statistics = Statistics(job!!)
         PropertyUtil.reconfigure(job, activated, showStatistics)
+        if (currentChallengesCount <= 0) currentChallengesCount = GamePublisher.DEFAULT_CURRENT_CHALLENGES
     }
 
     @Throws(IOException::class)
@@ -91,14 +91,25 @@ class GameMultiBranchProperty
     }
 
     /**
-     * Sets the new values of [activated] and [showStatistics], if the job configuration has been saved.
-     * Also calls [PropertyUtil.reconfigure] to update the [LeaderboardAction] and [StatisticsAction].
+     * Called by Jenkins after the object has been created from his XML representation. Used for data migration.
+     */
+    @Suppress("unused", "SENSELESS_COMPARISON")
+    private fun readResolve(): Any {
+        if (currentChallengesCount == 0) currentChallengesCount = GamePublisher.DEFAULT_CURRENT_CHALLENGES
+
+        return this
+    }
+
+    /**
+     * Sets the new values of [activated], [showStatistics] and [currentChallengesCount], if the job configuration has
+     * been saved. Also calls [PropertyUtil.reconfigure] to update the [LeaderboardAction] and [StatisticsAction].
      *
      * @see [AbstractFolderProperty.reconfigure]
      */
     override fun reconfigure(req: StaplerRequest, form: JSONObject?): AbstractFolderProperty<*> {
         if (form != null) activated = form.getBoolean("activated")
         if (form != null) showStatistics = form.getBoolean("showStatistics")
+        if (form != null) currentChallengesCount = form.getInt("currentChallengesCount")
         PropertyUtil.reconfigure(owner!!, activated, showStatistics)
         return this
     }
@@ -234,7 +245,8 @@ class GameMultiBranchProperty
         override fun newInstance(req: StaplerRequest?, formData: JSONObject): AbstractFolderProperty<*>? {
             return if (req == null || req.findAncestor(AbstractItem::class.java).getObject() == null) null
             else GameMultiBranchProperty(req.findAncestor(AbstractItem::class.java).getObject() as AbstractItem,
-                    formData.getBoolean("activated"), formData.getBoolean("showStatistics"))
+                formData.getBoolean("activated"), formData.getBoolean("showStatistics"),
+                formData.getInt("currentChallengesCount"))
         }
     }
 }

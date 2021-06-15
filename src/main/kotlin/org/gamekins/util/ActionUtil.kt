@@ -21,6 +21,7 @@ import hudson.model.AbstractItem
 import hudson.model.User
 import hudson.util.FormValidation
 import org.gamekins.GameUserProperty
+import org.gamekins.GamePublisher
 import org.gamekins.challenge.Challenge
 import org.gamekins.challenge.ChallengeFactory
 import org.gamekins.challenge.DummyChallenge
@@ -118,7 +119,9 @@ object ActionUtil {
                                   constants: HashMap<String, String>, classes: ArrayList<SourceFileDetails>,
                                   workspace: FilePath) {
         val generated = ChallengeFactory.generateNewChallenges(
-                user, property, constants, classes, workspace)
+            user, property, constants, classes, workspace,
+            maxChallenges = constants["currentChallengesCount"]?.toInt() ?: GamePublisher.DEFAULT_CURRENT_CHALLENGES
+        )
         val branch = if (constants["branch"] != null
                 && workspace.remote.contains(constants["branch"]!!.toRegex()))
             constants["branch"]!! else "master"

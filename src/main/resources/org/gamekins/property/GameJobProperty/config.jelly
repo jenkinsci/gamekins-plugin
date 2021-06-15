@@ -46,6 +46,11 @@
 
             </table>
         </div>
+
+        <f:entry title="Simultaneous current challenges" field="currentChallengesCount"
+                 description="Default: 3">
+            <f:number />
+        </f:entry>
     </f:section>
     <f:section title="Parameter" />
 

@@ -23,6 +23,7 @@ import org.gamekins.util.PropertyUtil
 import org.gamekins.StatisticsAction
 import org.gamekins.statistics.Statistics
 import net.sf.json.JSONObject
+import org.gamekins.GamePublisher
 import org.kohsuke.stapler.DataBoundConstructor
 import org.kohsuke.stapler.DataBoundSetter
 import org.kohsuke.stapler.StaplerProxy
@@ -38,8 +39,10 @@ import kotlin.jvm.Throws
  * @since 0.1
  */
 class GameJobProperty
-@DataBoundConstructor constructor(job: AbstractItem, @set:DataBoundSetter var activated: Boolean,
-                                  @set:DataBoundSetter var showStatistics: Boolean)
+@DataBoundConstructor constructor(job: AbstractItem,
+                                  @set:DataBoundSetter var activated: Boolean,
+                                  @set:DataBoundSetter var showStatistics: Boolean,
+                                  @set:DataBoundSetter var currentChallengesCount: Int)
     : JobProperty<Job<*, *>>(), GameProperty, StaplerProxy {
 
     private var statistics: Statistics
@@ -47,6 +50,7 @@ class GameJobProperty
 
     init {
         statistics = Statistics(job)
+        if (currentChallengesCount <= 0) currentChallengesCount = GamePublisher.DEFAULT_CURRENT_CHALLENGES
     }
 
     @Throws(IOException::class)
@@ -96,14 +100,25 @@ class GameJobProperty
     }
 
     /**
-     * Sets the new values of [activated] and [showStatistics], if the job configuration has been saved.
-     * Also calls [PropertyUtil.reconfigure] to update the [LeaderboardAction] and [StatisticsAction].
+     * Called by Jenkins after the object has been created from his XML representation. Used for data migration.
+     */
+    @Suppress("unused", "SENSELESS_COMPARISON")
+    private fun readResolve(): Any {
+        if (currentChallengesCount == 0) currentChallengesCount = GamePublisher.DEFAULT_CURRENT_CHALLENGES
+
+        return this
+    }
+
+    /**
+     * Sets the new values of [activated], [showStatistics] and [currentChallengesCount], if the job configuration has
+     * been saved. Also calls [PropertyUtil.reconfigure] to update the [LeaderboardAction] and [StatisticsAction].
      *
      * @see [JobProperty.reconfigure]
      */
     override fun reconfigure(req: StaplerRequest, form: JSONObject?): JobProperty<*> {
         if (form != null) activated = form.getBoolean("activated")
         if (form != null) showStatistics = form.getBoolean("showStatistics")
+        if (form != null) currentChallengesCount = form.getInt("currentChallengesCount")
         PropertyUtil.reconfigure(owner, activated, showStatistics)
         return this
     }

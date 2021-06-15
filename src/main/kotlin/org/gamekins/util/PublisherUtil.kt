@@ -18,6 +18,7 @@ package org.gamekins.util
 
 import hudson.FilePath
 import hudson.model.*
+import org.gamekins.GamePublisher
 import org.gamekins.GameUserProperty
 import org.gamekins.challenge.ChallengeFactory
 import org.gamekins.challenge.DummyChallenge
@@ -146,8 +147,10 @@ object PublisherUtil {
             listener.logger.println("[Gamekins] Start checking solved status of achievements for user ${user.fullName}")
 
             //Generate new Challenges if the user has less than three
-            val userGenerated = ChallengeFactory.generateNewChallenges(user, property, constants, classes,
-                    workspace, listener)
+            val userGenerated = ChallengeFactory.generateNewChallenges(
+                user, property, constants, classes, workspace, listener,
+                maxChallenges = constants["currentChallengesCount"]?.toInt()
+                    ?: GamePublisher.DEFAULT_CURRENT_CHALLENGES)
 
             //Check if an achievement is solved
             constants["solved"] = userSolved.toString()

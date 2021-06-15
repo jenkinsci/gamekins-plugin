@@ -150,6 +150,7 @@ class GameJobPropertyDescriptor : JobPropertyDescriptor(GameJobProperty::class.j
     override fun newInstance(req: StaplerRequest?, formData: JSONObject): JobProperty<*>? {
         return if (req == null || req.findAncestor(AbstractItem::class.java).getObject() == null) null
         else GameJobProperty(req.findAncestor(AbstractItem::class.java).getObject() as AbstractItem,
-                formData.getBoolean("activated"), formData.getBoolean("showStatistics"))
+            formData.getBoolean("activated"), formData.getBoolean("showStatistics"),
+            formData.getInt("currentChallengesCount"))
     }
 }
