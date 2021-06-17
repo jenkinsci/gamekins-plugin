@@ -24,11 +24,12 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldStartWith
 import io.mockk.mockkClass
 import io.mockk.unmockkAll
+import org.gamekins.util.Constants
 import org.gamekins.util.Constants.Parameters
 
 class DummyChallengeTest : AnnotationSpec() {
 
-    private val challenge = DummyChallenge(Parameters())
+    private val challenge = DummyChallenge(Parameters(), Constants.NOTHING_DEVELOPED)
 
     @AfterAll
     fun cleanUp() {

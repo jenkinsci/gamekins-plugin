@@ -1,8 +1,30 @@
+/*
+ * Copyright 2021 Gamekins contributors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+
+ * http://www.apache.org/licenses/LICENSE-2.0
+
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.gamekins.util
 
 import hudson.FilePath
 import java.io.Serializable
 
+/**
+ * Object with constants for Gamekins and [Parameters] for generation.
+ *
+ * @author Philipp Straubinger
+ * @since 0.4
+ */
 object Constants {
 
     const val DEFAULT_CURRENT_CHALLENGES = 3
@@ -15,6 +37,8 @@ object Constants {
 
     const val ERROR_SAVING = "There was an error with saving"
 
+    const val ERROR_GENERATION = "There was an error with generating a new challenge"
+
     const val EXISTS = " exists "
 
     const val NO_TEAM = "No team specified"
@@ -22,6 +46,8 @@ object Constants {
     const val NOT_ACTIVATED = "[Gamekins] Not activated"
 
     const val NOT_SOLVED = "Not solved"
+
+    const val NOTHING_DEVELOPED = "You haven't developed anything lately"
 
     const val RUN_TOTAL_COUNT = 200
 

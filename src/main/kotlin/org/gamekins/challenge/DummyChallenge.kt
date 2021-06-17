@@ -18,6 +18,7 @@ package org.gamekins.challenge
 
 import hudson.model.Run
 import hudson.model.TaskListener
+import org.gamekins.util.Constants
 import org.gamekins.util.Constants.Parameters
 
 /**
@@ -26,7 +27,7 @@ import org.gamekins.util.Constants.Parameters
  * @author Philipp Straubinger
  * @since 0.1
  */
-class DummyChallenge(private var parameters: Parameters) : Challenge {
+class DummyChallenge(private var parameters: Parameters, private var reason: String) : Challenge {
 
     override fun equals(other: Any?): Boolean {
         if (other == null) return false
@@ -106,6 +107,7 @@ class DummyChallenge(private var parameters: Parameters) : Challenge {
     @Suppress("unused", "SENSELESS_COMPARISON")
     private fun readResolve(): Any {
         if (parameters == null) parameters = Parameters()
+        if (reason == null) reason = Constants.ERROR_GENERATION
         return this
     }
 
@@ -115,7 +117,7 @@ class DummyChallenge(private var parameters: Parameters) : Challenge {
      * @see Challenge
      */
     override fun toString(): String {
-        return "You haven't developed anything lately"
+        return reason
     }
 
     override fun toEscapedString(): String {

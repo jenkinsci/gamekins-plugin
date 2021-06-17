@@ -128,7 +128,7 @@ object ChallengeFactory {
         do {
             if (count == 5 || workList.isEmpty()) {
                 listener.logger.println("[Gamekins] No CoverageChallenge could be built")
-                return DummyChallenge(parameters)
+                return DummyChallenge(parameters, Constants.ERROR_GENERATION)
             }
 
             val selectedClass = selectClass(workList, rankValues)
@@ -274,9 +274,10 @@ object ChallengeFactory {
 
             for (i in property.getCurrentChallenges(parameters.projectName).size until maxChallenges) {
                 if (userClasses.size == 0) {
-                    property.newChallenge(parameters.projectName, DummyChallenge(parameters))
+                    property.newChallenge(parameters.projectName,
+                        DummyChallenge(parameters, Constants.NOTHING_DEVELOPED))
                     EventHandler.addEvent(ChallengeGeneratedEvent(parameters.projectName, parameters.branch,
-                        property.getUser(), DummyChallenge(parameters)))
+                        property.getUser(), DummyChallenge(parameters, Constants.ERROR_GENERATION)))
                     break
                 }
 
@@ -317,7 +318,7 @@ object ChallengeFactory {
             var count = 0
             do {
                 if (count == 3) {
-                    challenge = DummyChallenge(parameters)
+                    challenge = DummyChallenge(parameters, Constants.ERROR_GENERATION)
                     break
                 }
                 isChallengeUnique = true

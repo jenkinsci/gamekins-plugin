@@ -100,7 +100,7 @@ object ActionUtil {
             if (classes.isNotEmpty()) {
                 generateAndUpdate(user, property, job, parameters, ArrayList(classes))
             } else {
-                property.newChallenge(parameters.projectName, DummyChallenge(parameters))
+                property.newChallenge(parameters.projectName, DummyChallenge(parameters, Constants.ERROR_GENERATION))
             }
         } else {
             generatedText += " (Workspace deleted or on remote machine)"
