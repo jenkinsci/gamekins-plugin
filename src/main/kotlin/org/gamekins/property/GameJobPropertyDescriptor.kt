@@ -16,7 +16,6 @@
 
 package org.gamekins.property
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import hudson.Extension
 import hudson.maven.AbstractMavenProject
 import hudson.model.*
@@ -24,7 +23,6 @@ import hudson.util.FormValidation
 import hudson.util.ListBoxModel
 import org.gamekins.util.PropertyUtil
 import net.sf.json.JSONObject
-import org.gamekins.GameUserProperty
 import org.jenkinsci.plugins.workflow.job.WorkflowJob
 import org.kohsuke.stapler.AncestorInPath
 import org.kohsuke.stapler.QueryParameter

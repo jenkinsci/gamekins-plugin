@@ -16,16 +16,15 @@
 
 package org.gamekins.challenge
 
-import hudson.FilePath
 import hudson.model.Run
 import hudson.model.TaskListener
 import hudson.model.User
 import org.gamekins.statistics.Statistics
 import org.gamekins.LeaderboardAction
 import org.gamekins.file.SourceFileDetails
+import org.gamekins.util.Constants.Parameters
 import org.gamekins.util.JacocoUtil.CoverageMethod
 import org.jsoup.nodes.Element
-import kotlin.collections.HashMap
 
 /**
  * Interface for all Challenges of Gamekins.
@@ -52,7 +51,7 @@ interface Challenge {
      * Returns the constants provided during creation. Must include entries for "projectName", "branch", "workspace",
      * "jacocoResultsPath" and "jacocoCSVPath".
      */
-    fun getConstants(): HashMap<String, String>
+    fun getParameters(): Parameters
 
     /**
      * Returns the creation time in milliseconds since 01.01.1970.
@@ -84,13 +83,13 @@ interface Challenge {
     /**
      * Checks whether the current [Challenge] is still solvable or not.
      */
-    fun isSolvable(constants: HashMap<String, String>, run: Run<*, *>, listener: TaskListener, workspace: FilePath)
+    fun isSolvable(parameters: Parameters, run: Run<*, *>, listener: TaskListener)
             : Boolean
 
     /**
      * Checks whether the current [Challenge] is solved.
      */
-    fun isSolved(constants: HashMap<String, String>, run: Run<*, *>, listener: TaskListener, workspace: FilePath)
+    fun isSolved(parameters: Parameters, run: Run<*, *>, listener: TaskListener)
             : Boolean
 
     /**
@@ -117,8 +116,7 @@ interface Challenge {
     /**
      * Data class for the initialisation of a Challenge. Every val variable will be non-null with the desired data.
      */
-    data class ChallengeGenerationData(val constants: HashMap<String, String>, val user: User,
-                                       val selectedClass: SourceFileDetails, val workspace: FilePath,
+    data class ChallengeGenerationData(val parameters: Parameters, val user: User, val selectedClass: SourceFileDetails,
                                        val listener: TaskListener, var method: CoverageMethod? = null,
                                        var line: Element? = null, var testCount: Int? = null,
                                        var headCommitHash: String? = null)

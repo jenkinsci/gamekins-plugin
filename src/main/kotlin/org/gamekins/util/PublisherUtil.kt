@@ -18,7 +18,6 @@ package org.gamekins.util
 
 import hudson.FilePath
 import hudson.model.*
-import org.gamekins.GamePublisher
 import org.gamekins.GameUserProperty
 import org.gamekins.challenge.ChallengeFactory
 import org.gamekins.challenge.DummyChallenge
@@ -32,6 +31,7 @@ import org.gamekins.property.GameJobProperty
 import org.gamekins.property.GameMultiBranchProperty
 import org.gamekins.property.GameProperty
 import org.gamekins.statistics.Statistics
+import org.gamekins.util.Constants.Parameters
 import org.gamekins.util.JacocoUtil.FilesOfAllSubDirectoriesCallable
 import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject
 import java.io.IOException
@@ -48,15 +48,14 @@ object PublisherUtil {
     /**
      * Checks whether one or more achievements are solved.
      */
-    private fun checkAchievements(property: GameUserProperty, run: Run<*, *>,
-                                  classes: ArrayList<SourceFileDetails>, constants: HashMap<String, String>,
-                                  workspace: FilePath, listener: TaskListener): Int {
+    private fun checkAchievements(property: GameUserProperty, run: Run<*, *>, classes: ArrayList<SourceFileDetails>,
+                                  parameters: Parameters, listener: TaskListener): Int {
 
         var solved = 0
-        for (achievement in property.getUnsolvedAchievements(constants["projectName"]!!)) {
-            if (achievement.isSolved(classes, constants, run, property, workspace, listener)) {
-                property.completeAchievement(constants["projectName"]!!, achievement)
-                EventHandler.addEvent(AchievementSolvedEvent(constants["projectName"]!!, constants["branch"]!!,
+        for (achievement in property.getUnsolvedAchievements(parameters.projectName)) {
+            if (achievement.isSolved(classes, parameters, run, property, listener)) {
+                property.completeAchievement(parameters.projectName, achievement)
+                EventHandler.addEvent(AchievementSolvedEvent(parameters.projectName, parameters.branch,
                     property.getUser(), achievement))
                 listener.logger.println("[Gamekins] Solved achievement $achievement")
                 solved++
@@ -69,15 +68,15 @@ object PublisherUtil {
     /**
      * Checks whether one or more Challenges are unsolvable.
      */
-    private fun checkSolvable(run: Run<*, *>, property: GameUserProperty, constants: HashMap<String, String>,
-                              workspace: FilePath, listener: TaskListener) {
+    private fun checkSolvable(run: Run<*, *>, property: GameUserProperty, parameters: Parameters,
+                              listener: TaskListener) {
 
-        for (challenge in property.getCurrentChallenges(constants["projectName"])) {
-            if (!challenge.isSolvable(constants, run, listener, workspace)) {
+        for (challenge in property.getCurrentChallenges(parameters.projectName)) {
+            if (!challenge.isSolvable(parameters, run, listener)) {
                 var reason = "Not solvable"
                 if (challenge is MutationTestChallenge) reason = "Source file changed"
-                property.rejectChallenge(constants["projectName"]!!, challenge, reason)
-                EventHandler.addEvent(ChallengeUnsolvableEvent(constants["projectName"]!!, constants["branch"]!!,
+                property.rejectChallenge(parameters.projectName, challenge, reason)
+                EventHandler.addEvent(ChallengeUnsolvableEvent(parameters.projectName, parameters.branch,
                     property.getUser(), challenge))
                 listener.logger.println("[Gamekins] Challenge ${challenge?.toEscapedString()} " +
                         "can not be solved anymore")
@@ -88,20 +87,20 @@ object PublisherUtil {
     /**
      * Checks whether one or more Challenges are solved.
      */
-    private fun checkSolved(run: Run<*, *>, property: GameUserProperty, constants: HashMap<String, String>,
-                            workspace: FilePath, listener: TaskListener): Int {
+    private fun checkSolved(run: Run<*, *>, property: GameUserProperty, parameters: Parameters,
+                            listener: TaskListener): Int {
 
         var solved = 0
-        for (challenge in property.getCurrentChallenges(constants["projectName"])) {
-            if (challenge is MutationTestChallenge && constants["mocoJSONPath"].isNullOrEmpty()) {
+        for (challenge in property.getCurrentChallenges(parameters.projectName)) {
+            if (challenge is MutationTestChallenge && parameters.mocoJSONPath.isEmpty()) {
                 listener.logger.println("[Gamekins] Cannot check this mutation test challenge is solved or not " +
                         "because moco.json can't be found - ${challenge.toEscapedString()}")
                 continue
             }
-            if (challenge.isSolved(constants, run, listener, workspace)) {
-                property.completeChallenge(constants["projectName"]!!, challenge)
-                property.addScore(constants["projectName"]!!, challenge.getScore())
-                EventHandler.addEvent(ChallengeSolvedEvent(constants["projectName"]!!, constants["branch"]!!,
+            if (challenge.isSolved(parameters, run, listener)) {
+                property.completeChallenge(parameters.projectName, challenge)
+                property.addScore(parameters.projectName, challenge.getScore())
+                EventHandler.addEvent(ChallengeSolvedEvent(parameters.projectName, parameters.branch,
                     property.getUser(), challenge))
                 listener.logger.println("[Gamekins] Solved challenge ${challenge?.toEscapedString()}.")
                 if (challenge !is DummyChallenge) solved++
@@ -116,8 +115,7 @@ object PublisherUtil {
      * with the number of generated and solved Challenges.
      */
     fun checkUser(user: User, run: Run<*, *>, classes: ArrayList<SourceFileDetails>,
-                  constants: HashMap<String, String>, result: Result?, workspace: FilePath,
-                  listener: TaskListener = TaskListener.NULL)
+                  parameters: Parameters, result: Result?, listener: TaskListener = TaskListener.NULL)
             : HashMap<String, Int> {
 
         var generated = 0
@@ -127,35 +125,34 @@ object PublisherUtil {
             "solvedAchievements" to solvedAchievements)
 
         val property = user.getProperty(GameUserProperty::class.java)
-        if (property != null && property.isParticipating(constants["projectName"]!!)) {
+        if (property != null && property.isParticipating(parameters.projectName)) {
 
             //Generate BuildChallenge if the run has failed
-            if (ChallengeFactory.generateBuildChallenge(result, user, workspace, property, constants, listener)) {
+            if (ChallengeFactory.generateBuildChallenge(result, user, property, parameters, listener)) {
                 generated ++
             }
 
             listener.logger.println("[Gamekins] Start checking solved status of challenges for user ${user.fullName}")
 
             //Check if a Challenges is solved
-            val userSolved = checkSolved(run, property, constants, workspace, listener)
+            val userSolved = checkSolved(run, property, parameters, listener)
 
             listener.logger.println("[Gamekins] Start checking solvable state of challenges for user ${user.fullName}")
 
             //Check if the Challenges are still solvable
-            checkSolvable(run, property, constants, workspace, listener)
+            checkSolvable(run, property, parameters, listener)
 
             listener.logger.println("[Gamekins] Start checking solved status of achievements for user ${user.fullName}")
 
             //Generate new Challenges if the user has less than three
             val userGenerated = ChallengeFactory.generateNewChallenges(
-                user, property, constants, classes, workspace, listener,
-                maxChallenges = constants["currentChallengesCount"]?.toInt()
-                    ?: GamePublisher.DEFAULT_CURRENT_CHALLENGES)
+                user, property, parameters, classes, listener,
+                maxChallenges = parameters.currentChallengesCount)
 
             //Check if an achievement is solved
-            constants["solved"] = userSolved.toString()
-            constants["generated"] = userGenerated.toString()
-            solvedAchievements = checkAchievements(property, run, classes, constants, workspace, listener)
+            parameters.solved = userSolved
+            parameters.generated = userGenerated
+            solvedAchievements = checkAchievements(property, run, classes, parameters, listener)
 
             solved += userSolved
             generated += userGenerated
@@ -243,24 +240,24 @@ object PublisherUtil {
     }
 
     /**
-     * Retrieves all last changed classes and removes fully covered classes [removeFullCoveredClasses] and classes
+     * Retrieves all last changed classes and removes fully covered classes [removeFullyCoveredClasses] and classes
      * without JaCoCo files [removeClassesWithoutJacocoFiles] and sorts them according to their coverage [sort] if
      * activated.
      */
     @JvmStatic
-    fun retrieveLastChangedClasses(workspace: FilePath, searchCommitCount: Int, constants: HashMap<String, String>,
+    fun retrieveLastChangedClasses(searchCommitCount: Int, parameters: Parameters,
                                    users: Collection<User> = User.getAll(), listener: TaskListener = TaskListener.NULL,
-                                   removeFullCoveredClasses: Boolean = true,
+                                   removeFullyCoveredClasses: Boolean = true,
                                    removeClassesWithoutJacocoFiles: Boolean = true, sort: Boolean = true)
             : List<SourceFileDetails> {
 
         val classes: ArrayList<SourceFileDetails>
         try {
             classes = ArrayList(GitUtil.getLastChangedClasses(searchCommitCount, "",
-                constants, listener, GitUtil.mapUsersToGameUsers(users), workspace))
+                parameters, listener, GitUtil.mapUsersToGameUsers(users)))
             listener.logger.println("[Gamekins] Found ${classes.size} last changed files")
 
-            if (removeFullCoveredClasses) {
+            if (removeFullyCoveredClasses) {
                 classes.removeIf { details: SourceFileDetails -> details.coverage == 1.0 }
             }
             listener.logger.println("[Gamekins] Found ${classes.size} last changed files without 100% coverage")
@@ -286,7 +283,7 @@ object PublisherUtil {
     /**
      * Updates the [Statistics] after all users have been checked.
      */
-    fun updateStatistics(run: Run<*, *>, constants: HashMap<String, String>, generated: Int, solved: Int,
+    fun updateStatistics(run: Run<*, *>, parameters: Parameters, generated: Int, solved: Int,
                          solvedAchievements:Int, listener: TaskListener = TaskListener.NULL) {
 
         //Get the current job and property
@@ -306,17 +303,17 @@ object PublisherUtil {
             property.getStatistics()
                 .addRunEntry(
                     job,
-                    constants["branch"]!!,
+                    parameters.branch,
                     Statistics.RunEntry(
                         run.getNumber(),
-                        constants["branch"]!!,
+                        parameters.branch,
                         run.result,
                         run.startTimeInMillis,
                         generated,
                         solved,
                         solvedAchievements,
-                        constants["projectTests"]!!.toInt(),
-                        constants["projectCoverage"]!!.toDouble()
+                        parameters.projectTests,
+                        parameters.projectCoverage
                     ), listener)
 
             try {

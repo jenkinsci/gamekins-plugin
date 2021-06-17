@@ -22,6 +22,7 @@ import hudson.model.TaskListener
 import org.gamekins.util.GitUtil.GameUser
 import jenkins.security.MasterToSlaveCallable
 import org.gamekins.file.SourceFileDetails
+import org.gamekins.util.Constants.Parameters
 import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
@@ -43,8 +44,6 @@ import kotlin.random.Random
  * @since 0.1
  */
 object JacocoUtil {
-
-    const val EXISTS = " exists "
 
     /**
      * Calculates the number of covered lines in a JaCoCo class files [document] with a given [modifier].
@@ -97,7 +96,7 @@ object JacocoUtil {
      */
     fun chooseRandomLine(classDetails: SourceFileDetails, workspace: FilePath): Element? {
         val elements = getLines(calculateCurrentFilePath(
-                workspace, classDetails.jacocoSourceFile, classDetails.workspace))
+                workspace, classDetails.jacocoSourceFile, classDetails.parameters.remote))
         return if (elements.isEmpty()) null else elements[Random.nextInt(elements.size)]
     }
 
@@ -107,7 +106,7 @@ object JacocoUtil {
      */
     fun chooseRandomMethod(classDetails: SourceFileDetails, workspace: FilePath): CoverageMethod? {
         val methods = getNotFullyCoveredMethodEntries(calculateCurrentFilePath(
-                workspace, classDetails.jacocoMethodFile, classDetails.workspace))
+                workspace, classDetails.jacocoMethodFile, classDetails.parameters.remote))
         return if (methods.isEmpty()) null else methods[Random.nextInt(methods.size)]
     }
 
@@ -180,9 +179,9 @@ object JacocoUtil {
         return try {
             if (!jacocoSourceFile.exists() || !jacocoCSVFile.exists()) {
                 listener.logger.println("[Gamekins] JaCoCo source file " + jacocoSourceFile.remote
-                        + EXISTS + jacocoSourceFile.exists())
+                        + Constants.EXISTS + jacocoSourceFile.exists())
                 listener.logger.println("[Gamekins] JaCoCo csv file " + jacocoCSVFile.remote
-                        + EXISTS + jacocoCSVFile.exists())
+                        + Constants.EXISTS + jacocoCSVFile.exists())
                 return null
             }
             generateDocument(jacocoSourceFile)
@@ -237,13 +236,13 @@ object JacocoUtil {
      * Similar to [JacocoUtil.calculateCurrentFilePath], only specific to JaCoCo files.
      */
     @JvmStatic
-    fun getJacocoFileInMultiBranchProject(run: Run<*, *>, constants: HashMap<String, String>,
+    fun getJacocoFileInMultiBranchProject(run: Run<*, *>, parameters: Parameters,
                                           jacocoFile: FilePath, oldBranch: String): FilePath {
         return if (run.parent.parent is WorkflowMultiBranchProject
-                && constants["branch"] != oldBranch) {
+                && parameters.branch != oldBranch) {
             FilePath(jacocoFile.channel, jacocoFile.remote.replace(
-                    constants["projectName"].toString() + "_" + oldBranch,
-                    constants["projectName"].toString() + "_" + constants["branch"]))
+                    parameters.projectName + "_" + oldBranch,
+                    parameters.projectName + "_" + parameters.branch))
         } else {
             jacocoFile
         }
@@ -493,14 +492,14 @@ object JacocoUtil {
             jacocoCSVFile = File(jacocoPath.toString() + shortJacocoCSVPath.substring(2))
             if (!jacocoCSVFile.exists()) {
                 listener.logger.println("[Gamekins] JaCoCoCSVPath: " + jacocoCSVFile.absolutePath
-                        + EXISTS + jacocoCSVFile.exists())
+                        + Constants.EXISTS + jacocoCSVFile.exists())
             }
 
-            if (!shortMocoJSONPath.isNullOrEmpty()) {
+            if (shortMocoJSONPath.isNotEmpty()) {
                 mocoJSONFile = File(StringBuilder(workspace.remote).toString() + shortMocoJSONPath.substring(2))
                 if (!mocoJSONFile.exists()) {
                     listener.logger.println("[Gamekins] MoCoJSONPath: " + mocoJSONFile.absolutePath
-                            + EXISTS + mocoJSONFile.exists())
+                            + Constants.EXISTS + mocoJSONFile.exists())
                 }
             } else {
                 mocoJSONFile = null
@@ -512,13 +511,13 @@ object JacocoUtil {
             jacocoMethodFile = File("$jacocoPath$className.html")
             if (!jacocoMethodFile.exists()) {
                 listener.logger.println("[Gamekins] JaCoCoMethodPath: "
-                        + jacocoMethodFile.absolutePath + EXISTS + jacocoMethodFile.exists())
+                        + jacocoMethodFile.absolutePath + Constants.EXISTS + jacocoMethodFile.exists())
             }
 
             jacocoSourceFile = File(jacocoPath.toString() + className + "." + this.extension + ".html")
             if (!jacocoSourceFile.exists()) {
                 listener.logger.println("[Gamekins] JaCoCoSourcePath: "
-                        + jacocoSourceFile.absolutePath + EXISTS + jacocoSourceFile.exists())
+                        + jacocoSourceFile.absolutePath + Constants.EXISTS + jacocoSourceFile.exists())
             }
 
             coverage = getCoverageInPercentageFromJacoco(className,

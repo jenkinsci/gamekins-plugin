@@ -20,7 +20,6 @@ import hudson.FilePath
 import hudson.model.Result
 import hudson.model.TaskListener
 import hudson.model.User
-import org.gamekins.GamePublisher
 import org.gamekins.GamePublisherDescriptor
 import org.gamekins.GameUserProperty
 import org.gamekins.challenge.Challenge.ChallengeGenerationData
@@ -33,6 +32,8 @@ import org.gamekins.mutation.MutationUtils
 import org.gamekins.mutation.MutationUtils.findMutationHasCodeSnippets
 import org.gamekins.mutation.MutationUtils.getCurrentLinesOperatorMapping
 import org.gamekins.mutation.MutationUtils.getSurvivedMutationList
+import org.gamekins.util.Constants
+import org.gamekins.util.Constants.Parameters
 import org.gamekins.util.GitUtil
 import org.gamekins.util.GitUtil.HeadCommitCallable
 import org.gamekins.util.JUnitUtil
@@ -74,23 +75,23 @@ object ChallengeFactory {
      */
     @JvmStatic
     fun generateBuildChallenge(
-        result: Result?, user: User, workspace: FilePath, property: GameUserProperty,
-        constants: HashMap<String, String>, listener: TaskListener = TaskListener.NULL
+        result: Result?, user: User, property: GameUserProperty,
+        parameters: Parameters, listener: TaskListener = TaskListener.NULL
     )
             : Boolean {
         try {
             if (result != null && result != Result.SUCCESS) {
-                val challenge = BuildChallenge(constants)
+                val challenge = BuildChallenge(parameters)
                 val mapUser: User? = GitUtil.mapUser(
-                    workspace.act(HeadCommitCallable(workspace.remote))
+                    parameters.workspace.act(HeadCommitCallable(parameters.remote))
                         .authorIdent, User.getAll()
                 )
 
                 if (mapUser == user
-                    && !property.getCurrentChallenges(constants["projectName"]).contains(challenge)
+                    && !property.getCurrentChallenges(parameters.projectName).contains(challenge)
                 ) {
-                    property.newChallenge(constants["projectName"]!!, challenge)
-                    EventHandler.addEvent(ChallengeGeneratedEvent(constants["projectName"]!!, constants["branch"]!!,
+                    property.newChallenge(parameters.projectName, challenge)
+                    EventHandler.addEvent(ChallengeGeneratedEvent(parameters.projectName, parameters.branch,
                         property.getUser(), challenge))
                     listener.logger.println("[Gamekins] Generated new BuildChallenge")
                     user.save()
@@ -110,14 +111,13 @@ object ChallengeFactory {
      * With a probability of 10% a new [TestChallenge] is generated to keep the user motivated. Otherwise a class
      * is selected by the Rank Selection algorithm from the pool of [classes], where the [user] has changed something
      * in his last commits. It is being attempted five times to generate a [CoverageChallenge]. If this fails or if
-     * the list of [classes] is empty, a new [DummyChallenge] is generated. The [workspace] is the folder with the
+     * the list of [classes] is empty, a new [DummyChallenge] is generated. The workspace is the folder with the
      * code and execution rights, and the [listener] reports the events to the console output of Jenkins.
      */
     @JvmStatic
     @Throws(IOException::class, InterruptedException::class)
     fun generateChallenge(
-        user: User, constants: HashMap<String, String>, listener: TaskListener,
-        classes: ArrayList<SourceFileDetails>, workspace: FilePath
+        user: User, parameters: Parameters, listener: TaskListener, classes: ArrayList<SourceFileDetails>
     ): Challenge {
 
         val workList = ArrayList(classes)
@@ -128,7 +128,7 @@ object ChallengeFactory {
         do {
             if (count == 5 || workList.isEmpty()) {
                 listener.logger.println("[Gamekins] No CoverageChallenge could be built")
-                return DummyChallenge(constants)
+                return DummyChallenge(parameters)
             }
 
             val selectedClass = selectClass(workList, rankValues)
@@ -136,7 +136,7 @@ object ChallengeFactory {
             count++
 
             val rejectedChallenges = user.getProperty(GameUserProperty::class.java)
-                .getRejectedChallenges(constants["projectName"])
+                .getRejectedChallenges(parameters.projectName)
 
             //Remove classes where a ClassCoverageChallenge has been rejected previously
             if (!rejectedChallenges.filter {
@@ -154,13 +154,13 @@ object ChallengeFactory {
                 continue
             }
 
-            val challengeClass = chooseChallengeType(constants["mocoJSONPath"])
-            val data = ChallengeGenerationData(constants, user, selectedClass, workspace, listener)
+            val challengeClass = chooseChallengeType(parameters.mocoJSONPath)
+            val data = ChallengeGenerationData(parameters, user, selectedClass, listener)
 
             when {
                 challengeClass == TestChallenge::class.java -> {
-                    data.testCount = JUnitUtil.getTestCount(workspace)
-                    data.headCommitHash = workspace.act(HeadCommitCallable(workspace.remote)).name
+                    data.testCount = JUnitUtil.getTestCount(parameters.workspace)
+                    data.headCommitHash = parameters.workspace.act(HeadCommitCallable(parameters.remote)).name
                     listener.logger.println("[Gamekins] Generated new TestChallenge")
                     challenge = challengeClass
                         .getConstructor(ChallengeGenerationData::class.java)
@@ -178,10 +178,8 @@ object ChallengeFactory {
                         "[Gamekins] Try class " + selectedClass.fileName + " and type "
                                 + challengeClass
                     )
-                    challenge = generateMutationTestChallenge(
-                        selectedClass, constants["branch"],
-                        constants["projectName"], listener, workspace, user
-                    )
+                    challenge = generateMutationTestChallenge(selectedClass, parameters.branch, parameters.projectName,
+                        listener, parameters.workspace, user)
                 }
                 else -> {
                     challenge = generateThirdPartyChallenge(data, challengeClass)
@@ -215,8 +213,8 @@ object ChallengeFactory {
         val document: Document = try {
             JacocoUtil.generateDocument(
                 JacocoUtil.calculateCurrentFilePath(
-                    data.workspace,
-                    data.selectedClass.jacocoSourceFile, data.selectedClass.workspace
+                    data.parameters.workspace,
+                    data.selectedClass.jacocoSourceFile, data.selectedClass.parameters.remote
                 )
             )
         } catch (e: Exception) {
@@ -238,13 +236,13 @@ object ChallengeFactory {
                         .newInstance(data)
                 }
                 MethodCoverageChallenge::class.java -> {
-                    data.method = JacocoUtil.chooseRandomMethod(data.selectedClass, data.workspace)
+                    data.method = JacocoUtil.chooseRandomMethod(data.selectedClass, data.parameters.workspace)
                     if (data.method == null) null else challengeClass
                         .getConstructor(ChallengeGenerationData::class.java)
                         .newInstance(data)
                 }
                 else -> {
-                    data.line = JacocoUtil.chooseRandomLine(data.selectedClass, data.workspace)
+                    data.line = JacocoUtil.chooseRandomLine(data.selectedClass, data.parameters.workspace)
                     if (data.line == null) null else challengeClass
                         .getConstructor(ChallengeGenerationData::class.java)
                         .newInstance(data)
@@ -259,13 +257,12 @@ object ChallengeFactory {
      */
     @JvmStatic
     fun generateNewChallenges(
-        user: User, property: GameUserProperty, constants: HashMap<String, String>,
-        classes: ArrayList<SourceFileDetails>, workspace: FilePath,
-        listener: TaskListener = TaskListener.NULL, maxChallenges: Int = GamePublisher.DEFAULT_CURRENT_CHALLENGES
+        user: User, property: GameUserProperty, parameters: Parameters, classes: ArrayList<SourceFileDetails>,
+        listener: TaskListener = TaskListener.NULL, maxChallenges: Int = Constants.DEFAULT_CURRENT_CHALLENGES
     ): Int {
 
         var generated = 0
-        if (property.getCurrentChallenges(constants["projectName"]).size < maxChallenges) {
+        if (property.getCurrentChallenges(parameters.projectName).size < maxChallenges) {
             listener.logger.println("[Gamekins] Start generating challenges for user ${user.fullName}")
 
             val userClasses = ArrayList(classes)
@@ -275,15 +272,15 @@ object ChallengeFactory {
 
             listener.logger.println("[Gamekins] Found ${userClasses.size} last changed files of user ${user.fullName}")
 
-            for (i in property.getCurrentChallenges(constants["projectName"]).size until maxChallenges) {
+            for (i in property.getCurrentChallenges(parameters.projectName).size until maxChallenges) {
                 if (userClasses.size == 0) {
-                    property.newChallenge(constants["projectName"]!!, DummyChallenge(constants))
-                    EventHandler.addEvent(ChallengeGeneratedEvent(constants["projectName"]!!, constants["branch"]!!,
-                        property.getUser(), DummyChallenge(constants)))
+                    property.newChallenge(parameters.projectName, DummyChallenge(parameters))
+                    EventHandler.addEvent(ChallengeGeneratedEvent(parameters.projectName, parameters.branch,
+                        property.getUser(), DummyChallenge(parameters)))
                     break
                 }
 
-                generated += generateUniqueChallenge(user, property, constants, userClasses, workspace, listener)
+                generated += generateUniqueChallenge(user, property, parameters, userClasses, listener)
             }
         }
 
@@ -297,10 +294,10 @@ object ChallengeFactory {
     private fun generateThirdPartyChallenge(data: ChallengeGenerationData, challengeClass: Class<out Challenge>)
             : Challenge? {
 
-        data.testCount = JUnitUtil.getTestCount(data.workspace)
-        data.headCommitHash = data.workspace.act(HeadCommitCallable(data.workspace.remote)).name
-        data.method = JacocoUtil.chooseRandomMethod(data.selectedClass, data.workspace)
-        data.line = JacocoUtil.chooseRandomLine(data.selectedClass, data.workspace)
+        data.testCount = JUnitUtil.getTestCount(data.parameters.workspace)
+        data.headCommitHash = data.parameters.workspace.act(HeadCommitCallable(data.parameters.remote)).name
+        data.method = JacocoUtil.chooseRandomMethod(data.selectedClass, data.parameters.workspace)
+        data.line = JacocoUtil.chooseRandomLine(data.selectedClass, data.parameters.workspace)
 
         return challengeClass.getConstructor(ChallengeGenerationData::class.java).newInstance(data)
     }
@@ -309,8 +306,7 @@ object ChallengeFactory {
      * Tries to generate a new unique [Challenge].
      */
     private fun generateUniqueChallenge(
-        user: User, property: GameUserProperty, constants: HashMap<String, String>,
-        userClasses: ArrayList<SourceFileDetails>, workspace: FilePath,
+        user: User, property: GameUserProperty, parameters: Parameters, userClasses: ArrayList<SourceFileDetails>,
         listener: TaskListener
     ): Int {
         var generated = 0
@@ -321,18 +317,18 @@ object ChallengeFactory {
             var count = 0
             do {
                 if (count == 3) {
-                    challenge = DummyChallenge(constants)
+                    challenge = DummyChallenge(parameters)
                     break
                 }
                 isChallengeUnique = true
 
                 listener.logger.println("[Gamekins] Started to generate challenge")
-                challenge = generateChallenge(user, constants, listener, userClasses, workspace)
+                challenge = generateChallenge(user, parameters, listener, userClasses)
 
                 listener.logger.println("[Gamekins] Generated challenge ${challenge.toEscapedString()}")
                 if (challenge is DummyChallenge) break
 
-                for (currentChallenge in property.getCurrentChallenges(constants["projectName"])) {
+                for (currentChallenge in property.getCurrentChallenges(parameters.projectName)) {
                     if (currentChallenge.toString() == challenge.toString()) {
                         isChallengeUnique = false
                         listener.logger.println("[Gamekins] Challenge is not unique")
@@ -342,9 +338,9 @@ object ChallengeFactory {
                 count++
             } while (!isChallengeUnique)
 
-            property.newChallenge(constants["projectName"]!!, challenge)
+            property.newChallenge(parameters.projectName, challenge)
             listener.logger.println("[Gamekins] Added challenge ${challenge.toEscapedString()}")
-            EventHandler.addEvent(ChallengeGeneratedEvent(constants["projectName"]!!, constants["branch"]!!,
+            EventHandler.addEvent(ChallengeGeneratedEvent(parameters.projectName, parameters.branch,
                 property.getUser(), challenge))
             generated++
         } catch (e: Exception) {
@@ -369,7 +365,7 @@ object ChallengeFactory {
     ): MutationTestChallenge? {
         MutationUtils.mutationBlackList.clear()
         val jsonFilePath = JacocoUtil.calculateCurrentFilePath(
-            workspace, classDetails.mocoJSONFile!!, classDetails.workspace
+            workspace, classDetails.mocoJSONFile!!, classDetails.parameters.remote
         )
         val commitID = workspace.act(HeadCommitCallable(workspace.remote)).name
         val fullClassName = "${classDetails.packageName}.${classDetails.fileName}"

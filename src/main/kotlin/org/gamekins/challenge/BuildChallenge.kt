@@ -16,11 +16,10 @@
 
 package org.gamekins.challenge
 
-import hudson.FilePath
 import hudson.model.Result
 import hudson.model.Run
 import hudson.model.TaskListener
-import kotlin.collections.HashMap
+import org.gamekins.util.Constants.Parameters
 
 /**
  * Specific [Challenge] to motivate the user to fix a failing build in Jenkins.
@@ -28,7 +27,7 @@ import kotlin.collections.HashMap
  * @author Philipp Straubinger
  * @since 0.1
  */
-class BuildChallenge(private var constants: HashMap<String, String>) : Challenge {
+class BuildChallenge(private var parameters: Parameters) : Challenge {
 
     private val created = System.currentTimeMillis()
     private var solved: Long = 0
@@ -39,8 +38,8 @@ class BuildChallenge(private var constants: HashMap<String, String>) : Challenge
         return true
     }
 
-    override fun getConstants(): HashMap<String, String> {
-        return constants
+    override fun getParameters(): Parameters {
+        return parameters
     }
 
     override fun getCreated(): Long {
@@ -60,7 +59,7 @@ class BuildChallenge(private var constants: HashMap<String, String>) : Challenge
     }
 
     override fun hashCode(): Int {
-        var result = constants.hashCode()
+        var result = parameters.hashCode()
         result = 31 * result + created.hashCode()
         result = 31 * result + solved.hashCode()
         return result
@@ -69,16 +68,14 @@ class BuildChallenge(private var constants: HashMap<String, String>) : Challenge
     /**
      * A [BuildChallenge] is always solvable since it depends on the status of the Jenkins [run].
      */
-    override fun isSolvable(constants: HashMap<String, String>, run: Run<*, *>, listener: TaskListener,
-                            workspace: FilePath): Boolean {
+    override fun isSolvable(parameters: Parameters, run: Run<*, *>, listener: TaskListener): Boolean {
         return true
     }
 
     /**
      * A [BuildChallenge] is only solved if the status of the current [run] is [Result.SUCCESS].
      */
-    override fun isSolved(constants: HashMap<String, String>, run: Run<*, *>, listener: TaskListener,
-                          workspace: FilePath): Boolean {
+    override fun isSolved(parameters: Parameters, run: Run<*, *>, listener: TaskListener): Boolean {
         if (run.result == Result.SUCCESS) {
             solved = System.currentTimeMillis()
             return true
@@ -100,7 +97,7 @@ class BuildChallenge(private var constants: HashMap<String, String>) : Challenge
      */
     @Suppress("unused", "SENSELESS_COMPARISON")
     private fun readResolve(): Any {
-        if (constants == null) constants = hashMapOf()
+        if (parameters == null) parameters = Parameters()
         return this
     }
 

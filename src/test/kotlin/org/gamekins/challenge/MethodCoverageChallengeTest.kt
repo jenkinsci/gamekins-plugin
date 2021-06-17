@@ -24,6 +24,7 @@ import io.kotest.core.spec.style.AnnotationSpec
 import io.kotest.matchers.shouldBe
 import io.mockk.*
 import org.gamekins.file.SourceFileDetails
+import org.gamekins.util.Constants.Parameters
 import org.jsoup.nodes.Document
 
 class MethodCoverageChallengeTest : AnnotationSpec() {
@@ -39,7 +40,7 @@ class MethodCoverageChallengeTest : AnnotationSpec() {
     private lateinit var method : JacocoUtil.CoverageMethod
     private val coverage = 0.0
     private val run = mockkClass(Run::class)
-    private val map = HashMap<String, String>()
+    private val parameters = Parameters()
     private val listener = TaskListener.NULL
     private val branch = "master"
     private val methodName = "toString"
@@ -47,7 +48,11 @@ class MethodCoverageChallengeTest : AnnotationSpec() {
 
     @BeforeEach
     fun init() {
-        map["branch"] = branch
+        parameters.branch = branch
+        parameters.workspace = path
+        parameters.jacocoResultsPath = shortJacocoPath
+        parameters.jacocoCSVPath = shortJacocoCSVPath
+        parameters.mocoJSONPath = mocoJSONPath
         mockkStatic(JacocoUtil::class)
         val document = mockkClass(Document::class)
         method = JacocoUtil.CoverageMethod(methodName, 10, 10, "")
@@ -57,9 +62,9 @@ class MethodCoverageChallengeTest : AnnotationSpec() {
         every { JacocoUtil.calculateCoveredLines(any(), any()) } returns 0
         every { JacocoUtil.getNotFullyCoveredMethodEntries(any()) } returns arrayListOf(method)
         every { JacocoUtil.getMethodEntries(any()) } returns arrayListOf()
-        details = SourceFileDetails(map, shortFilePath, path, shortJacocoPath, shortJacocoCSVPath, mocoJSONPath, listener)
+        details = SourceFileDetails(parameters, shortFilePath, listener)
         every { data.selectedClass } returns details
-        every { data.workspace } returns path
+        every { data.parameters } returns parameters
         every { data.method } returns method
         challenge = MethodCoverageChallenge(data)
     }
@@ -83,18 +88,18 @@ class MethodCoverageChallengeTest : AnnotationSpec() {
 
     @Test
     fun isSolvable() {
-        challenge.isSolvable(map, run, listener, path) shouldBe true
-        map["branch"] = branch
-        challenge.isSolvable(map, run, listener, path) shouldBe true
+        challenge.isSolvable(parameters, run, listener) shouldBe true
+        parameters.branch = branch
+        challenge.isSolvable(parameters, run, listener) shouldBe true
         val pathMock = mockkClass(FilePath::class)
         every { pathMock.exists() } returns true
         every { JacocoUtil.calculateCurrentFilePath(any(), any(), any()) } returns pathMock
-        challenge.isSolvable(map, run, listener, pathMock) shouldBe false
+        challenge.isSolvable(parameters, run, listener) shouldBe false
         every { JacocoUtil.getMethodEntries(any()) } returns arrayListOf(method)
-        challenge.isSolvable(map, run, listener, pathMock) shouldBe true
+        challenge.isSolvable(parameters, run, listener) shouldBe true
         method = JacocoUtil.CoverageMethod(methodName, 10, 0, "")
         every { JacocoUtil.getMethodEntries(any()) } returns arrayListOf(method)
-        challenge.isSolvable(map, run, listener, pathMock) shouldBe false
+        challenge.isSolvable(parameters, run, listener) shouldBe false
     }
 
     @Test
@@ -103,13 +108,13 @@ class MethodCoverageChallengeTest : AnnotationSpec() {
         every { pathMock.exists() } returns false
         every { pathMock.remote } returns path.remote
         every { JacocoUtil.getJacocoFileInMultiBranchProject(any(), any(), any(), any()) } returns pathMock
-        challenge.isSolved(map, run, listener, path) shouldBe false
+        challenge.isSolved(parameters, run, listener) shouldBe false
         every { pathMock.exists() } returns true
-        challenge.isSolved(map, run, listener, path) shouldBe false
+        challenge.isSolved(parameters, run, listener) shouldBe false
         every { JacocoUtil.getMethodEntries(any()) } returns arrayListOf(method)
-        challenge.isSolved(map, run, listener, path) shouldBe false
+        challenge.isSolved(parameters, run, listener) shouldBe false
         method = JacocoUtil.CoverageMethod(methodName, 10, 0, "")
         every { JacocoUtil.getMethodEntries(any()) } returns arrayListOf(method)
-        challenge.isSolved(map, run, listener, path) shouldBe true
+        challenge.isSolved(parameters, run, listener) shouldBe true
     }
 }

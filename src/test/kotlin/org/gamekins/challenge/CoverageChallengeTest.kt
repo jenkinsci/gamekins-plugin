@@ -24,6 +24,7 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldStartWith
 import io.mockk.*
 import org.gamekins.file.SourceFileDetails
+import org.gamekins.util.Constants.Parameters
 import org.jsoup.nodes.Document
 
 class CoverageChallengeTest : AnnotationSpec() {
@@ -51,12 +52,16 @@ class CoverageChallengeTest : AnnotationSpec() {
         every { JacocoUtil.getCoverageInPercentageFromJacoco(any(), any()) } returns coverage
         every { JacocoUtil.generateDocument(any()) } returns document
         every { JacocoUtil.calculateCoveredLines(any(), any()) } returns 0
-        val map = HashMap<String, String>()
-        map["branch"] = "master"
-        details = SourceFileDetails(map, shortFilePath, path, shortJacocoPath, shortJacocoCSVPath, mocoJSONPath, TaskListener.NULL)
+        val parameters = Parameters()
+        parameters.branch = "master"
+        parameters.workspace = path
+        parameters.jacocoResultsPath = shortJacocoPath
+        parameters.jacocoCSVPath = shortJacocoCSVPath
+        parameters.mocoJSONPath = mocoJSONPath
+        details = SourceFileDetails(parameters, shortFilePath, TaskListener.NULL)
         val data = mockkClass(Challenge.ChallengeGenerationData::class)
         every { data.selectedClass } returns details
-        every { data.workspace } returns path
+        every { data.parameters } returns parameters
         challenge = ClassCoverageChallenge(data)
 
         challenge.printToXML("", "") shouldBe

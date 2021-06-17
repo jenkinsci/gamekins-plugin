@@ -25,14 +25,12 @@ import jenkins.model.Jenkins
 import org.gamekins.challenge.Challenge
 import org.gamekins.property.GameJobProperty
 import org.gamekins.property.GameMultiBranchProperty
-import org.gamekins.util.GitUtil
-import org.gamekins.util.PublisherUtil
 import jenkins.tasks.SimpleBuildStep
 import org.gamekins.event.EventHandler
 import org.gamekins.event.build.BuildFinishedEvent
 import org.gamekins.event.build.BuildStartedEvent
-import org.gamekins.util.JUnitUtil
-import org.gamekins.util.JacocoUtil
+import org.gamekins.util.*
+import org.gamekins.util.Constants.Parameters
 import org.jenkinsci.plugins.workflow.job.WorkflowJob
 import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject
 import org.kohsuke.stapler.DataBoundConstructor
@@ -58,12 +56,7 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
     : Notifier(), SimpleBuildStep, StaplerProxy {
 
     @set:DataBoundSetter
-    var searchCommitCount: Int = if (searchCommitCount > 0) searchCommitCount else GitUtil.DEFAULT_SEARCH_COMMIT_COUNT
-
-    companion object {
-        const val DEFAULT_CURRENT_CHALLENGES = 3
-        private const val NOT_ACTIVATED = "[Gamekins] Not activated"
-    }
+    var searchCommitCount: Int = if (searchCommitCount > 0) searchCommitCount else Constants.DEFAULT_SEARCH_COMMIT_COUNT
 
     override fun getTarget(): Any {
         Jenkins.getInstanceOrNull()?.checkPermission(Item.CONFIGURE)
@@ -71,66 +64,59 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
     }
 
     /**
-     * Starts the execution of Gamekins for a specific [run] with its [result]. The [constants] contain needed Strings
-     * like the paths to the JaCoCo files. The [workspace] is the folder with the code and execution rights, and the
-     * [listener] reports the events to the console output of Jenkins.
+     * Starts the execution of Gamekins for a specific [run] with its [result]. The [parameters] contain needed data
+     * like the paths to the JaCoCo files. The [parameters] includes the workspace, the folder with the code and
+     * execution rights, and the [listener] reports the events to the console output of Jenkins.
      */
     private fun executePublisher(
-        run: Run<*, *>, constants: HashMap<String, String>, result: Result?,
-        listener: TaskListener, workspace: FilePath?
+        run: Run<*, *>, parameters: Parameters, result: Result?,
+        listener: TaskListener
     ) {
 
         //Checks whether the paths of the JaCoCo files are correct
-        if (!PublisherUtil.doCheckJacocoResultsPath(workspace!!, jacocoResultsPath!!)) {
+        if (!PublisherUtil.doCheckJacocoResultsPath(parameters.workspace, parameters.jacocoResultsPath)) {
             listener.logger.println("[Gamekins] JaCoCo folder is not correct")
             return
         }
-        if (!PublisherUtil.doCheckJacocoCSVPath(workspace, jacocoCSVPath!!)) {
+        if (!PublisherUtil.doCheckJacocoCSVPath(parameters.workspace, parameters.jacocoCSVPath)) {
             listener.logger.println("[Gamekins] JaCoCo csv file could not be found")
             return
         }
-        if (!PublisherUtil.doCheckMocoJSONPath(workspace, mocoJSONPath)) {
-            constants["mocoJSONPath"] = ""
+        if (!PublisherUtil.doCheckMocoJSONPath(parameters.workspace, parameters.mocoJSONPath)) {
+            parameters.mocoJSONPath = ""
             listener.logger.println("[Gamekins] MoCo JSON file could not be found, mutation test challenge will " +
                     "not be generated")
             listener.logger.println("[Gamekins] Please check moco.json file path configuration to enable mutation " +
                     "test challenge feature")
-        } else {
-            constants["mocoJSONPath"] = mocoJSONPath!!
         }
-
-        constants["jacocoResultsPath"] = jacocoResultsPath!!
-        constants["jacocoCSVPath"] = jacocoCSVPath!!
-        constants["workspace"] = workspace.remote
 
         //Extracts the branch
         if (run.parent.parent is WorkflowMultiBranchProject) {
-            constants["branch"] = run.parent.name
+            parameters.branch = run.parent.name
         } else {
-            constants["branch"] = GitUtil.getBranch(workspace)
+            parameters.branch = GitUtil.getBranch(parameters.workspace)
         }
 
-        EventHandler.addEvent(BuildStartedEvent(constants["projectName"]!!, constants["branch"]!!, run))
+        EventHandler.addEvent(BuildStartedEvent(parameters.projectName, parameters.branch, run))
 
         listener.logger.println("[Gamekins] Start")
         listener.logger.println("[Gamekins] Solve Challenges and generate new Challenges")
 
         //Computes the last changed classes
-        val classes = PublisherUtil.retrieveLastChangedClasses(workspace, searchCommitCount, constants,
-                listener = listener)
+        val classes = PublisherUtil.retrieveLastChangedClasses(searchCommitCount, parameters, listener = listener)
 
         //Generate some project statistics
-        constants["projectCoverage"] = JacocoUtil.getProjectCoverage(workspace,
-            constants["jacocoCSVPath"]!!.split("/".toRegex())
-                    [constants["jacocoCSVPath"]!!.split("/".toRegex()).size - 1]).toString()
-        constants["projectTests"] = JUnitUtil.getTestCount(workspace, run).toString()
+        parameters.projectCoverage = JacocoUtil.getProjectCoverage(parameters.workspace,
+            parameters.jacocoCSVPath.split("/".toRegex())
+                    [parameters.jacocoCSVPath.split("/".toRegex()).size - 1])
+        parameters.projectTests = JUnitUtil.getTestCount(parameters.workspace, run)
 
         //Checks for each user his Challenges and generates new ones if needed
         var generated = 0
         var solved = 0
         var solvedAchievements = 0
         for (user in User.getAll()) {
-            val results = PublisherUtil.checkUser(user, run, ArrayList(classes), constants, result, workspace, listener)
+            val results = PublisherUtil.checkUser(user, run, ArrayList(classes), parameters, result, listener)
             generated += (if (results["generated"] != null) results["generated"] else 0)!!
             solved += (if (results["solved"] != null) results["solved"] else 0)!!
             solvedAchievements += (if (results["solvedAchievements"] != null) results["solvedAchievements"] else 0)!!
@@ -141,9 +127,9 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
         listener.logger.println("[Gamekins] Update Statistics")
 
         //Updates the Statistics
-        PublisherUtil.updateStatistics(run, constants, generated, solved, solvedAchievements, listener)
+        PublisherUtil.updateStatistics(run, parameters, generated, solved, solvedAchievements, listener)
 
-        EventHandler.addEvent(BuildFinishedEvent(constants["projectName"]!!, constants["branch"]!!, run))
+        EventHandler.addEvent(BuildFinishedEvent(parameters.projectName, parameters.branch, run))
 
         listener.logger.println("[Gamekins] Finished")
     }
@@ -166,15 +152,16 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
         if (build.project == null || build.project.getProperty(GameJobProperty::class.java) == null
             || !build.project.getProperty(GameJobProperty::class.java).activated
         ) {
-            listener.logger.println(NOT_ACTIVATED)
+            listener.logger.println(Constants.NOT_ACTIVATED)
             return true
         }
 
-        val constants = HashMap<String, String>()
-        constants["projectName"] = build.project.name
-        constants["currentChallengesCount"] = build.project.getProperty(GameJobProperty::class.java)
-            .currentChallengesCount.toString()
-        executePublisher(build, constants, build.result, listener, build.workspace)
+        val parameters = Parameters(jacocoCSVPath = jacocoCSVPath!!, jacocoResultsPath = jacocoResultsPath!!,
+            mocoJSONPath = mocoJSONPath!!, workspace = build.workspace!!)
+        parameters.projectName = build.project.name
+        parameters.currentChallengesCount = build.project.getProperty(GameJobProperty::class.java)
+            .currentChallengesCount
+        executePublisher(build, parameters, build.result, listener)
         return true
     }
 
@@ -188,32 +175,32 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
         @Nonnull run: Run<*, *>, @Nonnull workspace: FilePath,
         @Nonnull launcher: Launcher, @Nonnull listener: TaskListener
     ) {
-        val constants = HashMap<String, String>()
+
+        val parameters = Parameters(jacocoCSVPath = jacocoCSVPath!!,
+            jacocoResultsPath = jacocoResultsPath!!, mocoJSONPath = mocoJSONPath!!, workspace = workspace)
         if (run.parent.parent is WorkflowMultiBranchProject) {
             val project = run.parent.parent as WorkflowMultiBranchProject
             if (project.properties.get(GameMultiBranchProperty::class.java) == null
                 || !project.properties.get(GameMultiBranchProperty::class.java).activated
             ) {
-                listener.logger.println(NOT_ACTIVATED)
+                listener.logger.println(Constants.NOT_ACTIVATED)
                 return
             }
-            constants["projectName"] = project.name
-            constants["currentChallengesCount"] = project.properties.get(GameMultiBranchProperty::class.java)
-                .currentChallengesCount.toString()
+            parameters.projectName = project.name
+            parameters.currentChallengesCount = project.properties.get(GameMultiBranchProperty::class.java)
+                .currentChallengesCount
         } else {
             if (run.parent.getProperty(GameJobProperty::class.java) == null
                 || !run.parent.getProperty(GameJobProperty::class.java).activated
             ) {
-                listener.logger.println(NOT_ACTIVATED)
+                listener.logger.println(Constants.NOT_ACTIVATED)
                 return
             }
-            constants["projectName"] = run.parent.name
-            constants["currentChallengesCount"] = run.parent.getProperty(GameJobProperty::class.java)
-                .currentChallengesCount.toString()
+            parameters.projectName = run.parent.name
+            parameters.currentChallengesCount = run.parent.getProperty(GameJobProperty::class.java)
+                .currentChallengesCount
         }
 
-        constants["jacocoResultsPath"] = jacocoResultsPath!!
-        constants["jacocoCSVPath"] = jacocoCSVPath!!
-        executePublisher(run, constants, run.result, listener, workspace)
+        executePublisher(run, parameters, run.result, listener)
     }
 }

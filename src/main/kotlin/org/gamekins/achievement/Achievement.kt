@@ -22,6 +22,8 @@ import hudson.model.TaskListener
 import org.gamekins.GameUserProperty
 import org.gamekins.LeaderboardAction
 import org.gamekins.file.SourceFileDetails
+import org.gamekins.util.Constants
+import org.gamekins.util.Constants.Parameters
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.reflect.KCallable
@@ -38,17 +40,13 @@ class Achievement(var badgePath: String, var unsolvedBadgePath: String, val full
                   val description: String, val title: String, val secret: Boolean,
                   val additionalParameters: HashMap<String, String>) {
 
-    companion object {
-        const val NOT_SOLVED = "Not solved"
-    }
-
     @Transient private lateinit var callClass: KClass<out Any>
     @Transient private lateinit var callFunction: KCallable<*>
     private var solvedTime: Long = 0
     val solvedTimeString: String
     get() {
         if (solvedTime == 0L) {
-            return NOT_SOLVED
+            return Constants.NOT_SOLVED
         } else {
             val calendar = Calendar.getInstance()
             calendar.timeInMillis = solvedTime
@@ -128,9 +126,9 @@ class Achievement(var badgePath: String, var unsolvedBadgePath: String, val full
      * Checks whether the [Achievement] is solved. Adds all parameters to an array to be passed into a vararg
      * parameter and executes the [callFunction] of the [callClass].
      */
-    fun isSolved(classes: ArrayList<SourceFileDetails>, constants: HashMap<String, String>, run: Run<*, *>,
-                 property: GameUserProperty, workspace: FilePath, listener: TaskListener = TaskListener.NULL): Boolean {
-        val array = arrayOf(callClass.objectInstance, classes, constants, run, property, workspace, listener,
+    fun isSolved(classes: ArrayList<SourceFileDetails>, parameters: Parameters, run: Run<*, *>,
+                 property: GameUserProperty, listener: TaskListener = TaskListener.NULL): Boolean {
+        val array = arrayOf(callClass.objectInstance, classes, parameters, run, property, listener,
             additionalParameters)
         val result: Boolean = callFunction.call(*array) as Boolean
         if (result) solvedTime = System.currentTimeMillis()

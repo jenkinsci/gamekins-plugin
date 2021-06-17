@@ -26,6 +26,7 @@ import org.gamekins.statistics.Statistics
 import net.sf.json.JSONObject
 import org.gamekins.achievement.Achievement
 import org.gamekins.challenge.CoverageChallenge
+import org.gamekins.util.Constants
 import org.gamekins.util.PropertyUtil
 import org.kohsuke.stapler.*
 import java.util.UUID
@@ -53,11 +54,6 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
     private val score: HashMap<String, Int> = HashMap()
     private var sendNotifications: Boolean = true
     private var unsolvedAchievements: HashMap<String, CopyOnWriteArrayList<Achievement>> = HashMap()
-
-    companion object {
-        const val TYPE_JSON = "application/json"
-        const val TYPE_PLAIN = "text/plain"
-    }
 
     /**
      * Adds an additional [score] to one project [projectName], since one user can participate in multiple projects.
@@ -114,7 +110,7 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
      * a specific [projectName].
      */
     fun doGetAchievementsCount(rsp: StaplerResponse, @QueryParameter projectName: String) {
-        rsp.contentType = TYPE_PLAIN
+        rsp.contentType = Constants.TYPE_PLAIN
         val printer = rsp.writer
         if (projectName.isEmpty() || completedAchievements[projectName] == null
             || unsolvedAchievements[projectName] == null) {
@@ -130,7 +126,7 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
      */
     fun doGetCompletedAchievements(rsp: StaplerResponse, @QueryParameter projectName: String) {
         val json = jacksonObjectMapper().writeValueAsString(completedAchievements[projectName])
-        rsp.contentType = TYPE_JSON
+        rsp.contentType = Constants.TYPE_JSON
         val printer = rsp.writer
         printer.print(json)
         printer.flush()
@@ -144,7 +140,7 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
         if (participation.keys.contains(lastProject)) projects.add(lastProject)
         projects.addAll(participation.keys)
         val json = jacksonObjectMapper().writeValueAsString(projects.distinct())
-        rsp.contentType = TYPE_JSON
+        rsp.contentType = Constants.TYPE_JSON
         val printer = rsp.writer
         printer.print(json)
         printer.flush()
@@ -155,7 +151,7 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
      */
     fun doGetUnsolvedAchievements(rsp: StaplerResponse, @QueryParameter projectName: String) {
         val json = jacksonObjectMapper().writeValueAsString(unsolvedAchievements[projectName]?.filter { !it.secret })
-        rsp.contentType = TYPE_JSON
+        rsp.contentType = Constants.TYPE_JSON
         val printer = rsp.writer
         printer.print(json)
         printer.flush()
@@ -165,7 +161,7 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
      * Returns the list of unsolved secret [Achievement]s for a specific [projectName].
      */
     fun doGetUnsolvedSecretAchievementsCount(rsp: StaplerResponse, @QueryParameter projectName: String) {
-        rsp.contentType = TYPE_PLAIN
+        rsp.contentType = Constants.TYPE_PLAIN
         val printer = rsp.writer
         if (projectName.isEmpty() || unsolvedAchievements[projectName] == null) {
             printer.print(0)
@@ -179,7 +175,7 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
      * Returns true if the this user asks for his [Achievement]s. False if another user wants to see it.
      */
     fun doIsCurrentUser(rsp: StaplerResponse) {
-        rsp.contentType = TYPE_PLAIN
+        rsp.contentType = Constants.TYPE_PLAIN
         val printer = rsp.writer
         printer.print(this.user == User.current())
         printer.flush()
@@ -317,6 +313,7 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
      * Adds a new [Challenge] to the user.
      */
     fun newChallenge(projectName: String, challenge: Challenge) {
+        if (projectName.isBlank()) return
         currentChallenges.computeIfAbsent(projectName) { CopyOnWriteArrayList() }
         val challenges = currentChallenges[projectName]!!
         challenges.add(challenge)
@@ -391,7 +388,7 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
         //Remove falsely solved achievements
         for (project in participation.keys) {
             val list = unsolvedAchievements[project]!!
-            list.removeIf { it.solvedTimeString !=  Achievement.NOT_SOLVED }
+            list.removeIf { it.solvedTimeString !=  Constants.NOT_SOLVED }
             unsolvedAchievements[project] = list
         }
 

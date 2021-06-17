@@ -16,11 +16,11 @@
 
 package org.gamekins.challenge
 
-import hudson.FilePath
 import hudson.model.Run
 import hudson.model.TaskListener
 import org.gamekins.challenge.Challenge.ChallengeGenerationData
 import org.gamekins.file.SourceFileDetails
+import org.gamekins.util.Constants
 import org.gamekins.util.JacocoUtil
 
 /**
@@ -29,7 +29,8 @@ import org.gamekins.util.JacocoUtil
  * @author Philipp Straubinger
  * @since 0.1
  */
-class MethodCoverageChallenge(data: ChallengeGenerationData) : CoverageChallenge(data.selectedClass, data.workspace) {
+class MethodCoverageChallenge(data: ChallengeGenerationData)
+    : CoverageChallenge(data.selectedClass, data.parameters.workspace) {
 
     private val lines = data.method!!.lines
     private val methodName = data.method!!.methodName
@@ -38,7 +39,7 @@ class MethodCoverageChallenge(data: ChallengeGenerationData) : CoverageChallenge
 
 
     init {
-        codeSnippet = createCodeSnippet(details, firstLineID, data.workspace)
+        codeSnippet = createCodeSnippet(details, firstLineID, data.parameters.workspace)
     }
 
     override fun equals(other: Any?): Boolean {
@@ -50,7 +51,7 @@ class MethodCoverageChallenge(data: ChallengeGenerationData) : CoverageChallenge
     }
 
     override fun getSnippet(): String {
-        return if (codeSnippet.isNotEmpty()) codeSnippet else "Code snippet is not available"
+        return codeSnippet.ifEmpty { "Code snippet is not available" }
     }
 
     override fun getName(): String {
@@ -70,20 +71,19 @@ class MethodCoverageChallenge(data: ChallengeGenerationData) : CoverageChallenge
 
     /**
      * Checks whether the [MethodCoverageChallenge] is solvable if the [run] was in the branch (taken from
-     * [constants]), where it has been generated. There must be uncovered or not fully covered lines left in the
-     * method. The [workspace] is the folder with the code and execution rights, and the [listener] reports the events
+     * [parameters]), where it has been generated. There must be uncovered or not fully covered lines left in the
+     * method. The workspace is the folder with the code and execution rights, and the [listener] reports the events
      * to the console output of Jenkins.
      */
-    override fun isSolvable(constants: HashMap<String, String>, run: Run<*, *>, listener: TaskListener,
-                            workspace: FilePath): Boolean {
-        if (details.constants["branch"] != constants["branch"]) return true
+    override fun isSolvable(parameters: Constants.Parameters, run: Run<*, *>, listener: TaskListener): Boolean {
+        if (details.parameters.branch != parameters.branch) return true
 
-        val jacocoMethodFile = JacocoUtil.calculateCurrentFilePath(workspace,
-                details.jacocoMethodFile, details.workspace)
+        val jacocoMethodFile = JacocoUtil.calculateCurrentFilePath(parameters.workspace,
+                details.jacocoMethodFile, details.parameters.remote)
         try {
             if (!jacocoMethodFile.exists()) {
                 listener.logger.println("[Gamekins] JaCoCo method file "
-                        + jacocoMethodFile.remote + JacocoUtil.EXISTS + jacocoMethodFile.exists())
+                        + jacocoMethodFile.remote + Constants.EXISTS + jacocoMethodFile.exists())
                 return true
             }
 
@@ -103,24 +103,23 @@ class MethodCoverageChallenge(data: ChallengeGenerationData) : CoverageChallenge
 
     /**
      * The [MethodCoverageChallenge] is solved if the number of missed lines, according to the [details] JaCoCo
-     * files, is less than during generation. The [workspace] is the folder with the code and execution rights, and
+     * files, is less than during generation. The workspace is the folder with the code and execution rights, and
      * the [listener] reports the events to the console output of Jenkins.
      */
-    override fun isSolved(constants: HashMap<String, String>, run: Run<*, *>, listener: TaskListener,
-                          workspace: FilePath): Boolean {
-        val jacocoMethodFile = JacocoUtil.getJacocoFileInMultiBranchProject(run, constants,
-                JacocoUtil.calculateCurrentFilePath(workspace, details.jacocoMethodFile,
-                        details.workspace), details.constants["branch"]!!)
-        val jacocoCSVFile = JacocoUtil.getJacocoFileInMultiBranchProject(run, constants,
-                JacocoUtil.calculateCurrentFilePath(workspace, details.jacocoCSVFile,
-                        details.workspace), details.constants["branch"]!!)
+    override fun isSolved(parameters: Constants.Parameters, run: Run<*, *>, listener: TaskListener): Boolean {
+        val jacocoMethodFile = JacocoUtil.getJacocoFileInMultiBranchProject(run, parameters,
+                JacocoUtil.calculateCurrentFilePath(parameters.workspace, details.jacocoMethodFile,
+                        details.parameters.remote), details.parameters.branch)
+        val jacocoCSVFile = JacocoUtil.getJacocoFileInMultiBranchProject(run, parameters,
+                JacocoUtil.calculateCurrentFilePath(parameters.workspace, details.jacocoCSVFile,
+                        details.parameters.remote), details.parameters.branch)
 
         try {
             if (!jacocoMethodFile.exists() || !jacocoCSVFile.exists()) {
                 listener.logger.println("[Gamekins] JaCoCo method file " + jacocoMethodFile.remote
-                        + JacocoUtil.EXISTS + jacocoMethodFile.exists())
+                        + Constants.EXISTS + jacocoMethodFile.exists())
                 listener.logger.println("[Gamekins] JaCoCo csv file " + jacocoCSVFile.remote
-                        + JacocoUtil.EXISTS + jacocoCSVFile.exists())
+                        + Constants.EXISTS + jacocoCSVFile.exists())
                 return false
             }
 
@@ -159,6 +158,6 @@ class MethodCoverageChallenge(data: ChallengeGenerationData) : CoverageChallenge
     override fun toString(): String {
         return ("Write a test to cover more lines of method <b>" + methodName + "</b> in class <b>"
                 + details.fileName + "</b> in package <b>" + details.packageName
-                + "</b> (created for branch " + details.constants["branch"] + ")")
+                + "</b> (created for branch " + details.parameters.branch + ")")
     }
 }

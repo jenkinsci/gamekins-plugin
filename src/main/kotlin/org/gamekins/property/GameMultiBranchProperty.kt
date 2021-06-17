@@ -32,7 +32,7 @@ import org.gamekins.StatisticsAction
 import org.gamekins.statistics.Statistics
 import org.gamekins.util.PropertyUtil
 import net.sf.json.JSONObject
-import org.gamekins.GamePublisher
+import org.gamekins.util.Constants
 import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject
 import org.kohsuke.stapler.*
 import java.io.IOException
@@ -61,7 +61,7 @@ class GameMultiBranchProperty
     init {
         statistics = Statistics(job!!)
         PropertyUtil.reconfigure(job, activated, showStatistics)
-        if (currentChallengesCount <= 0) currentChallengesCount = GamePublisher.DEFAULT_CURRENT_CHALLENGES
+        if (currentChallengesCount <= 0) currentChallengesCount = Constants.DEFAULT_CURRENT_CHALLENGES
     }
 
     @Throws(IOException::class)
@@ -95,7 +95,7 @@ class GameMultiBranchProperty
      */
     @Suppress("unused", "SENSELESS_COMPARISON")
     private fun readResolve(): Any {
-        if (currentChallengesCount == 0) currentChallengesCount = GamePublisher.DEFAULT_CURRENT_CHALLENGES
+        if (currentChallengesCount == 0) currentChallengesCount = Constants.DEFAULT_CURRENT_CHALLENGES
 
         return this
     }

@@ -16,8 +16,9 @@
 
 package org.gamekins.file
 
-import hudson.FilePath
 import hudson.model.TaskListener
+import org.gamekins.util.Constants
+import org.gamekins.util.Constants.Parameters
 import org.gamekins.util.JacocoUtil
 import org.gamekins.util.JacocoUtil.ClassDetails
 import java.io.File
@@ -25,21 +26,13 @@ import java.io.File
 /**
  * The internal representation of a class file received from git.
  *
- * @param shortJacocoPath Path of the JaCoCo root directory, beginning with ** / (without space)
- * @param shortJacocoCSVPath Path of the JaCoCo csv file, beginning with ** / (without space)
- * @param shortMocoJSONPath Path of the MoCo json file, beginning with ** / (without space)
- *
  * @author Philipp Straubinger
  * @since 0.4
  */
-class SourceFileDetails(constants: HashMap<String, String>,
+class SourceFileDetails(parameters: Parameters,
                         filePath: String,
-                        workspace: FilePath,
-                        shortJacocoPath: String,
-                        shortJacocoCSVPath: String,
-                        shortMocoJSONPath: String,
                         listener: TaskListener = TaskListener.NULL)
-    : FileDetails(constants, filePath, workspace)  {
+    : FileDetails(parameters, filePath)  {
 
     val coverage: Double
     val jacocoCSVFile: File
@@ -51,46 +44,47 @@ class SourceFileDetails(constants: HashMap<String, String>,
         val pathSplit = filePath.split("/".toRegex())
 
         //Build the paths to the JaCoCo files
-        val jacocoPath = StringBuilder(workspace.remote)
+        val jacocoPath = StringBuilder(parameters.remote)
         var i = 0
         while (pathSplit[i] != "src") {
             if (pathSplit[i].isNotEmpty()) jacocoPath.append("/").append(pathSplit[i])
             i++
         }
-        jacocoCSVFile = File(jacocoPath.toString() + shortJacocoCSVPath.substring(2))
+        jacocoCSVFile = File(jacocoPath.toString() + parameters.jacocoCSVPath.substring(2))
         if (!jacocoCSVFile.exists()) {
             listener.logger.println("[Gamekins] JaCoCoCSVPath: " + jacocoCSVFile.absolutePath
-                    + JacocoUtil.EXISTS + jacocoCSVFile.exists())
+                    + Constants.EXISTS + jacocoCSVFile.exists())
         }
 
-        if (shortMocoJSONPath != "") {
-            mocoJSONFile = File(StringBuilder(workspace.remote).toString() + shortMocoJSONPath.substring(2))
+        if (parameters.mocoJSONPath != "") {
+            mocoJSONFile = File(StringBuilder(parameters.remote).toString()
+                    + parameters.mocoJSONPath.substring(2))
             if (!mocoJSONFile.exists()) {
                 listener.logger.println("[Gamekins] MoCoJSONPath: " + mocoJSONFile.absolutePath
-                        + JacocoUtil.EXISTS + mocoJSONFile.exists())
+                        + Constants.EXISTS + mocoJSONFile.exists())
             }
         } else {
             mocoJSONFile = null
         }
 
-        jacocoPath.append(shortJacocoPath.substring(2))
+        jacocoPath.append(parameters.jacocoResultsPath.substring(2))
         if (!jacocoPath.toString().endsWith("/")) jacocoPath.append("/")
         jacocoPath.append(packageName).append("/")
         jacocoMethodFile = File("$jacocoPath$fileName.html")
         if (!jacocoMethodFile.exists()) {
             listener.logger.println("[Gamekins] JaCoCoMethodPath: "
-                    + jacocoMethodFile.absolutePath + JacocoUtil.EXISTS + jacocoMethodFile.exists())
+                    + jacocoMethodFile.absolutePath + Constants.EXISTS + jacocoMethodFile.exists())
         }
 
         jacocoSourceFile = File("$jacocoPath$fileName.$fileExtension.html")
         if (!jacocoSourceFile.exists()) {
             listener.logger.println("[Gamekins] JaCoCoSourcePath: "
-                    + jacocoSourceFile.absolutePath + JacocoUtil.EXISTS + jacocoSourceFile.exists())
+                    + jacocoSourceFile.absolutePath + Constants.EXISTS + jacocoSourceFile.exists())
         }
 
         coverage = JacocoUtil.getCoverageInPercentageFromJacoco(
             fileName,
-            JacocoUtil.calculateCurrentFilePath(workspace, jacocoCSVFile)
+            JacocoUtil.calculateCurrentFilePath(parameters.workspace, jacocoCSVFile)
         )
     }
 
@@ -103,12 +97,12 @@ class SourceFileDetails(constants: HashMap<String, String>,
             val shortMoco = if (classDetails.mocoJSONFile == null) ""
                             else classDetails.mocoJSONFile.absolutePath.removePrefix(classDetails.workspace)
 
-            val sourceFileDetails = SourceFileDetails(classDetails.constants,
+            val parameters = Constants.constantsToParameters(classDetails.constants)
+            parameters.jacocoResultsPath = shortJacoco
+            parameters.jacocoCSVPath = classDetails.jacocoCSVFile.absolutePath.removePrefix(classDetails.workspace)
+            parameters.mocoJSONPath = shortMoco
+            val sourceFileDetails = SourceFileDetails(parameters,
                 classDetails.sourceFilePath,
-                FilePath(null, classDetails.workspace),
-                "**$shortJacoco",
-                "**${classDetails.jacocoCSVFile.absolutePath.removePrefix(classDetails.workspace)}",
-                "**$shortMoco",
                 TaskListener.NULL)
             classDetails.changedByUsers.forEach { sourceFileDetails.addUser(it) }
 
@@ -125,5 +119,14 @@ class SourceFileDetails(constants: HashMap<String, String>,
             }
             return first
         }
+    }
+
+    /**
+     * Called by Jenkins after the object has been created from his XML representation. Used for data migration.
+     */
+    @Suppress("unused", "SENSELESS_COMPARISON")
+    private fun readResolve(): Any {
+        if (parameters == null) parameters = Parameters()
+        return this
     }
 }

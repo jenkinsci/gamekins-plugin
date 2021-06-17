@@ -18,6 +18,7 @@ package org.gamekins.statistics
 
 import hudson.model.*
 import org.gamekins.GameUserProperty
+import org.gamekins.util.Constants
 import org.gamekins.util.JUnitUtil
 import org.jenkinsci.plugins.workflow.job.WorkflowJob
 import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject
@@ -41,10 +42,6 @@ class Statistics(job: AbstractItem) {
     init {
         runEntries = generateRunEntries(job)
         fullyInitialized = true
-    }
-
-    companion object {
-        private const val RUN_TOTAL_COUNT = 200
     }
 
     /**
@@ -213,18 +210,18 @@ class Statistics(job: AbstractItem) {
     }
 
     /**
-     * Generates [RUN_TOTAL_COUNT] entries from the [job] if no master branch was found.
+     * Generates entries from the [job] if no master branch was found.
      */
     private fun generateRunEntriesWorkflowMultiBranchProject(job: WorkflowMultiBranchProject): ArrayList<RunEntry> {
         val entries = ArrayList<RunEntry>()
         var count = 0
         for (workflowJob in job.items) {
-            if (count >= RUN_TOTAL_COUNT) break
+            if (count >= Constants.RUN_TOTAL_COUNT) break
             val runList = mutableListOf<Run<*, *>>()
             workflowJob.builds.forEach { runList.add(it) }
             runList.reverse()
             for (workflowRun in runList) {
-                if (count >= RUN_TOTAL_COUNT) break
+                if (count >= Constants.RUN_TOTAL_COUNT) break
                 entries.add(RunEntry(
                     workflowRun.getNumber(),
                     workflowJob.name,

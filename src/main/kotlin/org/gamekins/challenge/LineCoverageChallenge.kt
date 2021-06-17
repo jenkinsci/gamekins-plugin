@@ -20,6 +20,7 @@ import hudson.FilePath
 import hudson.model.Run
 import hudson.model.TaskListener
 import org.gamekins.file.SourceFileDetails
+import org.gamekins.util.Constants
 import org.gamekins.util.JacocoUtil
 import org.jsoup.nodes.Element
 import kotlin.math.abs
@@ -31,7 +32,7 @@ import kotlin.math.abs
  * @since 0.1
  */
 class LineCoverageChallenge(data: Challenge.ChallengeGenerationData)
-    : CoverageChallenge(data.selectedClass, data.workspace) {
+    : CoverageChallenge(data.selectedClass, data.parameters.workspace) {
 
     private val coverageType: String = data.line!!.attr("class")
     private val currentCoveredBranches: Int
@@ -42,7 +43,7 @@ class LineCoverageChallenge(data: Challenge.ChallengeGenerationData)
 
 
     init {
-        codeSnippet = createCodeSnippet(details, lineNumber,  data.workspace)
+        codeSnippet = createCodeSnippet(details, lineNumber,  data.parameters.workspace)
         val split = data.line!!.attr("title").split(" ".toRegex())
         when {
             split.isEmpty() || (split.size == 1 && split[0].isBlank()) -> {
@@ -66,7 +67,7 @@ class LineCoverageChallenge(data: Challenge.ChallengeGenerationData)
         else if (target < 0) return ""
         if (classDetails.jacocoSourceFile.exists()) {
             val javaHtmlPath = JacocoUtil.calculateCurrentFilePath(
-                workspace, classDetails.jacocoSourceFile, classDetails.workspace
+                workspace, classDetails.jacocoSourceFile, classDetails.parameters.remote
             )
             val snippetElements = JacocoUtil.getLinesInRange(javaHtmlPath, target, 2)
             if (snippetElements.first == "") return ""
@@ -119,18 +120,17 @@ class LineCoverageChallenge(data: Challenge.ChallengeGenerationData)
 
     /**
      * Checks whether the [LineCoverageChallenge] is solvable if the [run] was in the branch (taken from
-     * [constants]), where it has been generated. The line must not be covered and still be in the class.
-     * The [workspace] is the folder with the code and execution rights, and the [listener] reports the events to the
+     * [parameters]), where it has been generated. The line must not be covered and still be in the class.
+     * The workspace is the folder with the code and execution rights, and the [listener] reports the events to the
      * console output of Jenkins.
      */
-    override fun isSolvable(constants: HashMap<String, String>, run: Run<*, *>, listener: TaskListener,
-                            workspace: FilePath): Boolean {
-        if (details.constants["branch"] != constants["branch"]) return true
+    override fun isSolvable(parameters: Constants.Parameters, run: Run<*, *>, listener: TaskListener): Boolean {
+        if (details.parameters.branch != parameters.branch) return true
 
-        val jacocoSourceFile = JacocoUtil.calculateCurrentFilePath(workspace, details.jacocoSourceFile,
-                details.workspace)
-        val jacocoCSVFile = JacocoUtil.calculateCurrentFilePath(workspace, details.jacocoCSVFile,
-                details.workspace)
+        val jacocoSourceFile = JacocoUtil.calculateCurrentFilePath(parameters.workspace, details.jacocoSourceFile,
+                details.parameters.remote)
+        val jacocoCSVFile = JacocoUtil.calculateCurrentFilePath(parameters.workspace, details.jacocoCSVFile,
+                details.parameters.remote)
         if (!jacocoSourceFile.exists() || !jacocoCSVFile.exists()) return true
 
         val document = JacocoUtil.generateDocument(jacocoSourceFile, jacocoCSVFile, listener) ?: return false
@@ -148,17 +148,16 @@ class LineCoverageChallenge(data: Challenge.ChallengeGenerationData)
 
     /**
      * The [LineCoverageChallenge] is solved if the line, according to the [details] JaCoCo files, is fully
-     * covered or partially covered (only if it was uncovered during generation). The [workspace] is the folder with
+     * covered or partially covered (only if it was uncovered during generation). The workspace is the folder with
      * the code and execution rights, and the [listener] reports the events to the console output of Jenkins.
      */
-    override fun isSolved(constants: HashMap<String, String>, run: Run<*, *>, listener: TaskListener,
-                          workspace: FilePath): Boolean {
-        val jacocoSourceFile = JacocoUtil.getJacocoFileInMultiBranchProject(run, constants,
-                JacocoUtil.calculateCurrentFilePath(workspace, details.jacocoSourceFile,
-                        details.workspace), details.constants["branch"]!!)
-        val jacocoCSVFile = JacocoUtil.getJacocoFileInMultiBranchProject(run, constants,
-                JacocoUtil.calculateCurrentFilePath(workspace, details.jacocoCSVFile,
-                        details.workspace), details.constants["branch"]!!)
+    override fun isSolved(parameters: Constants.Parameters, run: Run<*, *>, listener: TaskListener): Boolean {
+        val jacocoSourceFile = JacocoUtil.getJacocoFileInMultiBranchProject(run, parameters,
+                JacocoUtil.calculateCurrentFilePath(parameters.workspace, details.jacocoSourceFile,
+                        details.parameters.remote), details.parameters.branch)
+        val jacocoCSVFile = JacocoUtil.getJacocoFileInMultiBranchProject(run, parameters,
+                JacocoUtil.calculateCurrentFilePath(parameters.workspace, details.jacocoCSVFile,
+                        details.parameters.remote), details.parameters.branch)
 
         val document = JacocoUtil.generateDocument(jacocoSourceFile, jacocoCSVFile, listener) ?: return false
 
@@ -235,6 +234,6 @@ class LineCoverageChallenge(data: Challenge.ChallengeGenerationData)
                 else "Write a test to fully cover line "
         return (prefix + "<b>" + lineNumber + "</b> in class <b>" + details.fileName
                 + "</b> in package <b>" + details.packageName + "</b> (created for branch "
-                + details.constants["branch"] + ")")
+                + details.parameters.branch + ")")
     }
 }

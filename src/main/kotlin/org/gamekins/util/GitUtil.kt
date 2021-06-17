@@ -38,6 +38,7 @@ import org.eclipse.jgit.treewalk.EmptyTreeIterator
 import org.gamekins.file.FileDetails
 import org.gamekins.file.SourceFileDetails
 import org.gamekins.file.TestFileDetails
+import org.gamekins.util.Constants.Parameters
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.IOException
@@ -56,8 +57,6 @@ import kotlin.jvm.Throws
  * @since 0.1
  */
 object GitUtil {
-
-    const val DEFAULT_SEARCH_COMMIT_COUNT = 50
 
     /**
      * Returns the current branch of the git repository in the [workspace].
@@ -126,48 +125,47 @@ object GitUtil {
 
     /**
      * Returns a list of last changed classes. It searches the last [count] of commits in the history
-     * (or until a certain [commitHash]) in the [workspace] and assigns the files changed in these commits to the
-     * according [users]. [constants] are needed for information about the JaCoCo paths and the [listener] reports
-     * the events to the console output of Jenkins.
+     * (or until a certain [commitHash]) and assigns the files changed in these commits to the according [users].
+     * [parameters] are needed for information about the JaCoCo paths and the [listener] reports the events to the
+     * console output of Jenkins.
      */
     @JvmStatic
     fun getLastChangedClasses(
-        count: Int, commitHash: String, constants: HashMap<String, String>, listener: TaskListener,
-        users: ArrayList<GameUser>, workspace: FilePath
+        count: Int, commitHash: String, parameters: Parameters, listener: TaskListener,
+        users: ArrayList<GameUser>
     ): List<SourceFileDetails> {
 
-        return workspace.act(LastChangedFilesCallable(constants, workspace, count, commitHash, users, listener))
+        return parameters.workspace.act(LastChangedFilesCallable(parameters, count, commitHash, users, listener))
             .filterIsInstance<SourceFileDetails>()
     }
 
     /**
      * Returns a list of last changed files of a [user]. It searches the last [count] of commits in the history
-     * (or until a certain [commitHash]) in the [workspace] and assigns the files changed in these commits to the
-     * according [users]. [constants] are needed for information about the JaCoCo paths and the [listener] reports
+     * (or until a certain [commitHash]) and assigns the files changed in these commits to the
+     * according [users]. [parameters] are needed for information about the JaCoCo paths and the [listener] reports
      * the events to the console output of Jenkins.
      */
     @JvmStatic
-    fun getLastChangedClassesOfUser(count: Int, commitHash: String, constants: HashMap<String, String>,
+    fun getLastChangedClassesOfUser(count: Int, commitHash: String, parameters: Parameters,
                                     listener: TaskListener, user: GameUser, users: ArrayList<GameUser>,
-                                    workspace: FilePath
     ): List<SourceFileDetails> {
-        return getLastChangedClasses(count, commitHash, constants, listener, users, workspace)
+        return getLastChangedClasses(count, commitHash, parameters, listener, users)
             .filter { it.changedByUsers.contains(user) }
     }
 
     /**
      * Returns a list of last changed files. It searches the last [count] of commits in the history
-     * (or until a certain [commitHash]) in the [workspace] and assigns the files changed in these commits to the
-     * according [users]. [constants] are needed for information about the JaCoCo paths and the [listener] reports
+     * (or until a certain [commitHash]) and assigns the files changed in these commits to the
+     * according [users]. [parameters] are needed for information about the JaCoCo paths and the [listener] reports
      * the events to the console output of Jenkins.
      */
     @JvmStatic
-    fun getLastChangedFiles(count: Int, commitHash: String, constants: HashMap<String, String>,
-                            users: ArrayList<GameUser>, workspace: FilePath, listener: TaskListener
+    fun getLastChangedFiles(count: Int, commitHash: String, parameters: Parameters,
+                            users: ArrayList<GameUser>, listener: TaskListener
     ): ArrayList<FileDetails> {
 
         val builder = FileRepositoryBuilder()
-        val repo = builder.setGitDir(File(workspace.remote + "/.git")).setMustExist(true).build()
+        val repo = builder.setGitDir(File(parameters.remote + "/.git")).setMustExist(true).build()
         val walk = RevWalk(repo)
 
         val headCommit = getHead(repo)
@@ -249,14 +247,13 @@ object GitUtil {
                         if (!found && user != null) {
                             val details: FileDetails = when {
                                 pathSplit.contains("test") -> {
-                                    TestFileDetails(constants, path, workspace, listener)
+                                    TestFileDetails(parameters, path, listener)
                                 }
                                 path.endsWith(".java") || path.endsWith(".kt") -> {
-                                    SourceFileDetails(constants, path, workspace, constants["jacocoResultsPath"]!!,
-                                        constants["jacocoCSVPath"]!!, constants["mocoJSONPath"]!!, listener)
+                                    SourceFileDetails(parameters, path, listener)
                                 }
                                 else -> {
-                                    FileDetails(constants, path, workspace)
+                                    FileDetails(parameters, path)
                                 }
                             }
                             details.addUser(user)
@@ -275,32 +272,30 @@ object GitUtil {
 
     /**
      * Returns a list of last changed tests. It searches the last [count] of commits in the history
-     * (or until a certain [commitHash]) in the [workspace] and assigns the files changed in these commits to the
-     * according [users]. [constants] are needed for information about the JaCoCo paths and the [listener] reports
+     * (or until a certain [commitHash]) and assigns the files changed in these commits to the
+     * according [users]. [parameters] are needed for information about the JaCoCo paths and the [listener] reports
      * the events to the console output of Jenkins.
      */
     @JvmStatic
     fun getLastChangedTests(
-        count: Int, commitHash: String, constants: HashMap<String, String>, listener: TaskListener,
-        users: ArrayList<GameUser>, workspace: FilePath
+        count: Int, commitHash: String, parameters: Parameters, listener: TaskListener, users: ArrayList<GameUser>
     ): List<TestFileDetails> {
 
-        return workspace.act(LastChangedFilesCallable(constants, workspace, count, commitHash, users, listener))
+        return parameters.workspace.act(LastChangedFilesCallable(parameters, count, commitHash, users, listener))
             .filterIsInstance<TestFileDetails>()
     }
 
     /**
      * Returns a list of last changed tests of a [user]. It searches the last [count] of commits in the history
-     * (or until a certain [commitHash]) in the [workspace] and assigns the files changed in these commits to the
-     * according [users]. [constants] are needed for information about the JaCoCo paths and the [listener] reports
+     * (or until a certain [commitHash]) and assigns the files changed in these commits to the
+     * according [users]. [parameters] are needed for information about the JaCoCo paths and the [listener] reports
      * the events to the console output of Jenkins.
      */
     @JvmStatic
-    fun getLastChangedTestsOfUser(count: Int, commitHash: String, constants: HashMap<String, String>,
-                                  listener: TaskListener, user: GameUser, users: ArrayList<GameUser>,
-                                  workspace: FilePath
+    fun getLastChangedTestsOfUser(count: Int, commitHash: String, parameters: Parameters,
+                                  listener: TaskListener, user: GameUser, users: ArrayList<GameUser>
     ): List<TestFileDetails> {
-        return getLastChangedTests(count, commitHash, constants, listener, users, workspace)
+        return getLastChangedTests(count, commitHash, parameters, listener, users)
             .filter { it.changedByUsers.contains(user) }
     }
 
@@ -492,8 +487,7 @@ object GitUtil {
      * @since 0.1
      */
     private class LastChangedFilesCallable constructor(
-        private val constants: HashMap<String, String>,
-        private val workspace: FilePath,
+        private val parameters: Parameters,
         private val commitCount: Int,
         private val commitHash: String,
         private val users: ArrayList<GameUser>,
@@ -505,7 +499,7 @@ object GitUtil {
          * or throws some exception.
          */
         override fun call(): ArrayList<FileDetails> {
-            return getLastChangedFiles(commitCount, commitHash, constants, users, workspace, listener)
+            return getLastChangedFiles(commitCount, commitHash, parameters, users, listener)
         }
     }
 

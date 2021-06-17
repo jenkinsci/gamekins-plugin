@@ -21,11 +21,11 @@ import hudson.model.AbstractItem
 import hudson.model.User
 import hudson.util.FormValidation
 import org.gamekins.GameUserProperty
-import org.gamekins.GamePublisher
 import org.gamekins.challenge.Challenge
 import org.gamekins.challenge.ChallengeFactory
 import org.gamekins.challenge.DummyChallenge
 import org.gamekins.file.SourceFileDetails
+import org.gamekins.util.Constants.Parameters
 import java.io.IOException
 
 /**
@@ -86,27 +86,24 @@ object ActionUtil {
     fun generateChallengeAfterRejection(challenge: Challenge, user: User, property: GameUserProperty,
                                         job: AbstractItem): String {
 
-        val constants = challenge.getConstants()
+        val parameters = challenge.getParameters()
         var generatedText = ": No additional Challenge generated"
-        if (constants["workspace"] != null) {
-            var workspace = FilePath(null, constants["workspace"]!!)
-            if (!workspace.exists() && constants["branch"] != null) {
-                workspace = FilePath(null, constants["workspace"]!!.replace(constants["branch"]!!, "master"))
-            }
+        if (!parameters.workspace.exists()) {
+            parameters.workspace = FilePath(null, parameters.remote.replace(parameters.branch, "master"))
+        }
 
-            if (workspace.exists()) {
-                val classes = PublisherUtil.retrieveLastChangedClasses(
-                        workspace, GitUtil.DEFAULT_SEARCH_COMMIT_COUNT, constants)
-                generatedText = ": New Challenge generated"
+        if (parameters.workspace.exists()) {
+            val classes = PublisherUtil.retrieveLastChangedClasses(
+                Constants.DEFAULT_SEARCH_COMMIT_COUNT, parameters)
+            generatedText = ": New Challenge generated"
 
-                if (classes.isNotEmpty()) {
-                    generateAndUpdate(user, property, job, constants, ArrayList(classes), workspace)
-                } else {
-                    property.newChallenge(constants["projectName"]!!, DummyChallenge(constants))
-                }
+            if (classes.isNotEmpty()) {
+                generateAndUpdate(user, property, job, parameters, ArrayList(classes))
             } else {
-                generatedText += " (Workspace deleted or on remote machine)"
+                property.newChallenge(parameters.projectName, DummyChallenge(parameters))
             }
+        } else {
+            generatedText += " (Workspace deleted or on remote machine)"
         }
 
         return generatedText
@@ -116,15 +113,12 @@ object ActionUtil {
      * Generates a new [Challenge] and updates the Statistics
      */
     private fun generateAndUpdate(user: User, property: GameUserProperty, job: AbstractItem,
-                                  constants: HashMap<String, String>, classes: ArrayList<SourceFileDetails>,
-                                  workspace: FilePath) {
+                                  parameters: Parameters, classes: ArrayList<SourceFileDetails>) {
         val generated = ChallengeFactory.generateNewChallenges(
-            user, property, constants, classes, workspace,
-            maxChallenges = constants["currentChallengesCount"]?.toInt() ?: GamePublisher.DEFAULT_CURRENT_CHALLENGES
+            user, property, parameters, classes, maxChallenges = parameters.currentChallengesCount
         )
-        val branch = if (constants["branch"] != null
-                && workspace.remote.contains(constants["branch"]!!.toRegex()))
-            constants["branch"]!! else "master"
+        val branch = if (parameters.remote.contains(parameters.branch.toRegex()))
+            parameters.branch else "master"
         PropertyUtil.retrieveGameProperty(job)?.getStatistics()
                 ?.addGeneratedAfterRejection(branch, generated)
     }

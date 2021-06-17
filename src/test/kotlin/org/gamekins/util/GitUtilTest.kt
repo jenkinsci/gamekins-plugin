@@ -21,6 +21,7 @@ import hudson.model.TaskListener
 import hudson.model.User
 import hudson.tasks.Mailer.UserProperty
 import org.gamekins.test.TestUtils
+import org.gamekins.util.Constants.Parameters
 import io.kotest.core.spec.style.AnnotationSpec
 import io.kotest.matchers.collections.beEmpty
 import io.kotest.matchers.should
@@ -38,7 +39,7 @@ class GitUtilTest : AnnotationSpec() {
 
     private lateinit var root : String
     private lateinit var path : FilePath
-    private val constants = HashMap<String, String>()
+    private val parameters = Parameters()
     private val user = mockkClass(GitUtil.GameUser::class)
     private val name = "Philipp Straubinger"
     private val mail = "philipp.straubinger@uni-passau.de"
@@ -54,10 +55,11 @@ class GitUtilTest : AnnotationSpec() {
         TestUtils.unzip("$root.zip", root)
         path = FilePath(null, root)
 
-        constants["projectName"] = "test-project"
-        constants["jacocoResultsPath"] = "**/target/site/jacoco/"
-        constants["jacocoCSVPath"] = "**/target/site/jacoco/jacoco.csv"
-        constants["mocoJSONPath"] = "**/target/site/moco/mutation/"
+        parameters.projectName = "test-project"
+        parameters.jacocoResultsPath = "**/target/site/jacoco/"
+        parameters.jacocoCSVPath = "**/target/site/jacoco/jacoco.csv"
+        parameters.mocoJSONPath = "**/target/site/moco/mutation/"
+        parameters.workspace = path
 
         every { user.id } returns id
         every { user.fullName } returns name
@@ -93,8 +95,8 @@ class GitUtilTest : AnnotationSpec() {
 
     @Test
     fun getLastChangedClasses() {
-        GitUtil.getLastChangedClasses(50, "", constants, TaskListener.NULL, arrayListOf(user), path).size shouldBe 8
-        GitUtil.getLastChangedClasses(1, "", constants, TaskListener.NULL, arrayListOf(user), path) should beEmpty()
+        GitUtil.getLastChangedClasses(50, "", parameters, TaskListener.NULL, arrayListOf(user)).size shouldBe 8
+        GitUtil.getLastChangedClasses(1, "", parameters, TaskListener.NULL, arrayListOf(user)) should beEmpty()
     }
 
     @Test
@@ -113,7 +115,7 @@ class GitUtilTest : AnnotationSpec() {
         every { mailProperty1.address } returns mail
         every { user1.getProperty(UserProperty::class.java) } returns mailProperty1
 
-        GitUtil.getLastChangedFiles(50, "", constants, arrayListOf(GitUtil.GameUser(user1)), path, TaskListener.NULL).size shouldBe 14
+        GitUtil.getLastChangedFiles(50, "", parameters, arrayListOf(GitUtil.GameUser(user1)), TaskListener.NULL).size shouldBe 14
     }
 
     @Test
@@ -132,15 +134,15 @@ class GitUtilTest : AnnotationSpec() {
         every { mailProperty1.address } returns mail
         every { user1.getProperty(UserProperty::class.java) } returns mailProperty1
 
-        GitUtil.getLastChangedClasses(50, "", constants, TaskListener.NULL, GitUtil.mapUsersToGameUsers(listOf(user1)), path).size shouldBe 8
-        GitUtil.getLastChangedClasses(50, headHash, constants, TaskListener.NULL, GitUtil.mapUsersToGameUsers(listOf(user1)), path).size shouldBe 0
+        GitUtil.getLastChangedClasses(50, "", parameters, TaskListener.NULL, GitUtil.mapUsersToGameUsers(listOf(user1))).size shouldBe 8
+        GitUtil.getLastChangedClasses(50, headHash, parameters, TaskListener.NULL, GitUtil.mapUsersToGameUsers(listOf(user1))).size shouldBe 0
 
         val firstCommit = "d3f574e28542876d4cd243c2ac730a6b9eed8b2c"
         //TODO: Should be 8, but see GitUtil.getDiffOfCommit()
-        GitUtil.getLastChangedClasses(50, firstCommit, constants, TaskListener.NULL, GitUtil.mapUsersToGameUsers(listOf(user1)), path).size shouldBe 7
+        GitUtil.getLastChangedClasses(50, firstCommit, parameters, TaskListener.NULL, GitUtil.mapUsersToGameUsers(listOf(user1))).size shouldBe 7
 
         val commitHash = "02c7398664cc9a15508a2d96c2b10f341f1fa4de"
-        GitUtil.getLastChangedClasses(50, commitHash, constants, TaskListener.NULL, GitUtil.mapUsersToGameUsers(listOf(user1)), path).size shouldBe 3
+        GitUtil.getLastChangedClasses(50, commitHash, parameters, TaskListener.NULL, GitUtil.mapUsersToGameUsers(listOf(user1))).size shouldBe 3
     }
 
     @Test
@@ -158,14 +160,14 @@ class GitUtilTest : AnnotationSpec() {
         every { mailProperty1.address } returns mail
         every { user1.getProperty(UserProperty::class.java) } returns mailProperty1
 
-        GitUtil.getLastChangedTestsOfUser(50, "", constants, TaskListener.NULL,  GitUtil.GameUser(user1), GitUtil.mapUsersToGameUsers(listOf(user1)), path).size shouldBe 4
-        GitUtil.getLastChangedTestsOfUser(50, headHash, constants, TaskListener.NULL,  GitUtil.GameUser(user1), GitUtil.mapUsersToGameUsers(listOf(user1)), path).size shouldBe 0
+        GitUtil.getLastChangedTestsOfUser(50, "", parameters, TaskListener.NULL,  GitUtil.GameUser(user1), GitUtil.mapUsersToGameUsers(listOf(user1))).size shouldBe 4
+        GitUtil.getLastChangedTestsOfUser(50, headHash, parameters, TaskListener.NULL,  GitUtil.GameUser(user1), GitUtil.mapUsersToGameUsers(listOf(user1))).size shouldBe 0
 
         val firstCommit = "d3f574e28542876d4cd243c2ac730a6b9eed8b2c"
-        GitUtil.getLastChangedTestsOfUser(50, firstCommit, constants, TaskListener.NULL,  GitUtil.GameUser(user1), GitUtil.mapUsersToGameUsers(listOf(user1)), path).size shouldBe 4
+        GitUtil.getLastChangedTestsOfUser(50, firstCommit, parameters, TaskListener.NULL,  GitUtil.GameUser(user1), GitUtil.mapUsersToGameUsers(listOf(user1))).size shouldBe 4
 
         val commitHash = "da1e195773389f37ff5898b10e1708707e7208ac"
-        GitUtil.getLastChangedTestsOfUser(50, commitHash, constants, TaskListener.NULL,  GitUtil.GameUser(user1), GitUtil.mapUsersToGameUsers(listOf(user1)), path).size shouldBe 3
+        GitUtil.getLastChangedTestsOfUser(50, commitHash, parameters, TaskListener.NULL,  GitUtil.GameUser(user1), GitUtil.mapUsersToGameUsers(listOf(user1))).size shouldBe 3
     }
 
     @Test

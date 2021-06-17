@@ -16,10 +16,10 @@
 
 package org.gamekins.challenge
 
-import hudson.FilePath
 import hudson.model.Run
 import hudson.model.TaskListener
 import org.gamekins.file.SourceFileDetails
+import org.gamekins.util.Constants
 import org.gamekins.util.JacocoUtil
 import org.jsoup.nodes.Document
 
@@ -30,11 +30,12 @@ import org.jsoup.nodes.Document
  * @since 0.1
  */
 class ClassCoverageChallenge(data: Challenge.ChallengeGenerationData)
-    : CoverageChallenge(data.selectedClass, data.workspace) {
+    : CoverageChallenge(data.selectedClass, data.parameters.workspace) {
 
     init {
         //TODO: Optimize for Kotlin objects
-        codeSnippet = createCodeSnippet(data.selectedClass, "class ${data.selectedClass.fileName}", data.workspace)
+        codeSnippet = createCodeSnippet(data.selectedClass, "class ${data.selectedClass.fileName}",
+            data.parameters.workspace)
     }
 
     override fun equals(other: Any?): Boolean {
@@ -63,21 +64,20 @@ class ClassCoverageChallenge(data: Challenge.ChallengeGenerationData)
 
     /**
      * Checks whether the [ClassCoverageChallenge] is solvable if the [run] was in the branch (taken from
-     * [constants]), where it has been generated. There must be uncovered or not fully covered lines left in the class.
+     * [parameters]), where it has been generated. There must be uncovered or not fully covered lines left in the class.
      * The [workspace] is the folder with the code and execution rights, and the [listener] reports the events to the
      * console output of Jenkins.
      */
-    override fun isSolvable(constants: HashMap<String, String>, run: Run<*, *>, listener: TaskListener,
-                            workspace: FilePath): Boolean {
-        if (details.constants["branch"] != constants["branch"]) return true
+    override fun isSolvable(parameters: Constants.Parameters, run: Run<*, *>, listener: TaskListener): Boolean {
+        if (details.parameters.branch != parameters.branch) return true
 
-        val jacocoSourceFile = JacocoUtil.calculateCurrentFilePath(workspace,
-                details.jacocoSourceFile, details.workspace)
+        val jacocoSourceFile = JacocoUtil.calculateCurrentFilePath(parameters.workspace,
+                details.jacocoSourceFile, details.parameters.remote)
         val document: Document
         document = try {
             if (!jacocoSourceFile.exists()) {
                 listener.logger.println("[Gamekins] JaCoCo source file "
-                        + jacocoSourceFile.remote + JacocoUtil.EXISTS + jacocoSourceFile.exists())
+                        + jacocoSourceFile.remote + Constants.EXISTS + jacocoSourceFile.exists())
                 return true
             }
             JacocoUtil.generateDocument(jacocoSourceFile)
@@ -95,14 +95,13 @@ class ClassCoverageChallenge(data: Challenge.ChallengeGenerationData)
      * than during generation. The [workspace] is the folder with the code and execution rights, and the [listener]
      * reports the events to the console output of Jenkins.
      */
-    override fun isSolved(constants: HashMap<String, String>, run: Run<*, *>, listener: TaskListener,
-                          workspace: FilePath): Boolean {
-        val jacocoSourceFile = JacocoUtil.getJacocoFileInMultiBranchProject(run, constants,
-                JacocoUtil.calculateCurrentFilePath(workspace, details.jacocoSourceFile,
-                        details.workspace), details.constants["branch"]!!)
-        val jacocoCSVFile = JacocoUtil.getJacocoFileInMultiBranchProject(run, constants,
-                JacocoUtil.calculateCurrentFilePath(workspace, details.jacocoCSVFile,
-                        details.workspace), details.constants["branch"]!!)
+    override fun isSolved(parameters: Constants.Parameters, run: Run<*, *>, listener: TaskListener): Boolean {
+        val jacocoSourceFile = JacocoUtil.getJacocoFileInMultiBranchProject(run, parameters,
+                JacocoUtil.calculateCurrentFilePath(parameters.workspace, details.jacocoSourceFile,
+                        details.parameters.remote), details.parameters.branch)
+        val jacocoCSVFile = JacocoUtil.getJacocoFileInMultiBranchProject(run, parameters,
+                JacocoUtil.calculateCurrentFilePath(parameters.workspace, details.jacocoCSVFile,
+                        details.parameters.remote), details.parameters.branch)
 
         val document = JacocoUtil.generateDocument(jacocoSourceFile, jacocoCSVFile, listener) ?: return false
 
@@ -132,6 +131,6 @@ class ClassCoverageChallenge(data: Challenge.ChallengeGenerationData)
     override fun toString(): String {
         return ("Write a test to cover more lines in class <b>" + details.fileName
                 + "</b> in package <b>" + details.packageName + "</b> (created for branch "
-                + details.constants["branch"] + ")")
+                + details.parameters.branch + ")")
     }
 }

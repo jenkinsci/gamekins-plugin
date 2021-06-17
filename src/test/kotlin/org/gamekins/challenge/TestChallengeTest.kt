@@ -32,6 +32,7 @@ import io.kotest.matchers.string.shouldStartWith
 import io.mockk.*
 import jenkins.branch.MultiBranchProject
 import org.gamekins.file.TestFileDetails
+import org.gamekins.util.Constants.Parameters
 import org.gamekins.util.JUnitUtil
 
 class TestChallengeTest : AnnotationSpec() {
@@ -39,14 +40,14 @@ class TestChallengeTest : AnnotationSpec() {
     private lateinit var challenge : TestChallenge
     private val user = mockkClass(hudson.model.User::class)
     private val run = mockkClass(Run::class)
-    private val map = HashMap<String, String>()
+    private val parameters = Parameters()
     private val listener = TaskListener.NULL
     private val path = FilePath(null, "")
     private val testCount = 10
 
     @BeforeEach
     fun init() {
-        map["branch"] = "master"
+        parameters.branch = "master"
         every { user.id } returns ""
         every { user.fullName } returns ""
         every { user.getProperty(hudson.tasks.Mailer.UserProperty::class.java) } returns null
@@ -55,7 +56,7 @@ class TestChallengeTest : AnnotationSpec() {
         every { data.headCommitHash } returns ""
         every { data.testCount } returns testCount
         every { data.user } returns user
-        every { data.constants } returns map
+        every { data.parameters } returns parameters
         challenge = TestChallenge(data)
     }
 
@@ -76,13 +77,13 @@ class TestChallengeTest : AnnotationSpec() {
         every { job.parent } returns project
         every { project.items } returns listOf(workJob)
         every { workJob.name } returns "master"
-        challenge.isSolvable(map, run, listener, path) shouldBe true
+        challenge.isSolvable(parameters, run, listener) shouldBe true
 
         every { workJob.name } returns "branch"
-        challenge.isSolvable(map, run, listener, path) shouldBe false
+        challenge.isSolvable(parameters, run, listener) shouldBe false
 
         every { job.parent } returns multiProject
-        challenge.isSolvable(map, run, listener, path) shouldBe true
+        challenge.isSolvable(parameters, run, listener) shouldBe true
     }
 
     @Test
@@ -91,21 +92,21 @@ class TestChallengeTest : AnnotationSpec() {
         mockkStatic(JUnitUtil::class)
         mockkStatic(GitUtil::class)
         mockkStatic(User::class)
-        map["branch"] = "master"
+        parameters.branch = "master"
 
         every { JUnitUtil.getTestCount(path, run) } returns testCount
-        challenge.isSolved(map, run, listener, path) shouldBe false
+        challenge.isSolved(parameters, run, listener) shouldBe false
 
         every { JUnitUtil.getTestCount(path, run) } returns (testCount + 1)
-        every { GitUtil.getLastChangedTestsOfUser(any(), any(), any(), any(), any(), any(), any()) } returns listOf()
+        every { GitUtil.getLastChangedTestsOfUser(any(), any(), any(), any(), any(), any()) } returns listOf()
         every { User.getAll() } returns listOf()
-        challenge.isSolved(map, run, listener, path) shouldBe false
+        challenge.isSolved(parameters, run, listener) shouldBe false
 
         //every { GitUtil.getLastChangedTestsOfUser(GitUtil.DEFAULT_SEARCH_COMMIT_COUNT, "", map, listener, GitUtil.GameUser(user), arrayListOf(), path) } returns listOf(
         //    mockkClass(TestFileDetails::class))
-        every { GitUtil.getLastChangedTestsOfUser(any(), any(), any(), any(), any(), any(), any()) } returns listOf(
+        every { GitUtil.getLastChangedTestsOfUser(any(), any(), any(), any(), any(), any()) } returns listOf(
             mockkClass(TestFileDetails::class))
-        challenge.isSolved(map, run, listener, path) shouldBe  true
+        challenge.isSolved(parameters, run, listener) shouldBe  true
         challenge.getSolved() shouldNotBe 0
         challenge.getScore() shouldBe 1
     }

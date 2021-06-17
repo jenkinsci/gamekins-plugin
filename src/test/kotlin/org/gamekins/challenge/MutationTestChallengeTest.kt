@@ -28,6 +28,7 @@ import org.gamekins.file.SourceFileDetails
 import org.gamekins.mutation.MutationDetails
 import org.gamekins.mutation.MutationInfo
 import org.gamekins.mutation.MutationResults
+import org.gamekins.util.Constants.Parameters
 import org.gamekins.util.GitUtil
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
@@ -49,8 +50,7 @@ class MutationTestChallengeTest : AnnotationSpec() {
     private val element = mockkClass(Element::class)
     private val elements = Elements(listOf(element))
     private val coverage = 0.0
-    private val run = mockkClass(Run::class)
-    private val map = HashMap<String, String>()
+    private val parameters = Parameters()
     private val listener = TaskListener.NULL
     private val branch = "master"
 
@@ -91,7 +91,11 @@ class MutationTestChallengeTest : AnnotationSpec() {
 
     @BeforeEach
     fun init() {
-        map["branch"] = branch
+        parameters.branch = branch
+        parameters.workspace = path
+        parameters.jacocoResultsPath = shortJacocoPath
+        parameters.jacocoCSVPath = shortJacocoCSVPath
+        parameters.mocoJSONPath = mocoJSONPath
         mockkStatic(JacocoUtil::class)
         every { JacocoUtil.calculateCurrentFilePath(any(), any(), any()) } returns path
         every { JacocoUtil.getCoverageInPercentageFromJacoco(any(), any()) } returns coverage
@@ -100,7 +104,7 @@ class MutationTestChallengeTest : AnnotationSpec() {
         every { JacocoUtil.getLines(any()) }  returns elements
         mockkObject(MutationResults.Companion)
         every { MutationResults.retrievedMutationsFromJson(any(), any()) }  returns MutationResults(entries, "")
-        details = SourceFileDetails(map, shortFilePath, path, shortJacocoPath, shortJacocoCSVPath, mocoJSONPath, listener)
+        details = SourceFileDetails(parameters, shortFilePath, listener)
 
         challenge = MutationTestChallenge(mutation1, details, branch, "commitID", "snippet", "line")
         challenge1 = MutationTestChallenge(mutation2, details, branch, "commitID", "", "line")
@@ -170,7 +174,7 @@ class MutationTestChallengeTest : AnnotationSpec() {
 
     @Test
     fun getConstants() {
-        challenge.getConstants() shouldBe challenge.details.constants
+        challenge.getParameters() shouldBe challenge.details.parameters
     }
 
     @Test
@@ -181,23 +185,24 @@ class MutationTestChallengeTest : AnnotationSpec() {
     @Test
     fun isSolvable() {
         val run = mockkClass(Run::class)
-        val map = HashMap<String, String>()
+        val parameters = Parameters()
         val listener = TaskListener.NULL
         val path1 = mockkClass(FilePath::class)
         var res:  List<String> = listOf("abc")
         every { path1.act(ofType(GitUtil.DiffFromHeadCallable::class)) } returns res
-        challenge.isSolvable(map, run, listener, path1) shouldBe true
+        every { path1.remote } returns ""
+        parameters.workspace = path1
+        challenge.isSolvable(parameters, run, listener) shouldBe true
         res = listOf("org/gamekins/challenge/Challenge")
         every { path1.act(ofType(GitUtil.DiffFromHeadCallable::class)) } returns res
-        challenge.isSolvable(map, run, listener, path1) shouldBe false
+        challenge.isSolvable(parameters, run, listener) shouldBe false
     }
 
     @Test
     fun isSolved() {
         val run = mockkClass(Run::class)
-        val map = HashMap<String, String>()
+        val parameters = Parameters()
         val listener = TaskListener.NULL
-        val path1 = mockkClass(FilePath::class)
 
 
         challenge = MutationTestChallenge(mutation1, details, branch, "commitID", "snippet", "line")
@@ -205,10 +210,10 @@ class MutationTestChallengeTest : AnnotationSpec() {
         challenge.branch shouldBe branch
         challenge.commitID shouldBe "commitID"
 
-        challenge.isSolved(map, run, listener, path1) shouldBe false
-        challenge1.isSolved(map, run, listener, path1) shouldBe true
+        challenge.isSolved(parameters, run, listener) shouldBe false
+        challenge1.isSolved(parameters, run, listener) shouldBe true
         every { MutationResults.retrievedMutationsFromJson(any(), any()) }  returns MutationResults(emptyEntries, "")
-        challenge1.isSolved(map, run, listener, path1) shouldBe false
+        challenge1.isSolved(parameters, run, listener) shouldBe false
         every { MutationResults.retrievedMutationsFromJson(any(), any()) }  returns MutationResults(entries, "")
     }
 
@@ -237,8 +242,10 @@ class MutationTestChallengeTest : AnnotationSpec() {
         val classDetails = mockkClass(SourceFileDetails::class)
         var lineOfCode = 51
         val path1 = mockkClass(FilePath::class)
+        every { path1.remote } returns ""
         every { classDetails.jacocoSourceFile.exists() }  returns true
-        every { classDetails.workspace } returns ""
+        every { classDetails.parameters.workspace } returns FilePath(null, "")
+        every { classDetails.parameters.remote } returns ""
         every { JacocoUtil.getLinesInRange(any(), any(), any()) }  returns Pair("", "")
         MutationTestChallenge.createCodeSnippet(classDetails, lineOfCode, path1) shouldBe Pair("", "")
         every { JacocoUtil.getLinesInRange(any(), any(), any()) }  returns Pair("abc", "")

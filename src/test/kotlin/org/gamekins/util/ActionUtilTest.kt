@@ -16,6 +16,7 @@
 
 package org.gamekins.util
 
+import hudson.FilePath
 import hudson.model.AbstractItem
 import hudson.model.Job
 import hudson.model.User
@@ -25,6 +26,7 @@ import org.gamekins.challenge.ChallengeFactory
 import org.gamekins.challenge.LineCoverageChallenge
 import org.gamekins.property.GameJobProperty
 import org.gamekins.statistics.Statistics
+import org.gamekins.util.Constants.Parameters
 import org.gamekins.test.TestUtils
 import io.kotest.core.spec.style.AnnotationSpec
 import io.kotest.matchers.shouldBe
@@ -45,7 +47,7 @@ class ActionUtilTest: AnnotationSpec() {
     private val userProperty = mockkClass(GameUserProperty::class)
     private val challenge = mockkClass(LineCoverageChallenge::class)
     private val stringChallenge = "LineCoverageChallenge"
-    private val constants = hashMapOf<String, String>()
+    private val parameters = Parameters()
     private lateinit var root : String
 
     @BeforeAll
@@ -97,27 +99,22 @@ class ActionUtilTest: AnnotationSpec() {
     @Test
     fun generateChallengeAfterRejection() {
         mockkStatic(ActionUtil::class)
+        mockkStatic(User::class)
+        every { User.getAll() } returns listOf()
+        every { challenge.getParameters() } returns parameters
 
-        every { challenge.getConstants() } returns constants
-        ActionUtil.generateChallengeAfterRejection(challenge, user, userProperty, job) shouldBe
-                ": No additional Challenge generated"
-
-        constants["test"] = "test"
-        ActionUtil.generateChallengeAfterRejection(challenge, user, userProperty, job) shouldBe
-                ": No additional Challenge generated"
-
-        constants["workspace"] = "/home/1241352356/branch1"
+        parameters.workspace = FilePath(null, "/home/1241352356/branch1")
         ActionUtil.generateChallengeAfterRejection(challenge, user, userProperty, job) shouldBe
                 ": No additional Challenge generated (Workspace deleted or on remote machine)"
 
-        constants["branch"] = "branch1"
+        parameters.branch = "branch1"
         ActionUtil.generateChallengeAfterRejection(challenge, user, userProperty, job) shouldBe
                 ": No additional Challenge generated (Workspace deleted or on remote machine)"
 
         mockkStatic(PublisherUtil::class)
         every { PublisherUtil.retrieveLastChangedClasses(any(), any(), any()) } returns arrayListOf()
-        constants["workspace"] = root
-        constants["projectName"] = "test-project"
+        parameters.workspace = FilePath(null, root)
+        parameters.projectName = "test-project"
         ActionUtil.generateChallengeAfterRejection(challenge, user, userProperty, job) shouldBe
                 ": New Challenge generated"
 

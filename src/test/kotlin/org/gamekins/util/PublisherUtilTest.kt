@@ -21,6 +21,7 @@ import com.cloudbees.hudson.plugins.folder.AbstractFolderPropertyDescriptor
 import hudson.FilePath
 import hudson.model.Job
 import hudson.model.Result
+import hudson.model.User
 import hudson.util.DescribableList
 import hudson.util.StreamTaskListener
 import org.gamekins.challenge.ChallengeFactory
@@ -42,6 +43,7 @@ import io.mockk.unmockkAll
 import jenkins.branch.MultiBranchProject
 import org.gamekins.achievement.Achievement
 import org.gamekins.file.SourceFileDetails
+import org.gamekins.util.Constants.Parameters
 import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject
 import java.io.File
 import java.lang.NullPointerException
@@ -55,7 +57,7 @@ class PublisherUtilTest : AnnotationSpec() {
     private val jacocoCSVPath = "**/target/site/jacoco/jacoco.csv"
     private val mocoJSONPath = "**/target/moco/mutation/moco.json"
     private val run = mockkClass(hudson.model.Run::class)
-    private val constants = HashMap<String, String>()
+    private val parameters = Parameters()
     private val job = mockkClass(Job::class)
     private val project = mockkClass(WorkflowMultiBranchProject::class)
     private val multiProject = mockkClass(MultiBranchProject::class)
@@ -78,11 +80,12 @@ class PublisherUtilTest : AnnotationSpec() {
         TestUtils.unzip("$root.zip", root)
         path = FilePath(null, root)
 
-        constants["branch"] = "master"
-        constants["jacocoCSVPath"] = jacocoCSVPath
-        constants["projectName"] = "test-project"
-        constants["projectTests"] = "100"
-        constants["projectCoverage"] = "80.0"
+        parameters.branch = "master"
+        parameters.jacocoCSVPath = jacocoCSVPath
+        parameters.projectName = "test-project"
+        parameters.projectTests = 100
+        parameters.projectCoverage = 80.0
+        parameters.workspace = path
 
         every { run.parent } returns job
         every { job.parent } returns project
@@ -100,6 +103,8 @@ class PublisherUtilTest : AnnotationSpec() {
 
         mockkStatic(JacocoUtil::class)
         mockkStatic(JUnitUtil::class)
+        mockkStatic(PublisherUtil::class)
+        mockkStatic(User::class)
         every { JUnitUtil.getTestCount(any(), any()) } returns 4
         every { JacocoUtil.getProjectCoverage(any(), any()) } returns 0.4
 
@@ -110,7 +115,7 @@ class PublisherUtilTest : AnnotationSpec() {
         every { multiProject.save() } returns Unit
 
         mockkStatic(GitUtil::class)
-        every { GitUtil.getLastChangedClasses(any(), any(), any(), any(), any(), any()) } returns arrayListOf(classDetails)
+        every { GitUtil.getLastChangedClasses(any(), any(), any(), any(), any()) } returns arrayListOf(classDetails)
 
         mockkStatic(PropertyUtil::class)
         mockkStatic(ChallengeFactory::class)
@@ -133,47 +138,47 @@ class PublisherUtilTest : AnnotationSpec() {
         val map = hashMapOf("generated" to 0, "solved" to 0, "solvedAchievements" to 0)
 
         every { PropertyUtil.realUser(user) } returns false
-        PublisherUtil.checkUser(user, run, arrayListOf(classDetails), constants, Result.SUCCESS, path) shouldBe map
+        PublisherUtil.checkUser(user, run, arrayListOf(classDetails), parameters, Result.SUCCESS) shouldBe map
 
         every { user.getProperty(org.gamekins.GameUserProperty::class.java) } returns null
         every { PropertyUtil.realUser(user) } returns true
-        PublisherUtil.checkUser(user, run, arrayListOf(classDetails), constants, Result.SUCCESS, path) shouldBe map
+        PublisherUtil.checkUser(user, run, arrayListOf(classDetails), parameters, Result.SUCCESS) shouldBe map
 
         every { user.getProperty(org.gamekins.GameUserProperty::class.java) } returns userProperty
         every { userProperty.isParticipating(any()) } returns false
-        PublisherUtil.checkUser(user, run, arrayListOf(classDetails), constants, Result.SUCCESS, path) shouldBe map
+        PublisherUtil.checkUser(user, run, arrayListOf(classDetails), parameters, Result.SUCCESS) shouldBe map
 
         every { userProperty.isParticipating(any()) } returns true
         every { ChallengeFactory.generateBuildChallenge(any(), any(), any(), any(), any()) } returns true
         every { userProperty.getCurrentChallenges(any()) } returns CopyOnWriteArrayList()
         every { userProperty.getUnsolvedAchievements(any()) } returns CopyOnWriteArrayList()
         every { ChallengeFactory.generateNewChallenges(any(), any(), any(), any(), any()) } returns 0
-        PublisherUtil.checkUser(user, run, arrayListOf(classDetails), constants, Result.SUCCESS, path) shouldBe hashMapOf("generated" to 1, "solved" to 0, "solvedAchievements" to 0)
+        PublisherUtil.checkUser(user, run, arrayListOf(classDetails), parameters, Result.SUCCESS) shouldBe hashMapOf("generated" to 1, "solved" to 0, "solvedAchievements" to 0)
 
         every { ChallengeFactory.generateBuildChallenge(any(), any(), any(), any(), any()) } returns false
-        every { challenge.isSolved(any(), any(), any(), any()) } returns false
-        every { challenge.isSolvable(any(), any(), any(), any()) } returns true
+        every { challenge.isSolved(any(), any(), any()) } returns false
+        every { challenge.isSolvable(any(), any(), any()) } returns true
         every { userProperty.getCurrentChallenges(any()) } returns CopyOnWriteArrayList(listOf(challenge))
-        PublisherUtil.checkUser(user, run, arrayListOf(classDetails), constants, Result.SUCCESS, path) shouldBe map
+        PublisherUtil.checkUser(user, run, arrayListOf(classDetails), parameters, Result.SUCCESS) shouldBe map
 
-        every { challenge.isSolved(any(), any(), any(), any()) } returns true
-        every { challenge.isSolvable(any(), any(), any(), any()) } returns false
+        every { challenge.isSolved(any(), any(), any()) } returns true
+        every { challenge.isSolvable(any(), any(), any()) } returns false
         every { challenge.getScore() } returns 1
         every { challenge.toEscapedString() } returns ""
         every { userProperty.completeChallenge(any(), any()) } returns Unit
         every { userProperty.addScore(any(), any()) } returns Unit
         every { userProperty.rejectChallenge(any(), any(), any()) } returns Unit
         every { userProperty.getUser() } returns user
-        PublisherUtil.checkUser(user, run, arrayListOf(classDetails), constants, Result.SUCCESS, path) shouldBe hashMapOf("generated" to 0, "solved" to 1, "solvedAchievements" to 0)
+        PublisherUtil.checkUser(user, run, arrayListOf(classDetails), parameters, Result.SUCCESS) shouldBe hashMapOf("generated" to 0, "solved" to 1, "solvedAchievements" to 0)
 
         val achievement = mockkClass(Achievement::class)
         every { achievement.isSolved(any(), any(), any(), any(), any()) } returns false
         every { userProperty.getUnsolvedAchievements(any()) } returns CopyOnWriteArrayList(listOf(achievement))
         every { userProperty.completeAchievement(any(), any()) } returns Unit
-        PublisherUtil.checkUser(user, run, arrayListOf(classDetails), constants, Result.SUCCESS, path) shouldBe hashMapOf("generated" to 0, "solved" to 1, "solvedAchievements" to 0)
+        PublisherUtil.checkUser(user, run, arrayListOf(classDetails), parameters, Result.SUCCESS) shouldBe hashMapOf("generated" to 0, "solved" to 1, "solvedAchievements" to 0)
 
         every { achievement.isSolved(any(), any(), any(), any(), any()) } returns true
-        PublisherUtil.checkUser(user, run, arrayListOf(classDetails), constants, Result.SUCCESS, path) shouldBe hashMapOf("generated" to 0, "solved" to 1, "solvedAchievements" to 1)
+        PublisherUtil.checkUser(user, run, arrayListOf(classDetails), parameters, Result.SUCCESS) shouldBe hashMapOf("generated" to 0, "solved" to 1, "solvedAchievements" to 1)
     }
 
     @Test
@@ -196,26 +201,27 @@ class PublisherUtilTest : AnnotationSpec() {
 
     @Test
     fun retrieveLastChangedClasses() {
-        PublisherUtil.retrieveLastChangedClasses(path, 50, constants, listOf(),
-                removeClassesWithoutJacocoFiles = false, removeFullCoveredClasses = false, sort = false) shouldHaveSize
+        PublisherUtil.retrieveLastChangedClasses(50, parameters, listOf(),
+                removeClassesWithoutJacocoFiles = false, removeFullyCoveredClasses = false, sort = false) shouldHaveSize
                 1
 
         every { classDetails.coverage } returns 0.1
         every { classDetails.filesExists() } returns true
-        PublisherUtil.retrieveLastChangedClasses(path, 50, constants, listOf(),
-                removeClassesWithoutJacocoFiles = true, removeFullCoveredClasses = true, sort = true) shouldHaveSize
+        PublisherUtil.retrieveLastChangedClasses(50, parameters, listOf(),
+                removeClassesWithoutJacocoFiles = true, removeFullyCoveredClasses = true, sort = true) shouldHaveSize
                 1
 
         every { classDetails.coverage } returns 1.0
-        PublisherUtil.retrieveLastChangedClasses(path, 50, constants, listOf(),
-                removeClassesWithoutJacocoFiles = true, removeFullCoveredClasses = true, sort = true) shouldHaveSize
+        every { GitUtil.getLastChangedClasses(any(), any(), any(), any(), any()) } returns arrayListOf(classDetails)
+        PublisherUtil.retrieveLastChangedClasses(50, parameters, listOf(),
+                removeClassesWithoutJacocoFiles = true, removeFullyCoveredClasses = true, sort = true) shouldHaveSize
                 0
 
         every { classDetails.coverage } returns 0.1
         every { classDetails.filesExists() } returns false
-        every { GitUtil.getLastChangedClasses(any(), any(), any(), any(), any(), any()) } returns arrayListOf(classDetails)
-        PublisherUtil.retrieveLastChangedClasses(path, 50, constants, listOf(),
-                removeClassesWithoutJacocoFiles = true, removeFullCoveredClasses = true, sort = true) shouldHaveSize
+        every { GitUtil.getLastChangedClasses(any(), any(), any(), any(), any()) } returns arrayListOf(classDetails)
+        PublisherUtil.retrieveLastChangedClasses(50, parameters, listOf(),
+                removeClassesWithoutJacocoFiles = true, removeFullyCoveredClasses = true, sort = true) shouldHaveSize
                 0
     }
 
@@ -224,7 +230,7 @@ class PublisherUtilTest : AnnotationSpec() {
         val outputString = "[Gamekins] No entry for Statistics added"
 
         var listener = StreamTaskListener(File("$root/output.txt"))
-        PublisherUtil.updateStatistics(run, constants, 0, 0, 0, listener)
+        PublisherUtil.updateStatistics(run, parameters, 0, 0, 0, listener)
         var output = FilePath(null, "$root/output.txt").readToString()
         output shouldNotContain outputString
 
@@ -232,20 +238,20 @@ class PublisherUtilTest : AnnotationSpec() {
                 descList2 as DescribableList<AbstractFolderProperty<*>, AbstractFolderPropertyDescriptor>?
         every { descList2.get(org.gamekins.property.GameMultiBranchProperty::class.java) } returns
                 null
-        PublisherUtil.updateStatistics(run, constants, 0, 0, 0, listener)
+        PublisherUtil.updateStatistics(run, parameters, 0, 0, 0, listener)
         output = FilePath(null, "$root/output.txt").readToString()
         File("$root/output.txt").delete() shouldBe true
         listener = StreamTaskListener(File("$root/output.txt"))
         output shouldContain outputString
 
         every { job.parent } returns multiProject
-        PublisherUtil.updateStatistics(run, constants, 0, 0, 0, listener)
+        PublisherUtil.updateStatistics(run, parameters, 0, 0, 0, listener)
         output = FilePath(null, "$root/output.txt").readToString()
         output shouldNotContain outputString
 
         every { job.getProperty(org.gamekins.property.GameJobProperty::class.java.name) } returns null
         val e = shouldThrow<NullPointerException> {
-            PublisherUtil.updateStatistics(run, constants, 0, 0, 0, listener)
+            PublisherUtil.updateStatistics(run, parameters, 0, 0, 0, listener)
         }
         e.message shouldBe "null cannot be cast to non-null type org.gamekins.property.GameJobProperty"
     }

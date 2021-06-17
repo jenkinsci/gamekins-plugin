@@ -23,7 +23,7 @@ import org.gamekins.util.PropertyUtil
 import org.gamekins.StatisticsAction
 import org.gamekins.statistics.Statistics
 import net.sf.json.JSONObject
-import org.gamekins.GamePublisher
+import org.gamekins.util.Constants
 import org.kohsuke.stapler.DataBoundConstructor
 import org.kohsuke.stapler.DataBoundSetter
 import org.kohsuke.stapler.StaplerProxy
@@ -50,7 +50,7 @@ class GameJobProperty
 
     init {
         statistics = Statistics(job)
-        if (currentChallengesCount <= 0) currentChallengesCount = GamePublisher.DEFAULT_CURRENT_CHALLENGES
+        if (currentChallengesCount <= 0) currentChallengesCount = Constants.DEFAULT_CURRENT_CHALLENGES
     }
 
     @Throws(IOException::class)
@@ -104,7 +104,7 @@ class GameJobProperty
      */
     @Suppress("unused", "SENSELESS_COMPARISON")
     private fun readResolve(): Any {
-        if (currentChallengesCount == 0) currentChallengesCount = GamePublisher.DEFAULT_CURRENT_CHALLENGES
+        if (currentChallengesCount == 0) currentChallengesCount = Constants.DEFAULT_CURRENT_CHALLENGES
 
         return this
     }

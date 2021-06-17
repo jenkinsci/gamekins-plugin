@@ -24,6 +24,7 @@ import io.kotest.core.spec.style.AnnotationSpec
 import io.kotest.matchers.shouldBe
 import io.mockk.*
 import org.gamekins.file.SourceFileDetails
+import org.gamekins.util.Constants.Parameters
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import org.jsoup.select.Elements
@@ -43,14 +44,18 @@ class LineCoverageChallengeTest : AnnotationSpec() {
     private val elements = Elements(listOf(element))
     private val coverage = 0.0
     private val run = mockkClass(Run::class)
-    private val map = HashMap<String, String>()
+    private val parameters = Parameters()
     private val listener = TaskListener.NULL
     private val branch = "master"
     private val data = mockkClass(Challenge.ChallengeGenerationData::class)
 
     @BeforeEach
     fun init() {
-        map["branch"] = branch
+        parameters.branch = branch
+        parameters.workspace = path
+        parameters.jacocoResultsPath = shortJacocoPath
+        parameters.jacocoCSVPath = shortJacocoCSVPath
+        parameters.mocoJSONPath = mocoJSONPath
         mockkStatic(JacocoUtil::class)
         every { JacocoUtil.calculateCurrentFilePath(any(), any()) } returns path
         every { JacocoUtil.getCoverageInPercentageFromJacoco(any(), any()) } returns coverage
@@ -61,9 +66,9 @@ class LineCoverageChallengeTest : AnnotationSpec() {
         every { element.attr("class") } returns "nc"
         every { element.attr("title") } returns ""
         every { element.text() } returns "toString();"
-        details = SourceFileDetails(map, shortFilePath, path, shortJacocoPath, shortJacocoCSVPath, mocoJSONPath, listener)
+        details = SourceFileDetails(parameters, shortFilePath, listener)
         every { data.selectedClass } returns details
-        every { data.workspace } returns path
+        every { data.parameters } returns parameters
         every { data.line } returns element
         challenge = LineCoverageChallenge(data)
     }
@@ -83,7 +88,7 @@ class LineCoverageChallengeTest : AnnotationSpec() {
         every { document.select("span.pc") } returns Elements()
         every { document.select("span.nc") } returns Elements()
         every { document.select("span.fc") } returns elements
-        challenge.isSolved(map, run, listener, path) shouldBe true
+        challenge.isSolved(parameters, run, listener) shouldBe true
         challenge.getMaxCoveredBranchesIfFullyCovered() shouldBe 1
     }
 
@@ -91,14 +96,14 @@ class LineCoverageChallengeTest : AnnotationSpec() {
     fun getScore() {
         challenge.getScore() shouldBe 2
         every { JacocoUtil.getCoverageInPercentageFromJacoco(any(), any()) } returns 0.9
-        details = SourceFileDetails(map, shortFilePath, path, shortJacocoPath, shortJacocoCSVPath, mocoJSONPath, listener)
+        details = SourceFileDetails(parameters, shortFilePath, listener)
         every { data.selectedClass } returns details
         challenge = LineCoverageChallenge(data)
         challenge.getScore() shouldBe 3
         challenge.toEscapedString()
         every { element.attr("class") } returns "pc"
         every { JacocoUtil.getCoverageInPercentageFromJacoco(any(), any()) } returns coverage
-        details = SourceFileDetails(map, shortFilePath, path, shortJacocoPath, shortJacocoCSVPath, mocoJSONPath, listener)
+        details = SourceFileDetails(parameters, shortFilePath, listener)
         every { data.selectedClass } returns details
         challenge = LineCoverageChallenge(data)
         challenge.getScore() shouldBe 3
@@ -119,17 +124,17 @@ class LineCoverageChallengeTest : AnnotationSpec() {
 
     @Test
     fun isSolvable() {
-        challenge.isSolvable(map, run, listener, path) shouldBe true
-        map["branch"] = branch
-        challenge.isSolvable(map, run, listener, path) shouldBe true
+        challenge.isSolvable(parameters, run, listener) shouldBe true
+        parameters.branch = branch
+        challenge.isSolvable(parameters, run, listener) shouldBe true
         every { document.select("span.pc") } returns Elements()
         every { document.select("span.nc") } returns Elements()
         val pathMock = mockkClass(FilePath::class)
         every { pathMock.exists() } returns true
         every { JacocoUtil.calculateCurrentFilePath(any(), any(), any()) } returns pathMock
-        challenge.isSolvable(map, run, listener, pathMock) shouldBe false
+        challenge.isSolvable(parameters, run, listener) shouldBe false
         every { document.select("span.nc") } returns elements
-        challenge.isSolvable(map, run, listener, pathMock) shouldBe true
+        challenge.isSolvable(parameters, run, listener) shouldBe true
     }
 
     @Test
@@ -138,38 +143,38 @@ class LineCoverageChallengeTest : AnnotationSpec() {
         every { pathMock.exists() } returns false
         every { pathMock.remote } returns path.remote
         every { JacocoUtil.getJacocoFileInMultiBranchProject(any(), any(), any(), any()) } returns pathMock
-        challenge.isSolved(map, run, listener, path) shouldBe false
+        challenge.isSolved(parameters, run, listener) shouldBe false
         every { pathMock.exists() } returns true
         every { document.select("span.pc") } returns Elements()
         every { document.select("span.fc") } returns Elements()
         every { document.select("span.nc") } returns Elements()
-        challenge.isSolved(map, run, listener, path) shouldBe false
+        challenge.isSolved(parameters, run, listener) shouldBe false
         every { document.select("span.fc") } returns elements
-        challenge.isSolved(map, run, listener, path) shouldBe true
+        challenge.isSolved(parameters, run, listener) shouldBe true
         every { element.attr("class") } returns "pc"
         every { data.line } returns element
         challenge = LineCoverageChallenge(data)
-        challenge.isSolved(map, run, listener, path) shouldBe true
+        challenge.isSolved(parameters, run, listener) shouldBe true
         every { element.attr("class") } returns "nc"
         every { document.select("span.fc") } returns Elements()
         every { document.select("span.nc") } returns elements
-        challenge.isSolved(map, run, listener, path) shouldBe false
+        challenge.isSolved(parameters, run, listener) shouldBe false
         every { element.attr("class") } returns "fc"
         every { element.attr("id") } returns "L6"
         every { document.select("span.fc") } returns elements
         every { document.select("span.nc") } returns Elements()
-        challenge.isSolved(map, run, listener, path) shouldBe true
+        challenge.isSolved(parameters, run, listener) shouldBe true
         every { element.attr("title") } returns "2 of 3 branches missed."
         every { element.attr("class") } returns "pc"
         every { data.line } returns element
         challenge = LineCoverageChallenge(data)
-        challenge.isSolved(map, run, listener, path) shouldBe false
+        challenge.isSolved(parameters, run, listener) shouldBe false
         every { element.attr("title") } returns "All 3 branches missed."
         every { element.attr("class") } returns "nc"
         every { data.line } returns element
         challenge = LineCoverageChallenge(data)
-        challenge.isSolved(map, run, listener, path) shouldBe false
+        challenge.isSolved(parameters, run, listener) shouldBe false
         every { element.attr("title") } returns "1 of 3 branches missed."
-        challenge.isSolved(map, run, listener, path) shouldBe true
+        challenge.isSolved(parameters, run, listener) shouldBe true
     }
 }

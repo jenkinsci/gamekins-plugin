@@ -16,7 +16,7 @@
 
 package org.gamekins.file
 
-import hudson.FilePath
+import org.gamekins.util.Constants.Parameters
 import org.gamekins.util.GitUtil
 import org.gamekins.util.JacocoUtil
 import java.io.File
@@ -25,14 +25,13 @@ import java.io.Serializable
 /**
  * The internal representation of a file received from git.
  *
- * @param constants Constants about the project, needed for generating new challenges after rejection
+ * @param parameters Constants about the project, needed for generating new challenges after rejection
  * @param filePath Path of the file, starting in the workspace root directory
- * @param workspace Workspace of the project
  *
  * @author Philipp Straubinger
  * @since 0.4
  */
-open class FileDetails(val constants: HashMap<String, String>, val filePath: String, workspace: FilePath)
+open class FileDetails(var parameters: Parameters, val filePath: String)
     : Serializable {
 
     val changedByUsers: HashSet<GitUtil.GameUser> = hashSetOf()
@@ -40,7 +39,6 @@ open class FileDetails(val constants: HashMap<String, String>, val filePath: Str
     val fileName: String
     val fileExtension: String
     val packageName: String
-    val workspace: String = workspace.remote
 
     init {
         val pathSplit = filePath.split("/".toRegex())
@@ -50,10 +48,10 @@ open class FileDetails(val constants: HashMap<String, String>, val filePath: Str
         fileExtension = lastPartOfFile.removePrefix(lastPartOfFile.split("\\.".toRegex())[0] + ".")
         packageName = JacocoUtil.computePackageName(filePath)
 
-        file = if (!this.workspace.endsWith("/") && !filePath.startsWith("/")) {
-            File(this.workspace + "/" + filePath)
+        file = if (!parameters.remote.endsWith("/") && !filePath.startsWith("/")) {
+            File(parameters.remote + "/" + filePath)
         } else {
-            File(this.workspace + filePath)
+            File(parameters.remote + filePath)
         }
     }
 
@@ -69,5 +67,14 @@ open class FileDetails(val constants: HashMap<String, String>, val filePath: Str
      */
     fun filesExists(): Boolean {
         return file.exists()
+    }
+
+    /**
+     * Called by Jenkins after the object has been created from his XML representation. Used for data migration.
+     */
+    @Suppress("unused", "SENSELESS_COMPARISON")
+    private fun readResolve(): Any {
+        if (parameters == null) parameters = Parameters()
+        return this
     }
 }

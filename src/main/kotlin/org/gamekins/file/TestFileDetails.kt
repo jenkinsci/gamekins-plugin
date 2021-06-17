@@ -18,6 +18,7 @@ package org.gamekins.file
 
 import hudson.FilePath
 import hudson.model.TaskListener
+import org.gamekins.util.Constants.Parameters
 import org.gamekins.util.JUnitUtil
 import org.gamekins.util.JacocoUtil
 import java.io.File
@@ -28,11 +29,10 @@ import java.io.File
  * @author Philipp Straubinger
  * @since 0.4
  */
-class TestFileDetails(constants: HashMap<String, String>,
+class TestFileDetails(parameters: Parameters,
                       filePath: String,
-                      workspace: FilePath,
                       listener: TaskListener = TaskListener.NULL)
-    : FileDetails(constants, filePath, workspace) {
+    : FileDetails(parameters, filePath) {
 
     val junitFile: File
     val testCount: Int
@@ -40,8 +40,9 @@ class TestFileDetails(constants: HashMap<String, String>,
     val testNames: HashSet<String>
 
     init {
-        val files: List<FilePath> = workspace.act(
-            JacocoUtil.FilesOfAllSubDirectoriesCallable(workspace, "TEST-$packageName\\.$fileName\\.xml")
+        val files: List<FilePath> = parameters.workspace.act(
+            JacocoUtil.FilesOfAllSubDirectoriesCallable(
+                parameters.workspace, "TEST-$packageName\\.$fileName\\.xml")
         )
 
         if (files.isEmpty()) {
@@ -56,5 +57,14 @@ class TestFileDetails(constants: HashMap<String, String>,
             testFailCount = JUnitUtil.getTestCountOfSingleJUnitResult(files.first())
             testNames = JUnitUtil.getTestNames(files.first())
         }
+    }
+
+    /**
+     * Called by Jenkins after the object has been created from his XML representation. Used for data migration.
+     */
+    @Suppress("unused", "SENSELESS_COMPARISON")
+    private fun readResolve(): Any {
+        if (parameters == null) parameters = Parameters()
+        return this
     }
 }

@@ -22,6 +22,7 @@ import hudson.model.TaskListener
 import org.gamekins.file.SourceFileDetails
 import org.gamekins.mutation.MutationInfo
 import org.gamekins.mutation.MutationResults
+import org.gamekins.util.Constants.Parameters
 import org.gamekins.util.GitUtil
 import org.gamekins.util.JacocoUtil
 
@@ -59,7 +60,7 @@ class MutationTestChallenge(
             }
             if (details.jacocoSourceFile.exists()) {
                 val javaHtmlPath = JacocoUtil.calculateCurrentFilePath(
-                    workspace, details.jacocoSourceFile, details.workspace
+                    workspace, details.jacocoSourceFile, details.parameters.remote
                 )
                 val snippetElements = JacocoUtil.getLinesInRange(javaHtmlPath, lineOfCode, 4)
                 if (snippetElements.first == "") {
@@ -84,8 +85,8 @@ class MutationTestChallenge(
      * Returns the constants provided during creation. Must include entries for "projectName", "branch", "workspace",
      * "jacocoResultsPath" and "jacocoCSVPath".
      */
-    override fun getConstants(): HashMap<String, String> {
-        return details.constants
+    override fun getParameters(): Parameters {
+        return details.parameters
     }
 
     override fun getCreated(): Long {
@@ -135,18 +136,17 @@ class MutationTestChallenge(
 
     /**
      * Checks whether the [MutationTestChallenge] is solvable if the [run] was in the [branch] (taken from
-     * [constants]), where it has been generated. The [workspace] is the folder with the code and execution rights,
+     * [parameters]), where it has been generated. The workspace is the folder with the code and execution rights,
      * and the [listener] reports the events to the console output of Jenkins.
      *
      * A mutation challenge is discarded if its source file has changed (using git info)
      */
     override fun isSolvable(
-        constants: HashMap<String, String>, run: Run<*, *>, listener: TaskListener,
-        workspace: FilePath
+        parameters: Parameters, run: Run<*, *>, listener: TaskListener
     ): Boolean {
-        val changedClasses = workspace.act(
+        val changedClasses = parameters.workspace.act(
             GitUtil.DiffFromHeadCallable(
-                workspace, commitID,
+                parameters.workspace, commitID,
                 details.packageName
             )
         )
@@ -158,19 +158,18 @@ class MutationTestChallenge(
 
     /**
      * The [MutationTestChallenge] is solved if mutation status is killed.
-     * The [workspace] is the folder with the code and execution rights, and
+     * The workspace is the folder with the code and execution rights, and
      * the [listener] reports the events to the console output of Jenkins.
      *
      * A mutation challenge is solved if it exists in MoCo JSON file and has result as "killed"
      *
      */
     override fun isSolved(
-        constants: HashMap<String, String>, run: Run<*, *>, listener: TaskListener,
-        workspace: FilePath
+        parameters: Parameters, run: Run<*, *>, listener: TaskListener
     ): Boolean {
         if (details.mocoJSONFile == null) return false
         val jsonFilePath = JacocoUtil.calculateCurrentFilePath(
-            workspace, details.mocoJSONFile!!, details.workspace
+            parameters.workspace, details.mocoJSONFile!!, details.parameters.remote
         )
         val mutationResults = MutationResults.retrievedMutationsFromJson(jsonFilePath, listener)
         val filteredByClass = mutationResults?.entries?.filter { it.key == this.className }

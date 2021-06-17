@@ -32,6 +32,7 @@ import io.mockk.mockkStatic
 import io.mockk.unmockkAll
 import org.eclipse.jgit.revwalk.RevCommit
 import org.gamekins.file.SourceFileDetails
+import org.gamekins.util.Constants.Parameters
 import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject
 import org.jsoup.nodes.Document
 import org.jsoup.select.Elements
@@ -45,6 +46,7 @@ class JacocoUtilTest : AnnotationSpec() {
     private lateinit var jacocoCSVFile : FilePath
     private lateinit var jacocoMethodFile : FilePath
     private lateinit var sourceFile : FilePath
+    private lateinit var parameters : Parameters
 
     @BeforeAll
     fun initAll() {
@@ -61,6 +63,8 @@ class JacocoUtilTest : AnnotationSpec() {
         jacocoCSVFile = FilePath(null, path.remote + "/target/site/jacoco/jacoco.csv")
         sourceFile = FilePath(null, path.remote + "/src/main/java/com/example/Complex.java")
         jacocoMethodFile = FilePath(null, path.remote + "/target/site/jacoco/com.example/Complex.html")
+        parameters = Parameters()
+        parameters.workspace = path
 
     }
 
@@ -88,7 +92,7 @@ class JacocoUtilTest : AnnotationSpec() {
     fun chooseRandomLine() {
         val classDetails = mockkClass(SourceFileDetails::class)
         every { classDetails.jacocoSourceFile } returns File(jacocoSourceFile.remote)
-        every { classDetails.workspace } returns path.remote
+        every { classDetails.parameters } returns parameters
         JacocoUtil.chooseRandomLine(classDetails, path) shouldNotBe null
 
         every { JacocoUtil.getLines(any()) } returns Elements()
@@ -100,7 +104,7 @@ class JacocoUtilTest : AnnotationSpec() {
         mockkStatic(JacocoUtil::class)
         val classDetails = mockkClass(SourceFileDetails::class)
         every { classDetails.jacocoMethodFile } returns File(jacocoMethodFile.remote)
-        every { classDetails.workspace } returns path.remote
+        every { classDetails.parameters } returns parameters
         JacocoUtil.chooseRandomMethod(classDetails, path) shouldNotBe null
 
         every { JacocoUtil.getNotFullyCoveredMethodEntries(any()) } returns arrayListOf()
@@ -140,16 +144,15 @@ class JacocoUtilTest : AnnotationSpec() {
         val project = mockkClass(WorkflowMultiBranchProject::class)
         every { run.parent } returns job
         every { job.parent } returns project
-        val map = HashMap<String, String>()
-        map["branch"] = "testing"
-        map["projectName"] = "test-project"
+        parameters.branch = "testing"
+        parameters.projectName = "test-project"
         val jacocoFile = FilePath(null, "/home/test/test-project_testing/file.html")
         val jacocoFileMaster = FilePath(null, "/home/test/test-project_master/file.html")
 
-        JacocoUtil.getJacocoFileInMultiBranchProject(run, map, jacocoFile, "testing") shouldBe jacocoFile
-        JacocoUtil.getJacocoFileInMultiBranchProject(run, map, jacocoFileMaster, "master") shouldBe jacocoFile
+        JacocoUtil.getJacocoFileInMultiBranchProject(run, parameters, jacocoFile, "testing") shouldBe jacocoFile
+        JacocoUtil.getJacocoFileInMultiBranchProject(run, parameters, jacocoFileMaster, "master") shouldBe jacocoFile
         every { job.parent } returns mockkClass(jenkins.branch.MultiBranchProject::class)
-        JacocoUtil.getJacocoFileInMultiBranchProject(run, map, jacocoFile, "testing") shouldBe jacocoFile
+        JacocoUtil.getJacocoFileInMultiBranchProject(run, parameters, jacocoFile, "testing") shouldBe jacocoFile
     }
 
     @Test

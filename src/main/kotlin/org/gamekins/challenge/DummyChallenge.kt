@@ -16,10 +16,9 @@
 
 package org.gamekins.challenge
 
-import hudson.FilePath
 import hudson.model.Run
 import hudson.model.TaskListener
-import kotlin.collections.HashMap
+import org.gamekins.util.Constants.Parameters
 
 /**
  * Generated [Challenge] if the user has not developed something in the last commits. Only for information purposes.
@@ -27,7 +26,7 @@ import kotlin.collections.HashMap
  * @author Philipp Straubinger
  * @since 0.1
  */
-class DummyChallenge(private var constants: HashMap<String, String>) : Challenge {
+class DummyChallenge(private var parameters: Parameters) : Challenge {
 
     override fun equals(other: Any?): Boolean {
         if (other == null) return false
@@ -35,8 +34,8 @@ class DummyChallenge(private var constants: HashMap<String, String>) : Challenge
         return true
     }
 
-    override fun getConstants(): HashMap<String, String> {
-        return constants
+    override fun getParameters(): Parameters {
+        return parameters
     }
 
     /**
@@ -71,7 +70,7 @@ class DummyChallenge(private var constants: HashMap<String, String>) : Challenge
     }
 
     override fun hashCode(): Int {
-        return constants.hashCode()
+        return parameters.hashCode()
     }
 
     /**
@@ -79,8 +78,7 @@ class DummyChallenge(private var constants: HashMap<String, String>) : Challenge
      *
      * @see Challenge
      */
-    override fun isSolvable(constants: HashMap<String, String>, run: Run<*, *>, listener: TaskListener,
-                            workspace: FilePath): Boolean {
+    override fun isSolvable(parameters: Parameters, run: Run<*, *>, listener: TaskListener): Boolean {
         return true
     }
 
@@ -89,8 +87,7 @@ class DummyChallenge(private var constants: HashMap<String, String>) : Challenge
      *
      * @see Challenge
      */
-    override fun isSolved(constants: HashMap<String, String>, run: Run<*, *>, listener: TaskListener,
-                          workspace: FilePath): Boolean {
+    override fun isSolved(parameters: Parameters, run: Run<*, *>, listener: TaskListener): Boolean {
         return true
     }
 
@@ -108,7 +105,7 @@ class DummyChallenge(private var constants: HashMap<String, String>) : Challenge
      */
     @Suppress("unused", "SENSELESS_COMPARISON")
     private fun readResolve(): Any {
-        if (constants == null) constants = hashMapOf()
+        if (parameters == null) parameters = Parameters()
         return this
     }
 

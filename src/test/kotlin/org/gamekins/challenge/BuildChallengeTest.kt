@@ -27,6 +27,7 @@ import io.kotest.matchers.string.shouldStartWith
 import io.mockk.every
 import io.mockk.mockkClass
 import io.mockk.unmockkAll
+import org.gamekins.util.Constants.Parameters
 
 class BuildChallengeTest : AnnotationSpec() {
 
@@ -34,7 +35,7 @@ class BuildChallengeTest : AnnotationSpec() {
 
     @BeforeEach
     fun init() {
-        challenge = BuildChallenge(hashMapOf())
+        challenge = BuildChallenge(Parameters())
     }
 
     @AfterAll
@@ -45,15 +46,14 @@ class BuildChallengeTest : AnnotationSpec() {
     @Test
     fun isSolved() {
         val run = mockkClass(Run::class)
-        val map = HashMap<String, String>()
+        val parameters = Parameters()
         val listener = TaskListener.NULL
-        val path = FilePath(null, "")
 
-        challenge.isSolvable(map, run, listener, path) shouldBe true
-        every { run.getResult() } returns Result.FAILURE
-        challenge.isSolved(map, run, listener, path) shouldBe false
-        every { run.getResult() } returns Result.SUCCESS
-        challenge.isSolved(map, run, listener, path) shouldBe true
+        challenge.isSolvable(parameters, run, listener) shouldBe true
+        every { run.result } returns Result.FAILURE
+        challenge.isSolved(parameters, run, listener) shouldBe false
+        every { run.result } returns Result.SUCCESS
+        challenge.isSolved(parameters, run, listener) shouldBe true
         challenge.getSolved() shouldNotBe 0
         challenge.getScore() shouldBe 1
     }

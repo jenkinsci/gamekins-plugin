@@ -19,6 +19,7 @@ package org.gamekins.challenge
 import hudson.FilePath
 import org.gamekins.file.SourceFileDetails
 import org.gamekins.util.JacocoUtil
+import org.gamekins.util.Constants.Parameters
 import java.io.File
 
 /**
@@ -47,7 +48,7 @@ abstract class CoverageChallenge(var details: SourceFileDetails, workspace: File
      */
     init {
         val document = JacocoUtil.generateDocument(JacocoUtil.calculateCurrentFilePath(workspace!!,
-                details.jacocoSourceFile, details.workspace))
+                details.jacocoSourceFile, details.parameters.remote))
         fullyCoveredLines = JacocoUtil.calculateCoveredLines(document, "fc")
         partiallyCoveredLines = JacocoUtil.calculateCoveredLines(document, "pc")
         notCoveredLines = JacocoUtil.calculateCoveredLines(document, "nc")
@@ -61,7 +62,7 @@ abstract class CoverageChallenge(var details: SourceFileDetails, workspace: File
     open fun createCodeSnippet(classDetails: SourceFileDetails, target: Any, workspace: FilePath): String {
         if (classDetails.jacocoSourceFile.exists()) {
             val javaHtmlPath = JacocoUtil.calculateCurrentFilePath(
-                workspace, classDetails.jacocoSourceFile, classDetails.workspace
+                workspace, classDetails.jacocoSourceFile, classDetails.parameters.remote
             )
             val snippetElements = JacocoUtil.getLinesInRange(javaHtmlPath, target, 4)
             if (snippetElements.first == "") {
@@ -81,8 +82,8 @@ abstract class CoverageChallenge(var details: SourceFileDetails, workspace: File
         return ""
     }
 
-    override fun getConstants(): HashMap<String, String> {
-        return details.constants
+    override fun getParameters(): Parameters {
+        return details.parameters
     }
 
     override fun getCreated(): Long {

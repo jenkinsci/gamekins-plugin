@@ -16,14 +16,14 @@
 
 package org.gamekins.challenge
 
-import hudson.FilePath
 import hudson.model.Run
 import hudson.model.TaskListener
 import hudson.model.User
+import org.gamekins.util.Constants
+import org.gamekins.util.Constants.Parameters
 import org.gamekins.util.GitUtil
 import org.gamekins.util.JUnitUtil
 import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject
-import kotlin.collections.HashMap
 
 /**
  * Specific [Challenge] to motivate the user to write a new test.
@@ -36,7 +36,7 @@ class TestChallenge(data: Challenge.ChallengeGenerationData) : Challenge {
     private val currentCommit: String = data.headCommitHash!!
     private val testCount: Int = data.testCount!!
     private val user: User = data.user
-    private var constants: HashMap<String, String> = data.constants
+    private var parameters: Parameters = data.parameters
     private val created = System.currentTimeMillis()
     private var solved: Long = 0
     private var testCountSolved = 0
@@ -47,8 +47,8 @@ class TestChallenge(data: Challenge.ChallengeGenerationData) : Challenge {
         return true
     }
 
-    override fun getConstants(): HashMap<String, String> {
-        return constants
+    override fun getParameters(): Parameters {
+        return parameters
     }
 
     override fun getCreated(): Long {
@@ -71,8 +71,8 @@ class TestChallenge(data: Challenge.ChallengeGenerationData) : Challenge {
         var result = currentCommit.hashCode()
         result = 31 * result + testCount
         result = 31 * result + user.hashCode()
-        result = 31 * result + constants["branch"].hashCode()
-        result = 31 * result + constants.hashCode()
+        result = 31 * result + parameters.branch.hashCode()
+        result = 31 * result + parameters.hashCode()
         result = 31 * result + created.hashCode()
         result = 31 * result + solved.hashCode()
         result = 31 * result + testCountSolved
@@ -80,14 +80,13 @@ class TestChallenge(data: Challenge.ChallengeGenerationData) : Challenge {
     }
 
     /**
-     * A [TestChallenge] is always solvable if the branch (taken form the [constants]), where it has been generated,
+     * A [TestChallenge] is always solvable if the branch (taken form the [parameters]), where it has been generated,
      * still exists in the project.
      */
-    override fun isSolvable(constants: HashMap<String, String>, run: Run<*, *>, listener: TaskListener,
-                            workspace: FilePath): Boolean {
+    override fun isSolvable(parameters: Parameters, run: Run<*, *>, listener: TaskListener): Boolean {
         if (run.parent.parent is WorkflowMultiBranchProject) {
             for (workflowJob in (run.parent.parent as WorkflowMultiBranchProject).items) {
-                if (workflowJob.name == this.constants["branch"]) return true
+                if (workflowJob.name == this.parameters.branch) return true
             }
         } else {
             return true
@@ -96,22 +95,21 @@ class TestChallenge(data: Challenge.ChallengeGenerationData) : Challenge {
     }
 
     /**
-     * A [TestChallenge] can only be solved in the branch (taken form the [constants]) where it has been generated,
+     * A [TestChallenge] can only be solved in the branch (taken form the [parameters]) where it has been generated,
      * because there can be different amounts of tests in different branches. The [TestChallenge] is solved if the
      * [testCount] during generation was less than the current amount of tests and the [user] has written a test since
      * the last commit ([currentCommit]).
      */
-    override fun isSolved(constants: HashMap<String, String>, run: Run<*, *>, listener: TaskListener,
-                          workspace: FilePath): Boolean {
-        if (this.constants["branch"] != constants["branch"]) return false
+    override fun isSolved(parameters: Parameters, run: Run<*, *>, listener: TaskListener): Boolean {
+        if (this.parameters.branch != parameters.branch) return false
         try {
-            val testCountSolved = JUnitUtil.getTestCount(workspace, run)
+            val testCountSolved = JUnitUtil.getTestCount(parameters.workspace, run)
             if (testCountSolved <= testCount) {
                 return false
             }
             val lastChangedFilesOfUser = GitUtil.getLastChangedTestsOfUser(
-                GitUtil.DEFAULT_SEARCH_COMMIT_COUNT, currentCommit, constants, listener, GitUtil.GameUser(user),
-                GitUtil.mapUsersToGameUsers(User.getAll()), workspace)
+                Constants.DEFAULT_SEARCH_COMMIT_COUNT, currentCommit, parameters, listener, GitUtil.GameUser(user),
+                GitUtil.mapUsersToGameUsers(User.getAll()))
             if (lastChangedFilesOfUser.isNotEmpty()) {
                 solved = System.currentTimeMillis()
                 this.testCountSolved = testCountSolved
@@ -138,7 +136,7 @@ class TestChallenge(data: Challenge.ChallengeGenerationData) : Challenge {
      */
     @Suppress("unused", "SENSELESS_COMPARISON")
     private fun readResolve(): Any {
-        if (constants == null) constants = hashMapOf()
+        if (parameters == null) parameters = Parameters()
         return this
     }
 
@@ -147,6 +145,6 @@ class TestChallenge(data: Challenge.ChallengeGenerationData) : Challenge {
     }
 
     override fun toString(): String {
-        return "Write a new test in branch ${constants["branch"]}"
+        return "Write a new test in branch ${parameters.branch}"
     }
 }

@@ -24,10 +24,11 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldStartWith
 import io.mockk.mockkClass
 import io.mockk.unmockkAll
+import org.gamekins.util.Constants.Parameters
 
 class DummyChallengeTest : AnnotationSpec() {
 
-    private val challenge = DummyChallenge(hashMapOf())
+    private val challenge = DummyChallenge(Parameters())
 
     @AfterAll
     fun cleanUp() {
@@ -37,12 +38,12 @@ class DummyChallengeTest : AnnotationSpec() {
     @Test
     fun isSolved() {
         val run = mockkClass(Run::class)
-        val map = HashMap<String, String>()
+        val parameters = Parameters()
         val listener = TaskListener.NULL
         val path = FilePath(null, "")
 
-        challenge.isSolvable(map, run, listener, path) shouldBe true
-        challenge.isSolved(map, run, listener, path) shouldBe true
+        challenge.isSolvable(parameters, run, listener) shouldBe true
+        challenge.isSolved(parameters, run, listener) shouldBe true
         challenge.getScore() shouldBe 0
         challenge.getCreated() shouldBe 0
         challenge.getSolved() shouldBe 0
