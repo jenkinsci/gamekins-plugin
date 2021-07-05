@@ -71,8 +71,136 @@
 
             <j:if test="${it.participating}">
                 <h1 class="ml-2">
-                    Challenges
+                    Quests &amp; Challenges
                 </h1>
+
+                <div class="row container-fluid py-1 px-5 justify-content-center">
+                    <p class="font-italic font-weight-light">Click on a quest to expand and see more details if
+                        available</p>
+                    <div id="questAccordion" class="col-12 px-0 shadow-lg">
+                        <div class="card-header py-2 my-1 bg-dark text-white" id="headingOne">
+                            <h5 class="m-2">Current Quests</h5>
+                        </div>
+                        <?jelly escape-by-default='false'?>
+
+                        <j:forEach indexVar="index" var="currentQuest" items="${it.currentQuests}">
+                            <div class="card border-0">
+                                <div class="card-header p-0 m-0" data-toggle="tooltip" data-placement="top"
+                                     title="Click to see more details" id="headingQuest${index + 1}">
+                                    <div class="row mx-1 align-items-center mb-2">
+                                        <div class="col-12 col-sm-10">
+                                            <h5>
+                                                <button class="btn btn-link text-dark text-left text-decoration-none"
+                                                        data-toggle="collapse" data-target="#quest${index + 1}"
+                                                        aria-expanded="true"
+                                                        aria-controls="collapseOne"
+                                                        style="font-size:14px;">
+                                                    ${index + 1}. <span id="currentQuestText${index + 1}">${currentQuest}</span>
+                                                    <span class="ml-2 badge badge-success">${currentQuest.score} points</span>
+                                                </button>
+                                            </h5>
+                                        </div>
+                                        <div class="col-12 col-sm-2">
+                                            <button type="button" class="btn btn-danger m-2 py-1"
+                                                    style="font-size: 14px;"
+                                                    data-toggle="modal" data-target="#rejectModal"
+                                                    data-quest-id="${index + 1}"
+                                                    data-descriptor-url="${it.descriptor.descriptorFullUrl}">
+                                                Reject
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="quest${index + 1}" class="collapse" aria-labelledby="headingQuest${index + 1}"
+                                 data-parent="#questAccordion">
+                                <div class="card-body" style="font-size:15px;">
+                                    <j:forEach indexVar="indexQuest" var="step" items="${currentQuest.steps}">
+                                        <div class="card border-0">
+                                            <j:if test="${step == currentQuest.currentStep}">
+                                                <div class="card-header p-0 m-0" data-toggle="tooltip" data-placement="top"
+                                                     title="Click to see more details" id="headingQuestChallenge${indexQuest + 1}">
+                                                    <div class="row mx-1 align-items-center mb-2">
+                                                        <div class="col-12 col-sm-12">
+                                                            <h5>
+                                                                <j:if test='${step.description != ""}'>
+                                                                    ${step.description}
+                                                                    <br/>
+                                                                </j:if>
+                                                                <button class="btn btn-link text-dark text-left text-decoration-none"
+                                                                        data-toggle="collapse" data-target="#step${indexQuest + 1}"
+                                                                        aria-expanded="true"
+                                                                        aria-controls="collapseOne"
+                                                                        style="font-size:14px;">
+                                                                    ${indexQuest + 1}. <span id="questChallengeText${indexQuest + 1}">${step.challenge}</span>
+                                                                    <span class="ml-2 badge badge-warning">${step.challenge.name}</span>
+                                                                </button>
+                                                            </h5>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div id="step${indexQuest + 1}" class="collapse" aria-labelledby="questStepHeading${indexQuest + 1}"
+                                                     data-parent="#quest${index + 1}">
+                                                    <div class="card-body" style="font-size:15px;">
+
+                                                        <j:if test='${step.challenge.name == "Mutation"}'>
+                                                            <p>Write or update tests so that they fail when we <b>${step.challenge.mutationDescription}</b> at the mentioned location</p>
+                                                            <h6>${step.challenge.fileName}</h6>
+                                                        </j:if>
+                                                        <j:if test='${step.challenge.name == "Mutation"}'>
+                                                            <j:if test='${step.challenge.snippet != ""}'>
+                                                                <h6>Original code snippet</h6>
+                                                            </j:if>
+                                                            <j:if test='${step.challenge.snippet == ""}'>
+                                                                <h6>Original code snippet is not available</h6>
+                                                            </j:if>
+                                                        </j:if>
+
+                                                        <j:if test='${step.challenge.snippet != ""}'>
+                                                            ${step.challenge.snippet}
+                                                        </j:if>
+
+                                                        <j:if test='${step.challenge.name == "Mutation"}'>
+                                                            <j:if test='${step.challenge.mutatedLine != ""}'>
+                                                                <h6>Mutated line of code</h6>
+                                                                ${step.challenge.mutatedLine}
+                                                            </j:if>
+                                                            <j:if test='${step.challenge.mutatedLine == ""}'>
+                                                                <h6 class="pt-3">Mutated line of code is not available</h6>
+                                                            </j:if>
+                                                            <p class="font-italic font-weight-light">The mutated line is built from
+                                                                byte code information and could be syntactically invalid. Please use along with the description in that case
+                                                            </p>
+                                                        </j:if>
+
+                                                    </div>
+                                                </div>
+                                            </j:if>
+                                            <j:if test="${step != currentQuest.currentStep}">
+                                                <div class="card-header p-0 m-0">
+                                                    <div class="row mx-1 align-items-center mb-2">
+                                                        <div class="col-12 col-sm-12" style="opacity: 0.4">
+                                                            <h5>
+                                                                <button class="btn btn-link text-dark text-left text-decoration-none"
+                                                                        style="font-size:14px;" disabled="disabled">
+                                                                    ${indexQuest + 1}. <span id="questChallengeText${index + 1}">${step.challenge}</span>
+                                                                    <span class="ml-2 badge badge-warning">${step.challenge.name}</span>
+                                                                </button>
+                                                            </h5>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </j:if>
+                                        </div>
+                                    </j:forEach>
+                                </div>
+                            </div>
+                        </j:forEach>
+                    </div>
+                </div>
+
                 <div class="row container-fluid py-1 px-5 justify-content-center">
                     <p class="font-italic font-weight-light">Click on a challenge to expand and see more details if
                         available</p>
@@ -178,6 +306,52 @@
                                 <button type="button" class="btn btn-danger" id="rejectButtonConfirm">Reject</button>
                             </div>
                         </div>
+                    </div>
+                </div>
+
+                <div class="row container-fluid py-2 px-4 justify-content-center">
+                    <div class="col-12 col-md-6 table-responsive p-4" style="max-height: 600px">
+                        <table class="mt-3 shadow table-hover table pane sortable bigtable" id="completedQuestsTable">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th scope="col" class="text-left"><h5 class="pl-4">Completed Quests</h5></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <j:forEach indexVar="index" var="completedQuest" items="${it.completedQuests}">
+                                    <j:if test="${!completedQuest.first.toString().contains('No quest could be generated')}">
+                                        <tr>
+                                            <td class="p-4" style="background-color: #dbffe0;">${completedQuest}
+                                                <span class="ml-2 badge badge-success">${completedQuest.score} points</span>
+                                            </td>
+                                        </tr>
+                                    </j:if>
+                                </j:forEach>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="col-12 col-md-6 table-responsive p-4" style="max-height: 600px">
+                        <table class="mt-3 shadow table-hover table pane sortable bigtable" id="rejectedQuestsTable">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th scope="col" class="text-left"><h5 class="pl-4">Rejected Quests</h5></th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                <j:forEach indexVar="index" var="rejectedQuests" items="${it.rejectedQuests}">
+                                    <j:if test="${!completedQuest.first.toString().contains('No quest could be generated')}">
+                                        <tr>
+                                            <td data-toggle="tooltip" data-placement="right"
+                                                title="Reason: ${rejectedQuests.second}" class="p-4"
+                                                style="background-color: #fff4e8;">
+                                                ${rejectedQuests.first}
+                                            </td>
+                                        </tr>
+                                    </j:if>
+                                </j:forEach>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
 
@@ -310,10 +484,14 @@
                     let modal = jQuery3(this)
                     let button = jQuery3(event.relatedTarget)
                     let descriptorFullUrl = button.data('descriptor-url')
-                    let challengeID = button.data('challenge-id')
-                    modal.find('.modal-title').text('Reject Current Challenge ' + challengeID)
                     let rejectBtnConfirm = modal.find('#rejectButtonConfirm')
-                    rejectBtnConfirm.data("cid", challengeID)
+                    if (button.data('challenge-id') === undefined) {
+                        rejectBtnConfirm.data("qid", button.data('quest-id'))
+                        modal.find('.modal-title').text('Reject Quest ' + button.data('quest-id'))
+                    } else {
+                        rejectBtnConfirm.data("cid", button.data('challenge-id'))
+                        modal.find('.modal-title').text('Reject Current Challenge ' + button.data('challenge-id'))
+                    }
                     rejectBtnConfirm.data("url", descriptorFullUrl)
                 })
 
@@ -323,43 +501,69 @@
 
                 jQuery3('#rejectButtonConfirm').on('click', function () {
                     let btn = jQuery3(this)
+                    let questID = btn.data('qid')
                     let challengeID = btn.data('cid')
                     let descriptorFullUrl = btn.data('url')
                     let modal = jQuery3("#rejectModal")
-                    let challenge = jQuery3("#currentChallengeText" + challengeID)[0].innerText
                     let reason = modal.find('#reason-text').val()
-                    let url = descriptorFullUrl + "/rejectChallenge"
                     let parameters = {}
-                    parameters["reject"] = challenge
                     parameters["reason"] = reason
 
-                    new Ajax.Request(url, {
-                        parameters: parameters,
-                        onComplete: function (rsp) {
-                            if (rsp.responseText.includes("class=error")) {
-                                modal.find('#error-text')[0].innerHTML = rsp.responseText;
-                                return false;
-                            } else {
-                                modal.find('#error-text')[0].innerHTML = ""
-                                modal.find('#reason-text').val("")
-                                // Update UI after successful rejection
-                                var temp = jQuery3("#heading" + challengeID)
-                                var challengeText = temp.find("#currentChallengeText" + challengeID).html()
-                                console.log(challengeText)
-                                if (challengeText != null) {
-                                    if (!challengeText.includes("You have nothing developed recently")) {
-                                        var appendedVal = '<tr>' +
-                                            '<td class="p-4" style="background-color: #fff4e8;" data-toggle="tooltip" data-placement="right" title="' + reason + '">' + challengeText + '</td>' +
-                                            '</tr>'
-                                        jQuery3("#rejectedTable").append(appendedVal)
-                                        jQuery3('[data-toggle="tooltip"]').tooltip()
+
+
+
+                    if (questID === undefined) {
+                        let challenge = jQuery3("#currentChallengeText" + challengeID)[0].innerText
+                        let url = descriptorFullUrl + "/rejectChallenge"
+                        parameters["reject"] = challenge
+
+                        new Ajax.Request(url, {
+                            parameters: parameters,
+                            onComplete: function (rsp) {
+                                if (rsp.responseText.includes("class=error")) {
+                                    modal.find('#error-text')[0].innerHTML = rsp.responseText;
+                                    return false;
+                                } else {
+                                    modal.find('#error-text')[0].innerHTML = ""
+                                    modal.find('#reason-text').val("")
+                                    // Update UI after successful rejection
+                                    var temp = jQuery3("#heading" + challengeID)
+                                    var challengeText = temp.find("#currentChallengeText" + challengeID).html()
+                                    if (challengeText != null) {
+                                        if (!challengeText.includes("You have nothing developed recently")) {
+                                            var appendedVal = '<tr>' +
+                                                '<td class="p-4" style="background-color: #fff4e8;" data-toggle="tooltip" data-placement="right" title="' + reason + '">' + challengeText + '</td>' +
+                                                '</tr>'
+                                            jQuery3("#rejectedTable").append(appendedVal)
+                                            jQuery3('[data-toggle="tooltip"]').tooltip()
+                                        }
                                     }
                                 }
+                                modal.modal("hide")
+                                location.reload()
                             }
-                            modal.modal("hide")
-                            location.reload()
-                        }
-                    })
+                        })
+                    } else {
+                        let quest = jQuery3("#currentQuestText" + questID)[0].innerText
+                        let url = descriptorFullUrl + "/rejectQuest"
+                        parameters["reject"] = quest
+
+                        new Ajax.Request(url, {
+                            parameters: parameters,
+                            onComplete: function (rsp) {
+                                if (rsp.responseText.includes("class=error")) {
+                                    modal.find('#error-text')[0].innerHTML = rsp.responseText;
+                                    return false;
+                                } else {
+                                    modal.find('#error-text')[0].innerHTML = ""
+                                    modal.find('#reason-text').val("")
+
+                                }
+                                modal.modal("hide")
+                                location.reload()
+                            }
+                        })
+                    }
                 })
             </script>
         </l:main-panel>

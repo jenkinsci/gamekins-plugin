@@ -22,10 +22,10 @@ import org.gamekins.GameUserProperty
 import org.gamekins.challenge.ChallengeFactory
 import org.gamekins.challenge.DummyChallenge
 import org.gamekins.challenge.MutationTestChallenge
+import org.gamekins.challenge.quest.QuestFactory
 import org.gamekins.event.EventHandler
-import org.gamekins.event.user.AchievementSolvedEvent
-import org.gamekins.event.user.ChallengeSolvedEvent
-import org.gamekins.event.user.ChallengeUnsolvableEvent
+import org.gamekins.event.user.*
+import org.gamekins.file.FileDetails
 import org.gamekins.file.SourceFileDetails
 import org.gamekins.property.GameJobProperty
 import org.gamekins.property.GameMultiBranchProperty
@@ -59,6 +59,44 @@ object PublisherUtil {
                     property.getUser(), achievement))
                 listener.logger.println("[Gamekins] Solved achievement $achievement")
                 solved++
+            }
+        }
+
+        return solved
+    }
+
+    /**
+     * Checks whether the quests / quest steps of a user are solved or unsolvable and generates new ones if needed.
+     */
+    private fun checkQuests(run: Run<*, *>, property: GameUserProperty, parameters: Parameters, listener: TaskListener
+    ): Int {
+
+        var solved = 0
+        for (quest in property.getCurrentQuests(parameters.projectName)) {
+            if (quest.isCurrentStepSolved(parameters, run, listener)) {
+                val questStep = quest.getLastStep()
+                listener.logger.println("[Gamekins] Solved quest step $questStep of quest $quest")
+                EventHandler.addEvent(
+                    QuestStepSolvedEvent(parameters.projectName, parameters.branch, property.getUser(), quest)
+                )
+            }
+            if (quest.isSolved()) {
+                property.completeQuest(parameters.projectName, quest)
+                EventHandler.addEvent(
+                    QuestSolvedEvent(parameters.projectName, parameters.branch, property.getUser(), quest)
+                )
+                listener.logger.println("[Gamekins] Solved quest $quest")
+                solved++
+            }
+        }
+
+        for (quest in property.getCurrentQuests(parameters.projectName)) {
+            if (!quest.isSolvable(parameters, run, listener)) {
+                property.rejectQuest(parameters.projectName, quest, "One or more challenges are not solvable anymore")
+                EventHandler.addEvent(
+                    QuestUnsolvableEvent(parameters.projectName, parameters.branch, property.getUser(), quest)
+                )
+                listener.logger.println("[Gamekins] Quest $quest can not be solved anymore")
             }
         }
 
@@ -121,6 +159,8 @@ object PublisherUtil {
         var generated = 0
         var solved = 0
         var solvedAchievements = 0
+        var solvedQuests = 0
+        var generatedQuests = 0
         if (!PropertyUtil.realUser(user)) return hashMapOf("generated" to 0, "solved" to 0,
             "solvedAchievements" to solvedAchievements)
 
@@ -142,17 +182,21 @@ object PublisherUtil {
             //Check if the Challenges are still solvable
             checkSolvable(run, property, parameters, listener)
 
-            listener.logger.println("[Gamekins] Start checking solved status of achievements for user ${user.fullName}")
-
             //Generate new Challenges if the user has less than three
             val userGenerated = ChallengeFactory.generateNewChallenges(
                 user, property, parameters, classes, listener,
                 maxChallenges = parameters.currentChallengesCount)
 
             //Check if an achievement is solved
+            listener.logger.println("[Gamekins] Start checking solved status of achievements for user ${user.fullName}")
             parameters.solved = userSolved
             parameters.generated = userGenerated
             solvedAchievements = checkAchievements(property, run, classes, parameters, listener)
+
+            listener.logger.println("[Gamekins] Start checking solved status of quests for user ${user.fullName}")
+            solvedQuests = checkQuests(run, property, parameters, listener)
+            generatedQuests = QuestFactory.generateNewQuests(user, property, parameters, listener,
+                classes as ArrayList<FileDetails>, maxQuests = parameters.currentQuestsCount)
 
             solved += userSolved
             generated += userGenerated

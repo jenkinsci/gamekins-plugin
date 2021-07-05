@@ -29,6 +29,8 @@ object Constants {
 
     const val DEFAULT_CURRENT_CHALLENGES = 3
 
+    const val DEFAULT_CURRENT_QUESTS = 1
+
     const val DEFAULT_SEARCH_COMMIT_COUNT = 50
 
     const val UNEXPECTED_ERROR = "Unexpected Error"
@@ -41,6 +43,9 @@ object Constants {
 
     const val EXISTS = " exists "
 
+    const val NO_QUEST = "No quest could be generated. This could mean that none of the prerequisites was met, " +
+            "please try again later."
+
     const val NO_TEAM = "No team specified"
 
     const val NOT_ACTIVATED = "[Gamekins] Not activated"
@@ -49,12 +54,17 @@ object Constants {
 
     const val NOTHING_DEVELOPED = "You haven't developed anything lately"
 
+    const val REJECTED_QUEST = "Previous quest was rejected, please run a new build to generate a new quest"
+
     const val RUN_TOTAL_COUNT = 200
 
     const val TYPE_JSON = "application/json"
 
     const val TYPE_PLAIN = "text/plain"
 
+    /**
+     * Migrates a [HashMap] of constants to the class [Parameters].
+     */
     fun constantsToParameters(constants: HashMap<String, String>): Parameters {
         val parameters = Parameters()
         if (constants["branch"] != null) parameters.branch = constants["branch"]!!
@@ -72,9 +82,16 @@ object Constants {
         return parameters
     }
 
+    /**
+     * The class representation of parameters during challenge generation.
+     *
+     * @author Philipp Straubinger
+     * @since 0.4
+     */
     class Parameters(
         var branch: String = "",
         var currentChallengesCount: Int = DEFAULT_CURRENT_CHALLENGES,
+        var currentQuestsCount: Int = DEFAULT_CURRENT_QUESTS,
         var generated: Int = 0,
         var jacocoCSVPath: String = "",
         var jacocoResultsPath: String = "",
@@ -101,6 +118,7 @@ object Constants {
         private fun readResolve(): Any {
             if (remote == null) remote = ""
             if (workspace == null) workspace = FilePath(null, remote)
+            if (currentQuestsCount == null) currentQuestsCount = DEFAULT_CURRENT_QUESTS
             return this
         }
     }

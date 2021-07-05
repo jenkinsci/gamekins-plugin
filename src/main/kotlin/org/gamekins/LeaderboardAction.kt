@@ -20,6 +20,7 @@ import hudson.model.*
 import org.gamekins.challenge.Challenge
 import org.gamekins.util.PropertyUtil
 import jenkins.model.Jenkins
+import org.gamekins.challenge.quest.Quest
 import org.kohsuke.stapler.StaplerProxy
 import org.kohsuke.stapler.export.Exported
 import org.kohsuke.stapler.export.ExportedBean
@@ -44,6 +45,16 @@ class LeaderboardAction(val job: AbstractItem) : ProminentProjectAction, Describ
     }
 
     /**
+     * Returns the list of completed Quests of the current project and user.
+     */
+    fun getCompletedQuests(): CopyOnWriteArrayList<Quest> {
+        val user: User = User.current() ?: return CopyOnWriteArrayList()
+        val property = user.getProperty(GameUserProperty::class.java)
+            ?: return CopyOnWriteArrayList()
+        return property.getCompletedQuests(job.name)
+    }
+
+    /**
      * Returns the list of current Challenges of the current project and user.
      */
     fun getCurrentChallenges(): CopyOnWriteArrayList<Challenge> {
@@ -51,6 +62,16 @@ class LeaderboardAction(val job: AbstractItem) : ProminentProjectAction, Describ
         val property = user.getProperty(GameUserProperty::class.java)
                 ?: return CopyOnWriteArrayList()
         return property.getCurrentChallenges(job.name)
+    }
+
+    /**
+     * Returns the list of current Quests of the current project and user.
+     */
+    fun getCurrentQuests(): CopyOnWriteArrayList<Quest> {
+        val user: User = User.current() ?: return CopyOnWriteArrayList()
+        val property = user.getProperty(GameUserProperty::class.java)
+            ?: return CopyOnWriteArrayList()
+        return property.getCurrentQuests(job.name)
     }
 
     override fun getDescriptor(): Descriptor<LeaderboardAction> {
@@ -73,6 +94,16 @@ class LeaderboardAction(val job: AbstractItem) : ProminentProjectAction, Describ
         val property = user.getProperty(GameUserProperty::class.java)
                 ?: return CopyOnWriteArrayList()
         return property.getRejectedChallenges(job.name)
+    }
+
+    /**
+     * Returns the list of rejected Quests of the current project and user.
+     */
+    fun getRejectedQuests(): CopyOnWriteArrayList<Pair<Quest, String>> {
+        val user: User = User.current() ?: return CopyOnWriteArrayList()
+        val property = user.getProperty(GameUserProperty::class.java)
+            ?: return CopyOnWriteArrayList()
+        return property.getRejectedQuests(job.name)
     }
 
     override fun getTarget(): Any {

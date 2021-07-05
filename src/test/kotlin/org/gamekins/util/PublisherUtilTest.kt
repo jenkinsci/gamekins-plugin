@@ -42,6 +42,7 @@ import io.mockk.mockkStatic
 import io.mockk.unmockkAll
 import jenkins.branch.MultiBranchProject
 import org.gamekins.achievement.Achievement
+import org.gamekins.challenge.quest.QuestFactory
 import org.gamekins.file.SourceFileDetails
 import org.gamekins.util.Constants.Parameters
 import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject
@@ -119,6 +120,7 @@ class PublisherUtilTest : AnnotationSpec() {
 
         mockkStatic(PropertyUtil::class)
         mockkStatic(ChallengeFactory::class)
+        mockkStatic(QuestFactory::class)
         every { user.properties } returns mapOf()
         every { user.fullName } returns "Name"
         every { user.save() } returns Unit
@@ -152,7 +154,9 @@ class PublisherUtilTest : AnnotationSpec() {
         every { ChallengeFactory.generateBuildChallenge(any(), any(), any(), any(), any()) } returns true
         every { userProperty.getCurrentChallenges(any()) } returns CopyOnWriteArrayList()
         every { userProperty.getUnsolvedAchievements(any()) } returns CopyOnWriteArrayList()
+        every { userProperty.getCurrentQuests(any()) } returns CopyOnWriteArrayList()
         every { ChallengeFactory.generateNewChallenges(any(), any(), any(), any(), any()) } returns 0
+        every { QuestFactory.generateNewQuests(any(), any(), any(), any(), any()) } returns 0
         PublisherUtil.checkUser(user, run, arrayListOf(classDetails), parameters, Result.SUCCESS) shouldBe hashMapOf("generated" to 1, "solved" to 0, "solvedAchievements" to 0)
 
         every { ChallengeFactory.generateBuildChallenge(any(), any(), any(), any(), any()) } returns false

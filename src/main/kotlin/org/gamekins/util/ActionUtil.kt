@@ -24,6 +24,7 @@ import org.gamekins.GameUserProperty
 import org.gamekins.challenge.Challenge
 import org.gamekins.challenge.ChallengeFactory
 import org.gamekins.challenge.DummyChallenge
+import org.gamekins.challenge.quest.Quest
 import org.gamekins.file.SourceFileDetails
 import org.gamekins.util.Constants.Parameters
 import java.io.IOException
@@ -75,6 +76,46 @@ object ActionUtil {
         }
 
         return FormValidation.ok("Challenge rejected$generatedText")
+    }
+
+    /**
+     * Rejects a [Quest] with the String representation [reject] and a [reason].
+     */
+    fun doRejectQuest(job: AbstractItem, reject: String, reason: String): FormValidation {
+        var rejectReason = reason
+        if (rejectReason.isEmpty()) return FormValidation.error("Please insert your reason for rejection")
+        if (rejectReason.matches(Regex("\\s+"))) rejectReason = "No reason provided"
+
+        val user: User = User.current()
+            ?: return FormValidation.error("There is no user signed in")
+        val property = user.getProperty(GameUserProperty::class.java)
+            ?: return FormValidation.error("Unexpected error while retrieving the property")
+
+        val projectName = job.name
+        var quest: Quest? = null
+        for (ques in property.getCurrentQuests(projectName)) {
+            if (ques.toString() == reject) {
+                quest = ques
+                break
+            }
+        }
+
+        if (quest == null) return FormValidation.error("The quest does not exist")
+        if (quest.name == Constants.NO_QUEST || quest.name == Constants.REJECTED_QUEST) {
+            return FormValidation.error("Dummies cannot be rejected - please run another build")
+        }
+        property.rejectQuest(projectName, quest, rejectReason)
+        property.newQuest(projectName, Quest(Constants.REJECTED_QUEST, arrayListOf()))
+
+        try {
+            user.save()
+            job.save()
+        } catch (e: IOException) {
+            e.printStackTrace()
+            return FormValidation.error("Unexpected error while saving")
+        }
+
+        return FormValidation.ok("Quest rejected")
     }
 
     /**

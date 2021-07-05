@@ -41,14 +41,12 @@ object EventHandler {
     }
 
     /**
-     * Generates the mail text based on the current events.
+     * Generates the text for all [Event]s based on Challenges.
      */
-    fun generateMailText(projectName: String, build: Run<*, *>, user: User, list: ArrayList<UserEvent>): String {
-        var text = "Hello ${user.fullName},\n\n"
-        text += "here are your Gamekins results from run ${build.number} of project $projectName:\n\n"
-
+    fun generateChallengesText(list: ArrayList<UserEvent>): String {
+        var text = ""
         if (list.find { it is ChallengeSolvedEvent } != null) {
-            text += "Challenges solved:\n"
+            text += "Challenge(s) solved:\n"
             for (event in list.filterIsInstance<ChallengeSolvedEvent>()) {
                 text += "- ${event.challenge.toEscapedString()}\n"
             }
@@ -56,7 +54,7 @@ object EventHandler {
         }
 
         if (list.find { it is ChallengeUnsolvableEvent } != null) {
-            text += "New unsolvable Challenges:\n"
+            text += "New unsolvable Challenge(s):\n"
             for (event in list.filterIsInstance<ChallengeUnsolvableEvent>()) {
                 text += "- ${event.challenge.toEscapedString()}\n"
             }
@@ -64,15 +62,29 @@ object EventHandler {
         }
 
         if (list.find { it is ChallengeGeneratedEvent } != null) {
-            text += "Challenges generated:\n"
+            text += "Challenge(s) generated:\n"
             for (event in list.filterIsInstance<ChallengeGeneratedEvent>()) {
                 text += "- ${event.challenge.toEscapedString()}\n"
             }
             text += "\n"
         }
 
+        return text
+    }
+
+    /**
+     * Generates the mail text based on the current events.
+     */
+    fun generateMailText(projectName: String, build: Run<*, *>, user: User, list: ArrayList<UserEvent>): String {
+        var text = "Hello ${user.fullName},\n\n"
+        text += "here are your Gamekins results from run ${build.number} of project $projectName:\n\n"
+
+        text += generateChallengesText(list)
+
+        text += generateQuestsText(list)
+
         if (list.find { it is AchievementSolvedEvent } != null) {
-            text += "Achievements solved:\n"
+            text += "Achievement(s) solved:\n"
             for (event in list.filterIsInstance<AchievementSolvedEvent>()) {
                 text += "- ${event.achievement}\n"
             }
@@ -82,6 +94,46 @@ object EventHandler {
         text += "View the build on ${build.parent.absoluteUrl}${build.number}/\n"
         text += "View the leaderboard on ${build.parent.absoluteUrl}leaderboard/\n"
         text += "View your achievements on ${user.absoluteUrl}/achievements/"
+
+        return text
+    }
+
+    /**
+     * Generates the text for all [Event]s based on Quests.
+     */
+    fun generateQuestsText(list: ArrayList<UserEvent>): String {
+        var text = ""
+        if (list.find { it is QuestStepSolvedEvent } != null) {
+            text += "Quest step(s) solved:\n"
+            for (event in list.filterIsInstance<QuestStepSolvedEvent>()) {
+                text += "- ${event.quest}: ${event.questStep}\n"
+            }
+            text += "\n"
+        }
+
+        if (list.find { it is QuestSolvedEvent } != null) {
+            text += "Quest(s) solved:\n"
+            for (event in list.filterIsInstance<QuestSolvedEvent>()) {
+                text += "- ${event.quest}\n"
+            }
+            text += "\n"
+        }
+
+        if (list.find { it is QuestUnsolvableEvent } != null) {
+            text += "New unsolvable Quest(s):\n"
+            for (event in list.filterIsInstance<QuestUnsolvableEvent>()) {
+                text += "- ${event.quest}\n"
+            }
+            text += "\n"
+        }
+
+        if (list.find { it is QuestGeneratedEvent } != null) {
+            text += "Quest(s) generated:\n"
+            for (event in list.filterIsInstance<QuestGeneratedEvent>()) {
+                text += "- ${event.quest}\n"
+            }
+            text += "\n"
+        }
 
         return text
     }

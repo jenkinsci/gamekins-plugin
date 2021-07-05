@@ -89,16 +89,16 @@ class EventHandlerTest : AnnotationSpec() {
                 "\n" +
                 "here are your Gamekins results from run 0 of project test:\n" +
                 "\n" +
-                "Challenges solved:\n" +
+                "Challenge(s) solved:\n" +
                 "- Challenge1\n" +
                 "\n" +
-                "New unsolvable Challenges:\n" +
+                "New unsolvable Challenge(s):\n" +
                 "- Challenge2\n" +
                 "\n" +
-                "Challenges generated:\n" +
+                "Challenge(s) generated:\n" +
                 "- Challenge3\n" +
                 "\n" +
-                "Achievements solved:\n" +
+                "Achievement(s) solved:\n" +
                 "- Achievement\n" +
                 "\n" +
                 "View the build on http://localhost:8080/jenkins/job/test/0/\n" +

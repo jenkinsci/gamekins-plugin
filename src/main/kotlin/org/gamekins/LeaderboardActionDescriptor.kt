@@ -21,6 +21,7 @@ import hudson.model.AbstractItem
 import hudson.model.Descriptor
 import hudson.util.FormValidation
 import org.gamekins.challenge.Challenge
+import org.gamekins.challenge.quest.Quest
 import org.gamekins.util.ActionUtil
 import org.kohsuke.stapler.AncestorInPath
 import org.kohsuke.stapler.QueryParameter
@@ -43,6 +44,14 @@ class LeaderboardActionDescriptor : Descriptor<LeaderboardAction>(LeaderboardAct
     fun doRejectChallenge(@AncestorInPath job: AbstractItem, @QueryParameter reject: String,
                           @QueryParameter reason: String): FormValidation {
         return ActionUtil.doRejectChallenge(job, reject, reason)
+    }
+
+    /**
+     * Rejects a [Quest] with the String representation [reject] and a [reason].
+     */
+    fun doRejectQuest(@AncestorInPath job: AbstractItem, @QueryParameter reject: String,
+                          @QueryParameter reason: String): FormValidation {
+        return ActionUtil.doRejectQuest(job, reject, reason)
     }
 
     @Nonnull

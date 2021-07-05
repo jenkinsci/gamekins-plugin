@@ -381,7 +381,7 @@ object ChallengeFactory {
             return null
         }
 
-        val currentChallenges = user.getProperty(GameUserProperty::class.java).getCurrentChallenges(projectName).
+        val currentChallenges = user.getProperty(GameUserProperty::class.java).getCurrentChallenges(projectName!!).
                                         filterIsInstance<MutationTestChallenge>()
 
         val survivedList = getSurvivedMutationList(relevantMutationResultsByClass[fullClassName],
