@@ -114,6 +114,11 @@ interface Challenge {
     override fun toString(): String
 
     /**
+     * Updates the [Challenge] during a quest if the [Challenge] is not the first one.
+     */
+    fun update(parameters: Parameters) = Unit
+
+    /**
      * Data class for the initialisation of a Challenge. Every val variable will be non-null with the desired data.
      */
     data class ChallengeGenerationData(val parameters: Parameters, val user: User, val selectedClass: SourceFileDetails,

@@ -119,66 +119,83 @@
                                     <j:forEach indexVar="indexQuest" var="step" items="${currentQuest.steps}">
                                         <div class="card border-0">
                                             <j:if test="${step == currentQuest.currentStep}">
-                                                <div class="card-header p-0 m-0" data-toggle="tooltip" data-placement="top"
-                                                     title="Click to see more details" id="headingQuestChallenge${indexQuest + 1}">
-                                                    <div class="row mx-1 align-items-center mb-2">
-                                                        <div class="col-12 col-sm-12">
-                                                            <h5>
-                                                                <j:if test='${step.description != ""}'>
-                                                                    ${step.description}
-                                                                    <br/>
+                                                <j:if test="${indexQuest == currentQuest.currentStepNumber}">
+                                                    <div class="card-header p-0 m-0" data-toggle="tooltip" data-placement="top"
+                                                         title="Click to see more details" id="headingQuestChallenge${indexQuest + 1}">
+                                                        <div class="row mx-1 align-items-center mb-2">
+                                                            <div class="col-12 col-sm-12">
+                                                                <h5>
+                                                                    <j:if test='${step.description != ""}'>
+                                                                        ${step.description}
+                                                                        <br/>
+                                                                    </j:if>
+                                                                    <button class="btn btn-link text-dark text-left text-decoration-none"
+                                                                            data-toggle="collapse" data-target="#step${indexQuest + 1}"
+                                                                            aria-expanded="true"
+                                                                            aria-controls="collapseOne"
+                                                                            style="font-size:14px;">
+                                                                        ${indexQuest + 1}. <span id="questChallengeText${indexQuest + 1}">${step.challenge}</span>
+                                                                        <span class="ml-2 badge badge-warning">${step.challenge.name}</span>
+                                                                    </button>
+                                                                </h5>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div id="step${indexQuest + 1}" class="collapse" aria-labelledby="questStepHeading${indexQuest + 1}"
+                                                         data-parent="#quest${index + 1}">
+                                                        <div class="card-body" style="font-size:15px;">
+
+                                                            <j:if test='${step.challenge.name == "Mutation"}'>
+                                                                <p>Write or update tests so that they fail when we <b>${step.challenge.mutationDescription}</b> at the mentioned location</p>
+                                                                <h6>${step.challenge.fileName}</h6>
+                                                            </j:if>
+                                                            <j:if test='${step.challenge.name == "Mutation"}'>
+                                                                <j:if test='${step.challenge.snippet != ""}'>
+                                                                    <h6>Original code snippet</h6>
                                                                 </j:if>
+                                                                <j:if test='${step.challenge.snippet == ""}'>
+                                                                    <h6>Original code snippet is not available</h6>
+                                                                </j:if>
+                                                            </j:if>
+
+                                                            <j:if test='${step.challenge.snippet != ""}'>
+                                                                ${step.challenge.snippet}
+                                                            </j:if>
+
+                                                            <j:if test='${step.challenge.name == "Mutation"}'>
+                                                                <j:if test='${step.challenge.mutatedLine != ""}'>
+                                                                    <h6>Mutated line of code</h6>
+                                                                    ${step.challenge.mutatedLine}
+                                                                </j:if>
+                                                                <j:if test='${step.challenge.mutatedLine == ""}'>
+                                                                    <h6 class="pt-3">Mutated line of code is not available</h6>
+                                                                </j:if>
+                                                                <p class="font-italic font-weight-light">The mutated line is built from
+                                                                    byte code information and could be syntactically invalid. Please use along with the description in that case
+                                                                </p>
+                                                            </j:if>
+
+                                                        </div>
+                                                    </div>
+                                                </j:if>
+                                            </j:if>
+                                            <j:if test="${step != currentQuest.currentStep}">
+                                                <div class="card-header p-0 m-0">
+                                                    <div class="row mx-1 align-items-center mb-2">
+                                                        <div class="col-12 col-sm-12" style="opacity: 0.4">
+                                                            <h5>
                                                                 <button class="btn btn-link text-dark text-left text-decoration-none"
-                                                                        data-toggle="collapse" data-target="#step${indexQuest + 1}"
-                                                                        aria-expanded="true"
-                                                                        aria-controls="collapseOne"
-                                                                        style="font-size:14px;">
-                                                                    ${indexQuest + 1}. <span id="questChallengeText${indexQuest + 1}">${step.challenge}</span>
+                                                                        style="font-size:14px;" disabled="disabled">
+                                                                    ${indexQuest + 1}. <span id="questChallengeText${index + 1}">${step.challenge}</span>
                                                                     <span class="ml-2 badge badge-warning">${step.challenge.name}</span>
                                                                 </button>
                                                             </h5>
                                                         </div>
                                                     </div>
                                                 </div>
-
-                                                <div id="step${indexQuest + 1}" class="collapse" aria-labelledby="questStepHeading${indexQuest + 1}"
-                                                     data-parent="#quest${index + 1}">
-                                                    <div class="card-body" style="font-size:15px;">
-
-                                                        <j:if test='${step.challenge.name == "Mutation"}'>
-                                                            <p>Write or update tests so that they fail when we <b>${step.challenge.mutationDescription}</b> at the mentioned location</p>
-                                                            <h6>${step.challenge.fileName}</h6>
-                                                        </j:if>
-                                                        <j:if test='${step.challenge.name == "Mutation"}'>
-                                                            <j:if test='${step.challenge.snippet != ""}'>
-                                                                <h6>Original code snippet</h6>
-                                                            </j:if>
-                                                            <j:if test='${step.challenge.snippet == ""}'>
-                                                                <h6>Original code snippet is not available</h6>
-                                                            </j:if>
-                                                        </j:if>
-
-                                                        <j:if test='${step.challenge.snippet != ""}'>
-                                                            ${step.challenge.snippet}
-                                                        </j:if>
-
-                                                        <j:if test='${step.challenge.name == "Mutation"}'>
-                                                            <j:if test='${step.challenge.mutatedLine != ""}'>
-                                                                <h6>Mutated line of code</h6>
-                                                                ${step.challenge.mutatedLine}
-                                                            </j:if>
-                                                            <j:if test='${step.challenge.mutatedLine == ""}'>
-                                                                <h6 class="pt-3">Mutated line of code is not available</h6>
-                                                            </j:if>
-                                                            <p class="font-italic font-weight-light">The mutated line is built from
-                                                                byte code information and could be syntactically invalid. Please use along with the description in that case
-                                                            </p>
-                                                        </j:if>
-
-                                                    </div>
-                                                </div>
                                             </j:if>
-                                            <j:if test="${step != currentQuest.currentStep}">
+                                            <j:if test="${indexQuest != currentQuest.currentStepNumber}">
                                                 <div class="card-header p-0 m-0">
                                                     <div class="row mx-1 align-items-center mb-2">
                                                         <div class="col-12 col-sm-12" style="opacity: 0.4">

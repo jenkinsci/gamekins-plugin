@@ -50,7 +50,6 @@ class ClassCoverageChallenge(data: Challenge.ChallengeGenerationData)
     }
 
     override fun getSnippet(): String {
-        // No code snippet is collected for a ClassCoverageChallenge
         return codeSnippet
     }
 

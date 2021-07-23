@@ -47,6 +47,13 @@ class Quest(val name: String, val steps: ArrayList<QuestStep>) {
     }
 
     /**
+     * Returns the number of the [currentStep].
+     */
+    fun getCurrentStepNumber(): Int {
+        return currentStep
+    }
+
+    /**
      * Returns the last solved or first [QuestStep] of the [Quest].
      */
     fun getLastStep(): QuestStep {
@@ -76,6 +83,9 @@ class Quest(val name: String, val steps: ArrayList<QuestStep>) {
         if (steps.isEmpty()) return false
         if (steps[currentStep].challenge.isSolved(parameters, run, listener)) {
             currentStep++
+            if (currentStep < steps.size) {
+                steps[currentStep].challenge.update(parameters)
+            }
             return true
         }
 

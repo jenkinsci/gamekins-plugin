@@ -62,11 +62,33 @@ open class FileDetails(var parameters: Parameters, val filePath: String)
         changedByUsers.add(user)
     }
 
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is FileDetails) return false
+
+        if (filePath != other.filePath) return false
+        if (file != other.file) return false
+        if (fileName != other.fileName) return false
+        if (fileExtension != other.fileExtension) return false
+        if (packageName != other.packageName) return false
+
+        return true
+    }
+
     /**
      * Check whether the file exists.
      */
     fun filesExists(): Boolean {
         return file.exists()
+    }
+
+    override fun hashCode(): Int {
+        var result = filePath.hashCode()
+        result = 31 * result + file.hashCode()
+        result = 31 * result + fileName.hashCode()
+        result = 31 * result + fileExtension.hashCode()
+        result = 31 * result + packageName.hashCode()
+        return result
     }
 
     /**

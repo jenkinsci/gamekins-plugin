@@ -117,7 +117,8 @@ object ChallengeFactory {
     @JvmStatic
     @Throws(IOException::class, InterruptedException::class)
     fun generateChallenge(
-        user: User, parameters: Parameters, listener: TaskListener, classes: ArrayList<SourceFileDetails>
+        user: User, parameters: Parameters, listener: TaskListener, classes: ArrayList<SourceFileDetails>,
+        cla: SourceFileDetails? = null
     ): Challenge {
 
         val workList = ArrayList(classes)
@@ -131,7 +132,7 @@ object ChallengeFactory {
                 return DummyChallenge(parameters, Constants.ERROR_GENERATION)
             }
 
-            val selectedClass = selectClass(workList, rankValues)
+            val selectedClass = cla ?: selectClass(workList, rankValues)
             workList.remove(selectedClass)
             count++
 
@@ -360,7 +361,7 @@ object ChallengeFactory {
      * mutations which belong to the given class
      */
     @Throws(IOException::class, InterruptedException::class)
-    private fun generateMutationTestChallenge(
+    fun generateMutationTestChallenge(
         classDetails: SourceFileDetails, branch: String?, projectName: String?,
         listener: TaskListener, workspace: FilePath, user: User
     ): MutationTestChallenge? {

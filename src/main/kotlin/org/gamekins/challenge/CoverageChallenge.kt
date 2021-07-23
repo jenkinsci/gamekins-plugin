@@ -33,10 +33,10 @@ abstract class CoverageChallenge(var details: SourceFileDetails, workspace: File
 
     @Deprecated("Use implementation of new file structure", replaceWith = ReplaceWith("details"))
     val classDetails: JacocoUtil.ClassDetails? = null
-    val coverage: Double
-    protected val fullyCoveredLines: Int
-    protected val notCoveredLines: Int
-    protected val partiallyCoveredLines: Int
+    var coverage: Double
+    protected var fullyCoveredLines: Int
+    protected var notCoveredLines: Int
+    protected var partiallyCoveredLines: Int
     var solvedCoverage = 0.0
     private val created = System.currentTimeMillis()
     private var solved: Long = 0
@@ -128,5 +128,14 @@ abstract class CoverageChallenge(var details: SourceFileDetails, workspace: File
 
     override fun toEscapedString(): String {
         return toString().replace(Regex("<.+?>"), "")
+    }
+
+    override fun update(parameters: Parameters) {
+        val document = JacocoUtil.generateDocument(JacocoUtil.calculateCurrentFilePath(parameters.workspace,
+            details.jacocoSourceFile, details.parameters.remote))
+        fullyCoveredLines = JacocoUtil.calculateCoveredLines(document, "fc")
+        partiallyCoveredLines = JacocoUtil.calculateCoveredLines(document, "pc")
+        notCoveredLines = JacocoUtil.calculateCoveredLines(document, "nc")
+        coverage = details.coverage
     }
 }

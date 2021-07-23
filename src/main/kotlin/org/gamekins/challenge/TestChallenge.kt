@@ -33,8 +33,8 @@ import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject
  */
 class TestChallenge(data: Challenge.ChallengeGenerationData) : Challenge {
 
-    private val currentCommit: String = data.headCommitHash!!
-    private val testCount: Int = data.testCount!!
+    private var currentCommit: String = data.headCommitHash!!
+    private var testCount: Int = data.testCount!!
     private val user: User = data.user
     private var parameters: Parameters = data.parameters
     private val created = System.currentTimeMillis()
@@ -146,5 +146,10 @@ class TestChallenge(data: Challenge.ChallengeGenerationData) : Challenge {
 
     override fun toString(): String {
         return "Write a new test in branch ${parameters.branch}"
+    }
+
+    override fun update(parameters: Parameters) {
+        this.testCount = parameters.projectTests
+        this.currentCommit = parameters.workspace.act(GitUtil.HeadCommitCallable(parameters.workspace.remote)).name
     }
 }

@@ -16,17 +16,18 @@
 
 package org.gamekins.challenge.quest
 
+import hudson.FilePath
 import hudson.model.TaskListener
 import hudson.model.User
 import org.gamekins.GameUserProperty
-import org.gamekins.challenge.Challenge
-import org.gamekins.challenge.LineCoverageChallenge
+import org.gamekins.challenge.*
 import org.gamekins.event.EventHandler
 import org.gamekins.event.user.QuestGeneratedEvent
 import org.gamekins.file.FileDetails
 import org.gamekins.file.SourceFileDetails
 import org.gamekins.util.Constants
 import org.gamekins.util.GitUtil
+import org.gamekins.util.JUnitUtil
 import org.gamekins.util.JacocoUtil
 import org.jsoup.nodes.Element
 import kotlin.random.Random
@@ -87,14 +88,7 @@ object QuestFactory {
     }
 
     /**
-     * Lines over lines: 3 LineCoverageChallenges in one class
-     * More than methods: 3 MethodCoverageChallenges in one class
-     * Pack it together: 3 Challenges in one package
-     * Incremental: 3 ClassCoverageChallenges in one class
-     * Expanding: Line -> Method -> Class
-     * Decreasing: Class -> Method -> Line
-     * Just test: 3 TestChallenges
-     * 100% is not the limit: 3 MutationChallenges in one class
+     * Through all: Line, Method, Class, Test, Mutation
      *
      * Generates a random new [Quest].
      */
@@ -104,8 +98,15 @@ object QuestFactory {
     ): Quest {
 
         for (i in 0..2) {
-            val quest = when (Random.nextInt(1)) {
+            val quest = when (Random.nextInt(8)) {
                 0 -> generateLinesQuest(user, property, parameters, listener, classes)
+                1 -> generateMethodsQuest(user, property, parameters, listener, classes)
+                2 -> generatePackageQuest(user, property, parameters, listener, classes)
+                3 -> generateClassQuest(user, property, parameters, listener, classes)
+                4 -> generateExpandingQuest(user, property, parameters, listener, classes)
+                5 -> generateDecreasingQuest(user, property, parameters, listener, classes)
+                6 -> generateTestQuest(user, property, parameters, listener, classes)
+                7 -> generateMutationQuest(user, property, parameters, listener, classes)
                 else -> null
             }
 
@@ -118,7 +119,80 @@ object QuestFactory {
     }
 
     /**
-     * Generates a new LineQuest with three different [LineCoverageChallenge]s in the same class.
+     * Generates a new ClassQuest with three [ClassCoverageChallenge]s for the same class.
+     */
+    private fun generateClassQuest(
+        user: User, property: GameUserProperty, parameters: Constants.Parameters, listener: TaskListener,
+        classes: ArrayList<FileDetails>
+    ): Quest? {
+        val suitableClasses = ArrayList(classes.filterIsInstance<SourceFileDetails>().filter { it.coverage < 1.0 })
+        val rejectedClasses = property.getRejectedChallenges(parameters.projectName)
+            .map { it.first }
+            .filterIsInstance<ClassCoverageChallenge>()
+            .map { it.details }
+        suitableClasses.removeIf { rejectedClasses.contains(it) }
+        if (suitableClasses.isEmpty()) return null
+        val selectedClass = suitableClasses.random()
+
+        val steps = arrayListOf<QuestStep>()
+        val data = Challenge.ChallengeGenerationData(parameters, user, selectedClass, listener)
+        for (i in 0..2) {
+            steps.add(QuestStep("", ClassCoverageChallenge(data)))
+        }
+
+        return Quest("Incremental - Solve three Class Coverage Challenges", steps)
+    }
+
+    /**
+     * Generates a new DecreasingQuest in the order [ClassCoverageChallenge], [MethodCoverageChallenge] and
+     * [LineCoverageChallenge] in the same class.
+     */
+    private fun generateDecreasingQuest(
+        user: User, property: GameUserProperty, parameters: Constants.Parameters, listener: TaskListener,
+        classes: ArrayList<FileDetails>
+    ): Quest? {
+        val suitableClasses = classes.filterIsInstance<SourceFileDetails>().filter { it.coverage < 1.0 }
+        if (suitableClasses.isEmpty()) return null
+        val selectedClass = suitableClasses.random()
+
+        val steps = arrayListOf<QuestStep>()
+        val line = JacocoUtil.chooseRandomLine(selectedClass, parameters.workspace)
+        val method = JacocoUtil.chooseRandomMethod(selectedClass, parameters.workspace)
+        val data = Challenge.ChallengeGenerationData(parameters, user, selectedClass, listener, method, line)
+
+        steps.add(QuestStep("", ClassCoverageChallenge(data)))
+        steps.add(QuestStep("", MethodCoverageChallenge(data)))
+        steps.add(QuestStep("", LineCoverageChallenge(data)))
+
+        return Quest("Decreasing - Solve a Class, Method and Line Coverage Challenge", steps)
+    }
+
+    /**
+     * Generates a new ExpandingQuest in the order [LineCoverageChallenge], [MethodCoverageChallenge] and
+     * [ClassCoverageChallenge] in the same class.
+     */
+    private fun generateExpandingQuest(
+        user: User, property: GameUserProperty, parameters: Constants.Parameters, listener: TaskListener,
+        classes: ArrayList<FileDetails>
+    ): Quest? {
+        val suitableClasses = classes.filterIsInstance<SourceFileDetails>().filter { it.coverage < 1.0 }
+        if (suitableClasses.isEmpty()) return null
+        val selectedClass = suitableClasses.random()
+
+        val steps = arrayListOf<QuestStep>()
+        val line = JacocoUtil.chooseRandomLine(selectedClass, parameters.workspace)
+        val method = JacocoUtil.chooseRandomMethod(selectedClass, parameters.workspace)
+        val data = Challenge.ChallengeGenerationData(parameters, user, selectedClass, listener, method, line)
+
+        steps.add(QuestStep("", LineCoverageChallenge(data)))
+        steps.add(QuestStep("", MethodCoverageChallenge(data)))
+        steps.add(QuestStep("", ClassCoverageChallenge(data)))
+
+        return Quest("Expanding - Solve a Line, Method and Class Coverage Challenge", steps)
+    }
+
+    /**
+     * Generates a new LinesQuest with three different [LineCoverageChallenge]s in the same class.
      */
     private fun generateLinesQuest(
         user: User, property: GameUserProperty, parameters: Constants.Parameters, listener: TaskListener,
@@ -147,6 +221,125 @@ object QuestFactory {
             steps.add(QuestStep("", challenge))
         }
 
-        return Quest("Lines over lines", steps)
+        return Quest("Lines over lines - Solve three Line Coverage Challenges", steps)
+    }
+
+    /**
+     * Generates a new MethodsQuest with three different [MethodCoverageChallenge]s in the same class.
+     */
+    private fun generateMethodsQuest(
+        user: User, property: GameUserProperty, parameters: Constants.Parameters, listener: TaskListener,
+        classes: ArrayList<FileDetails>
+    ): Quest? {
+        val suitableClasses = classes.filterIsInstance<SourceFileDetails>().filter { it.coverage < 1.0 }
+        if (suitableClasses.isEmpty()) return null
+        val selectedClass = suitableClasses.random()
+
+        val suitableMethods = JacocoUtil.getMethodEntries(
+            FilePath(parameters.workspace, selectedClass.jacocoMethodFile.absolutePath)
+        ).filter { it.missedLines > 0 }
+        if (suitableMethods.size < 3) return null
+
+        val methods = suitableMethods.shuffled().take(3)
+        val steps = arrayListOf<QuestStep>()
+        for (method in methods) {
+            val data = Challenge.ChallengeGenerationData(parameters, user, selectedClass, listener, method = method)
+            val challenge = MethodCoverageChallenge(data)
+            if (property.getRejectedChallenges(parameters.projectName).any { it.first == challenge }) {
+                return null
+            }
+            steps.add(QuestStep("", challenge))
+        }
+
+        return Quest("More than methods - Solve three Method Coverage Challenge", steps)
+    }
+
+    /**
+     * Generates a new MutationQuest with three different [MutationTestChallenge]s in the same class.
+     */
+    private fun generateMutationQuest(
+        user: User, property: GameUserProperty, parameters: Constants.Parameters, listener: TaskListener,
+        classes: ArrayList<FileDetails>
+    ): Quest? {
+        val suitableClasses = classes.filterIsInstance<SourceFileDetails>()
+        if (suitableClasses.isEmpty()) return null
+        val selectedClass = suitableClasses.random()
+
+        val set = hashSetOf<MutationTestChallenge>()
+        var count = 0
+        while (set.size < 3 || count < 10) {
+            val challenge = ChallengeFactory.generateMutationTestChallenge(
+                selectedClass,
+                parameters.branch,
+                parameters.projectName,
+                listener,
+                parameters.workspace,
+                user
+            )
+            if (challenge != null) set.add(challenge)
+            count++
+        }
+
+        if (set.size < 3) return null
+        val steps = arrayListOf<QuestStep>()
+        for (i in 0..2) {
+            steps.add(QuestStep("", ArrayList(set)[i]))
+        }
+
+        return Quest("Coverage ist not everything - Solve three Mutation Test Challenges", steps)
+    }
+
+    /**
+     * Generates a new PackageQuest with three different [Challenge]s in the same package.
+     */
+    private fun generatePackageQuest(
+        user: User, property: GameUserProperty, parameters: Constants.Parameters, listener: TaskListener,
+        classes: ArrayList<FileDetails>
+    ): Quest? {
+        val suitableClasses = classes.filterIsInstance<SourceFileDetails>().filter { it.coverage < 1.0 }
+        if (suitableClasses.isEmpty()) return null
+        var selectedClass = suitableClasses.random()
+
+        val classesInPackage = arrayListOf<SourceFileDetails>()
+        for (i in 0..2) {
+            val filterClasses = suitableClasses.filter { it.packageName == selectedClass.packageName }
+            if (filterClasses.size < 3) {
+                selectedClass = suitableClasses.random()
+            } else {
+                classesInPackage.addAll(filterClasses)
+                break
+            }
+        }
+
+        val selectedClasses = classesInPackage.shuffled().take(3)
+        val steps = arrayListOf<QuestStep>()
+        for (cla in selectedClasses) {
+            val challenge = ChallengeFactory.generateChallenge(user, parameters, listener,
+                classes as ArrayList<SourceFileDetails>, cla)
+            steps.add(QuestStep("", challenge))
+        }
+
+        return Quest("Pack it together - Solve three Challenges in the same package", steps)
+    }
+
+    /**
+     * Generates a new TestQuest with three [TestChallenge]s.
+     */
+    private fun generateTestQuest(
+        user: User, property: GameUserProperty, parameters: Constants.Parameters, listener: TaskListener,
+        classes: ArrayList<FileDetails>
+    ): Quest {
+        val steps = arrayListOf<QuestStep>()
+        val data = Challenge.ChallengeGenerationData(
+            parameters,
+            user,
+            classes.filterIsInstance<SourceFileDetails>().random(),
+            listener,
+            testCount = JUnitUtil.getTestCount(parameters.workspace),
+            headCommitHash = parameters.workspace.act(GitUtil.HeadCommitCallable(parameters.remote)).name
+        )
+        (0..2).forEach { _ -> steps.add(QuestStep("", TestChallenge(data))) }
+
+        return Quest("Just test - Solve three Test Challenges", steps)
     }
 }
