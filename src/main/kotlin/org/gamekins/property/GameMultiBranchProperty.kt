@@ -49,7 +49,8 @@ class GameMultiBranchProperty
 @DataBoundConstructor constructor(job: AbstractItem?,
                                   @set:DataBoundSetter var activated: Boolean,
                                   @set:DataBoundSetter var showStatistics: Boolean,
-                                  @set:DataBoundSetter var currentChallengesCount: Int)
+                                  @set:DataBoundSetter var currentChallengesCount: Int,
+                                  @set:DataBoundSetter var currentQuestsCount: Int)
     : AbstractFolderProperty<AbstractFolder<*>?>(), GameProperty, StaplerProxy {
 
     private var statistics: Statistics
@@ -62,6 +63,7 @@ class GameMultiBranchProperty
         statistics = Statistics(job!!)
         PropertyUtil.reconfigure(job, activated, showStatistics)
         if (currentChallengesCount <= 0) currentChallengesCount = Constants.DEFAULT_CURRENT_CHALLENGES
+        if (currentQuestsCount <= 0) currentQuestsCount = Constants.DEFAULT_CURRENT_QUESTS
     }
 
     @Throws(IOException::class)
@@ -96,6 +98,7 @@ class GameMultiBranchProperty
     @Suppress("unused", "SENSELESS_COMPARISON")
     private fun readResolve(): Any {
         if (currentChallengesCount == 0) currentChallengesCount = Constants.DEFAULT_CURRENT_CHALLENGES
+        if (currentQuestsCount <= 0) currentQuestsCount = Constants.DEFAULT_CURRENT_QUESTS
 
         return this
     }
@@ -246,7 +249,7 @@ class GameMultiBranchProperty
             return if (req == null || req.findAncestor(AbstractItem::class.java).getObject() == null) null
             else GameMultiBranchProperty(req.findAncestor(AbstractItem::class.java).getObject() as AbstractItem,
                 formData.getBoolean("activated"), formData.getBoolean("showStatistics"),
-                formData.getInt("currentChallengesCount"))
+                formData.getInt("currentChallengesCount"), formData.getInt("currentQuestsCount"))
         }
     }
 }

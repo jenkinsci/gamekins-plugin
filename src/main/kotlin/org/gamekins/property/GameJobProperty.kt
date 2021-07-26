@@ -42,7 +42,8 @@ class GameJobProperty
 @DataBoundConstructor constructor(job: AbstractItem,
                                   @set:DataBoundSetter var activated: Boolean,
                                   @set:DataBoundSetter var showStatistics: Boolean,
-                                  @set:DataBoundSetter var currentChallengesCount: Int)
+                                  @set:DataBoundSetter var currentChallengesCount: Int,
+                                  @set:DataBoundSetter var currentQuestsCount: Int)
     : JobProperty<Job<*, *>>(), GameProperty, StaplerProxy {
 
     private var statistics: Statistics
@@ -51,6 +52,7 @@ class GameJobProperty
     init {
         statistics = Statistics(job)
         if (currentChallengesCount <= 0) currentChallengesCount = Constants.DEFAULT_CURRENT_CHALLENGES
+        if (currentQuestsCount <= 0) currentQuestsCount = Constants.DEFAULT_CURRENT_QUESTS
     }
 
     @Throws(IOException::class)
@@ -105,6 +107,7 @@ class GameJobProperty
     @Suppress("unused", "SENSELESS_COMPARISON")
     private fun readResolve(): Any {
         if (currentChallengesCount == 0) currentChallengesCount = Constants.DEFAULT_CURRENT_CHALLENGES
+        if (currentQuestsCount <= 0) currentQuestsCount = Constants.DEFAULT_CURRENT_QUESTS
 
         return this
     }

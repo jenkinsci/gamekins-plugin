@@ -107,7 +107,7 @@ class GameOrganizationFolderProperty private constructor()
                         property?.reconfigure(req, formData)
                                 ?: project.addProperty(GameMultiBranchProperty(project,
                                     formData.getBoolean("activated"), formData.getBoolean("showStatistics"),
-                                    formData.getInt("currentChallengesCount")))
+                                    formData.getInt("currentChallengesCount"), formData.getInt("currentQuestsCount")))
                         folder.save()
                         break
                     } catch (e: IOException) {

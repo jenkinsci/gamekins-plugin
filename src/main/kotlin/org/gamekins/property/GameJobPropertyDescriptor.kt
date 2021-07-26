@@ -149,6 +149,6 @@ class GameJobPropertyDescriptor : JobPropertyDescriptor(GameJobProperty::class.j
         return if (req == null || req.findAncestor(AbstractItem::class.java).getObject() == null) null
         else GameJobProperty(req.findAncestor(AbstractItem::class.java).getObject() as AbstractItem,
             formData.getBoolean("activated"), formData.getBoolean("showStatistics"),
-            formData.getInt("currentChallengesCount"))
+            formData.getInt("currentChallengesCount"), formData.getInt("currentQuestsCount"))
     }
 }
