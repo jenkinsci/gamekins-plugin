@@ -46,14 +46,16 @@
             </table>
         </div>
 
-        <f:entry title="Simultaneous current challenges" field="currentChallengesCount"
-                 description="Default: 3">
-            <f:number />
-        </f:entry>
-        <f:entry title="Simultaneous current quests" field="currentQuestsCount"
-                 description="Default: 1">
-            <f:number />
-        </f:entry>
+        <f:advanced>
+            <f:entry title="Simultaneous current challenges" field="currentChallengesCount"
+                     description="Default: 3">
+                <f:number />
+            </f:entry>
+            <f:entry title="Simultaneous current quests" field="currentQuestsCount"
+                     description="Default: 1">
+                <f:number />
+            </f:entry>
+        </f:advanced>
     </f:section>
 
     <script>
