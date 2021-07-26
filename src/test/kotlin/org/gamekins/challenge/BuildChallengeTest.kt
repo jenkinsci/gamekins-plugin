@@ -16,7 +16,6 @@
 
 package org.gamekins.challenge
 
-import hudson.FilePath
 import hudson.model.Result
 import hudson.model.Run
 import hudson.model.TaskListener

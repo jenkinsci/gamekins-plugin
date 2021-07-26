@@ -96,7 +96,7 @@ class Quest(val name: String, val steps: ArrayList<QuestStep>) {
      * Checks whether all Challenges of all [steps] are still solvable.
      */
     fun isSolvable(parameters: Constants.Parameters, run: Run<*, *>, listener: TaskListener): Boolean {
-        if (steps.isEmpty()) return true
+        if (steps.isEmpty()) return false
         for (i in currentStep until steps.size) {
             if (!steps[currentStep].challenge.isSolvable(parameters, run, listener)) return false
         }
@@ -108,7 +108,7 @@ class Quest(val name: String, val steps: ArrayList<QuestStep>) {
      * Checks whether all [steps] of the [Quest] are solved.
      */
     fun isSolved(): Boolean {
-        if (steps.isEmpty()) return true
+        if (steps.isEmpty()) return false
         if (currentStep >= steps.size) {
             solved = System.currentTimeMillis()
             return true
