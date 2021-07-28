@@ -11,6 +11,20 @@ class QuestStepTest : AnnotationSpec() {
     private val description = "Description"
 
     @Test
+    fun printToXML() {
+        val challenge = mockkClass(LineCoverageChallenge::class)
+        every { challenge.printToXML(any(), any()) } returns "    <Challenge>"
+        QuestStep(description, challenge).printToXML("") shouldBe "<QuestStep description=\"Description\">\n" +
+                "    <Challenge>\n" +
+                "</QuestStep>"
+
+        every { challenge.printToXML(any(), any()) } returns "        <Challenge>"
+        QuestStep(description, challenge).printToXML("    ") shouldBe "    <QuestStep description=\"Description\">\n" +
+                "        <Challenge>\n" +
+                "    </QuestStep>"
+    }
+
+    @Test
     fun testToString() {
         val challenge = mockkClass(LineCoverageChallenge::class)
         QuestStep(description, challenge).toString() shouldBe description

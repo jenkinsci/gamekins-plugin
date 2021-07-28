@@ -29,12 +29,13 @@ class QuestTest : AnnotationSpec() {
         every { challenge1.update(any()) } returns Unit
         every { challenge1.getScore() } returns 2
         every { challenge1.isSolvable(any(), any(), any()) } returns true
+        every { challenge1.printToXML(any(), any()) } returns "            <Challenge>"
         every { challenge2.equals(any()) } returns true
         every { challenge2.isSolved(any(), any(), any()) } returns true
         every { challenge2.update(any()) } returns Unit
         every { challenge2.getScore() } returns 3
         every { challenge2.isSolvable(any(), any(), any()) } returns true
-
+        every { challenge2.printToXML(any(), any()) } returns "            <Challenge>"
     }
 
     @AfterAll
@@ -132,6 +133,33 @@ class QuestTest : AnnotationSpec() {
         quest1.isCurrentStepSolved(Constants.Parameters(), run, TaskListener.NULL) shouldBe true
         quest1.isSolved() shouldBe true
         quest1.solved shouldNotBe 0
+    }
+
+    @Test
+    fun printToXML() {
+        val result1 = "<Quest name=\"Lines over Lines\" created=\"${quest1.created}\" solved=\"0\">\n" +
+                "    <QuestSteps count=\"2\">\n" +
+                "        <QuestStep description=\"\">\n" +
+                "            <Challenge>\n" +
+                "        </QuestStep>\n" +
+                "        <QuestStep description=\"\">\n" +
+                "            <Challenge>\n" +
+                "        </QuestStep>\n" +
+                "    </QuestSteps>\n" +
+                "</Quest>"
+        quest1.printToXML("", "") shouldBe result1
+
+        val result2 = "<Quest name=\"Lines over Lines\" created=\"${quest1.created}\" solved=\"0\" reason=\"reason\">\n" +
+                "    <QuestSteps count=\"2\">\n" +
+                "        <QuestStep description=\"\">\n" +
+                "            <Challenge>\n" +
+                "        </QuestStep>\n" +
+                "        <QuestStep description=\"\">\n" +
+                "            <Challenge>\n" +
+                "        </QuestStep>\n" +
+                "    </QuestSteps>\n" +
+                "</Quest>"
+        quest1.printToXML("reason", "") shouldBe result2
     }
 
     @Test

@@ -115,19 +115,25 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
         var generated = 0
         var solved = 0
         var solvedAchievements = 0
+        var solvedQuests = 0
+        var generatedQuests = 0
         for (user in User.getAll()) {
             val results = PublisherUtil.checkUser(user, run, ArrayList(classes), parameters, result, listener)
             generated += (if (results["generated"] != null) results["generated"] else 0)!!
             solved += (if (results["solved"] != null) results["solved"] else 0)!!
             solvedAchievements += (if (results["solvedAchievements"] != null) results["solvedAchievements"] else 0)!!
+            generatedQuests += (if (results["generatedQuests"] != null) results["generatedQuests"] else 0)!!
+            solvedQuests += (if (results["solvedQuests"] != null) results["solvedQuests"] else 0)!!
         }
 
         listener.logger.println("[Gamekins] Solved $solved Challenges and generated $generated Challenges")
         listener.logger.println("[Gamekins] Solved $solvedAchievements Achievements")
+        listener.logger.println("[Gamekins] Solved $solvedQuests Quests and generated $generatedQuests Quests")
         listener.logger.println("[Gamekins] Update Statistics")
 
         //Updates the Statistics
-        PublisherUtil.updateStatistics(run, parameters, generated, solved, solvedAchievements, listener)
+        PublisherUtil.updateStatistics(run, parameters, generated, solved, solvedAchievements, solvedQuests,
+            generatedQuests, listener)
 
         EventHandler.addEvent(BuildFinishedEvent(parameters.projectName, parameters.branch, run))
 

@@ -96,6 +96,8 @@ class Statistics(job: AbstractItem) {
                     0,
                     0,
                     0,
+                    0,
+                    0,
                     JUnitUtil.getTestCount(null, abstractBuild),
                     0.0))
                 return
@@ -115,6 +117,8 @@ class Statistics(job: AbstractItem) {
                     "",
                     workflowRun.result,
                     workflowRun.startTimeInMillis,
+                    0,
+                    0,
                     0,
                     0,
                     0,
@@ -140,6 +144,8 @@ class Statistics(job: AbstractItem) {
                             workflowJob.name,
                             workflowRun.result,
                             workflowRun.startTimeInMillis,
+                            0,
+                            0,
                             0,
                             0,
                             0,
@@ -200,6 +206,8 @@ class Statistics(job: AbstractItem) {
                     0,
                     0,
                     0,
+                    0,
+                    0,
                     JUnitUtil.getTestCount(null, run),
                     0.0))
             }
@@ -227,6 +235,8 @@ class Statistics(job: AbstractItem) {
                     workflowJob.name,
                     workflowRun.result,
                     workflowRun.startTimeInMillis,
+                    0,
+                    0,
                     0,
                     0,
                     0,
@@ -325,7 +335,7 @@ class Statistics(job: AbstractItem) {
      */
     class RunEntry(val runNumber: Int, val branch: String, val result: Result?, val startTime: Long,
                    var generatedChallenges: Int, val solvedChallenges: Int, var solvedAchievements: Int,
-                   val testCount: Int, val coverage: Double)
+                   var solvedQuests: Int, var generatedQuests: Int, val testCount: Int, val coverage: Double)
         : Comparable<RunEntry> {
 
         /**
@@ -336,6 +346,7 @@ class Statistics(job: AbstractItem) {
                     "\" result=\"" + (result?.toString() ?: "NULL") + "\" startTime=\"" +
                     startTime + "\" generatedChallenges=\"" + generatedChallenges +
                     "\" solvedChallenges=\"" + solvedChallenges + "\" solvedAchievements=\"" + solvedAchievements +
+                    "\" generatedQuests=\"" + generatedQuests + "\" solvedQuests=\"" + solvedQuests +
                     "\" tests=\"" + testCount + "\" coverage=\"" + coverage + "\"/>")
         }
 
@@ -355,6 +366,8 @@ class Statistics(job: AbstractItem) {
         @Suppress("unused", "SENSELESS_COMPARISON")
         private fun readResolve(): Any {
             if (solvedAchievements == null) solvedAchievements = 0
+            if (solvedQuests == null) solvedAchievements = 0
+            if (generatedQuests == null) solvedAchievements = 0
             return this
         }
     }

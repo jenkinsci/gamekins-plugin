@@ -117,6 +117,25 @@ class Quest(val name: String, val steps: ArrayList<QuestStep>) {
         return false
     }
 
+    /**
+     * Returns the XML representation of the quest.
+     */
+    fun printToXML(reason: String, indentation: String): String {
+        var print = "$indentation<Quest name=\"$name\" created=\"$created\" solved=\"$solved"
+        if (reason.isNotEmpty()) {
+            print += "\" reason=\"$reason"
+        }
+        print += "\">\n"
+        print += "$indentation    <QuestSteps count=\"${steps.size}\">\n"
+        for (step in steps) {
+            print += step.printToXML("$indentation        ")
+            print += "\n"
+        }
+        print += "$indentation    </QuestSteps>\n"
+        print += "</Quest>"
+        return print
+    }
+
     override fun toString(): String {
         return name
     }

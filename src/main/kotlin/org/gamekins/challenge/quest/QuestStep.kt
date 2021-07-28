@@ -26,6 +26,16 @@ import org.gamekins.challenge.Challenge
  */
 data class QuestStep(val description: String, val challenge: Challenge) {
 
+    /**
+     * Returns the XML representation of the quest step.
+     */
+    fun printToXML(indentation: String): String {
+        var print = "$indentation<QuestStep description=\"$description\">\n"
+        print += challenge.printToXML("", "$indentation    ")
+        print += "\n$indentation</QuestStep>"
+        return print
+    }
+
     override fun toString(): String {
         return description.ifEmpty { challenge.toEscapedString() }
     }

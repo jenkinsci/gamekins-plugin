@@ -402,6 +402,27 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
         }
         print.append(indentation).append("    </RejectedChallenges>\n")
 
+        print.append(indentation).append("    <CurrentQuests count=\"")
+            .append(getCurrentQuests(projectName).size).append("\">\n")
+        for (quest in getCurrentQuests(projectName)) {
+            print.append(quest.printToXML("", "$indentation        ")).append("\n")
+        }
+        print.append(indentation).append("    </CurrentQuests>\n")
+
+        print.append(indentation).append("    <CompletedQuests count=\"")
+            .append(getCompletedQuests(projectName).size).append("\">\n")
+        for (quest in getCompletedQuests(projectName)) {
+            print.append(quest.printToXML("", "$indentation        ")).append("\n")
+        }
+        print.append(indentation).append("    </CompletedQuests>\n")
+
+        print.append(indentation).append("    <RejectedQuests count=\"")
+            .append(getRejectedQuests(projectName).size).append("\">\n")
+        for (pair in rejectedQuests[projectName]!!) {
+            print.append(pair.first.printToXML(pair.second, "$indentation        ")).append("\n")
+        }
+        print.append(indentation).append("    </RejectedQuests>\n")
+
         print.append(indentation).append("    <Achievements count=\"")
             .append(getCompletedAchievements(projectName).size).append("\">\n")
         for (achievement in completedAchievements[projectName]!!) {

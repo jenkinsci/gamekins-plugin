@@ -161,8 +161,9 @@ object PublisherUtil {
         var solvedAchievements = 0
         var solvedQuests = 0
         var generatedQuests = 0
-        if (!PropertyUtil.realUser(user)) return hashMapOf("generated" to 0, "solved" to 0,
-            "solvedAchievements" to solvedAchievements)
+        if (!PropertyUtil.realUser(user)) return hashMapOf("generated" to generated, "solved" to solved,
+            "solvedAchievements" to solvedAchievements, "solvedQuests" to solvedQuests,
+            "generatedQuests" to generatedQuests)
 
         val property = user.getProperty(GameUserProperty::class.java)
         if (property != null && property.isParticipating(parameters.projectName)) {
@@ -208,7 +209,8 @@ object PublisherUtil {
             }
         }
 
-        return hashMapOf("generated" to generated, "solved" to solved, "solvedAchievements" to solvedAchievements)
+        return hashMapOf("generated" to generated, "solved" to solved, "solvedAchievements" to solvedAchievements,
+            "solvedQuests" to solvedQuests, "generatedQuests" to generatedQuests)
     }
 
     /**
@@ -328,7 +330,8 @@ object PublisherUtil {
      * Updates the [Statistics] after all users have been checked.
      */
     fun updateStatistics(run: Run<*, *>, parameters: Parameters, generated: Int, solved: Int,
-                         solvedAchievements:Int, listener: TaskListener = TaskListener.NULL) {
+                         solvedAchievements: Int, solvedQuests: Int, generatedQuests: Int,
+                         listener: TaskListener = TaskListener.NULL) {
 
         //Get the current job and property
         val property: GameProperty?
@@ -356,6 +359,8 @@ object PublisherUtil {
                         generated,
                         solved,
                         solvedAchievements,
+                        solvedQuests,
+                        generatedQuests,
                         parameters.projectTests,
                         parameters.projectCoverage
                     ), listener)

@@ -137,7 +137,7 @@ class PublisherUtilTest : AnnotationSpec() {
      */
     @Test
     fun checkUser() {
-        val map = hashMapOf("generated" to 0, "solved" to 0, "solvedAchievements" to 0)
+        val map = hashMapOf("generated" to 0, "solved" to 0, "solvedAchievements" to 0, "generatedQuests" to 0, "solvedQuests" to 0)
 
         every { PropertyUtil.realUser(user) } returns false
         PublisherUtil.checkUser(user, run, arrayListOf(classDetails), parameters, Result.SUCCESS) shouldBe map
@@ -157,7 +157,7 @@ class PublisherUtilTest : AnnotationSpec() {
         every { userProperty.getCurrentQuests(any()) } returns CopyOnWriteArrayList()
         every { ChallengeFactory.generateNewChallenges(any(), any(), any(), any(), any()) } returns 0
         every { QuestFactory.generateNewQuests(any(), any(), any(), any(), any()) } returns 0
-        PublisherUtil.checkUser(user, run, arrayListOf(classDetails), parameters, Result.SUCCESS) shouldBe hashMapOf("generated" to 1, "solved" to 0, "solvedAchievements" to 0)
+        PublisherUtil.checkUser(user, run, arrayListOf(classDetails), parameters, Result.SUCCESS) shouldBe hashMapOf("generated" to 1, "solved" to 0, "solvedAchievements" to 0, "generatedQuests" to 0, "solvedQuests" to 0)
 
         every { ChallengeFactory.generateBuildChallenge(any(), any(), any(), any(), any()) } returns false
         every { challenge.isSolved(any(), any(), any()) } returns false
@@ -173,16 +173,16 @@ class PublisherUtilTest : AnnotationSpec() {
         every { userProperty.addScore(any(), any()) } returns Unit
         every { userProperty.rejectChallenge(any(), any(), any()) } returns Unit
         every { userProperty.getUser() } returns user
-        PublisherUtil.checkUser(user, run, arrayListOf(classDetails), parameters, Result.SUCCESS) shouldBe hashMapOf("generated" to 0, "solved" to 1, "solvedAchievements" to 0)
+        PublisherUtil.checkUser(user, run, arrayListOf(classDetails), parameters, Result.SUCCESS) shouldBe hashMapOf("generated" to 0, "solved" to 1, "solvedAchievements" to 0, "generatedQuests" to 0, "solvedQuests" to 0)
 
         val achievement = mockkClass(Achievement::class)
         every { achievement.isSolved(any(), any(), any(), any(), any()) } returns false
         every { userProperty.getUnsolvedAchievements(any()) } returns CopyOnWriteArrayList(listOf(achievement))
         every { userProperty.completeAchievement(any(), any()) } returns Unit
-        PublisherUtil.checkUser(user, run, arrayListOf(classDetails), parameters, Result.SUCCESS) shouldBe hashMapOf("generated" to 0, "solved" to 1, "solvedAchievements" to 0)
+        PublisherUtil.checkUser(user, run, arrayListOf(classDetails), parameters, Result.SUCCESS) shouldBe hashMapOf("generated" to 0, "solved" to 1, "solvedAchievements" to 0, "generatedQuests" to 0, "solvedQuests" to 0)
 
         every { achievement.isSolved(any(), any(), any(), any(), any()) } returns true
-        PublisherUtil.checkUser(user, run, arrayListOf(classDetails), parameters, Result.SUCCESS) shouldBe hashMapOf("generated" to 0, "solved" to 1, "solvedAchievements" to 1)
+        PublisherUtil.checkUser(user, run, arrayListOf(classDetails), parameters, Result.SUCCESS) shouldBe hashMapOf("generated" to 0, "solved" to 1, "solvedAchievements" to 1, "generatedQuests" to 0, "solvedQuests" to 0)
     }
 
     @Test
@@ -234,7 +234,7 @@ class PublisherUtilTest : AnnotationSpec() {
         val outputString = "[Gamekins] No entry for Statistics added"
 
         var listener = StreamTaskListener(File("$root/output.txt"))
-        PublisherUtil.updateStatistics(run, parameters, 0, 0, 0, listener)
+        PublisherUtil.updateStatistics(run, parameters, 0, 0, 0, 0, 0, listener)
         var output = FilePath(null, "$root/output.txt").readToString()
         output shouldNotContain outputString
 
@@ -242,20 +242,20 @@ class PublisherUtilTest : AnnotationSpec() {
                 descList2 as DescribableList<AbstractFolderProperty<*>, AbstractFolderPropertyDescriptor>?
         every { descList2.get(org.gamekins.property.GameMultiBranchProperty::class.java) } returns
                 null
-        PublisherUtil.updateStatistics(run, parameters, 0, 0, 0, listener)
+        PublisherUtil.updateStatistics(run, parameters, 0, 0, 0, 0, 0, listener)
         output = FilePath(null, "$root/output.txt").readToString()
         File("$root/output.txt").delete() shouldBe true
         listener = StreamTaskListener(File("$root/output.txt"))
         output shouldContain outputString
 
         every { job.parent } returns multiProject
-        PublisherUtil.updateStatistics(run, parameters, 0, 0, 0, listener)
+        PublisherUtil.updateStatistics(run, parameters, 0, 0, 0, 0, 0, listener)
         output = FilePath(null, "$root/output.txt").readToString()
         output shouldNotContain outputString
 
         every { job.getProperty(org.gamekins.property.GameJobProperty::class.java.name) } returns null
         val e = shouldThrow<NullPointerException> {
-            PublisherUtil.updateStatistics(run, parameters, 0, 0, 0, listener)
+            PublisherUtil.updateStatistics(run, parameters, 0, 0, 0, 0, 0, listener)
         }
         e.message shouldBe "null cannot be cast to non-null type org.gamekins.property.GameJobProperty"
     }
