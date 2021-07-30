@@ -92,6 +92,7 @@ object QuestFactory {
      *
      * Generates a random new [Quest].
      */
+    @JvmStatic
     fun generateQuest(
         user: User, property: GameUserProperty, parameters: Constants.Parameters, listener: TaskListener,
         classes: ArrayList<FileDetails>
@@ -121,7 +122,8 @@ object QuestFactory {
     /**
      * Generates a new ClassQuest with three [ClassCoverageChallenge]s for the same class.
      */
-    private fun generateClassQuest(
+    @JvmStatic
+    fun generateClassQuest(
         user: User, property: GameUserProperty, parameters: Constants.Parameters, listener: TaskListener,
         classes: ArrayList<FileDetails>
     ): Quest? {
@@ -147,7 +149,8 @@ object QuestFactory {
      * Generates a new DecreasingQuest in the order [ClassCoverageChallenge], [MethodCoverageChallenge] and
      * [LineCoverageChallenge] in the same class.
      */
-    private fun generateDecreasingQuest(
+    @JvmStatic
+    fun generateDecreasingQuest(
         user: User, property: GameUserProperty, parameters: Constants.Parameters, listener: TaskListener,
         classes: ArrayList<FileDetails>
     ): Quest? {
@@ -171,7 +174,8 @@ object QuestFactory {
      * Generates a new ExpandingQuest in the order [LineCoverageChallenge], [MethodCoverageChallenge] and
      * [ClassCoverageChallenge] in the same class.
      */
-    private fun generateExpandingQuest(
+    @JvmStatic
+    fun generateExpandingQuest(
         user: User, property: GameUserProperty, parameters: Constants.Parameters, listener: TaskListener,
         classes: ArrayList<FileDetails>
     ): Quest? {
@@ -194,7 +198,8 @@ object QuestFactory {
     /**
      * Generates a new LinesQuest with three different [LineCoverageChallenge]s in the same class.
      */
-    private fun generateLinesQuest(
+    @JvmStatic
+    fun generateLinesQuest(
         user: User, property: GameUserProperty, parameters: Constants.Parameters, listener: TaskListener,
         classes: ArrayList<FileDetails>
     ): Quest? {
@@ -227,7 +232,8 @@ object QuestFactory {
     /**
      * Generates a new MethodsQuest with three different [MethodCoverageChallenge]s in the same class.
      */
-    private fun generateMethodsQuest(
+    @JvmStatic
+    fun generateMethodsQuest(
         user: User, property: GameUserProperty, parameters: Constants.Parameters, listener: TaskListener,
         classes: ArrayList<FileDetails>
     ): Quest? {
@@ -257,7 +263,8 @@ object QuestFactory {
     /**
      * Generates a new MutationQuest with three different [MutationTestChallenge]s in the same class.
      */
-    private fun generateMutationQuest(
+    @JvmStatic
+    fun generateMutationQuest(
         user: User, property: GameUserProperty, parameters: Constants.Parameters, listener: TaskListener,
         classes: ArrayList<FileDetails>
     ): Quest? {
@@ -267,7 +274,7 @@ object QuestFactory {
 
         val set = hashSetOf<MutationTestChallenge>()
         var count = 0
-        while (set.size < 3 || count < 10) {
+        while (set.size < 3 && count < 10) {
             val challenge = ChallengeFactory.generateMutationTestChallenge(
                 selectedClass,
                 parameters.branch,
@@ -286,13 +293,14 @@ object QuestFactory {
             steps.add(QuestStep("", ArrayList(set)[i]))
         }
 
-        return Quest("Coverage ist not everything - Solve three Mutation Test Challenges", steps)
+        return Quest("Coverage is not everything - Solve three Mutation Test Challenges", steps)
     }
 
     /**
      * Generates a new PackageQuest with three different [Challenge]s in the same package.
      */
-    private fun generatePackageQuest(
+    @JvmStatic
+    fun generatePackageQuest(
         user: User, property: GameUserProperty, parameters: Constants.Parameters, listener: TaskListener,
         classes: ArrayList<FileDetails>
     ): Quest? {
@@ -311,6 +319,7 @@ object QuestFactory {
             }
         }
 
+        if (classesInPackage.size < 3) return null
         val selectedClasses = classesInPackage.shuffled().take(3)
         val steps = arrayListOf<QuestStep>()
         for (cla in selectedClasses) {
@@ -325,7 +334,8 @@ object QuestFactory {
     /**
      * Generates a new TestQuest with three [TestChallenge]s.
      */
-    private fun generateTestQuest(
+    @JvmStatic
+    fun generateTestQuest(
         user: User, property: GameUserProperty, parameters: Constants.Parameters, listener: TaskListener,
         classes: ArrayList<FileDetails>
     ): Quest {

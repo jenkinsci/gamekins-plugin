@@ -360,6 +360,7 @@ object ChallengeFactory {
      * This function parses JSON file of mutation test results and filter to take only SURVIVED
      * mutations which belong to the given class
      */
+    @JvmStatic
     @Throws(IOException::class, InterruptedException::class)
     fun generateMutationTestChallenge(
         classDetails: SourceFileDetails, branch: String?, projectName: String?,

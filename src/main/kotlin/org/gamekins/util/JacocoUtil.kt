@@ -94,6 +94,7 @@ object JacocoUtil {
     /**
      * Chooses a random not fully covered line of the given [classDetails]. Returns null if there are no such lines.
      */
+    @JvmStatic
     fun chooseRandomLine(classDetails: SourceFileDetails, workspace: FilePath): Element? {
         val elements = getLines(calculateCurrentFilePath(
                 workspace, classDetails.jacocoSourceFile, classDetails.parameters.remote))
@@ -104,6 +105,7 @@ object JacocoUtil {
      * Chooses a random not fully covered method of the given [classDetails]. Returns null if there are no
      * such methods.
      */
+    @JvmStatic
     fun chooseRandomMethod(classDetails: SourceFileDetails, workspace: FilePath): CoverageMethod? {
         val methods = getNotFullyCoveredMethodEntries(calculateCurrentFilePath(
                 workspace, classDetails.jacocoMethodFile, classDetails.parameters.remote))
