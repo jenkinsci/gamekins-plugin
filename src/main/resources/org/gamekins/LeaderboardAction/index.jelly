@@ -25,6 +25,7 @@
                         <thead class="thead-dark">
                         <tr>
                             <th scope="col" class="text-center">#</th>
+                            <th scope="col" class="text-center"/>
                             <th scope="col" class="text-center">Participant</th>
                             <th scope="col" class="text-center">Team</th>
                             <th scope="col" class="text-center">Completed Challenges</th>
@@ -35,6 +36,9 @@
                         <j:forEach indexVar="index" var="userDetail" items="${it.userDetails}">
                             <tr>
                                 <td class="text-center">${index + 1}</td>
+                                <td class="text-center">
+                                    <img id="imageUser${index}" src="${userDetail.image}" height="48" width="48" />
+                                </td>
                                 <td><a href="${userDetail.url}/achievements">${userDetail.userName}</a></td>
                                 <td class="text-center">${userDetail.teamName}</td>
                                 <td class="text-center">${userDetail.completedChallenges}</td>
@@ -489,6 +493,15 @@
                 window.onload = (function () {
                     prettyPrint();
                     jQuery3('[data-toggle="tooltip"]').tooltip()
+
+                    let avatars = jQuery3('[id^=imageUser]')
+                    let src = document.getElementsByTagName("img")[0].src
+                    let base = src.substring(0, src.indexOf("static"))
+                    let endSplit = src.substring(src.indexOf("static")).split("/")
+                    for (let avatar of avatars) {
+                        let split = avatar.src.split("/")
+                        avatar.src = base + "static/" + endSplit[1] + "/plugin/gamekins/avatars/" + split[split.length - 1]
+                    }
                 });
 
                 jQuery3("#closeModalBtn").on("click", () => {

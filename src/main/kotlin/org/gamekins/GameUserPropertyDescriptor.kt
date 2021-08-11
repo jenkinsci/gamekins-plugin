@@ -17,9 +17,13 @@
 package org.gamekins
 
 import hudson.Extension
-import hudson.model.User
-import hudson.model.UserProperty
-import hudson.model.UserPropertyDescriptor
+import hudson.model.*
+import org.kohsuke.stapler.AncestorInPath
+import org.kohsuke.stapler.QueryParameter
+import java.io.File
+import java.net.URI
+import java.util.zip.ZipEntry
+import java.util.zip.ZipInputStream
 import javax.annotation.Nonnull
 
 /**
@@ -31,6 +35,52 @@ import javax.annotation.Nonnull
  */
 @Extension
 class GameUserPropertyDescriptor : UserPropertyDescriptor(GameUserProperty::class.java) {
+
+    /**
+     * Returns the list of avatars available in Gamekins. [job] is only needed so that Jenkins does recognize this
+     * method to be available from the frontend.
+     */
+    fun doGetAvatars(@AncestorInPath job: Job<*, *>?): String {
+        val resource = javaClass.getResource("../../../webapp/avatars")
+        val avatars = arrayListOf<String>()
+        if (resource.path.contains(".jar!")) {
+            var path = resource.path.replaceAfter(".jar!", "").replace(".jar!", ".jar")
+            path = path.replace("file:", "")
+            val zip = ZipInputStream(URI("file", "", path, null).toURL().openStream())
+
+            var entry: ZipEntry? = zip.nextEntry
+            while (entry != null) {
+                if (!entry.isDirectory && entry.name.startsWith("avatars/") && entry.name.endsWith(".png")) {
+                    avatars.add("/plugin/gamekins/avatars/" + entry.name)
+                }
+
+                entry = zip.nextEntry
+            }
+        } else {
+            val files = File(resource.toURI()).listFiles()!!.filter { it.extension == "png" }
+            files.forEach { file ->
+                avatars.add("/plugin/gamekins/avatars/" + file.name)
+            }
+        }
+
+        return avatars.toString()
+    }
+
+    /**
+     * Returns the relative path to the current avatar of a [user].
+     */
+    fun doGetCurrentAvatar(@AncestorInPath user: User?): String {
+        val property = user?.getProperty(GameUserProperty::class.java)
+        return "/plugin/gamekins/avatars/${property?.getCurrentAvatar()}"
+    }
+
+    /**
+     * Sets a new avatar based on the chosen one from the [user] with [name].
+     */
+    fun doSetCurrentAvatar(@AncestorInPath user: User?, @QueryParameter name: String) {
+        val property = user?.getProperty(GameUserProperty::class.java)
+        property?.setCurrentAvatar(name)
+    }
 
     @Nonnull
     override fun getDisplayName(): String {

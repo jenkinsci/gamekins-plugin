@@ -17,9 +17,7 @@
 package org.gamekins
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import hudson.model.Action
-import hudson.model.User
-import hudson.model.UserProperty
+import hudson.model.*
 import org.gamekins.challenge.Challenge
 import org.gamekins.challenge.DummyChallenge
 import org.gamekins.statistics.Statistics
@@ -30,9 +28,10 @@ import org.gamekins.challenge.quest.Quest
 import org.gamekins.util.Constants
 import org.gamekins.util.PropertyUtil
 import org.kohsuke.stapler.*
-import java.util.UUID
+import java.util.*
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.CopyOnWriteArraySet
+import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 
 /**
@@ -47,6 +46,7 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
     private var completedAchievements: HashMap<String, CopyOnWriteArrayList<Achievement>> = HashMap()
     private val completedChallenges: HashMap<String, CopyOnWriteArrayList<Challenge>> = HashMap()
     private var completedQuests: HashMap<String, CopyOnWriteArrayList<Quest>> = HashMap()
+    private var currentAvatar: String = ""
     private val currentChallenges: HashMap<String, CopyOnWriteArrayList<Challenge>> = HashMap()
     private var currentQuests: HashMap<String, CopyOnWriteArrayList<Quest>> = HashMap()
     private var gitNames: CopyOnWriteArraySet<String>? = null
@@ -221,6 +221,17 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
      */
     fun getCompletedQuests(projectName: String): CopyOnWriteArrayList<Quest> {
         return completedQuests[projectName]!!
+    }
+
+    /**
+     * Returns the filename of the current avatar.
+     */
+    fun getCurrentAvatar(): String {
+        if (currentAvatar.isNullOrEmpty()) {
+            currentAvatar = "001-actress.png"
+        }
+
+        return currentAvatar
     }
 
     /**
@@ -579,6 +590,15 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
         val list = CopyOnWriteArrayList<Achievement>()
         GamePublisherDescriptor.achievements.forEach { list.add(it.clone()) }
         unsolvedAchievements[projectName] = list
+    }
+
+    /**
+     * Sets the filename of the current avatar.
+     */
+    fun setCurrentAvatar(name: String) {
+        currentAvatar = name
+
+        user.save()
     }
 
     /**
