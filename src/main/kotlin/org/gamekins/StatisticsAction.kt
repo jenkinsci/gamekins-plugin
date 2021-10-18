@@ -67,7 +67,7 @@ class StatisticsAction(val job: AbstractItem) : ProminentProjectAction, StaplerP
 
     @Restricted(NoExternalUse::class)
     override fun getTarget(): Any {
-        Jenkins.getInstanceOrNull()?.checkPermission(Item.CONFIGURE)
+        this.job.checkPermission(Item.CONFIGURE)
         return this
     }
 

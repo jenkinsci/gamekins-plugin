@@ -81,9 +81,9 @@ class GameMultiBranchProperty
 
     override fun getTarget(): Any {
         if (this.owner?.parent is OrganizationFolder) {
-            Jenkins.getInstanceOrNull()?.checkPermission(Item.READ)
+            this.owner?.checkPermission(Item.READ)
         } else {
-            Jenkins.getInstanceOrNull()?.checkPermission(Item.CONFIGURE)
+            this.owner?.checkPermission(Item.CONFIGURE)
         }
         return this
     }

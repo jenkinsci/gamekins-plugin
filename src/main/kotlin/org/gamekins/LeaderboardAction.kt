@@ -107,7 +107,7 @@ class LeaderboardAction(val job: AbstractItem) : ProminentProjectAction, Describ
     }
 
     override fun getTarget(): Any {
-        Jenkins.getInstanceOrNull()?.checkPermission(Item.READ)
+        this.job.checkPermission(Job.READ)
         return this
     }
 

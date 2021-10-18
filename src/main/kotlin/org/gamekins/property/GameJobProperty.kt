@@ -93,7 +93,7 @@ class GameJobProperty
     }
 
     override fun getTarget(): Any {
-        Jenkins.getInstanceOrNull()?.checkPermission(Item.CONFIGURE)
+        this.owner.checkPermission(Item.CONFIGURE)
         return this
     }
 

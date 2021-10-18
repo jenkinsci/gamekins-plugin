@@ -59,7 +59,6 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
     var searchCommitCount: Int = if (searchCommitCount > 0) searchCommitCount else Constants.DEFAULT_SEARCH_COMMIT_COUNT
 
     override fun getTarget(): Any {
-        Jenkins.getInstanceOrNull()?.checkPermission(Item.CONFIGURE)
         return this
     }
 

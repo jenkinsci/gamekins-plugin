@@ -45,7 +45,7 @@ class GameOrganizationFolderProperty private constructor()
     : AbstractFolderProperty<AbstractFolder<*>?>(), StaplerProxy {
 
     override fun getTarget(): Any {
-        Jenkins.getInstanceOrNull()?.checkPermission(Item.CONFIGURE)
+        this.owner?.checkPermission(Item.READ)
         return this
     }
 
