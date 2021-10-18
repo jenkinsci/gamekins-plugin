@@ -23,6 +23,7 @@ import hudson.util.FormValidation
 import hudson.util.ListBoxModel
 import org.gamekins.util.PropertyUtil
 import net.sf.json.JSONObject
+import org.gamekins.util.Constants
 import org.jenkinsci.plugins.workflow.job.WorkflowJob
 import org.kohsuke.stapler.AncestorInPath
 import org.kohsuke.stapler.QueryParameter
@@ -147,8 +148,14 @@ class GameJobPropertyDescriptor : JobPropertyDescriptor(GameJobProperty::class.j
      */
     override fun newInstance(req: StaplerRequest?, formData: JSONObject): JobProperty<*>? {
         return if (req == null || req.findAncestor(AbstractItem::class.java).getObject() == null) null
-        else GameJobProperty(req.findAncestor(AbstractItem::class.java).getObject() as AbstractItem,
-            formData.getBoolean("activated"), formData.getBoolean("showStatistics"),
-            formData.getInt("currentChallengesCount"), formData.getInt("currentQuestsCount"))
+        else GameJobProperty(
+            req.findAncestor(AbstractItem::class.java).getObject() as AbstractItem,
+            formData.getBoolean("activated"),
+            formData.getBoolean("showStatistics"),
+            if (formData.getValue("currentChallengesCount") is Int)
+                formData.getInt("currentChallengesCount") else Constants.DEFAULT_CURRENT_CHALLENGES,
+            if (formData.getValue("currentQuestsCount") is Int)
+                formData.getInt("currentQuestsCount") else Constants.DEFAULT_CURRENT_QUESTS
+        )
     }
 }

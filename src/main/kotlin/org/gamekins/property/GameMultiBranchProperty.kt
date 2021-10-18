@@ -247,9 +247,15 @@ class GameMultiBranchProperty
          */
         override fun newInstance(req: StaplerRequest?, formData: JSONObject): AbstractFolderProperty<*>? {
             return if (req == null || req.findAncestor(AbstractItem::class.java).getObject() == null) null
-            else GameMultiBranchProperty(req.findAncestor(AbstractItem::class.java).getObject() as AbstractItem,
-                formData.getBoolean("activated"), formData.getBoolean("showStatistics"),
-                formData.getInt("currentChallengesCount"), formData.getInt("currentQuestsCount"))
+            else GameMultiBranchProperty(
+                req.findAncestor(AbstractItem::class.java).getObject() as AbstractItem,
+                formData.getBoolean("activated"),
+                formData.getBoolean("showStatistics"),
+                if (formData.getValue("currentChallengesCount") is Int)
+                    formData.getInt("currentChallengesCount") else Constants.DEFAULT_CURRENT_CHALLENGES,
+                if (formData.getValue("currentQuestsCount") is Int)
+                    formData.getInt("currentQuestsCount") else Constants.DEFAULT_CURRENT_QUESTS
+            )
         }
     }
 }
