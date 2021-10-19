@@ -119,9 +119,15 @@ class GameJobProperty
      * @see [JobProperty.reconfigure]
      */
     override fun reconfigure(req: StaplerRequest, form: JSONObject?): JobProperty<*> {
-        if (form != null) activated = form.getBoolean("activated")
-        if (form != null) showStatistics = form.getBoolean("showStatistics")
-        if (form != null) currentChallengesCount = form.getInt("currentChallengesCount")
+        if (form != null) {
+            activated = form.getBoolean("activated")
+            showStatistics = form.getBoolean("showStatistics")
+            if (form.getValue("currentChallengesCount") is String)
+                currentChallengesCount = form.getInt("currentChallengesCount")
+            if (form.getValue("currentQuestsCount") is String)
+                currentQuestsCount = form.getInt("currentQuestsCount")
+        }
+
         PropertyUtil.reconfigure(owner, activated, showStatistics)
         return this
     }
