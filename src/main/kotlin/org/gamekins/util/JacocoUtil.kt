@@ -332,6 +332,8 @@ object JacocoUtil {
                 methods.add(extractCoverageMethod(element))
             }
         }
+        methods.removeIf { it.methodName.startsWith("lambda$") }
+
         return methods
     }
 
