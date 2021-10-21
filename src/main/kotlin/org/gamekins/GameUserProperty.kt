@@ -564,13 +564,17 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
      * Rejects a given [quest] of project [projectName] with a [reason].
      */
     fun rejectQuest(projectName: String, quest: Quest, reason: String) {
-        rejectedQuests.computeIfAbsent(projectName) { CopyOnWriteArrayList() }
-        val quests = rejectedQuests[projectName]!!
-        quests.add(Pair(quest, reason))
-        rejectedQuests[projectName] = quests
-        val currentQuests = currentQuests[projectName]!!
-        currentQuests.remove(quest)
-        this.currentQuests[projectName] = currentQuests
+        if (quest.steps.size == 0) {
+            completeQuest(projectName, quest)
+        } else {
+            rejectedQuests.computeIfAbsent(projectName) { CopyOnWriteArrayList() }
+            val quests = rejectedQuests[projectName]!!
+            quests.add(Pair(quest, reason))
+            rejectedQuests[projectName] = quests
+            val currentQuests = currentQuests[projectName]!!
+            currentQuests.remove(quest)
+            this.currentQuests[projectName] = currentQuests
+        }
     }
 
     /**
