@@ -45,14 +45,14 @@ class StatisticsTest : AnnotationSpec() {
         //every { testing.builds } returns RunList(listOf(run))
         val job = mockkClass(org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject::class)
         every { job.items } returns listOf()
-        every { job.name } returns "test-project"
+        every { job.fullName } returns "test-project"
     }
 
     @Test
     fun isNotFullyInitialized() {
         val job = mockkClass(org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject::class)
         every { job.items } returns listOf()
-        every { job.name } returns "test-project"
+        every { job.fullName } returns "test-project"
 
         Statistics(job).isNotFullyInitialized() shouldBe false
     }

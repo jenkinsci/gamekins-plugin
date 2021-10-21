@@ -36,7 +36,7 @@ import kotlin.collections.ArrayList
 class Statistics(job: AbstractItem) {
 
     private var fullyInitialized: Boolean = false
-    private val projectName: String = job.name
+    private val projectName: String = job.fullName
     private val runEntries: MutableList<RunEntry>?
 
     init {

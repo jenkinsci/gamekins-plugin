@@ -67,7 +67,7 @@ class GameJobPropertyDescriptor : JobPropertyDescriptor(GameJobProperty::class.j
      */
     fun doDeleteTeam(@AncestorInPath job: Job<*, *>?, @QueryParameter teamsBox: String?): FormValidation {
         if (job == null) return FormValidation.error("Unexpected error: Parent job is null")
-        val projectName = job.name
+        val projectName = job.fullName
         val property = job.properties[this] as GameJobProperty
         val validation = PropertyUtil.doDeleteTeam(projectName, property, teamsBox!!)
         save()
@@ -90,7 +90,7 @@ class GameJobPropertyDescriptor : JobPropertyDescriptor(GameJobProperty::class.j
      * all users of the [job].
      */
     fun doFillUsersBoxItems(@AncestorInPath job: Job<*, *>?): ListBoxModel {
-        return if (job == null) ListBoxModel() else PropertyUtil.doFillUsersBoxItems(job.name)
+        return if (job == null) ListBoxModel() else PropertyUtil.doFillUsersBoxItems(job.fullName)
     }
 
     /**

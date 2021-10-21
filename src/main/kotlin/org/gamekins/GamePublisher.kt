@@ -163,7 +163,7 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
 
         val parameters = Parameters(jacocoCSVPath = jacocoCSVPath!!, jacocoResultsPath = jacocoResultsPath!!,
             mocoJSONPath = mocoJSONPath!!, workspace = build.workspace!!)
-        parameters.projectName = build.project.name
+        parameters.projectName = build.project.fullName
         parameters.currentChallengesCount = build.project.getProperty(GameJobProperty::class.java)
             .currentChallengesCount
         parameters.currentQuestsCount = build.project.getProperty(GameJobProperty::class.java)
@@ -193,7 +193,7 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
                 listener.logger.println(Constants.NOT_ACTIVATED)
                 return
             }
-            parameters.projectName = project.name
+            parameters.projectName = project.fullName
             parameters.currentChallengesCount = project.properties.get(GameMultiBranchProperty::class.java)
                 .currentChallengesCount
             parameters.currentQuestsCount = project.properties.get(GameMultiBranchProperty::class.java)
@@ -205,7 +205,7 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
                 listener.logger.println(Constants.NOT_ACTIVATED)
                 return
             }
-            parameters.projectName = run.parent.name
+            parameters.projectName = run.parent.fullName
             parameters.currentChallengesCount = run.parent.getProperty(GameJobProperty::class.java)
                 .currentChallengesCount
             parameters.currentQuestsCount = run.parent.getProperty(GameJobProperty::class.java)

@@ -51,7 +51,7 @@ object ActionUtil {
         val property = user.getProperty(GameUserProperty::class.java)
                 ?: return FormValidation.error("Unexpected error while retrieving the property")
 
-        val projectName = job.name
+        val projectName = job.fullName
         var challenge: Challenge? = null
         for (chal in property.getCurrentChallenges(projectName)) {
             if (chal.toEscapedString() == reject) {
@@ -91,7 +91,7 @@ object ActionUtil {
         val property = user.getProperty(GameUserProperty::class.java)
             ?: return FormValidation.error("Unexpected error while retrieving the property")
 
-        val projectName = job.name
+        val projectName = job.fullName
         var quest: Quest? = null
         for (ques in property.getCurrentQuests(projectName)) {
             if (ques.toString() == reject) {

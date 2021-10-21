@@ -49,8 +49,8 @@ class PropertyUtilTest : AnnotationSpec() {
 
     @BeforeAll
     fun initAll() {
-        every { job1.name } returns projectName1
-        every { job2.name } returns projectName2
+        every { job1.fullName } returns projectName1
+        every { job2.fullName } returns projectName2
 
         every { property1.addTeam(any()) } returns Unit
         every { property2.addTeam(any()) } returns Unit

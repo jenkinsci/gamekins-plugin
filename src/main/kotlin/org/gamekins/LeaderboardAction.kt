@@ -41,7 +41,7 @@ class LeaderboardAction(val job: AbstractItem) : ProminentProjectAction, Describ
         val user: User = User.current() ?: return CopyOnWriteArrayList()
         val property = user.getProperty(GameUserProperty::class.java)
                 ?: return CopyOnWriteArrayList()
-        return property.getCompletedChallenges(job.name)
+        return property.getCompletedChallenges(job.fullName)
     }
 
     /**
@@ -51,7 +51,7 @@ class LeaderboardAction(val job: AbstractItem) : ProminentProjectAction, Describ
         val user: User = User.current() ?: return CopyOnWriteArrayList()
         val property = user.getProperty(GameUserProperty::class.java)
             ?: return CopyOnWriteArrayList()
-        return property.getCompletedQuests(job.name)
+        return property.getCompletedQuests(job.fullName)
     }
 
     /**
@@ -61,7 +61,7 @@ class LeaderboardAction(val job: AbstractItem) : ProminentProjectAction, Describ
         val user: User = User.current() ?: return CopyOnWriteArrayList()
         val property = user.getProperty(GameUserProperty::class.java)
                 ?: return CopyOnWriteArrayList()
-        return property.getCurrentChallenges(job.name)
+        return property.getCurrentChallenges(job.fullName)
     }
 
     /**
@@ -71,7 +71,7 @@ class LeaderboardAction(val job: AbstractItem) : ProminentProjectAction, Describ
         val user: User = User.current() ?: return CopyOnWriteArrayList()
         val property = user.getProperty(GameUserProperty::class.java)
             ?: return CopyOnWriteArrayList()
-        return property.getCurrentQuests(job.name)
+        return property.getCurrentQuests(job.fullName)
     }
 
     override fun getDescriptor(): Descriptor<LeaderboardAction> {
@@ -93,7 +93,7 @@ class LeaderboardAction(val job: AbstractItem) : ProminentProjectAction, Describ
         val user: User = User.current() ?: return CopyOnWriteArrayList()
         val property = user.getProperty(GameUserProperty::class.java)
                 ?: return CopyOnWriteArrayList()
-        return property.getRejectedChallenges(job.name)
+        return property.getRejectedChallenges(job.fullName)
     }
 
     /**
@@ -103,7 +103,7 @@ class LeaderboardAction(val job: AbstractItem) : ProminentProjectAction, Describ
         val user: User = User.current() ?: return CopyOnWriteArrayList()
         val property = user.getProperty(GameUserProperty::class.java)
             ?: return CopyOnWriteArrayList()
-        return property.getRejectedQuests(job.name)
+        return property.getRejectedQuests(job.fullName)
     }
 
     override fun getTarget(): Any {
@@ -119,25 +119,25 @@ class LeaderboardAction(val job: AbstractItem) : ProminentProjectAction, Describ
         for (user in User.getAll()) {
             if (!PropertyUtil.realUser(user)) continue
             val property = user.getProperty(GameUserProperty::class.java)
-            if (property != null && property.isParticipating(job.name)) {
+            if (property != null && property.isParticipating(job.fullName)) {
                 var index = -1
                 details.indices.forEach { i ->
-                    if (details[i].teamName == property.getTeamName(job.name)) {
+                    if (details[i].teamName == property.getTeamName(job.fullName)) {
                         index = i
                     }
                 }
 
                 if (index != -1) {
-                    details[index].addCompletedAchievements(property.getCompletedAchievements(job.name).size)
-                    details[index].addCompletedChallenges(property.getCompletedChallenges(job.name).size)
-                    details[index].addScore(property.getScore(job.name))
+                    details[index].addCompletedAchievements(property.getCompletedAchievements(job.fullName).size)
+                    details[index].addCompletedChallenges(property.getCompletedChallenges(job.fullName).size)
+                    details[index].addScore(property.getScore(job.fullName))
                 } else {
                     details.add(
                         TeamDetails(
-                            property.getTeamName(job.name),
-                            property.getScore(job.name),
-                            property.getCompletedChallenges(job.name).size,
-                            property.getCompletedAchievements(job.name).size
+                            property.getTeamName(job.fullName),
+                            property.getScore(job.fullName),
+                            property.getCompletedChallenges(job.fullName).size,
+                            property.getCompletedAchievements(job.fullName).size
                         )
                     )
                 }
@@ -161,14 +161,14 @@ class LeaderboardAction(val job: AbstractItem) : ProminentProjectAction, Describ
         for (user in User.getAll()) {
             if (!PropertyUtil.realUser(user)) continue
             val property = user.getProperty(GameUserProperty::class.java)
-            if (property != null && property.isParticipating(job.name)) {
+            if (property != null && property.isParticipating(job.fullName)) {
                 details.add(
                     UserDetails(
                         user.fullName,
-                        property.getTeamName(job.name),
-                        property.getScore(job.name),
-                        property.getCompletedChallenges(job.name).size,
-                        property.getCompletedAchievements(job.name).size,
+                        property.getTeamName(job.fullName),
+                        property.getScore(job.fullName),
+                        property.getCompletedChallenges(job.fullName).size,
+                        property.getCompletedAchievements(job.fullName).size,
                         user.absoluteUrl,
                         property.getCurrentAvatar()
                     )
@@ -188,7 +188,7 @@ class LeaderboardAction(val job: AbstractItem) : ProminentProjectAction, Describ
     fun isParticipating(): Boolean {
         val user: User = User.current() ?: return false
         val property = user.getProperty(GameUserProperty::class.java) ?: return false
-        return property.isParticipating(job.name)
+        return property.isParticipating(job.fullName)
     }
 
     /**

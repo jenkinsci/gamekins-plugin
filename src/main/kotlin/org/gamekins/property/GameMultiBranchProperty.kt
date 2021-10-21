@@ -177,7 +177,7 @@ class GameMultiBranchProperty
         fun doDeleteTeam(@AncestorInPath job: WorkflowMultiBranchProject?,
                          @QueryParameter teamsBox: String?): FormValidation {
             if (job == null) return FormValidation.error("Unexpected error: Parent job is null")
-            val projectName = job.name
+            val projectName = job.fullName
             val property = job.properties[this] as GameMultiBranchProperty
             val validation = PropertyUtil.doDeleteTeam(projectName, property, teamsBox!!)
             save()
@@ -200,7 +200,7 @@ class GameMultiBranchProperty
          * all users of the [job].
          */
         fun doFillUsersBoxItems(@AncestorInPath job: WorkflowMultiBranchProject): ListBoxModel {
-            return PropertyUtil.doFillUsersBoxItems(job.name)
+            return PropertyUtil.doFillUsersBoxItems(job.fullName)
         }
 
         /**

@@ -25,7 +25,6 @@ import hudson.model.JobPropertyDescriptor
 import hudson.util.ListBoxModel
 import jenkins.branch.MultiBranchProject
 import jenkins.branch.OrganizationFolder
-import jenkins.model.Jenkins
 import net.sf.json.JSONObject
 import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject
 import org.kohsuke.stapler.AncestorInPath
@@ -101,7 +100,7 @@ class GameOrganizationFolderProperty private constructor()
             if (req == null) return null
             val folder = req.findAncestor(OrganizationFolder::class.java).getObject() as OrganizationFolder
             for (project in folder.items) {
-                if (project.name == formData.getString("project")) {
+                if (project.fullName == formData.getString("project")) {
                     try {
                         val property = project.properties.get(GameMultiBranchProperty::class.java)
                         property?.reconfigure(req, formData)

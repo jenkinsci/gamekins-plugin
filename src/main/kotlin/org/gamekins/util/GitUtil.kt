@@ -249,7 +249,8 @@ object GitUtil {
                                 pathSplit.contains("test") -> {
                                     TestFileDetails(parameters, path, listener)
                                 }
-                                path.endsWith(".java") || path.endsWith(".kt") -> {
+                                //TODO: Fix src in path
+                                path.contains("src/") && (path.endsWith(".java") || path.endsWith(".kt")) -> {
                                     SourceFileDetails(parameters, path, listener)
                                 }
                                 else -> {

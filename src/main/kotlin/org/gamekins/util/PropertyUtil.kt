@@ -77,7 +77,7 @@ object PropertyUtil {
 
         val user = retrieveUser(usersBox)
         if (user != null) {
-            val projectName = job.name
+            val projectName = job.fullName
             val property = user.getProperty(GameUserProperty::class.java)
             return if (property != null && !property.isParticipating(projectName)) {
                 property.setParticipating(projectName, teamsBox)
@@ -175,7 +175,7 @@ object PropertyUtil {
 
         val user = retrieveUser(usersBox)
         if (user != null) {
-            val projectName = job.name
+            val projectName = job.fullName
             val property = user.getProperty(GameUserProperty::class.java)
             return if (property != null && property.isParticipating(projectName, teamsBox)) {
                 property.removeParticipation(projectName)
@@ -204,8 +204,8 @@ object PropertyUtil {
         for (user in User.getAll()) {
             if (!realUser(user)) continue
             val userProperty = user.getProperty(GameUserProperty::class.java)
-            if (userProperty != null && userProperty.isParticipating(job.name)) {
-                userProperty.reset(job.name)
+            if (userProperty != null && userProperty.isParticipating(job.fullName)) {
+                userProperty.reset(job.fullName)
                 try {
                     user.save()
                 } catch (e: IOException) {
@@ -226,8 +226,8 @@ object PropertyUtil {
         for (user in User.getAll()) {
             if (!realUser(user)) continue
             val userProperty = user.getProperty(GameUserProperty::class.java)
-            if (userProperty != null && userProperty.isParticipating(job.name)) {
-                val teamName = userProperty.getTeamName(job.name)
+            if (userProperty != null && userProperty.isParticipating(job.fullName)) {
+                val teamName = userProperty.getTeamName(job.fullName)
                 val list = map[teamName]
                 if (list != null) {
                     list.add(user.fullName)

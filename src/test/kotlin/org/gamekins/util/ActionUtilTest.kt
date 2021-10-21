@@ -54,7 +54,7 @@ class ActionUtilTest: AnnotationSpec() {
     fun init() {
         mockkStatic(User::class)
 
-        every { job.name } returns "test-project"
+        every { job.fullName } returns "test-project"
         every { job.save() } returns Unit
         every { user.save() } returns Unit
         every { challenge.toString() } returns stringChallenge

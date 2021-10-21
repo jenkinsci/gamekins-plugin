@@ -53,7 +53,8 @@
                 function changeProjectURL() {
                     let link = document.getElementById("projectLink")
                     let baseURL = window.location.origin + window.location.href.substring(window.location.origin.length, window.location.href.indexOf("user"))
-                    link.href = baseURL + "job/" + projects.value + "/leaderboard/"
+                    let projectName = projects.value.replaceAll("/", "/job/")
+                    link.href = baseURL + "job/" + projectName + "/leaderboard/"
                     link.innerText = "Go to leaderboard"
                 }
 
