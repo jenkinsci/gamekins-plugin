@@ -78,7 +78,7 @@ open class FileDetails(var parameters: Parameters, val filePath: String)
     /**
      * Check whether the file exists.
      */
-    fun filesExists(): Boolean {
+    open fun filesExists(): Boolean {
         return file.exists()
     }
 

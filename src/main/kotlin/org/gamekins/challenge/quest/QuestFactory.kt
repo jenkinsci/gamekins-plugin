@@ -127,7 +127,8 @@ object QuestFactory {
         user: User, property: GameUserProperty, parameters: Constants.Parameters, listener: TaskListener,
         classes: ArrayList<FileDetails>
     ): Quest? {
-        val suitableClasses = ArrayList(classes.filterIsInstance<SourceFileDetails>().filter { it.coverage < 1.0 })
+        val suitableClasses = ArrayList(classes.filterIsInstance<SourceFileDetails>()
+            .filter { it.coverage < 1.0 && it.filesExists() })
         val rejectedClasses = property.getRejectedChallenges(parameters.projectName)
             .map { it.first }
             .filterIsInstance<ClassCoverageChallenge>()
@@ -154,7 +155,8 @@ object QuestFactory {
         user: User, property: GameUserProperty, parameters: Constants.Parameters, listener: TaskListener,
         classes: ArrayList<FileDetails>
     ): Quest? {
-        val suitableClasses = classes.filterIsInstance<SourceFileDetails>().filter { it.coverage < 1.0 }
+        val suitableClasses = classes.filterIsInstance<SourceFileDetails>()
+            .filter { it.coverage < 1.0  && it.filesExists() }
         if (suitableClasses.isEmpty()) return null
         val selectedClass = suitableClasses.random()
 
@@ -179,7 +181,8 @@ object QuestFactory {
         user: User, property: GameUserProperty, parameters: Constants.Parameters, listener: TaskListener,
         classes: ArrayList<FileDetails>
     ): Quest? {
-        val suitableClasses = classes.filterIsInstance<SourceFileDetails>().filter { it.coverage < 1.0 }
+        val suitableClasses = classes.filterIsInstance<SourceFileDetails>()
+            .filter { it.coverage < 1.0  && it.filesExists() }
         if (suitableClasses.isEmpty()) return null
         val selectedClass = suitableClasses.random()
 
@@ -203,7 +206,8 @@ object QuestFactory {
         user: User, property: GameUserProperty, parameters: Constants.Parameters, listener: TaskListener,
         classes: ArrayList<FileDetails>
     ): Quest? {
-        val suitableClasses = classes.filterIsInstance<SourceFileDetails>().filter { it.coverage < 1.0 }
+        val suitableClasses = classes.filterIsInstance<SourceFileDetails>()
+            .filter { it.coverage < 1.0  && it.filesExists() }
         if (suitableClasses.isEmpty()) return null
         val selectedClass = suitableClasses.random()
 
@@ -237,7 +241,8 @@ object QuestFactory {
         user: User, property: GameUserProperty, parameters: Constants.Parameters, listener: TaskListener,
         classes: ArrayList<FileDetails>
     ): Quest? {
-        val suitableClasses = classes.filterIsInstance<SourceFileDetails>().filter { it.coverage < 1.0 }
+        val suitableClasses = classes.filterIsInstance<SourceFileDetails>()
+            .filter { it.coverage < 1.0  && it.filesExists() }
         if (suitableClasses.isEmpty()) return null
         val selectedClass = suitableClasses.random()
 
@@ -268,7 +273,7 @@ object QuestFactory {
         user: User, property: GameUserProperty, parameters: Constants.Parameters, listener: TaskListener,
         classes: ArrayList<FileDetails>
     ): Quest? {
-        val suitableClasses = classes.filterIsInstance<SourceFileDetails>()
+        val suitableClasses = classes.filterIsInstance<SourceFileDetails>().filter { it.filesExists() }
         if (suitableClasses.isEmpty()) return null
         val selectedClass = suitableClasses.random()
 
@@ -304,7 +309,8 @@ object QuestFactory {
         user: User, property: GameUserProperty, parameters: Constants.Parameters, listener: TaskListener,
         classes: ArrayList<FileDetails>
     ): Quest? {
-        val suitableClasses = classes.filterIsInstance<SourceFileDetails>().filter { it.coverage < 1.0 }
+        val suitableClasses = classes.filterIsInstance<SourceFileDetails>()
+            .filter { it.coverage < 1.0  && it.filesExists() }
         if (suitableClasses.isEmpty()) return null
         var selectedClass = suitableClasses.random()
 

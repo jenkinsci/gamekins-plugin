@@ -121,6 +121,10 @@ class SourceFileDetails(parameters: Parameters,
         }
     }
 
+    override fun filesExists(): Boolean {
+        return super.filesExists() && jacocoCSVFile.exists() && jacocoMethodFile.exists() && jacocoSourceFile.exists()
+    }
+
     /**
      * Called by Jenkins after the object has been created from his XML representation. Used for data migration.
      */
