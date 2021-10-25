@@ -125,6 +125,7 @@ class QuestFactoryTest : AnnotationSpec() {
 
         val sourceDetail = mockkClass(SourceFileDetails::class)
         every { sourceDetail.coverage } returns 1.0
+        every { sourceDetail.filesExists() } returns true
         classes.add(sourceDetail)
         QuestFactory.generateClassQuest(user, property, parameters, listener, classes) shouldBe null
 
@@ -151,6 +152,7 @@ class QuestFactoryTest : AnnotationSpec() {
 
         val sourceDetail = mockkClass(SourceFileDetails::class)
         every { sourceDetail.coverage } returns 1.0
+        every { sourceDetail.filesExists() } returns true
         classes.add(sourceDetail)
         QuestFactory.generateDecreasingQuest(user, property, parameters, listener, classes) shouldBe null
 
@@ -177,6 +179,7 @@ class QuestFactoryTest : AnnotationSpec() {
 
         val sourceDetail = mockkClass(SourceFileDetails::class)
         every { sourceDetail.coverage } returns 1.0
+        every { sourceDetail.filesExists() } returns true
         classes.add(sourceDetail)
         QuestFactory.generateExpandingQuest(user, property, parameters, listener, classes) shouldBe null
 
@@ -203,6 +206,7 @@ class QuestFactoryTest : AnnotationSpec() {
 
         val sourceDetail = mockkClass(SourceFileDetails::class)
         every { sourceDetail.coverage } returns 1.0
+        every { sourceDetail.filesExists() } returns true
         classes.add(sourceDetail)
         QuestFactory.generateLinesQuest(user, property, parameters, listener, classes) shouldBe null
 
@@ -253,6 +257,7 @@ class QuestFactoryTest : AnnotationSpec() {
         QuestFactory.generateMutationQuest(user, property, parameters, listener, classes) shouldBe null
 
         val sourceDetail = mockkClass(SourceFileDetails::class)
+        every { sourceDetail.filesExists() } returns true
         classes.add(sourceDetail)
         every { ChallengeFactory.generateMutationTestChallenge(any(), any(), any(), any(), any(), any()) } returns null
         QuestFactory.generateMutationQuest(user, property, parameters, listener, classes) shouldBe null
@@ -270,6 +275,7 @@ class QuestFactoryTest : AnnotationSpec() {
 
         val sourceDetail = mockkClass(SourceFileDetails::class)
         every { sourceDetail.coverage } returns 1.0
+        every { sourceDetail.filesExists() } returns true
         classes.add(sourceDetail)
         QuestFactory.generateMethodsQuest(user, property, parameters, listener, classes) shouldBe null
 
@@ -302,6 +308,7 @@ class QuestFactoryTest : AnnotationSpec() {
 
         val sourceDetail = mockkClass(SourceFileDetails::class)
         every { sourceDetail.coverage } returns 1.0
+        every { sourceDetail.filesExists() } returns true
         classes.add(sourceDetail)
         QuestFactory.generatePackageQuest(user, property, parameters, listener, classes) shouldBe null
 
@@ -318,6 +325,9 @@ class QuestFactoryTest : AnnotationSpec() {
         every { details1.packageName } returns "package"
         every { details2.packageName } returns "package"
         every { details3.packageName } returns "other"
+        every { details1.filesExists() } returns true
+        every { details2.filesExists() } returns true
+        every { details3.filesExists() } returns true
         classes.add(details1)
         classes.add(details2)
         classes.add(details3)
