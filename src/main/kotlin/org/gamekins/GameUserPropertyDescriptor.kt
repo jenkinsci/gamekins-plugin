@@ -16,6 +16,7 @@
 
 package org.gamekins
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import hudson.Extension
 import hudson.model.*
 import org.kohsuke.stapler.AncestorInPath
@@ -41,29 +42,12 @@ class GameUserPropertyDescriptor : UserPropertyDescriptor(GameUserProperty::clas
      * method to be available from the frontend.
      */
     fun doGetAvatars(@AncestorInPath job: Job<*, *>?): String {
-        val resource = javaClass.getResource("../../../webapp/avatars")
-        val avatars = arrayListOf<String>()
-        if (resource.path.contains(".jar!")) {
-            var path = resource.path.replaceAfter(".jar!", "").replace(".jar!", ".jar")
-            path = path.replace("file:", "")
-            val zip = ZipInputStream(URI("file", "", path, null).toURL().openStream())
+        val resource = javaClass.getResource("/avatars/avatars.json")
+        val mapper = ObjectMapper()
 
-            var entry: ZipEntry? = zip.nextEntry
-            while (entry != null) {
-                if (!entry.isDirectory && entry.name.startsWith("avatars/") && entry.name.endsWith(".png")) {
-                    avatars.add("/plugin/gamekins/avatars/" + entry.name)
-                }
+        val list = mapper.readValue(resource?.readText(), Array<String>::class.java)
 
-                entry = zip.nextEntry
-            }
-        } else {
-            val files = File(resource.toURI()).listFiles()!!.filter { it.extension == "png" }
-            files.forEach { file ->
-                avatars.add("/plugin/gamekins/avatars/" + file.name)
-            }
-        }
-
-        return avatars.toString()
+        return list.asList().toString()
     }
 
     /**
