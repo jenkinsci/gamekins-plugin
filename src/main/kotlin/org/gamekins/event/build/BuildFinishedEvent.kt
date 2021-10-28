@@ -20,6 +20,7 @@ import hudson.model.Run
 import hudson.model.User
 import hudson.tasks.MailAddressResolver
 import hudson.tasks.Mailer
+import org.gamekins.GameUserProperty
 import org.gamekins.event.EventHandler
 import org.gamekins.event.user.*
 import java.util.*
@@ -53,7 +54,7 @@ class BuildFinishedEvent(projectName: String, branch: String, build: Run<*, *>)
 
         val mailer = Mailer.descriptor()
         for ((user, list) in userEvents) {
-            if (user.getProperty(org.gamekins.GameUserProperty::class.java).getNotifications()) {
+            if (user.getProperty(GameUserProperty::class.java).getNotifications()) {
                 val mail = MailAddressResolver.resolve(user)
                 val msg = MimeMessage(mailer.createSession())
                 msg.subject = "Gamekins results"

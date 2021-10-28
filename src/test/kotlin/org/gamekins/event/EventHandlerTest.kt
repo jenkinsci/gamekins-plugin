@@ -17,6 +17,7 @@
 package org.gamekins.event
 
 import hudson.model.FreeStyleProject
+import hudson.model.ItemGroup
 import hudson.model.Run
 import hudson.model.User
 import io.kotest.core.spec.style.AnnotationSpec
@@ -42,6 +43,7 @@ class EventHandlerTest : AnnotationSpec() {
     private val challengeGenerated = mockkClass(Challenge::class)
     private val run = mockkClass(Run::class)
     private val project = mockkClass(FreeStyleProject::class)
+    private val projectParent = mockkClass(ItemGroup::class)
 
     @BeforeEach
     fun init() {
@@ -53,6 +55,8 @@ class EventHandlerTest : AnnotationSpec() {
         every { run.getNumber() } returns 0
         every { run.parent } returns project
         every { project.absoluteUrl } returns "http://localhost:8080/jenkins/job/test/"
+        every { project.parent } returns projectParent
+        every { project.getProperty(any()) } returns null
         every { achievement.toString() } returns "Achievement"
         every { challengeSolved.toEscapedString() } returns "Challenge1"
         every { challengeUnsolvable.toEscapedString() } returns "Challenge2"
