@@ -254,11 +254,11 @@ object PropertyUtil {
      * have to be added via reflection.
      */
     @JvmStatic
-    fun reconfigure(owner: AbstractItem, activated: Boolean, showStatistics: Boolean) {
+    fun reconfigure(owner: AbstractItem, showLeaderboard: Boolean, showStatistics: Boolean) {
         if (owner is WorkflowJob) {
-            reconfigureWorkFlowJob(owner, activated, showStatistics)
+            reconfigureWorkFlowJob(owner, showLeaderboard, showStatistics)
         } else if (owner is WorkflowMultiBranchProject || owner is AbstractMavenProject<*, *>) {
-            reconfigureAbstractItem(owner, activated, showStatistics)
+            reconfigureAbstractItem(owner, showLeaderboard, showStatistics)
         }
     }
 
@@ -266,9 +266,9 @@ object PropertyUtil {
      * Adds or removes a [LeaderboardAction] or [StatisticsAction] with the help of the according methods of the
      * [job].
      */
-    private fun reconfigureWorkFlowJob(job: WorkflowJob, activated: Boolean, showStatistics: Boolean) {
+    private fun reconfigureWorkFlowJob(job: WorkflowJob, showLeaderboard: Boolean, showStatistics: Boolean) {
 
-        if (activated) {
+        if (showLeaderboard) {
             job.addOrReplaceAction(LeaderboardAction(job))
         } else {
             job.removeAction(LeaderboardAction(job))
@@ -289,13 +289,13 @@ object PropertyUtil {
      * Adds or removes a [LeaderboardAction] or [StatisticsAction] with the help of the according methods of the
      * [job].
      */
-    private fun reconfigureAbstractItem(job: AbstractItem, activated: Boolean, showStatistics: Boolean) {
+    private fun reconfigureAbstractItem(job: AbstractItem, showLeaderboard: Boolean, showStatistics: Boolean) {
 
         try {
             val actionField = Actionable::class.java.getDeclaredField("actions")
             actionField.isAccessible = true
             if (actionField[job] == null) actionField[job] = actionField.type.newInstance()
-            if (activated) {
+            if (showLeaderboard) {
                 (actionField[job] as MutableList<*>).removeIf { action -> action is LeaderboardAction }
                 (actionField[job] as MutableList<Action?>).add(LeaderboardAction(job))
             } else {

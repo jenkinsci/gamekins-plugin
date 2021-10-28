@@ -8,6 +8,9 @@
         <f:entry title="Enabled Project">
             <f:select field="project" />
         </f:entry>
+        <f:entry title="Show Leaderboard" field="showLeaderboard">
+            <f:checkbox />
+        </f:entry>
         <f:entry title="Show Statistics" field="showStatistics">
             <f:checkbox />
         </f:entry>

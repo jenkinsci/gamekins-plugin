@@ -365,6 +365,20 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
     }
 
     /**
+     * Returns a list of subprojects the user is participating.
+     */
+    fun isParticipatingInSubProjects(projectName: String): ArrayList<String> {
+        val list = arrayListOf<String>()
+        for (project in participation.keys) {
+            if (project.startsWith(projectName)) {
+                list.add(project)
+            }
+        }
+
+        return list
+    }
+
+    /**
      * Adds a new [Challenge] to the user.
      */
     fun newChallenge(projectName: String, challenge: Challenge) {

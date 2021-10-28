@@ -17,7 +17,6 @@
 package org.gamekins.property
 
 import hudson.model.*
-import jenkins.model.Jenkins
 import org.gamekins.LeaderboardAction
 import org.gamekins.util.PropertyUtil
 import org.gamekins.StatisticsAction
@@ -41,6 +40,7 @@ import kotlin.jvm.Throws
 class GameJobProperty
 @DataBoundConstructor constructor(job: AbstractItem,
                                   @set:DataBoundSetter var activated: Boolean,
+                                  @set:DataBoundSetter var showLeaderboard: Boolean,
                                   @set:DataBoundSetter var showStatistics: Boolean,
                                   @set:DataBoundSetter var currentChallengesCount: Int,
                                   @set:DataBoundSetter var currentQuestsCount: Int)
@@ -72,7 +72,7 @@ class GameJobProperty
     @Nonnull
     override fun getJobActions(job: Job<*, *>): Collection<Action> {
         val newActions: MutableList<Action> = ArrayList()
-        if (activated && (job.getAction(LeaderboardAction::class.java) == null || job is FreeStyleProject)) {
+        if (showLeaderboard && (job.getAction(LeaderboardAction::class.java) == null || job is FreeStyleProject)) {
             newActions.add(LeaderboardAction(job))
         }
         if (showStatistics && (job.getAction(StatisticsAction::class.java) == null || job is FreeStyleProject)) {
@@ -113,8 +113,9 @@ class GameJobProperty
     }
 
     /**
-     * Sets the new values of [activated], [showStatistics] and [currentChallengesCount], if the job configuration has
-     * been saved. Also calls [PropertyUtil.reconfigure] to update the [LeaderboardAction] and [StatisticsAction].
+     * Sets the new values of [activated], [showLeaderboard], [showStatistics] and [currentChallengesCount], if the
+     * job configuration has been saved. Also calls [PropertyUtil.reconfigure] to update the [LeaderboardAction]
+     * and [StatisticsAction].
      *
      * @see [JobProperty.reconfigure]
      */
@@ -122,13 +123,14 @@ class GameJobProperty
         if (form != null) {
             activated = form.getBoolean("activated")
             showStatistics = form.getBoolean("showStatistics")
+            showLeaderboard = form.getBoolean("showLeaderboard")
             if (form.getValue("currentChallengesCount") is String)
                 currentChallengesCount = form.getInt("currentChallengesCount")
             if (form.getValue("currentQuestsCount") is String)
                 currentQuestsCount = form.getInt("currentQuestsCount")
         }
 
-        PropertyUtil.reconfigure(owner, activated, showStatistics)
+        PropertyUtil.reconfigure(owner, showLeaderboard, showStatistics)
         return this
     }
 

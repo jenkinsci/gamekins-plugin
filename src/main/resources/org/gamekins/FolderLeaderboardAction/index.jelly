@@ -1,0 +1,72 @@
+<?jelly escape-by-default='true'?>
+
+<j:jelly xmlns:j="jelly:core" xmlns:l="/lib/layout" xmlns:st="jelly:stapler" xmlns:f="/lib/form"
+         xmlns:fa="/font-awesome" xmlns:bs="/bootstrap">
+
+    <l:layout title="Leaderboard">
+
+        <link rel="stylesheet" href="${rootURL}/plugin/gamekins/css/prettify.css" type="text/css"/>
+        <script src="${rootURL}/plugin/gamekins/vendor/prettify.js" type="text/javascript"/>
+
+        <l:side-panel>
+            <st:include page="sidepanel.jelly" it="${it.job}" optional="true"/>
+        </l:side-panel>
+        <l:main-panel>
+            <st:adjunct includes="io.jenkins.plugins.popper"/>
+            <st:adjunct includes="io.jenkins.plugins.jquery3"/>
+            <st:adjunct includes="io.jenkins.plugins.bootstrap4"/>
+
+            <h1 class="ml-2 mb-2">
+                Leaderboard
+            </h1>
+            <div class="container-fluid row px-4 justify-content-center">
+                <div class="col-12 table-responsive pr-3">
+                    <table class="mt-3 shadow table-hover table pane sortable bigtable">
+                        <thead class="thead-dark">
+                        <tr>
+                            <th scope="col" class="text-center">#</th>
+                            <th scope="col" class="text-center"/>
+                            <th scope="col" class="text-center">Participant</th>
+                            <th scope="col" class="text-center">Completed Challenges</th>
+                            <th scope="col" class="text-center">Completed Quests</th>
+                            <th scope="col" class="text-center">Completed Achievements</th>
+                            <th initialSortDir="up" class="text-center" scope="col">Score</th>
+                        </tr>
+                        </thead>
+                        <j:forEach indexVar="index" var="userDetail" items="${it.userDetails}">
+                            <tr>
+                                <td class="text-center">${index + 1}</td>
+                                <td class="text-center">
+                                    <img id="imageUser${index}" src="${userDetail.image}" height="48" width="48" />
+                                </td>
+                                <td><a href="${userDetail.url}/achievements">${userDetail.userName}</a></td>
+                                <td class="text-center">${userDetail.completedChallenges}</td>
+                                <td class="text-center">${userDetail.completedQuests}</td>
+                                <td class="text-center">${userDetail.completedAchievements}</td>
+                                <td class="text-center">${userDetail.score}</td>
+                            </tr>
+                        </j:forEach>
+                    </table>
+                </div>
+            </div>
+            <br/>
+
+            <script>
+                window.onload = (function () {
+                    prettyPrint();
+
+                    let avatars = jQuery3('[id^=imageUser]')
+                    let src = document.getElementsByTagName("img")[0].src
+                    let base = src.substring(0, src.indexOf("static"))
+                    let endSplit = src.substring(src.indexOf("static")).split("/")
+                    for (let avatar of avatars) {
+                        let split = avatar.src.split("/")
+                        avatar.src = base + "static/" + endSplit[1] + "/plugin/gamekins/avatars/" + split[split.length - 1]
+                    }
+                });
+            </script>
+
+        </l:main-panel>
+
+    </l:layout>
+</j:jelly>

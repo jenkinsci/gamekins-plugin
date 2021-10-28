@@ -105,8 +105,9 @@ class GameOrganizationFolderProperty private constructor()
                         val property = project.properties.get(GameMultiBranchProperty::class.java)
                         property?.reconfigure(req, formData)
                                 ?: project.addProperty(GameMultiBranchProperty(project,
-                                    formData.getBoolean("activated"), formData.getBoolean("showStatistics"),
-                                    formData.getInt("currentChallengesCount"), formData.getInt("currentQuestsCount")))
+                                    formData.getBoolean("activated"), formData.getBoolean("showLeaderboard"),
+                                    formData.getBoolean("showStatistics"), formData.getInt("currentChallengesCount"),
+                                    formData.getInt("currentQuestsCount")))
                         folder.save()
                         break
                     } catch (e: IOException) {

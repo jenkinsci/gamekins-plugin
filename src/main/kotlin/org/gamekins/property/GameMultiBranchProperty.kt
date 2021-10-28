@@ -26,7 +26,6 @@ import hudson.model.JobPropertyDescriptor
 import hudson.util.FormValidation
 import hudson.util.ListBoxModel
 import jenkins.branch.OrganizationFolder
-import jenkins.model.Jenkins
 import org.gamekins.LeaderboardAction
 import org.gamekins.StatisticsAction
 import org.gamekins.statistics.Statistics
@@ -48,6 +47,7 @@ import kotlin.jvm.Throws
 class GameMultiBranchProperty
 @DataBoundConstructor constructor(job: AbstractItem?,
                                   @set:DataBoundSetter var activated: Boolean,
+                                  @set:DataBoundSetter var showLeaderboard: Boolean,
                                   @set:DataBoundSetter var showStatistics: Boolean,
                                   @set:DataBoundSetter var currentChallengesCount: Int,
                                   @set:DataBoundSetter var currentQuestsCount: Int)
@@ -61,7 +61,7 @@ class GameMultiBranchProperty
      */
     init {
         statistics = Statistics(job!!)
-        PropertyUtil.reconfigure(job, activated, showStatistics)
+        PropertyUtil.reconfigure(job, showLeaderboard, showStatistics)
         if (currentChallengesCount <= 0) currentChallengesCount = Constants.DEFAULT_CURRENT_CHALLENGES
         if (currentQuestsCount <= 0) currentQuestsCount = Constants.DEFAULT_CURRENT_QUESTS
     }
@@ -104,8 +104,9 @@ class GameMultiBranchProperty
     }
 
     /**
-     * Sets the new values of [activated], [showStatistics] and [currentChallengesCount], if the job configuration has
-     * been saved. Also calls [PropertyUtil.reconfigure] to update the [LeaderboardAction] and [StatisticsAction].
+     * Sets the new values of [activated], [showLeaderboard], [showStatistics] and [currentChallengesCount], if the
+     * job configuration has been saved. Also calls [PropertyUtil.reconfigure] to update the [LeaderboardAction]
+     * and [StatisticsAction].
      *
      * @see [AbstractFolderProperty.reconfigure]
      */
@@ -113,13 +114,14 @@ class GameMultiBranchProperty
         if (form != null) {
             activated = form.getBoolean("activated")
             showStatistics = form.getBoolean("showStatistics")
+            showLeaderboard = form.getBoolean("showLeaderboard")
             if (form.getValue("currentChallengesCount") is String)
                 currentChallengesCount = form.getInt("currentChallengesCount")
             if (form.getValue("currentQuestsCount") is String)
                 currentQuestsCount = form.getInt("currentQuestsCount")
         }
         
-        PropertyUtil.reconfigure(owner!!, activated, showStatistics)
+        PropertyUtil.reconfigure(owner!!, showLeaderboard, showStatistics)
         return this
     }
 
@@ -256,6 +258,7 @@ class GameMultiBranchProperty
             else GameMultiBranchProperty(
                 req.findAncestor(AbstractItem::class.java).getObject() as AbstractItem,
                 formData.getBoolean("activated"),
+                formData.getBoolean("showLeaderboard"),
                 formData.getBoolean("showStatistics"),
                 if (formData.getValue("currentChallengesCount") is Int)
                     formData.getInt("currentChallengesCount") else Constants.DEFAULT_CURRENT_CHALLENGES,

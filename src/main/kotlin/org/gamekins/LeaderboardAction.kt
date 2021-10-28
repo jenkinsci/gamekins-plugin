@@ -168,6 +168,7 @@ class LeaderboardAction(val job: AbstractItem) : ProminentProjectAction, Describ
                         property.getTeamName(job.fullName),
                         property.getScore(job.fullName),
                         property.getCompletedChallenges(job.fullName).size,
+                        property.getCompletedQuests(job.fullName).size,
                         property.getCompletedAchievements(job.fullName).size,
                         user.absoluteUrl,
                         property.getCurrentAvatar()
@@ -200,8 +201,8 @@ class LeaderboardAction(val job: AbstractItem) : ProminentProjectAction, Describ
     @ExportedBean(defaultVisibility = 999)
     class UserDetails(@get:Exported val userName: String, @get:Exported val teamName: String,
                       @get:Exported val score: Int, @get:Exported val completedChallenges: Int,
-                      @get:Exported val completedAchievements: Int, @get:Exported val url: String,
-                      @get:Exported val image: String)
+                      @get:Exported val completedQuests: Int, @get:Exported val completedAchievements: Int,
+                      @get:Exported val url: String, @get:Exported val image: String)
 
     /**
      * Container for the details of a team displayed on the Leaderboard.

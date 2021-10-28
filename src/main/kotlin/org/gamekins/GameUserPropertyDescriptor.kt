@@ -21,10 +21,6 @@ import hudson.Extension
 import hudson.model.*
 import org.kohsuke.stapler.AncestorInPath
 import org.kohsuke.stapler.QueryParameter
-import java.io.File
-import java.net.URI
-import java.util.zip.ZipEntry
-import java.util.zip.ZipInputStream
 import javax.annotation.Nonnull
 
 /**
