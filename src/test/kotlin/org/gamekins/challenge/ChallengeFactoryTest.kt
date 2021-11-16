@@ -66,6 +66,7 @@ class ChallengeFactoryTest : AnnotationSpec() {
     private lateinit var challenge1 : MutationTestChallenge
     private lateinit var challenge2 : MutationTestChallenge
     private lateinit var details : SourceFileDetails
+    private val newDetails = mockkClass(SourceFileDetails::class)
 
     private val mutationDetails1 = MutationDetails(
         mapOf("className" to "io/jenkins/plugins/gamekins/challenge/Challenge", "methodName" to "foo1", "methodDescription" to "(Ljava/lang/Integer;)Ljava/lang/Integer;"),
@@ -146,6 +147,15 @@ class ChallengeFactoryTest : AnnotationSpec() {
         challenge2 = MutationTestChallenge(mutation3, details, branch, "commitID", "snippet", "line")
         mockkStatic(EventHandler::class)
         every { EventHandler.addEvent(any()) } returns Unit
+
+        every { newDetails.coverage } returns 0.0
+        every { newDetails.filesExists() } returns true
+        every { newDetails.fileName } returns details.fileName
+        every { newDetails.jacocoSourceFile } returns details.jacocoSourceFile
+        every { newDetails.jacocoCSVFile } returns details.jacocoCSVFile
+        every { newDetails.jacocoMethodFile } returns details.jacocoMethodFile
+        every { newDetails.parameters } returns details.parameters
+        every { newDetails.packageName } returns details.packageName
     }
 
     @AfterAll
@@ -198,7 +208,7 @@ class ChallengeFactoryTest : AnnotationSpec() {
         GamePublisherDescriptor.challenges.clear()
         GamePublisherDescriptor.challenges[ClassCoverageChallenge::class.java] = 1
         every { JacocoUtil.calculateCoveredLines(any(), "nc") } returns 10
-        ChallengeFactory.generateChallenge(user, parameters, listener, arrayListOf(details)) should
+        ChallengeFactory.generateChallenge(user, parameters, listener, arrayListOf(newDetails)) should
                 beOfType(ClassCoverageChallenge::class)
     }
 
@@ -226,7 +236,7 @@ class ChallengeFactoryTest : AnnotationSpec() {
         every { element.attr("class") } returns "nc"
         every { element.attr("title") } returns ""
         every { element.text() } returns "toString();"
-        ChallengeFactory.generateChallenge(user, parameters, listener, arrayListOf(details)) should
+        ChallengeFactory.generateChallenge(user, parameters, listener, arrayListOf(newDetails)) should
                 beOfType(LineCoverageChallenge::class)
     }
 
@@ -239,7 +249,7 @@ class ChallengeFactoryTest : AnnotationSpec() {
         every { JacocoUtil.calculateCoveredLines(any(), "nc") } returns 10
         val method = JacocoUtil.CoverageMethod("toString", 10, 10, "")
         every { JacocoUtil.getMethodEntries(any()) } returns arrayListOf(method)
-        ChallengeFactory.generateChallenge(user, parameters, listener, arrayListOf(details)) should
+        ChallengeFactory.generateChallenge(user, parameters, listener, arrayListOf(newDetails)) should
                 beOfType(MethodCoverageChallenge::class)
     }
 

@@ -102,7 +102,8 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
         listener.logger.println("[Gamekins] Solve Challenges and generate new Challenges")
 
         //Computes the last changed classes
-        val classes = PublisherUtil.retrieveLastChangedClasses(searchCommitCount, parameters, listener = listener)
+        val classes = PublisherUtil.retrieveLastChangedClasses(searchCommitCount, parameters,
+            removeFullyCoveredClasses = false, removeClassesWithoutJacocoFiles = false, listener = listener)
 
         //Generate some project statistics
         parameters.projectCoverage = JacocoUtil.getProjectCoverage(parameters.workspace,

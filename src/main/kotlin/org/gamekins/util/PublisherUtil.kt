@@ -305,14 +305,14 @@ object PublisherUtil {
 
             if (removeFullyCoveredClasses) {
                 classes.removeIf { details: SourceFileDetails -> details.coverage == 1.0 }
+                listener.logger.println("[Gamekins] Found ${classes.size} last changed files without 100% coverage")
             }
-            listener.logger.println("[Gamekins] Found ${classes.size} last changed files without 100% coverage")
 
             if (removeClassesWithoutJacocoFiles) {
                 classes.removeIf { details: SourceFileDetails -> !details.filesExists() }
+                listener.logger.println("[Gamekins] Found ${classes.size} last changed files with " +
+                        "existing coverage reports")
             }
-            listener.logger.println("[Gamekins] Found ${classes.size} last changed files with " +
-                    "existing coverage reports")
 
             if (sort) {
                 classes.sortWith(Comparator.comparingDouble(SourceFileDetails::coverage))

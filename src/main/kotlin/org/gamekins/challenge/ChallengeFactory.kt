@@ -122,7 +122,6 @@ object ChallengeFactory {
     ): Challenge {
 
         val workList = ArrayList(classes)
-        val rankValues = initializeRankSelection(workList)
 
         var challenge: Challenge?
         var count = 0
@@ -131,10 +130,24 @@ object ChallengeFactory {
                 listener.logger.println("[Gamekins] No CoverageChallenge could be built")
                 return DummyChallenge(parameters, Constants.ERROR_GENERATION)
             }
-
-            val selectedClass = cla ?: selectClass(workList, rankValues)
-            workList.remove(selectedClass)
             count++
+
+            val challengeClass = chooseChallengeType(parameters.mocoJSONPath)
+            val selectedClass = cla
+                ?: if (challengeClass.superclass == CoverageChallenge::class.java) {
+                    val tempList = ArrayList(workList)
+                    tempList.removeIf { details: SourceFileDetails -> details.coverage == 1.0 }
+                    tempList.removeIf { details: SourceFileDetails -> !details.filesExists() }
+                    if (tempList.isEmpty()) {
+                        challenge = null
+                        continue
+                    }
+                    selectClass(tempList, initializeRankSelection(tempList))
+                } else {
+                    selectClass(workList, initializeRankSelection(workList))
+                }
+
+            workList.remove(selectedClass)
 
             val rejectedChallenges = user.getProperty(GameUserProperty::class.java)
                 .getRejectedChallenges(parameters.projectName)
@@ -155,7 +168,6 @@ object ChallengeFactory {
                 continue
             }
 
-            val challengeClass = chooseChallengeType(parameters.mocoJSONPath)
             val data = ChallengeGenerationData(parameters, user, selectedClass, listener)
 
             when {
