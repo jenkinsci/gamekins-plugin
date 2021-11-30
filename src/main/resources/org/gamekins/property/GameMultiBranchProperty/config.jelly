@@ -76,7 +76,6 @@
                         jQuery3("#teamName")[0].value = ""
                     }
                     jQuery3("#error-add-team")[0].innerHTML = rsp.responseText
-                    buildTeamsList(descriptorFullUrl)
                 }
             })
         })
