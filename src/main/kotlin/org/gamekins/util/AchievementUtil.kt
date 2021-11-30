@@ -49,16 +49,19 @@ object AchievementUtil {
                                additionalParameters: HashMap<String, String>): Boolean {
         return property.getCompletedChallenges(parameters.projectName)
             .filterIsInstance<LineCoverageChallenge>()
-            .any { it.getMaxCoveredBranchesIfFullyCovered() >= additionalParameters["branches"]?.toInt()
-                    ?: Int.MAX_VALUE
-                    && it.getMaxCoveredBranchesIfFullyCovered() < additionalParameters["maxBranches"]?.toInt()
-                    ?: Int.MAX_VALUE }
+            .any {
+                (it.getMaxCoveredBranchesIfFullyCovered() >= (additionalParameters["branches"]?.toInt()
+                    ?: Int.MAX_VALUE)
+                        && it.getMaxCoveredBranchesIfFullyCovered() < (additionalParameters["maxBranches"]?.toInt()
+                    ?: Int.MAX_VALUE))
+            }
     }
 
     /**
      * Returns the number of lines of code (LOC). Excludes blank lines and comments.
      */
     fun getLinesOfCode(file: FilePath): Int {
+        if (!file.exists()) return 0
         val content = file.readToString().split("\n")
 
         return content
@@ -79,9 +82,9 @@ object AchievementUtil {
         val duration = if (run.duration != 0L) run.duration else
             max(0, System.currentTimeMillis() - run.startTimeInMillis)
         var retVal = if (additionalParameters["more"].toBoolean()) {
-            duration > additionalParameters["duration"]?.toLong()?.times(1000) ?: Long.MAX_VALUE
+            duration > (additionalParameters["duration"]?.toLong()?.times(1000) ?: Long.MAX_VALUE)
         } else {
-            duration < additionalParameters["duration"]?.toLong()?.times(1000) ?: 0
+            duration < (additionalParameters["duration"]?.toLong()?.times(1000) ?: 0)
         }
 
         if (!additionalParameters["maxDuration"].isNullOrEmpty()) {
@@ -103,7 +106,7 @@ object AchievementUtil {
 
         return property.getCompletedChallenges(parameters.projectName)
             .filterIsInstance<CoverageChallenge>()
-            .any { it.solvedCoverage >= additionalParameters["haveCoverage"]?.toDouble() ?: Double.MAX_VALUE }
+            .any { it.solvedCoverage >= (additionalParameters["haveCoverage"]?.toDouble() ?: Double.MAX_VALUE) }
     }
 
     /**
@@ -117,8 +120,8 @@ object AchievementUtil {
 
         return property.getCompletedChallenges(parameters.projectName)
             .filterIsInstance<CoverageChallenge>()
-            .count { it.solvedCoverage >= additionalParameters["haveCoverage"]?.toDouble() ?: Double.MAX_VALUE } >=
-                additionalParameters["classesCount"]?.toInt() ?: Int.MAX_VALUE
+            .count { it.solvedCoverage >= (additionalParameters["haveCoverage"]?.toDouble() ?: Double.MAX_VALUE) } >=
+                (additionalParameters["classesCount"]?.toInt() ?: Int.MAX_VALUE)
     }
 
     /**
@@ -133,12 +136,12 @@ object AchievementUtil {
         val path = parameters.remote.removeSuffix("/")
         return property.getCompletedChallenges(parameters.projectName)
             .filterIsInstance<CoverageChallenge>()
-            .filter { it.solvedCoverage >= additionalParameters["haveCoverage"]?.toDouble() ?: Double.MAX_VALUE }
+            .filter { it.solvedCoverage >= (additionalParameters["haveCoverage"]?.toDouble() ?: Double.MAX_VALUE) }
             .count {
                 getLinesOfCode(
                     FilePath(parameters.workspace.channel, path + it.details.filePath)
-                ) >= additionalParameters["linesCount"]?.toInt() ?: Int.MAX_VALUE
-            } >= additionalParameters["classesCount"]?.toInt() ?: Int.MAX_VALUE
+                ) >= (additionalParameters["linesCount"]?.toInt() ?: Int.MAX_VALUE)
+            } >= (additionalParameters["classesCount"]?.toInt() ?: Int.MAX_VALUE)
     }
 
     /**
@@ -166,7 +169,7 @@ object AchievementUtil {
                              run: Run<*, *>, property: GameUserProperty, listener: TaskListener,
                              additionalParameters: HashMap<String, String>): Boolean {
 
-        return parameters.projectCoverage >= additionalParameters["haveCoverage"]?.toDouble() ?: Double.MAX_VALUE
+        return parameters.projectCoverage >= (additionalParameters["haveCoverage"]?.toDouble() ?: Double.MAX_VALUE)
     }
 
     /**
@@ -177,7 +180,7 @@ object AchievementUtil {
                           run: Run<*, *>, property: GameUserProperty, listener: TaskListener,
                           additionalParameters: HashMap<String, String>): Boolean {
 
-        return parameters.projectTests >= additionalParameters["haveTests"]?.toInt() ?: Int.MAX_VALUE
+        return parameters.projectTests >= (additionalParameters["haveTests"]?.toInt() ?: Int.MAX_VALUE)
     }
 
     /**
@@ -190,10 +193,12 @@ object AchievementUtil {
                                 additionalParameters: HashMap<String, String>): Boolean {
         return property.getCompletedChallenges(parameters.projectName)
             .filterIsInstance<CoverageChallenge>()
-            .any { it.solvedCoverage.toBigDecimal() - it.coverage.toBigDecimal() >=
-                    additionalParameters["haveCoverage"]?.toBigDecimal() ?: Double.MAX_VALUE.toBigDecimal()
-                    && it.solvedCoverage.toBigDecimal() - it.coverage.toBigDecimal() <
-                    additionalParameters["maxCoverage"]?.toBigDecimal() ?: Double.MAX_VALUE.toBigDecimal() }
+            .any {
+                (it.solvedCoverage.toBigDecimal() - it.coverage.toBigDecimal() >=
+                        (additionalParameters["haveCoverage"]?.toBigDecimal() ?: Double.MAX_VALUE.toBigDecimal())
+                        && it.solvedCoverage.toBigDecimal() - it.coverage.toBigDecimal() <
+                        (additionalParameters["maxCoverage"]?.toBigDecimal() ?: Double.MAX_VALUE.toBigDecimal()))
+            }
     }
 
     /**
@@ -213,10 +218,10 @@ object AchievementUtil {
             val lastRun = PropertyUtil.retrieveGamePropertyFromRun(run)?.getStatistics()
                 ?.getLastRun(parameters.branch)
             if (lastRun != null) {
-                return (parameters.projectCoverage.toBigDecimal().minus(lastRun.coverage.toBigDecimal())
-                        >= additionalParameters["haveCoverage"]?.toBigDecimal() ?: Double.MAX_VALUE.toBigDecimal()
+                return ((parameters.projectCoverage.toBigDecimal().minus(lastRun.coverage.toBigDecimal())
+                        >= (additionalParameters["haveCoverage"]?.toBigDecimal() ?: Double.MAX_VALUE.toBigDecimal())
                         && parameters.projectCoverage.toBigDecimal().minus(lastRun.coverage.toBigDecimal())
-                        < additionalParameters["maxCoverage"]?.toBigDecimal() ?: Double.MAX_VALUE.toBigDecimal())
+                        < (additionalParameters["maxCoverage"]?.toBigDecimal() ?: Double.MAX_VALUE.toBigDecimal())))
             }
         }
         return false
@@ -230,10 +235,12 @@ object AchievementUtil {
                                  run: Run<*, *>, property: GameUserProperty, listener: TaskListener,
                                  additionalParameters: HashMap<String, String>): Boolean {
         return property.getCompletedChallenges(parameters.projectName)
-            .any { (it.getSolved() - it.getCreated()).div(1000) <=
-                    additionalParameters["timeDifference"]?.toLong() ?: 0
-                    && (it.getSolved() - it.getCreated()).div(1000) >
-                    additionalParameters["minTimeDifference"]?.toLong() ?: Long.MAX_VALUE }
+            .any {
+                ((it.getSolved() - it.getCreated()).div(1000) <=
+                        (additionalParameters["timeDifference"]?.toLong() ?: 0)
+                        && (it.getSolved() - it.getCreated()).div(1000) >
+                        (additionalParameters["minTimeDifference"]?.toLong() ?: Long.MAX_VALUE))
+            }
     }
 
     /**
@@ -257,7 +264,7 @@ object AchievementUtil {
                          additionalParameters: HashMap<String, String>): Boolean {
 
         return property.getCompletedChallenges(parameters.projectName).size >=
-                additionalParameters["solveNumber"]?.toInt() ?: Int.MAX_VALUE
+                (additionalParameters["solveNumber"]?.toInt() ?: Int.MAX_VALUE)
     }
 
     /**
@@ -268,6 +275,6 @@ object AchievementUtil {
                      run: Run<*, *>, property: GameUserProperty, listener: TaskListener,
                      additionalParameters: HashMap<String, String>): Boolean {
 
-        return parameters.solved >= additionalParameters["solveNumber"]?.toInt() ?: Int.MAX_VALUE
+        return parameters.solved >= (additionalParameters["solveNumber"]?.toInt() ?: Int.MAX_VALUE)
     }
 }
