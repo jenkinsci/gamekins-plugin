@@ -35,15 +35,15 @@
                         </thead>
                         <j:forEach indexVar="index" var="userDetail" items="${it.userDetails}">
                             <tr>
-                                <td class="text-center">${index + 1}</td>
+                                <td class="text-center" style="vertical-align: middle">${index + 1}</td>
                                 <td class="text-center">
                                     <img id="imageUser${index}" src="${userDetail.image}" height="48" width="48" />
                                 </td>
-                                <td><a href="${userDetail.url}/achievements">${userDetail.userName}</a></td>
-                                <td class="text-center">${userDetail.teamName}</td>
-                                <td class="text-center">${userDetail.completedChallenges}</td>
-                                <td class="text-center">${userDetail.completedAchievements}</td>
-                                <td class="text-center">${userDetail.score}</td>
+                                <td style="vertical-align: middle"><a href="${userDetail.url}/achievements">${userDetail.userName}</a></td>
+                                <td class="text-center" style="vertical-align: middle">${userDetail.teamName}</td>
+                                <td class="text-center" style="vertical-align: middle">${userDetail.completedChallenges}</td>
+                                <td class="text-center" style="vertical-align: middle">${userDetail.completedAchievements}</td>
+                                <td class="text-center" style="vertical-align: middle">${userDetail.score}</td>
                             </tr>
                         </j:forEach>
                     </table>
