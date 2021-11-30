@@ -122,8 +122,8 @@
                                 <div class="card-body" style="font-size:15px;">
                                     <j:forEach indexVar="indexQuest" var="step" items="${currentQuest.steps}">
                                         <div class="card border-0">
-                                            <j:if test="${step == currentQuest.currentStep}">
-                                                <j:if test="${indexQuest == currentQuest.currentStepNumber}">
+                                            <j:if test="${indexQuest == currentQuest.currentStepNumber}">
+                                                <j:if test="${step == currentQuest.currentStep}">
                                                     <div class="card-header p-0 m-0" data-toggle="tooltip" data-placement="top"
                                                          title="Click to see more details" id="headingQuestChallenge${indexQuest + 1}">
                                                         <div class="row mx-1 align-items-center mb-2">
@@ -184,22 +184,20 @@
                                                     </div>
                                                 </j:if>
                                             </j:if>
-                                            <j:if test="${step != currentQuest.currentStep}">
-                                                <j:if test="${indexQuest != currentQuest.currentStepNumber}">
-                                                    <div class="card-header p-0 m-0">
-                                                        <div class="row mx-1 align-items-center mb-2">
-                                                            <div class="col-12 col-sm-12" style="opacity: 0.4">
-                                                                <h5>
-                                                                    <button class="btn btn-link text-dark text-left text-decoration-none"
-                                                                            style="font-size:14px;" disabled="disabled">
-                                                                        ${indexQuest + 1}. <span id="questChallengeText${index + 1}">${step.challenge}</span>
-                                                                        <span class="ml-2 badge badge-warning">${step.challenge.name}</span>
-                                                                    </button>
-                                                                </h5>
-                                                            </div>
+                                            <j:if test="${indexQuest != currentQuest.currentStepNumber}">
+                                                <div class="card-header p-0 m-0">
+                                                    <div class="row mx-1 align-items-center mb-2">
+                                                        <div class="col-12 col-sm-12" style="opacity: 0.4">
+                                                            <h5>
+                                                                <button class="btn btn-link text-dark text-left text-decoration-none"
+                                                                        style="font-size:14px;" disabled="disabled">
+                                                                    ${indexQuest + 1}. <span id="questChallengeText${index + 1}">${step.challenge}</span>
+                                                                    <span class="ml-2 badge badge-warning">${step.challenge.name}</span>
+                                                                </button>
+                                                            </h5>
                                                         </div>
                                                     </div>
-                                                </j:if>
+                                                </div>
                                             </j:if>
                                         </div>
                                     </j:forEach>
