@@ -114,7 +114,6 @@ class MutationTestChallenge(
     }
 
     override fun getScore(): Int {
-        //TODO: Include coverage of line and/or mutation score
         return when {
             details.coverage < 0.8 -> 3
             details.coverage < 1.0 -> 4

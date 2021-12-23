@@ -21,7 +21,6 @@ import hudson.Launcher
 import hudson.model.*
 import hudson.tasks.BuildStepMonitor
 import hudson.tasks.Notifier
-import jenkins.model.Jenkins
 import org.gamekins.challenge.Challenge
 import org.gamekins.property.GameJobProperty
 import org.gamekins.property.GameMultiBranchProperty
@@ -90,10 +89,13 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
         }
 
         //Extracts the branch
-        if (run.parent.parent is WorkflowMultiBranchProject) {
-            parameters.branch = run.parent.name
-        } else {
-            parameters.branch = GitUtil.getBranch(parameters.workspace)
+        when (run.parent.parent) {
+            is WorkflowMultiBranchProject -> {
+                parameters.branch = run.parent.name
+            }
+            else -> {
+                parameters.branch = GitUtil.getBranch(parameters.workspace)
+            }
         }
 
         EventHandler.addEvent(BuildStartedEvent(parameters.projectName, parameters.branch, run))

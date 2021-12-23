@@ -112,7 +112,7 @@ object MutationUtils {
         var res = handleMutationInNewMethods(mutationOnNewMethods, classDetails, workspace, currentLinesOperatorMap)
         if (res.first != null) return res
         // Then comes the rest
-        val mutationOnOldMethods = survivedList.minus(mutationOnNewMethods)
+        val mutationOnOldMethods = survivedList.minus(mutationOnNewMethods.toSet())
         res = handleMutationInOldMethods(mutationOnOldMethods, classDetails, workspace, currentLinesOperatorMap)
         return res
     }
@@ -133,7 +133,7 @@ object MutationUtils {
         }
         val res = processMutationSnippet(mutationOnDiffOperator, classDetails, workspace)
         if (res.first != null) return res
-        val mutationOnSameOperator = muList.minus(mutationOnDiffOperator)
+        val mutationOnSameOperator = muList.minus(mutationOnDiffOperator.toSet())
         return processMutationSnippet(mutationOnSameOperator, classDetails, workspace)
     }
 
@@ -156,12 +156,11 @@ object MutationUtils {
         var res = processMutationSnippet(onNewLinesDiffOperator, classDetails, workspace)
         if (res.first != null) return res
 
-        val onNewLinesOldOperator = mutationOnNewLines.minus(onNewLinesDiffOperator)
+        val onNewLinesOldOperator = mutationOnNewLines.minus(onNewLinesDiffOperator.toSet())
         processMutationSnippet(onNewLinesOldOperator, classDetails, workspace)
-        if (res.first != null) return res
 
         // Lower priority is mutation on a same line
-        val mutationOnOldLines = muList.minus(mutationOnNewLines)
+        val mutationOnOldLines = muList.minus(mutationOnNewLines.toSet())
         val onOldLinesDiffOperator = mutationOnOldLines.filter {
             val loc = it?.mutationDetails?.loc
             currentLinesOperatorMap[loc]?.contains(it?.mutationDetails?.mutationOperatorName) != true
@@ -169,7 +168,7 @@ object MutationUtils {
         res = processMutationSnippet(onOldLinesDiffOperator, classDetails, workspace)
         if (res.first != null) return res
 
-        val theRest = mutationOnOldLines.minus(onOldLinesDiffOperator)
+        val theRest = mutationOnOldLines.minus(onOldLinesDiffOperator.toSet())
         res = processMutationSnippet(theRest, classDetails, workspace)
         return res
     }

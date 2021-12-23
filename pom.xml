@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
@@ -9,7 +9,7 @@
     </parent>
     <groupId>org.gamekins</groupId>
     <artifactId>gamekins</artifactId>
-    <version>0.3.1</version>
+    <version>0.4</version>
     <packaging>hpi</packaging>
 
     <properties>
@@ -19,8 +19,7 @@
         <!-- Parent pom uses 1.${java.level}, see to resolve: https://www.baeldung.com/maven-plugin-override-parent -->
         <!-- <maven.compiler.release>11</maven.compiler.release> -->
         <java.level>8</java.level>
-        <!-- JaCoCo 0.8.6 does not work with Kotlin 1.5.0 https://youtrack.jetbrains.com/issue/KT-44757 -->
-        <kotlin.version>1.4.32</kotlin.version>
+        <kotlin.version>1.5.32</kotlin.version>
         <maven.compiler.debug>true</maven.compiler.debug>
         <maven.compiler.debuglevel>lines,source</maven.compiler.debuglevel>
         <!-- <maven.test.skip>true</maven.test.skip> -->
@@ -59,7 +58,7 @@
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>structs</artifactId>
-            <version>1.22</version>
+            <version>1.23</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.jenkins-ci</groupId>
@@ -139,7 +138,7 @@
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>credentials</artifactId>
-            <version>2.4.1</version>
+            <version>2.6.1</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.eclipse.jgit/org.eclipse.jgit -->
         <dependency>
@@ -415,7 +414,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.6</version>
+                <version>0.8.7</version>
                 <executions>
                     <execution>
                         <goals>
@@ -434,6 +433,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.1</version>
                 <executions>
                     <execution>
                         <id>default-compile</id>

@@ -245,7 +245,7 @@ object PropertyUtil {
      */
     @JvmStatic
     fun realUser(user: User): Boolean {
-        return !user.properties.values.filter { it is UserDetails || it is Details }.isNullOrEmpty()
+        return user.properties.values.any { it is UserDetails || it is Details }
     }
 
     /**

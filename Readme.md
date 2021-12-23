@@ -39,6 +39,7 @@ Gamekins support the following project types:
  - Pipeline
  - Multibranch Pipeline
  - Organization folders with Multibranch Pipelines
+ - Folders for grouping projects (Leaderboard only)
 
 #### Non-Pipeline projects
 
@@ -75,6 +76,10 @@ To use the Jenkinsfile, you may need to install additional plugins on your Jenki
 Since an organization folder consists of multiple projects, which configuration cannot (easily) be changed, Gamekins 
 has to be enabled for each project. To do this, enable Gamekins for the project in the main configuration page of 
 the folder. It can be disabled in the same way and now configured in the desired project as described before.
+
+#### Folders
+In the configuration of a folder, the Leaderboard can be activated to show the cumulated progress of each user 
+participating in one of the sub-projects.
 
 #### Adding teams and users
 In the configuration page of the job underneath the checkboxes of the Gamekins section, new teams can be added and 

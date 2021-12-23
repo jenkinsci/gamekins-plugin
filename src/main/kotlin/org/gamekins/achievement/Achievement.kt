@@ -16,7 +16,6 @@
 
 package org.gamekins.achievement
 
-import hudson.FilePath
 import hudson.model.Run
 import hudson.model.TaskListener
 import org.gamekins.GameUserProperty

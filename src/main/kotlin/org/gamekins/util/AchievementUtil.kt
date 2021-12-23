@@ -218,10 +218,10 @@ object AchievementUtil {
             val lastRun = PropertyUtil.retrieveGamePropertyFromRun(run)?.getStatistics()
                 ?.getLastRun(parameters.branch)
             if (lastRun != null) {
-                return ((parameters.projectCoverage.toBigDecimal().minus(lastRun.coverage.toBigDecimal())
+                return (parameters.projectCoverage.toBigDecimal().minus(lastRun.coverage.toBigDecimal())
                         >= (additionalParameters["haveCoverage"]?.toBigDecimal() ?: Double.MAX_VALUE.toBigDecimal())
                         && parameters.projectCoverage.toBigDecimal().minus(lastRun.coverage.toBigDecimal())
-                        < (additionalParameters["maxCoverage"]?.toBigDecimal() ?: Double.MAX_VALUE.toBigDecimal())))
+                        < (additionalParameters["maxCoverage"]?.toBigDecimal() ?: Double.MAX_VALUE.toBigDecimal()))
             }
         }
         return false

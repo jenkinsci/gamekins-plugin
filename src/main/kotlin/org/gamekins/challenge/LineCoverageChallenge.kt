@@ -102,7 +102,7 @@ class LineCoverageChallenge(data: Challenge.ChallengeGenerationData)
     }
 
     override fun getSnippet(): String {
-        return if (codeSnippet.isNotEmpty()) codeSnippet else "Code snippet is not available"
+        return codeSnippet.ifEmpty { "Code snippet is not available" }
     }
 
     override fun getToolTipText(): String {

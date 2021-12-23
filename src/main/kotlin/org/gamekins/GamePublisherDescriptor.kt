@@ -103,7 +103,7 @@ class GamePublisherDescriptor : BuildStepDescriptor<Publisher?>(GamePublisher::c
     private fun initAchievementsList() {
         val resource = javaClass.getResource("/achievements")
 
-        if (resource.path.contains(".jar!")) {
+        if (resource?.path?.contains(".jar!") == true) {
             var path = resource.path.replaceAfter(".jar!", "").replace(".jar!", ".jar")
             path = path.replace("file:", "")
             val zip = ZipInputStream(URI("file", "", path, null).toURL().openStream())
@@ -122,7 +122,7 @@ class GamePublisherDescriptor : BuildStepDescriptor<Publisher?>(GamePublisher::c
                 entry = zip.nextEntry
             }
         } else {
-            val files = File(resource.toURI()).listFiles()!!.filter { it.extension == "json" }
+            val files = File(resource?.toURI()!!).listFiles()!!.filter { it.extension == "json" }
             files.forEach { file ->
                 achievements.addAll(AchievementInitializer.initializeAchievements("/achievements/" + file.name))
             }

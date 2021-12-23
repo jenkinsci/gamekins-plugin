@@ -20,7 +20,6 @@ import hudson.model.AbstractItem
 import hudson.model.AbstractProject
 import hudson.model.Item
 import hudson.model.ProminentProjectAction
-import jenkins.model.Jenkins
 import org.gamekins.property.GameJobProperty
 import org.gamekins.property.GameMultiBranchProperty
 import org.gamekins.property.GameProperty
