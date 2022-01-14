@@ -70,7 +70,7 @@ object JUnitUtil {
     fun getTestCountOfSingleJUnitResult(file: FilePath): Int {
         val document = Jsoup.parse(file.readToString(), "", Parser.xmlParser())
         val elements = document.select("testsuite")
-        return elements.first().attr("tests").toInt()
+        return elements.first()?.attr("tests")!!.toInt()
     }
 
     /**
@@ -113,7 +113,7 @@ object JUnitUtil {
     fun getTestFailCountOfSingleJUnitResult(file: FilePath): Int {
         val document = Jsoup.parse(file.readToString(), "", Parser.xmlParser())
         val elements = document.select("testsuite")
-        return elements.first().attr("failures").toInt() + elements.first().attr("errors").toInt()
+        return elements.first()?.attr("failures")!!.toInt() + elements.first()?.attr("errors")!!.toInt()
     }
 
     /**
