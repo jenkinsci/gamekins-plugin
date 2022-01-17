@@ -1,5 +1,11 @@
 ## Gamekins Plugin
-This is the repository of the Gamekins Plugin for Jenkins to add Gamifcation to Jenkins.
+This is the repository of the Gamekins Plugin for Jenkins to integrate Gamification into Jenkins.
+
+Gamekins is a neologism consisting of the words Gamification and Jenkins. This describes best what Gamekins is built 
+for: The integration of Gamification into Jenkins. Gamekins can be used on project level to add various Gamification 
+elements to the Continuous Integration lifecycle of the project. This enables a better and more motivated environment
+for developers in the project, especially for testing. Gamekins aims to improve the motivation of developers to test 
+their project more thoroughly and therefore to increase the quality of the software.
 
 ### Software requirements
 - Java Version 11

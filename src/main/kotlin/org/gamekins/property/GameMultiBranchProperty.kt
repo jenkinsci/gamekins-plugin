@@ -234,7 +234,7 @@ class GameMultiBranchProperty
 
         @Nonnull
         override fun getDisplayName(): String {
-            return "Set the activation of the Gamekins plugin."
+            return "Activate Gamekins"
         }
 
         /**

@@ -94,7 +94,7 @@ class GamePublisherDescriptor : BuildStepDescriptor<Publisher?>(GamePublisher::c
 
     @Nonnull
     override fun getDisplayName(): String {
-        return "Publisher for Gamekins plugin"
+        return "Gamekins Publisher"
     }
 
     /**
