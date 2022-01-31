@@ -530,13 +530,17 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
         completedChallenges.forEach { (p, challenges) ->
             val coverageChallenges = ArrayList(challenges.filterIsInstance<CoverageChallenge>())
             coverageChallenges.removeIf { it.details == null }
-            completedChallenges[p] = CopyOnWriteArrayList(coverageChallenges)
+            val finalChallenges = ArrayList(challenges.filter { it !is CoverageChallenge })
+            finalChallenges.addAll(coverageChallenges)
+            completedChallenges[p] = CopyOnWriteArrayList(finalChallenges)
         }
 
         currentChallenges.forEach { (p, challenges) ->
             val coverageChallenges = ArrayList(challenges.filterIsInstance<CoverageChallenge>())
             coverageChallenges.removeIf { it.details == null }
-            currentChallenges[p] = CopyOnWriteArrayList(coverageChallenges)
+            val finalChallenges = ArrayList(challenges.filter { it !is CoverageChallenge })
+            finalChallenges.addAll(coverageChallenges)
+            currentChallenges[p] = CopyOnWriteArrayList(finalChallenges)
         }
 
         rejectedChallenges.forEach { (p, challenges) ->
@@ -544,7 +548,9 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
             rejChallenges.removeIf { (challenge, _) ->
                 challenge is CoverageChallenge && challenge.details == null
             }
-            rejectedChallenges[p] = CopyOnWriteArrayList(rejChallenges)
+            val finalChallenges = ArrayList(challenges.filter { it.first !is CoverageChallenge })
+            finalChallenges.addAll(rejChallenges)
+            rejectedChallenges[p] = CopyOnWriteArrayList(finalChallenges)
         }
 
         return this
