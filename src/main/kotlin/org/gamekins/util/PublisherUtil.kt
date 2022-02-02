@@ -229,7 +229,7 @@ object PublisherUtil {
             return false
         }
         for (file in files) {
-            if (file.remote.endsWith(csvPath) || file.remote.endsWith(csvPath.replace("/", File.separator))) {
+            if (file.remote.endsWith(csvPath) || file.remote.endsWith(csvPath.replace("/", "\\"))) {
                 return true
             }
         }
@@ -255,7 +255,7 @@ object PublisherUtil {
             return false
         }
         for (file in files) {
-            if (file.remote.endsWith(jsonPath) || file.remote.endsWith(jsonPath.replace("/", File.separator))) {
+            if (file.remote.endsWith(jsonPath) || file.remote.endsWith(jsonPath.replace("/", "\\"))) {
                 return true
             }
         }
@@ -279,7 +279,7 @@ object PublisherUtil {
         }
         for (file in files) {
             val path = file.remote
-            if (path.substring(0, path.length - 10).endsWith(resultsPath) || path.substring(0, path.length - 10).endsWith(resultsPath.replace("/", File.separator))) {
+            if (path.substring(0, path.length - 10).endsWith(resultsPath) || path.substring(0, path.length - 10).endsWith(resultsPath.replace("/", "\\"))) {
                 return true
             }
         }
