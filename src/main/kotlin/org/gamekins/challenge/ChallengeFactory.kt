@@ -32,12 +32,9 @@ import org.gamekins.mutation.MutationUtils
 import org.gamekins.mutation.MutationUtils.findMutationHasCodeSnippets
 import org.gamekins.mutation.MutationUtils.getCurrentLinesOperatorMapping
 import org.gamekins.mutation.MutationUtils.getSurvivedMutationList
-import org.gamekins.util.Constants
+import org.gamekins.util.*
 import org.gamekins.util.Constants.Parameters
-import org.gamekins.util.GitUtil
 import org.gamekins.util.GitUtil.HeadCommitCallable
-import org.gamekins.util.JUnitUtil
-import org.gamekins.util.JacocoUtil
 import org.jsoup.nodes.Document
 import java.io.IOException
 import kotlin.collections.ArrayList
@@ -193,6 +190,14 @@ object ChallengeFactory {
                     )
                     challenge = generateMutationTestChallenge(selectedClass, parameters.branch, parameters.projectName,
                         listener, parameters.workspace, user)
+                }
+                challengeClass == SmellChallenge::class.java -> {
+                    listener.logger.println(
+                        "[Gamekins] Try class " + selectedClass.fileName + " and type "
+                                + challengeClass
+                    )
+                    //TODO: Include test files
+                    challenge = generateSmellChallenge(data, listener)
                 }
                 else -> {
                     challenge = generateThirdPartyChallenge(data, challengeClass)
@@ -434,6 +439,18 @@ object ChallengeFactory {
         return MutationTestChallenge(
             chosenMutation, classDetails, branch, commitID, codeSnippet, mutatedLine
         )
+    }
+
+    /**
+     * Generates a new [SmellChallenge] according the current [data]. Gets all smells of a file and chooses one of
+     * them randomly for generation.
+     */
+    fun generateSmellChallenge(data: ChallengeGenerationData, listener: TaskListener): SmellChallenge? {
+        val issues = SmellUtil.getSmellsOfFile(data.selectedClass, listener)
+
+        if (issues.isEmpty()) return null
+
+        return SmellChallenge(data.selectedClass, issues[Random.nextInt(issues.size)])
     }
 
     /**

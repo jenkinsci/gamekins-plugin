@@ -59,6 +59,10 @@ class TestFileDetails(parameters: Parameters,
         }
     }
 
+    override fun isTest(): Boolean {
+        return true
+    }
+
     /**
      * Called by Jenkins after the object has been created from his XML representation. Used for data migration.
      */

@@ -16,11 +16,16 @@
 
 package org.gamekins.file
 
+import hudson.FilePath
 import org.gamekins.util.Constants.Parameters
 import org.gamekins.util.GitUtil
 import org.gamekins.util.JacocoUtil
+import org.sonarsource.sonarlint.core.analysis.api.ClientInputFile
 import java.io.File
+import java.io.InputStream
 import java.io.Serializable
+import java.net.URI
+import java.nio.charset.Charset
 
 /**
  * The internal representation of a file received from git.
@@ -31,8 +36,8 @@ import java.io.Serializable
  * @author Philipp Straubinger
  * @since 0.4
  */
-open class FileDetails(var parameters: Parameters, val filePath: String)
-    : Serializable {
+abstract class FileDetails(var parameters: Parameters, val filePath: String)
+    : Serializable, ClientInputFile {
 
     val changedByUsers: HashSet<GitUtil.GameUser> = hashSetOf()
     val file: File
@@ -82,6 +87,26 @@ open class FileDetails(var parameters: Parameters, val filePath: String)
         return file.exists()
     }
 
+    override fun getCharset(): Charset? {
+        return null
+    }
+
+    override fun <G : Any?> getClientObject(): G? {
+        return null
+    }
+
+    override fun contents(): String {
+        return if (parameters.workspace.channel != null) {
+            FilePath(parameters.workspace.channel, file.absolutePath).readToString()
+        } else {
+            file.readText()
+        }
+    }
+
+    override fun getPath(): String {
+        return file.absolutePath
+    }
+
     override fun hashCode(): Int {
         var result = filePath.hashCode()
         result = 31 * result + file.hashCode()
@@ -91,6 +116,10 @@ open class FileDetails(var parameters: Parameters, val filePath: String)
         return result
     }
 
+    override fun inputStream(): InputStream {
+        return file.inputStream()
+    }
+
     /**
      * Called by Jenkins after the object has been created from his XML representation. Used for data migration.
      */
@@ -98,5 +127,23 @@ open class FileDetails(var parameters: Parameters, val filePath: String)
     private fun readResolve(): Any {
         if (parameters == null) parameters = Parameters()
         return this
+    }
+
+    override fun relativePath(): String {
+        return filePath
+    }
+
+    /**
+     * Updates the working directory according to the current build.
+     *
+     * @param parameters The current [Parameters] class of the build
+     */
+    fun update(parameters: Parameters): FileDetails {
+        this.parameters.workspace = parameters.workspace
+        return this
+    }
+
+    override fun uri(): URI {
+        return file.toURI()
     }
 }

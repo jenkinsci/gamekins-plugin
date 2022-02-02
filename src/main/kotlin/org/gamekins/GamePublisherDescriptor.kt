@@ -138,6 +138,7 @@ class GamePublisherDescriptor : BuildStepDescriptor<Publisher?>(GamePublisher::c
         challenges[MethodCoverageChallenge::class.java] = 3
         challenges[TestChallenge::class.java] = 1
         challenges[MutationTestChallenge::class.java] = 6
+        challenges[SmellChallenge::class.java] = 4
     }
 
     /**

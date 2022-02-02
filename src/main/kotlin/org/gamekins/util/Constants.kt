@@ -17,7 +17,9 @@
 package org.gamekins.util
 
 import hudson.FilePath
+import java.io.File
 import java.io.Serializable
+import java.nio.file.Path
 
 /**
  * Object with constants for Gamekins and [Parameters] for generation.
@@ -58,6 +60,8 @@ object Constants {
 
     const val RUN_TOTAL_COUNT = 200
 
+    val SONAR_JAVA_PLUGIN = pathToSonarJavaPlugin()
+
     const val TYPE_JSON = "application/json"
 
     const val TYPE_PLAIN = "text/plain"
@@ -80,6 +84,18 @@ object Constants {
         if (constants["solved"] != null) parameters.solved = constants["solved"]!!.toInt()
         if (constants["workspace"] != null) parameters.workspace = FilePath(null, constants["workspace"]!!)
         return parameters
+    }
+
+    /**
+     * Returns the path to the most recent jar file of the Sonar-Java-Plugin for SonarLint.
+     *
+     * TODO: Path inside packed Gamekins
+     */
+    private fun pathToSonarJavaPlugin(): Path {
+        val projectPath = System.getProperty("user.dir")
+        val libFolder = File("$projectPath/target/lib")
+        val jars = libFolder.listFiles()!!.filter { it.nameWithoutExtension.contains("sonar-java-plugin") }
+        return jars.last().toPath()
     }
 
     /**

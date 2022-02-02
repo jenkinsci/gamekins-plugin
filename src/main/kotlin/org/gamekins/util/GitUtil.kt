@@ -38,13 +38,14 @@ import org.eclipse.jgit.treewalk.EmptyTreeIterator
 import org.gamekins.file.FileDetails
 import org.gamekins.file.SourceFileDetails
 import org.gamekins.file.TestFileDetails
+import org.gamekins.file.OtherFileDetails
 import org.gamekins.util.Constants.Parameters
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.IOException
 import java.io.OutputStream
 import java.io.Serializable
-import java.util.Objects
+import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 import kotlin.collections.HashSet
@@ -213,7 +214,7 @@ object GitUtil {
                 }
 
                 //Not interested in merge commits
-                if (commit.shortMessage.toLowerCase().contains("merge")) continue
+                if (commit.shortMessage.lowercase(Locale.getDefault()).contains("merge")) continue
 
                 val diff = getDiffOfCommit(git, repo, commit)
                 val lines = diff.split("\n".toRegex())
@@ -257,7 +258,7 @@ object GitUtil {
                                     SourceFileDetails(parameters, path, listener)
                                 }
                                 else -> {
-                                    FileDetails(parameters, path)
+                                    OtherFileDetails(parameters, path)
                                 }
                             }
                             details.addUser(user)
