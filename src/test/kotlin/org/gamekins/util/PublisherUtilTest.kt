@@ -49,6 +49,7 @@ import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject
 import java.io.File
 import java.lang.NullPointerException
 import java.util.concurrent.CopyOnWriteArrayList
+import kotlin.collections.ArrayList
 
 class PublisherUtilTest : AnnotationSpec() {
 
@@ -192,15 +193,81 @@ class PublisherUtilTest : AnnotationSpec() {
     }
 
     @Test
+    fun doCheckJacocoCSVPathOSCompatibility() {
+        val filepathWin = mockkClass(FilePath::class)
+        val pathWin = mockkClass(FilePath::class)
+        val listWin = ArrayList<FilePath>()
+        listWin.add(filepathWin)
+
+        val filepathLinux = mockkClass(FilePath::class)
+        val pathLinux = mockkClass(FilePath::class)
+        val listLinux = ArrayList<FilePath>()
+        listLinux.add(filepathLinux)
+
+        every { pathWin.act(any<JacocoUtil.FilesOfAllSubDirectoriesCallable>()) } returns listWin
+        every { filepathWin.remote } returns jacocoCSVPath.replace('/', '\\')
+
+        every { pathLinux.act(any<JacocoUtil.FilesOfAllSubDirectoriesCallable>()) } returns listLinux
+        every { filepathLinux.remote } returns jacocoCSVPath
+
+        PublisherUtil.doCheckJacocoCSVPath(pathWin, jacocoCSVPath) shouldBe true
+        PublisherUtil.doCheckJacocoCSVPath(pathLinux, jacocoCSVPath) shouldBe true
+    }
+
+    @Test
     fun doCheckMocoJSONPath() {
         PublisherUtil.doCheckMocoJSONPath(path, mocoJSONPath) shouldBe false
         PublisherUtil.doCheckMocoJSONPath(FilePath(null, path.remote + "/src"), mocoJSONPath) shouldBe false
     }
 
     @Test
+    fun doCheckMocoJSONPathOSCompatibility() {
+        val filepathWin = mockkClass(FilePath::class)
+        val pathWin = mockkClass(FilePath::class)
+        val listWin = ArrayList<FilePath>()
+        listWin.add(filepathWin)
+
+        val filepathLinux = mockkClass(FilePath::class)
+        val pathLinux = mockkClass(FilePath::class)
+        val listLinux = ArrayList<FilePath>()
+        listLinux.add(filepathLinux)
+
+        every { pathWin.act(any<JacocoUtil.FilesOfAllSubDirectoriesCallable>()) } returns listWin
+        every { filepathWin.remote } returns mocoJSONPath.replace('/', '\\')
+
+        every { pathLinux.act(any<JacocoUtil.FilesOfAllSubDirectoriesCallable>()) } returns listLinux
+        every { filepathLinux.remote } returns mocoJSONPath
+
+        PublisherUtil.doCheckMocoJSONPath(pathWin, mocoJSONPath) shouldBe true
+        PublisherUtil.doCheckMocoJSONPath(pathLinux, mocoJSONPath) shouldBe true
+    }
+
+    @Test
     fun doCheckJacocoResultsPath() {
         PublisherUtil.doCheckJacocoResultsPath(path, jacocoResultsPath) shouldBe true
         PublisherUtil.doCheckJacocoResultsPath(FilePath(null, path.remote + "/src"), jacocoResultsPath) shouldBe false
+    }
+
+    @Test
+    fun doCheckJacocoResultsPathOSCompatibility() {
+        val filepathWin = mockkClass(FilePath::class)
+        val pathWin = mockkClass(FilePath::class)
+        val listWin = ArrayList<FilePath>()
+        listWin.add(filepathWin)
+
+        val filepathLinux = mockkClass(FilePath::class)
+        val pathLinux = mockkClass(FilePath::class)
+        val listLinux = ArrayList<FilePath>()
+        listLinux.add(filepathLinux)
+
+        every { pathWin.act(any<JacocoUtil.FilesOfAllSubDirectoriesCallable>()) } returns listWin
+        every { filepathWin.remote } returns jacocoResultsPath.replace('/', '\\') + "index.html"
+
+        every { pathLinux.act(any<JacocoUtil.FilesOfAllSubDirectoriesCallable>()) } returns listLinux
+        every { filepathLinux.remote } returns jacocoResultsPath + "index.html"
+
+        PublisherUtil.doCheckJacocoResultsPath(pathWin, jacocoResultsPath) shouldBe true
+        PublisherUtil.doCheckJacocoResultsPath(pathLinux, jacocoResultsPath) shouldBe true
     }
 
     @Test
