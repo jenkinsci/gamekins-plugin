@@ -210,8 +210,8 @@ class PublisherUtilTest : AnnotationSpec() {
         every { pathLinux.act(any<JacocoUtil.FilesOfAllSubDirectoriesCallable>()) } returns listLinux
         every { filepathLinux.remote } returns jacocoCSVPath
 
-        PublisherUtil.doCheckJacocoCSVPath(pathWin, jacocoCSVPath) shouldBe true
         PublisherUtil.doCheckJacocoCSVPath(pathLinux, jacocoCSVPath) shouldBe true
+        PublisherUtil.doCheckJacocoCSVPath(pathWin, jacocoCSVPath) shouldBe true
     }
 
     @Test
@@ -238,8 +238,8 @@ class PublisherUtilTest : AnnotationSpec() {
         every { pathLinux.act(any<JacocoUtil.FilesOfAllSubDirectoriesCallable>()) } returns listLinux
         every { filepathLinux.remote } returns mocoJSONPath
 
-        PublisherUtil.doCheckMocoJSONPath(pathWin, mocoJSONPath) shouldBe true
         PublisherUtil.doCheckMocoJSONPath(pathLinux, mocoJSONPath) shouldBe true
+        PublisherUtil.doCheckMocoJSONPath(pathWin, mocoJSONPath) shouldBe true
     }
 
     @Test
@@ -266,8 +266,8 @@ class PublisherUtilTest : AnnotationSpec() {
         every { pathLinux.act(any<JacocoUtil.FilesOfAllSubDirectoriesCallable>()) } returns listLinux
         every { filepathLinux.remote } returns jacocoResultsPath + "index.html"
 
-        PublisherUtil.doCheckJacocoResultsPath(pathWin, jacocoResultsPath) shouldBe true
         PublisherUtil.doCheckJacocoResultsPath(pathLinux, jacocoResultsPath) shouldBe true
+        PublisherUtil.doCheckJacocoResultsPath(pathWin, jacocoResultsPath) shouldBe true
     }
 
     @Test
