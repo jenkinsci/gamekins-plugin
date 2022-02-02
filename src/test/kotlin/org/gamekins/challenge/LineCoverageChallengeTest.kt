@@ -67,7 +67,7 @@ class LineCoverageChallengeTest : AnnotationSpec() {
         every { element.attr("title") } returns ""
         every { element.text() } returns "toString();"
         details = SourceFileDetails(parameters, shortFilePath, listener)
-        every { data.selectedClass } returns details
+        every { data.selectedFile } returns details
         every { data.parameters } returns parameters
         every { data.line } returns element
         challenge = LineCoverageChallenge(data)
@@ -97,14 +97,14 @@ class LineCoverageChallengeTest : AnnotationSpec() {
         challenge.getScore() shouldBe 2
         every { JacocoUtil.getCoverageInPercentageFromJacoco(any(), any()) } returns 0.9
         details = SourceFileDetails(parameters, shortFilePath, listener)
-        every { data.selectedClass } returns details
+        every { data.selectedFile } returns details
         challenge = LineCoverageChallenge(data)
         challenge.getScore() shouldBe 3
         challenge.toEscapedString()
         every { element.attr("class") } returns "pc"
         every { JacocoUtil.getCoverageInPercentageFromJacoco(any(), any()) } returns coverage
         details = SourceFileDetails(parameters, shortFilePath, listener)
-        every { data.selectedClass } returns details
+        every { data.selectedFile } returns details
         challenge = LineCoverageChallenge(data)
         challenge.getScore() shouldBe 3
         challenge.toEscapedString()

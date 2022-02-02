@@ -25,6 +25,7 @@ import org.gamekins.GameUserProperty
 import org.gamekins.challenge.Challenge.ChallengeGenerationData
 import org.gamekins.event.EventHandler
 import org.gamekins.event.user.ChallengeGeneratedEvent
+import org.gamekins.file.FileDetails
 import org.gamekins.file.SourceFileDetails
 import org.gamekins.mutation.MutationInfo
 import org.gamekins.mutation.MutationResults
@@ -106,33 +107,33 @@ object ChallengeFactory {
      * Generates a new [Challenge] for the current [user].
      *
      * With a probability of 10% a new [TestChallenge] is generated to keep the user motivated. Otherwise a class
-     * is selected by the Rank Selection algorithm from the pool of [classes], where the [user] has changed something
+     * is selected by the Rank Selection algorithm from the pool of [files], where the [user] has changed something
      * in his last commits. It is being attempted five times to generate a [CoverageChallenge]. If this fails or if
-     * the list of [classes] is empty, a new [DummyChallenge] is generated. The workspace is the folder with the
+     * the list of [files] is empty, a new [DummyChallenge] is generated. The workspace is the folder with the
      * code and execution rights, and the [listener] reports the events to the console output of Jenkins.
      */
     @JvmStatic
     @Throws(IOException::class, InterruptedException::class)
     fun generateChallenge(
-        user: User, parameters: Parameters, listener: TaskListener, classes: ArrayList<SourceFileDetails>,
-        cla: SourceFileDetails? = null
+        user: User, parameters: Parameters, listener: TaskListener, files: ArrayList<FileDetails>,
+        cla: FileDetails? = null
     ): Challenge {
 
-        val workList = ArrayList(classes)
+        val workList = ArrayList(files)
 
         var challenge: Challenge?
         var count = 0
         do {
             if (count == 5 || workList.isEmpty()) {
-                listener.logger.println("[Gamekins] No CoverageChallenge could be built")
+                listener.logger.println("[Gamekins] No Challenge could be built")
                 return DummyChallenge(parameters, Constants.ERROR_GENERATION)
             }
             count++
 
             val challengeClass = chooseChallengeType(parameters.mocoJSONPath)
-            val selectedClass = cla
+            val selectedFile = cla
                 ?: if (challengeClass.superclass == CoverageChallenge::class.java) {
-                    val tempList = ArrayList(workList)
+                    val tempList = ArrayList(workList.filterIsInstance<SourceFileDetails>())
                     tempList.removeIf { details: SourceFileDetails -> details.coverage == 1.0 }
                     tempList.removeIf { details: SourceFileDetails -> !details.filesExists() }
                     if (tempList.isEmpty()) {
@@ -140,32 +141,33 @@ object ChallengeFactory {
                         continue
                     }
                     selectClass(tempList, initializeRankSelection(tempList))
+                } else if (challengeClass == MutationTestChallenge::class.java) {
+                    selectClass(workList, initializeRankSelection(workList.filterIsInstance<SourceFileDetails>()))
                 } else {
                     selectClass(workList, initializeRankSelection(workList))
                 }
 
-            workList.remove(selectedClass)
+            workList.remove(selectedFile)
 
             val rejectedChallenges = user.getProperty(GameUserProperty::class.java)
                 .getRejectedChallenges(parameters.projectName)
 
             //Remove classes where a ClassCoverageChallenge has been rejected previously
-            if (!rejectedChallenges.filter {
+            if (rejectedChallenges.any {
                     it.first is ClassCoverageChallenge
-                            && (it.first as ClassCoverageChallenge).details.fileName == selectedClass.fileName
+                            && (it.first as ClassCoverageChallenge).details.fileName == selectedFile.fileName
                             && (it.first as ClassCoverageChallenge)
-                        .details.packageName == selectedClass.packageName
-                }
-                    .isNullOrEmpty()) {
+                        .details.packageName == selectedFile.packageName }) {
+
                 listener.logger.println(
-                    "[Gamekins] Class ${selectedClass.fileName} in package " +
-                            "${selectedClass.packageName} was rejected previously"
+                    "[Gamekins] Class ${selectedFile.fileName} in package " +
+                            "${selectedFile.packageName} was rejected previously"
                 )
                 challenge = null
                 continue
             }
 
-            val data = ChallengeGenerationData(parameters, user, selectedClass, listener)
+            val data = ChallengeGenerationData(parameters, user, selectedFile, listener)
 
             when {
                 challengeClass == TestChallenge::class.java -> {
@@ -178,25 +180,24 @@ object ChallengeFactory {
                 }
                 challengeClass.superclass == CoverageChallenge::class.java -> {
                     listener.logger.println(
-                        "[Gamekins] Try class " + selectedClass.fileName + " and type "
+                        "[Gamekins] Try class " + selectedFile.fileName + " and type "
                                 + challengeClass
                     )
                     challenge = generateCoverageChallenge(data, challengeClass)
                 }
                 challengeClass == MutationTestChallenge::class.java -> {
                     listener.logger.println(
-                        "[Gamekins] Try class " + selectedClass.fileName + " and type "
+                        "[Gamekins] Try class " + selectedFile.fileName + " and type "
                                 + challengeClass
                     )
-                    challenge = generateMutationTestChallenge(selectedClass, parameters.branch, parameters.projectName,
-                        listener, parameters.workspace, user)
+                    challenge = generateMutationTestChallenge(selectedFile as SourceFileDetails, parameters.branch,
+                        parameters.projectName, listener, parameters.workspace, user)
                 }
                 challengeClass == SmellChallenge::class.java -> {
                     listener.logger.println(
-                        "[Gamekins] Try class " + selectedClass.fileName + " and type "
+                        "[Gamekins] Try class " + selectedFile.fileName + " and type "
                                 + challengeClass
                     )
-                    //TODO: Include test files
                     challenge = generateSmellChallenge(data, listener)
                 }
                 else -> {
@@ -228,17 +229,18 @@ object ChallengeFactory {
     private fun generateCoverageChallenge(data: ChallengeGenerationData, challengeClass: Class<out Challenge>)
             : Challenge? {
 
+        if (data.selectedFile !is SourceFileDetails) return null
         val document: Document = try {
             JacocoUtil.generateDocument(
                 JacocoUtil.calculateCurrentFilePath(
                     data.parameters.workspace,
-                    data.selectedClass.jacocoSourceFile, data.selectedClass.parameters.remote
+                    data.selectedFile.jacocoSourceFile, data.selectedFile.parameters.remote
                 )
             )
         } catch (e: Exception) {
             data.listener.logger.println(
                 "[Gamekins] Exception with JaCoCoSourceFile "
-                        + data.selectedClass.jacocoSourceFile.absolutePath
+                        + data.selectedFile.jacocoSourceFile.absolutePath
             )
             e.printStackTrace(data.listener.logger)
             throw e
@@ -254,13 +256,13 @@ object ChallengeFactory {
                         .newInstance(data)
                 }
                 MethodCoverageChallenge::class.java -> {
-                    data.method = JacocoUtil.chooseRandomMethod(data.selectedClass, data.parameters.workspace)
+                    data.method = JacocoUtil.chooseRandomMethod(data.selectedFile, data.parameters.workspace)
                     if (data.method == null) null else challengeClass
                         .getConstructor(ChallengeGenerationData::class.java)
                         .newInstance(data)
                 }
                 else -> {
-                    data.line = JacocoUtil.chooseRandomLine(data.selectedClass, data.parameters.workspace)
+                    data.line = JacocoUtil.chooseRandomLine(data.selectedFile, data.parameters.workspace)
                     if (data.line == null) null else challengeClass
                         .getConstructor(ChallengeGenerationData::class.java)
                         .newInstance(data)
@@ -275,7 +277,7 @@ object ChallengeFactory {
      */
     @JvmStatic
     fun generateNewChallenges(
-        user: User, property: GameUserProperty, parameters: Parameters, classes: ArrayList<SourceFileDetails>,
+        user: User, property: GameUserProperty, parameters: Parameters, files: ArrayList<FileDetails>,
         listener: TaskListener = TaskListener.NULL, maxChallenges: Int = Constants.DEFAULT_CURRENT_CHALLENGES
     ): Int {
 
@@ -283,15 +285,15 @@ object ChallengeFactory {
         if (property.getCurrentChallenges(parameters.projectName).size < maxChallenges) {
             listener.logger.println("[Gamekins] Start generating challenges for user ${user.fullName}")
 
-            val userClasses = ArrayList(classes)
-            userClasses.removeIf { details: SourceFileDetails ->
+            val userFiles = ArrayList(files)
+            userFiles.removeIf { details: FileDetails ->
                 !details.changedByUsers.contains(GitUtil.GameUser(user))
             }
 
-            listener.logger.println("[Gamekins] Found ${userClasses.size} last changed files of user ${user.fullName}")
+            listener.logger.println("[Gamekins] Found ${userFiles.size} last changed files of user ${user.fullName}")
 
             for (i in property.getCurrentChallenges(parameters.projectName).size until maxChallenges) {
-                if (userClasses.size == 0) {
+                if (userFiles.size == 0) {
                     property.newChallenge(parameters.projectName,
                         DummyChallenge(parameters, Constants.NOTHING_DEVELOPED))
                     EventHandler.addEvent(ChallengeGeneratedEvent(parameters.projectName, parameters.branch,
@@ -299,7 +301,7 @@ object ChallengeFactory {
                     break
                 }
 
-                generated += generateUniqueChallenge(user, property, parameters, userClasses, listener)
+                generated += generateUniqueChallenge(user, property, parameters, userFiles, listener)
             }
         }
 
@@ -315,8 +317,10 @@ object ChallengeFactory {
 
         data.testCount = JUnitUtil.getTestCount(data.parameters.workspace)
         data.headCommitHash = data.parameters.workspace.act(HeadCommitCallable(data.parameters.remote)).name
-        data.method = JacocoUtil.chooseRandomMethod(data.selectedClass, data.parameters.workspace)
-        data.line = JacocoUtil.chooseRandomLine(data.selectedClass, data.parameters.workspace)
+        if (data.selectedFile is SourceFileDetails) {
+            data.method = JacocoUtil.chooseRandomMethod(data.selectedFile, data.parameters.workspace)
+            data.line = JacocoUtil.chooseRandomLine(data.selectedFile, data.parameters.workspace)
+        }
 
         return challengeClass.getConstructor(ChallengeGenerationData::class.java).newInstance(data)
     }
@@ -325,7 +329,7 @@ object ChallengeFactory {
      * Tries to generate a new unique [Challenge].
      */
     private fun generateUniqueChallenge(
-        user: User, property: GameUserProperty, parameters: Parameters, userClasses: ArrayList<SourceFileDetails>,
+        user: User, property: GameUserProperty, parameters: Parameters, userFiles: ArrayList<FileDetails>,
         listener: TaskListener
     ): Int {
         var generated = 0
@@ -342,7 +346,7 @@ object ChallengeFactory {
                 isChallengeUnique = true
 
                 listener.logger.println("[Gamekins] Started to generate challenge")
-                challenge = generateChallenge(user, parameters, listener, userClasses)
+                challenge = generateChallenge(user, parameters, listener, userFiles)
 
                 listener.logger.println("[Gamekins] Generated challenge ${challenge.toEscapedString()}")
                 if (challenge is DummyChallenge) break
@@ -428,7 +432,7 @@ object ChallengeFactory {
         if (chosenMutation == null) {
             // Choose a survived mutation randomly if no mutation with completed code snippet info can be found
             val temp = survivedList.minus(MutationUtils.mutationBlackList)
-            if (temp.isNullOrEmpty()) return null
+            if (temp.isEmpty()) return null
             val randomMutation = temp.random() ?: return null
             codeSnippet = MutationTestChallenge.createCodeSnippet(
                 classDetails, randomMutation.mutationDetails.loc, workspace
@@ -446,17 +450,17 @@ object ChallengeFactory {
      * them randomly for generation.
      */
     fun generateSmellChallenge(data: ChallengeGenerationData, listener: TaskListener): SmellChallenge? {
-        val issues = SmellUtil.getSmellsOfFile(data.selectedClass, listener)
+        val issues = SmellUtil.getSmellsOfFile(data.selectedFile, listener)
 
         if (issues.isEmpty()) return null
 
-        return SmellChallenge(data.selectedClass, issues[Random.nextInt(issues.size)])
+        return SmellChallenge(data.selectedFile, issues[Random.nextInt(issues.size)])
     }
 
     /**
      * Initializes the array with the values for the Rank Selection algorithm.
      */
-    private fun initializeRankSelection(workList: List<SourceFileDetails>): DoubleArray {
+    private fun initializeRankSelection(workList: List<FileDetails>): DoubleArray {
         val c = 1.5
         val rankValues = DoubleArray(workList.size)
         for (i in workList.indices) {
@@ -469,7 +473,7 @@ object ChallengeFactory {
     /**
      * Select a class of the [workList] with the Rank Selection algorithm ([rankValues]).
      */
-    private fun selectClass(workList: List<SourceFileDetails>, rankValues: DoubleArray): SourceFileDetails {
+    private fun selectClass(workList: List<FileDetails>, rankValues: DoubleArray): FileDetails {
         val probability = Random.nextDouble()
         var selectedClass = workList[workList.size - 1]
         for (i in workList.indices) {

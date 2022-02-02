@@ -20,7 +20,7 @@ import hudson.model.Run
 import hudson.model.TaskListener
 import org.gamekins.GameUserProperty
 import org.gamekins.LeaderboardAction
-import org.gamekins.file.SourceFileDetails
+import org.gamekins.file.FileDetails
 import org.gamekins.util.Constants
 import org.gamekins.util.Constants.Parameters
 import java.util.*
@@ -125,9 +125,10 @@ class Achievement(var badgePath: String, var unsolvedBadgePath: String, val full
      * Checks whether the [Achievement] is solved. Adds all parameters to an array to be passed into a vararg
      * parameter and executes the [callFunction] of the [callClass].
      */
-    fun isSolved(classes: ArrayList<SourceFileDetails>, parameters: Parameters, run: Run<*, *>,
-                 property: GameUserProperty, listener: TaskListener = TaskListener.NULL): Boolean {
-        val array = arrayOf(callClass.objectInstance, classes, parameters, run, property, listener,
+    fun isSolved(
+        files: ArrayList<FileDetails>, parameters: Parameters, run: Run<*, *>,
+        property: GameUserProperty, listener: TaskListener = TaskListener.NULL): Boolean {
+        val array = arrayOf(callClass.objectInstance, files, parameters, run, property, listener,
             additionalParameters)
         val result: Boolean = callFunction.call(*array) as Boolean
         if (result) solvedTime = System.currentTimeMillis()

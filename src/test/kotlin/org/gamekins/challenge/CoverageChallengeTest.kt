@@ -60,7 +60,7 @@ class CoverageChallengeTest : AnnotationSpec() {
         parameters.mocoJSONPath = mocoJSONPath
         details = SourceFileDetails(parameters, shortFilePath, TaskListener.NULL)
         val data = mockkClass(Challenge.ChallengeGenerationData::class)
-        every { data.selectedClass } returns details
+        every { data.selectedFile } returns details
         every { data.parameters } returns parameters
         challenge = ClassCoverageChallenge(data)
 

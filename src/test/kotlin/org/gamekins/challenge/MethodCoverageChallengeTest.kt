@@ -63,7 +63,7 @@ class MethodCoverageChallengeTest : AnnotationSpec() {
         every { JacocoUtil.getNotFullyCoveredMethodEntries(any()) } returns arrayListOf(method)
         every { JacocoUtil.getMethodEntries(any()) } returns arrayListOf()
         details = SourceFileDetails(parameters, shortFilePath, listener)
-        every { data.selectedClass } returns details
+        every { data.selectedFile } returns details
         every { data.parameters } returns parameters
         every { data.method } returns method
         challenge = MethodCoverageChallenge(data)

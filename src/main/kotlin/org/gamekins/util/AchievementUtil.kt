@@ -25,7 +25,7 @@ import org.gamekins.GameUserProperty
 import org.gamekins.challenge.BuildChallenge
 import org.gamekins.challenge.CoverageChallenge
 import org.gamekins.challenge.LineCoverageChallenge
-import org.gamekins.file.SourceFileDetails
+import org.gamekins.file.FileDetails
 import org.gamekins.util.Constants.Parameters
 import java.util.HashMap
 import kotlin.math.max
@@ -44,7 +44,7 @@ object AchievementUtil {
      * required line. Needs the key 'branches' in the map [additionalParameters] with a positive Int value.
      * Optional parameter is 'maxBranches' with a positive and exclusive Int value.
      */
-    fun coverLineWithXBranches(classes: ArrayList<SourceFileDetails>, parameters: Parameters,
+    fun coverLineWithXBranches(classes: ArrayList<FileDetails>, parameters: Parameters,
                                run: Run<*, *>, property: GameUserProperty, listener: TaskListener,
                                additionalParameters: HashMap<String, String>): Boolean {
         return property.getCompletedChallenges(parameters.projectName)
@@ -74,7 +74,7 @@ object AchievementUtil {
      * key 'more' in the map [additionalParameters] with a Boolean value and the key 'duration' with a Long value.
      * Optional parameters are 'minDuration' and 'maxDuration', only one at a time and value exclusively.
      */
-    fun haveBuildWithXSeconds(classes: ArrayList<SourceFileDetails>, parameters: Parameters,
+    fun haveBuildWithXSeconds(classes: ArrayList<FileDetails>, parameters: Parameters,
                               run: Run<*, *>, property: GameUserProperty, listener: TaskListener,
                               additionalParameters: HashMap<String, String>): Boolean {
         if (additionalParameters["more"].isNullOrEmpty()) return false
@@ -100,7 +100,7 @@ object AchievementUtil {
      * Solves the achievements with description: Solve a CoverageChallenge with at least X% coverage in the required
      * class. Needs the key 'haveCoverage' in the map [additionalParameters] with a positive Double value.
      */
-    fun haveClassWithXCoverage(classes: ArrayList<SourceFileDetails>, parameters: Parameters,
+    fun haveClassWithXCoverage(classes: ArrayList<FileDetails>, parameters: Parameters,
                                run: Run<*, *>, property: GameUserProperty, listener: TaskListener,
                                additionalParameters: HashMap<String, String>): Boolean {
 
@@ -114,7 +114,7 @@ object AchievementUtil {
      * Needs the keys 'haveCoverage' and 'classesCount' in the map [additionalParameters] with a positive
      * Double/Int value.
      */
-    fun haveXClassesWithYCoverage(classes: ArrayList<SourceFileDetails>, parameters: Parameters,
+    fun haveXClassesWithYCoverage(classes: ArrayList<FileDetails>, parameters: Parameters,
                                   run: Run<*, *>, property: GameUserProperty, listener: TaskListener,
                                   additionalParameters: HashMap<String, String>): Boolean {
 
@@ -129,7 +129,7 @@ object AchievementUtil {
      * with at least Z LOC. Needs the keys 'haveCoverage', 'classesCount' 'linesCount' and  in the map
      * [additionalParameters] with a positive Double/Int/Int value.
      */
-    fun haveXClassesWithYCoverageAndZLines(classes: ArrayList<SourceFileDetails>, parameters: Parameters,
+    fun haveXClassesWithYCoverageAndZLines(classes: ArrayList<FileDetails>, parameters: Parameters,
                                            run: Run<*, *>, property: GameUserProperty, listener: TaskListener,
                                            additionalParameters: HashMap<String, String>): Boolean {
 
@@ -148,7 +148,7 @@ object AchievementUtil {
      * Solves the achievements with description: Fail the build with X failed test. Needs the key 'failedTests'
      * in the map [additionalParameters] with a positive Int value. 'failedTests' with the value '0' means all tests.
      */
-    fun haveXFailedTests(classes: ArrayList<SourceFileDetails>, parameters: Parameters,
+    fun haveXFailedTests(classes: ArrayList<FileDetails>, parameters: Parameters,
                          run: Run<*, *>, property: GameUserProperty, listener: TaskListener,
                          additionalParameters: HashMap<String, String>): Boolean {
         val testCount = JUnitUtil.getTestCount(parameters.workspace, run)
@@ -165,7 +165,7 @@ object AchievementUtil {
      * Solves the achievements with description: Have X% project coverage. Needs the key 'haveCoverage'
      * in the map [additionalParameters] with a positive Double value.
      */
-    fun haveXProjectCoverage(classes: ArrayList<SourceFileDetails>, parameters: Parameters,
+    fun haveXProjectCoverage(classes: ArrayList<FileDetails>, parameters: Parameters,
                              run: Run<*, *>, property: GameUserProperty, listener: TaskListener,
                              additionalParameters: HashMap<String, String>): Boolean {
 
@@ -176,7 +176,7 @@ object AchievementUtil {
      * Solves the achievements with description: Have X tests in your project. Needs the key 'haveTests'
      * in the map [additionalParameters] with a positive Int value.
      */
-    fun haveXProjectTests(classes: ArrayList<SourceFileDetails>, parameters: Parameters,
+    fun haveXProjectTests(classes: ArrayList<FileDetails>, parameters: Parameters,
                           run: Run<*, *>, property: GameUserProperty, listener: TaskListener,
                           additionalParameters: HashMap<String, String>): Boolean {
 
@@ -188,7 +188,7 @@ object AchievementUtil {
      * Needs the key 'haveCoverage' in the map [additionalParameters] with a positive Double value.
      * Optional parameter 'maxCoverage' with an positive and exclusive Int value.
      */
-    fun improveClassCoverageByX(classes: ArrayList<SourceFileDetails>, parameters: Parameters,
+    fun improveClassCoverageByX(classes: ArrayList<FileDetails>, parameters: Parameters,
                                 run: Run<*, *>, property: GameUserProperty, listener: TaskListener,
                                 additionalParameters: HashMap<String, String>): Boolean {
         return property.getCompletedChallenges(parameters.projectName)
@@ -206,7 +206,7 @@ object AchievementUtil {
      * key 'haveCoverage' in the map [additionalParameters] with a positive Double value.
      * Optional parameter 'maxCoverage' with an positive and exclusive Int value.
      */
-    fun improveProjectCoverageByX(classes: ArrayList<SourceFileDetails>, parameters: Parameters,
+    fun improveProjectCoverageByX(classes: ArrayList<FileDetails>, parameters: Parameters,
                                   run: Run<*, *>, property: GameUserProperty, listener: TaskListener,
                                   additionalParameters: HashMap<String, String>): Boolean {
         val mapUser: User? = GitUtil.mapUser(
@@ -231,7 +231,7 @@ object AchievementUtil {
      * Solves the achievements with description: Solve a Challenge a maximum of X hours after generation. Needs the
      * key 'timeDifference' and 'minTimeDifference' in the map [additionalParameters] with a positive Long value.
      */
-    fun solveChallengeInXSeconds(classes: ArrayList<SourceFileDetails>, parameters: Parameters,
+    fun solveChallengeInXSeconds(classes: ArrayList<FileDetails>, parameters: Parameters,
                                  run: Run<*, *>, property: GameUserProperty, listener: TaskListener,
                                  additionalParameters: HashMap<String, String>): Boolean {
         return property.getCompletedChallenges(parameters.projectName)
@@ -247,7 +247,7 @@ object AchievementUtil {
      * Solves the achievement Fixing my own mistake: Let the build pass after it failed with one of
      * your commits as head.
      */
-    fun solveFirstBuildFail(classes: ArrayList<SourceFileDetails>, parameters: Parameters,
+    fun solveFirstBuildFail(classes: ArrayList<FileDetails>, parameters: Parameters,
                             run: Run<*, *>, property: GameUserProperty, listener: TaskListener,
                             additionalParameters: HashMap<String, String>): Boolean {
 
@@ -259,7 +259,7 @@ object AchievementUtil {
      * in the map [additionalParameters] with a positive Int value.
      */
     @JvmStatic
-    fun solveXChallenges(classes: ArrayList<SourceFileDetails>, parameters: Parameters,
+    fun solveXChallenges(classes: ArrayList<FileDetails>, parameters: Parameters,
                          run: Run<*, *>, property: GameUserProperty, listener: TaskListener,
                          additionalParameters: HashMap<String, String>): Boolean {
 
@@ -271,7 +271,7 @@ object AchievementUtil {
      * Solves the achievements with description: Solve X Challenges with one Jenkins build. Needs the key 'solveNumber'
      * in the map [additionalParameters] with a positive Int value.
      */
-    fun solveXAtOnce(classes: ArrayList<SourceFileDetails>, parameters: Parameters,
+    fun solveXAtOnce(classes: ArrayList<FileDetails>, parameters: Parameters,
                      run: Run<*, *>, property: GameUserProperty, listener: TaskListener,
                      additionalParameters: HashMap<String, String>): Boolean {
 

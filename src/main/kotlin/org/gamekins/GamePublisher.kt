@@ -104,7 +104,7 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
         listener.logger.println("[Gamekins] Solve Challenges and generate new Challenges")
 
         //Computes the last changed classes
-        val classes = PublisherUtil.retrieveLastChangedClasses(searchCommitCount, parameters,
+        val files = PublisherUtil.retrieveLastChangedSourceAndTestFiles(searchCommitCount, parameters,
             removeFullyCoveredClasses = false, removeClassesWithoutJacocoFiles = false, listener = listener)
 
         //Generate some project statistics
@@ -120,7 +120,7 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
         var solvedQuests = 0
         var generatedQuests = 0
         for (user in User.getAll()) {
-            val results = PublisherUtil.checkUser(user, run, ArrayList(classes), parameters, result, listener)
+            val results = PublisherUtil.checkUser(user, run, ArrayList(files), parameters, result, listener)
             generated += (if (results["generated"] != null) results["generated"] else 0)!!
             solved += (if (results["solved"] != null) results["solved"] else 0)!!
             solvedAchievements += (if (results["solvedAchievements"] != null) results["solvedAchievements"] else 0)!!

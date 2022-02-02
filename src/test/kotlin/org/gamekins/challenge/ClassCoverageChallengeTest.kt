@@ -58,7 +58,7 @@ class ClassCoverageChallengeTest : AnnotationSpec() {
         every { JacocoUtil.generateDocument(any()) } returns document
         every { JacocoUtil.calculateCoveredLines(any(), any()) } returns 0
         details = SourceFileDetails(parameters, shortFilePath, listener)
-        every { data.selectedClass } returns details
+        every { data.selectedFile } returns details
         every { data.parameters } returns parameters
         challenge = ClassCoverageChallenge(data)
     }
@@ -73,7 +73,7 @@ class ClassCoverageChallengeTest : AnnotationSpec() {
         challenge.getScore() shouldBe 1
         every { JacocoUtil.getCoverageInPercentageFromJacoco(any(), any()) } returns 0.9
         details = SourceFileDetails(parameters, shortFilePath, listener)
-        every { data.selectedClass } returns details
+        every { data.selectedFile } returns details
         challenge = ClassCoverageChallenge(data)
         challenge.getScore() shouldBe 2
         challenge.toEscapedString() shouldBe "Write a test to cover more lines in class $className in package " +

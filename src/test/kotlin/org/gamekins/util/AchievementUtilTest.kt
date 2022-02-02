@@ -35,6 +35,7 @@ import org.eclipse.jgit.revwalk.RevCommit
 import org.gamekins.challenge.BuildChallenge
 import org.gamekins.challenge.ClassCoverageChallenge
 import org.gamekins.challenge.LineCoverageChallenge
+import org.gamekins.file.FileDetails
 import org.gamekins.file.SourceFileDetails
 import org.gamekins.property.GameJobProperty
 import org.gamekins.statistics.Statistics
@@ -48,7 +49,7 @@ class AchievementUtilTest: AnnotationSpec() {
 
     private lateinit var root : String
     private val challenge = mockkClass(ClassCoverageChallenge::class)
-    private val classes = arrayListOf<SourceFileDetails>()
+    private val files = arrayListOf<FileDetails>()
     private val parameters = Parameters()
     private val run = mockkClass(hudson.model.Run::class)
     private val property = mockkClass(org.gamekins.GameUserProperty::class)
@@ -81,34 +82,34 @@ class AchievementUtilTest: AnnotationSpec() {
     @Test
     fun coverLineWithXBranches() {
         additionalParameters.clear()
-        AchievementUtil.coverLineWithXBranches(classes, parameters, run, property, TaskListener.NULL,
+        AchievementUtil.coverLineWithXBranches(files, parameters, run, property, TaskListener.NULL,
             additionalParameters) shouldBe false
 
         additionalParameters["branches"] = "2"
         val lineChallenge = mockkClass(LineCoverageChallenge::class)
         every { property.getCompletedChallenges(any()) } returns CopyOnWriteArrayList(listOf(lineChallenge))
         every { lineChallenge.getMaxCoveredBranchesIfFullyCovered() } returns 0
-        AchievementUtil.coverLineWithXBranches(classes, parameters, run, property, TaskListener.NULL,
+        AchievementUtil.coverLineWithXBranches(files, parameters, run, property, TaskListener.NULL,
             additionalParameters) shouldBe false
 
         every { lineChallenge.getMaxCoveredBranchesIfFullyCovered() } returns 1
-        AchievementUtil.coverLineWithXBranches(classes, parameters, run, property, TaskListener.NULL,
+        AchievementUtil.coverLineWithXBranches(files, parameters, run, property, TaskListener.NULL,
             additionalParameters) shouldBe false
 
         every { lineChallenge.getMaxCoveredBranchesIfFullyCovered() } returns 2
-        AchievementUtil.coverLineWithXBranches(classes, parameters, run, property, TaskListener.NULL,
+        AchievementUtil.coverLineWithXBranches(files, parameters, run, property, TaskListener.NULL,
             additionalParameters) shouldBe true
 
         every { lineChallenge.getMaxCoveredBranchesIfFullyCovered() } returns 3
-        AchievementUtil.coverLineWithXBranches(classes, parameters, run, property, TaskListener.NULL,
+        AchievementUtil.coverLineWithXBranches(files, parameters, run, property, TaskListener.NULL,
             additionalParameters) shouldBe true
 
         additionalParameters["maxBranches"] = "3"
-        AchievementUtil.coverLineWithXBranches(classes, parameters, run, property, TaskListener.NULL,
+        AchievementUtil.coverLineWithXBranches(files, parameters, run, property, TaskListener.NULL,
             additionalParameters) shouldBe false
 
         additionalParameters["maxBranches"] = "4"
-        AchievementUtil.coverLineWithXBranches(classes, parameters, run, property, TaskListener.NULL,
+        AchievementUtil.coverLineWithXBranches(files, parameters, run, property, TaskListener.NULL,
             additionalParameters) shouldBe true
 
         every { property.getCompletedChallenges(any()) } returns CopyOnWriteArrayList(listOf(challenge))
@@ -124,58 +125,58 @@ class AchievementUtilTest: AnnotationSpec() {
     fun haveBuildWithXSeconds() {
         additionalParameters.clear()
         every { run.duration } returns 100000000000
-        AchievementUtil.haveBuildWithXSeconds(classes, parameters, run, property, TaskListener.NULL,
+        AchievementUtil.haveBuildWithXSeconds(files, parameters, run, property, TaskListener.NULL,
             additionalParameters) shouldBe false
 
         every { run.result } returns Result.FAILURE
-        AchievementUtil.haveBuildWithXSeconds(classes, parameters, run, property, TaskListener.NULL,
+        AchievementUtil.haveBuildWithXSeconds(files, parameters, run, property, TaskListener.NULL,
             additionalParameters) shouldBe false
 
         additionalParameters["more"] = "false"
         every { run.result } returns Result.SUCCESS
-        AchievementUtil.haveBuildWithXSeconds(classes, parameters, run, property, TaskListener.NULL,
+        AchievementUtil.haveBuildWithXSeconds(files, parameters, run, property, TaskListener.NULL,
             additionalParameters) shouldBe false
 
         additionalParameters["more"] = "true"
-        AchievementUtil.haveBuildWithXSeconds(classes, parameters, run, property, TaskListener.NULL,
+        AchievementUtil.haveBuildWithXSeconds(files, parameters, run, property, TaskListener.NULL,
             additionalParameters) shouldBe false
 
         additionalParameters["duration"] = "100000000"
-        AchievementUtil.haveBuildWithXSeconds(classes, parameters, run, property, TaskListener.NULL,
+        AchievementUtil.haveBuildWithXSeconds(files, parameters, run, property, TaskListener.NULL,
             additionalParameters) shouldBe false
 
         every { run.duration } returns 100000000001
-        AchievementUtil.haveBuildWithXSeconds(classes, parameters, run, property, TaskListener.NULL,
+        AchievementUtil.haveBuildWithXSeconds(files, parameters, run, property, TaskListener.NULL,
             additionalParameters) shouldBe true
 
         every { run.duration } returns 100000000000
         additionalParameters["more"] = "false"
-        AchievementUtil.haveBuildWithXSeconds(classes, parameters, run, property, TaskListener.NULL,
+        AchievementUtil.haveBuildWithXSeconds(files, parameters, run, property, TaskListener.NULL,
             additionalParameters) shouldBe false
 
         every { run.duration } returns 99999999999
-        AchievementUtil.haveBuildWithXSeconds(classes, parameters, run, property, TaskListener.NULL,
+        AchievementUtil.haveBuildWithXSeconds(files, parameters, run, property, TaskListener.NULL,
             additionalParameters) shouldBe true
 
         every { run.duration } returns 99999999998
         additionalParameters["minDuration"] = "99999999999"
-        AchievementUtil.haveBuildWithXSeconds(classes, parameters, run, property, TaskListener.NULL,
+        AchievementUtil.haveBuildWithXSeconds(files, parameters, run, property, TaskListener.NULL,
             additionalParameters) shouldBe false
 
         every { run.duration } returns 99999999998
         additionalParameters["minDuration"] = "99999999997"
-        AchievementUtil.haveBuildWithXSeconds(classes, parameters, run, property, TaskListener.NULL,
+        AchievementUtil.haveBuildWithXSeconds(files, parameters, run, property, TaskListener.NULL,
             additionalParameters) shouldBe true
 
         every { run.duration } returns 100000000002
         additionalParameters["more"] = "true"
         additionalParameters["maxDuration"] = "100000000001"
-        AchievementUtil.haveBuildWithXSeconds(classes, parameters, run, property, TaskListener.NULL,
+        AchievementUtil.haveBuildWithXSeconds(files, parameters, run, property, TaskListener.NULL,
             additionalParameters) shouldBe false
 
         every { run.duration } returns 100000000002
         additionalParameters["maxDuration"] = "100000000003"
-        AchievementUtil.haveBuildWithXSeconds(classes, parameters, run, property, TaskListener.NULL,
+        AchievementUtil.haveBuildWithXSeconds(files, parameters, run, property, TaskListener.NULL,
             additionalParameters) shouldBe true
     }
 
@@ -183,15 +184,15 @@ class AchievementUtilTest: AnnotationSpec() {
     fun haveClassWithXCoverage() {
         additionalParameters.clear()
         every { challenge.solvedCoverage } returns 0.9
-        AchievementUtil.haveClassWithXCoverage(classes, parameters, run, property, TaskListener.NULL,
+        AchievementUtil.haveClassWithXCoverage(files, parameters, run, property, TaskListener.NULL,
             additionalParameters) shouldBe false
 
         additionalParameters["haveCoverage"] = "0.8"
-        AchievementUtil.haveClassWithXCoverage(classes, parameters, run, property, TaskListener.NULL,
+        AchievementUtil.haveClassWithXCoverage(files, parameters, run, property, TaskListener.NULL,
             additionalParameters) shouldBe true
 
         every { challenge.solvedCoverage } returns 0.7
-        AchievementUtil.haveClassWithXCoverage(classes, parameters, run, property, TaskListener.NULL,
+        AchievementUtil.haveClassWithXCoverage(files, parameters, run, property, TaskListener.NULL,
             additionalParameters) shouldBe false
     }
 
@@ -199,19 +200,19 @@ class AchievementUtilTest: AnnotationSpec() {
     fun haveXClassesWithYCoverage() {
         additionalParameters.clear()
         every { challenge.solvedCoverage } returns 0.9
-        AchievementUtil.haveXClassesWithYCoverage(classes, parameters, run, property, TaskListener.NULL,
+        AchievementUtil.haveXClassesWithYCoverage(files, parameters, run, property, TaskListener.NULL,
             additionalParameters) shouldBe false
 
         additionalParameters["haveCoverage"] = "0.8"
-        AchievementUtil.haveXClassesWithYCoverage(classes, parameters, run, property, TaskListener.NULL,
+        AchievementUtil.haveXClassesWithYCoverage(files, parameters, run, property, TaskListener.NULL,
             additionalParameters) shouldBe false
 
         additionalParameters["classesCount"] = "1"
-        AchievementUtil.haveXClassesWithYCoverage(classes, parameters, run, property, TaskListener.NULL,
+        AchievementUtil.haveXClassesWithYCoverage(files, parameters, run, property, TaskListener.NULL,
             additionalParameters) shouldBe true
 
         every { challenge.solvedCoverage } returns 0.7
-        AchievementUtil.haveXClassesWithYCoverage(classes, parameters, run, property, TaskListener.NULL,
+        AchievementUtil.haveXClassesWithYCoverage(files, parameters, run, property, TaskListener.NULL,
             additionalParameters) shouldBe false
     }
 
@@ -225,23 +226,23 @@ class AchievementUtilTest: AnnotationSpec() {
         every { challenge.details } returns details
         every { challenge.solvedCoverage } returns 0.9
         parameters.workspace = workspace
-        AchievementUtil.haveXClassesWithYCoverageAndZLines(classes, parameters, run, property, TaskListener.NULL,
+        AchievementUtil.haveXClassesWithYCoverageAndZLines(files, parameters, run, property, TaskListener.NULL,
             additionalParameters) shouldBe false
 
         additionalParameters["haveCoverage"] = "0.8"
-        AchievementUtil.haveXClassesWithYCoverageAndZLines(classes, parameters, run, property, TaskListener.NULL,
+        AchievementUtil.haveXClassesWithYCoverageAndZLines(files, parameters, run, property, TaskListener.NULL,
             additionalParameters) shouldBe false
 
         additionalParameters["linesCount"] = "100"
-        AchievementUtil.haveXClassesWithYCoverageAndZLines(classes, parameters, run, property, TaskListener.NULL,
+        AchievementUtil.haveXClassesWithYCoverageAndZLines(files, parameters, run, property, TaskListener.NULL,
             additionalParameters) shouldBe false
 
         additionalParameters["classesCount"] = "1"
-        AchievementUtil.haveXClassesWithYCoverageAndZLines(classes, parameters, run, property, TaskListener.NULL,
+        AchievementUtil.haveXClassesWithYCoverageAndZLines(files, parameters, run, property, TaskListener.NULL,
             additionalParameters) shouldBe true
 
         every { challenge.solvedCoverage } returns 0.7
-        AchievementUtil.haveXClassesWithYCoverageAndZLines(classes, parameters, run, property, TaskListener.NULL,
+        AchievementUtil.haveXClassesWithYCoverageAndZLines(files, parameters, run, property, TaskListener.NULL,
             additionalParameters) shouldBe false
     }
 
@@ -250,34 +251,34 @@ class AchievementUtilTest: AnnotationSpec() {
         additionalParameters.clear()
         every { run.result } returns Result.SUCCESS
         every { run.getAction(TestResultAction::class.java) } returns null
-        AchievementUtil.haveXFailedTests(classes, parameters, run, property, TaskListener.NULL,
+        AchievementUtil.haveXFailedTests(files, parameters, run, property, TaskListener.NULL,
             additionalParameters) shouldBe false
 
         mockkStatic(JUnitUtil::class)
         every { run.result } returns Result.FAILURE
         every { JUnitUtil.getTestFailCount(any(), any()) } returns 0
-        AchievementUtil.haveXFailedTests(classes, parameters, run, property, TaskListener.NULL,
+        AchievementUtil.haveXFailedTests(files, parameters, run, property, TaskListener.NULL,
             additionalParameters) shouldBe false
 
         additionalParameters["failedTests"] = "1"
-        AchievementUtil.haveXFailedTests(classes, parameters, run, property, TaskListener.NULL,
+        AchievementUtil.haveXFailedTests(files, parameters, run, property, TaskListener.NULL,
             additionalParameters) shouldBe false
 
         every { JUnitUtil.getTestFailCount(any(), any()) } returns 1
-        AchievementUtil.haveXFailedTests(classes, parameters, run, property, TaskListener.NULL,
+        AchievementUtil.haveXFailedTests(files, parameters, run, property, TaskListener.NULL,
             additionalParameters) shouldBe true
 
         additionalParameters["failedTests"] = "0"
         every { JUnitUtil.getTestCount(any(), any()) } returns 2
-        AchievementUtil.haveXFailedTests(classes, parameters, run, property, TaskListener.NULL,
+        AchievementUtil.haveXFailedTests(files, parameters, run, property, TaskListener.NULL,
             additionalParameters) shouldBe false
 
         every { JUnitUtil.getTestCount(any(), any()) } returns 1
-        AchievementUtil.haveXFailedTests(classes, parameters, run, property, TaskListener.NULL,
+        AchievementUtil.haveXFailedTests(files, parameters, run, property, TaskListener.NULL,
             additionalParameters) shouldBe true
 
         every { JUnitUtil.getTestCount(any(), any()) } returns 0
-        AchievementUtil.haveXFailedTests(classes, parameters, run, property, TaskListener.NULL,
+        AchievementUtil.haveXFailedTests(files, parameters, run, property, TaskListener.NULL,
             additionalParameters) shouldBe false
     }
 
@@ -285,15 +286,15 @@ class AchievementUtilTest: AnnotationSpec() {
     fun haveXProjectCoverage() {
         additionalParameters.clear()
         parameters.projectCoverage = 0.81
-        AchievementUtil.haveXProjectCoverage(classes, parameters, run, property, TaskListener.NULL,
+        AchievementUtil.haveXProjectCoverage(files, parameters, run, property, TaskListener.NULL,
             additionalParameters) shouldBe false
 
         additionalParameters["haveCoverage"] = "0.8"
-        AchievementUtil.haveXProjectCoverage(classes, parameters, run, property, TaskListener.NULL,
+        AchievementUtil.haveXProjectCoverage(files, parameters, run, property, TaskListener.NULL,
             additionalParameters) shouldBe true
 
         parameters.projectCoverage = 0.79
-        AchievementUtil.haveXProjectCoverage(classes, parameters, run, property, TaskListener.NULL,
+        AchievementUtil.haveXProjectCoverage(files, parameters, run, property, TaskListener.NULL,
             additionalParameters) shouldBe false
     }
 
@@ -301,15 +302,15 @@ class AchievementUtilTest: AnnotationSpec() {
     fun haveXProjectTests() {
         additionalParameters.clear()
         parameters.projectTests = 101
-        AchievementUtil.haveXProjectTests(classes, parameters, run, property, TaskListener.NULL,
+        AchievementUtil.haveXProjectTests(files, parameters, run, property, TaskListener.NULL,
             additionalParameters) shouldBe false
 
         additionalParameters["haveTests"] = "100"
-        AchievementUtil.haveXProjectTests(classes, parameters, run, property, TaskListener.NULL,
+        AchievementUtil.haveXProjectTests(files, parameters, run, property, TaskListener.NULL,
             additionalParameters) shouldBe true
 
         parameters.projectTests = 99
-        AchievementUtil.haveXProjectTests(classes, parameters, run, property, TaskListener.NULL,
+        AchievementUtil.haveXProjectTests(files, parameters, run, property, TaskListener.NULL,
             additionalParameters) shouldBe false
     }
 
@@ -318,32 +319,32 @@ class AchievementUtilTest: AnnotationSpec() {
         additionalParameters.clear()
         every { challenge.coverage } returns 0.0
         every { challenge.solvedCoverage } returns 0.0
-        AchievementUtil.improveClassCoverageByX(classes, parameters, run, property, TaskListener.NULL,
+        AchievementUtil.improveClassCoverageByX(files, parameters, run, property, TaskListener.NULL,
             additionalParameters) shouldBe false
 
         additionalParameters["haveCoverage"] = "0.1"
-        AchievementUtil.improveClassCoverageByX(classes, parameters, run, property, TaskListener.NULL,
+        AchievementUtil.improveClassCoverageByX(files, parameters, run, property, TaskListener.NULL,
             additionalParameters) shouldBe false
 
         every { challenge.coverage } returns 0.7
         every { challenge.solvedCoverage } returns 0.75
-        AchievementUtil.improveClassCoverageByX(classes, parameters, run, property, TaskListener.NULL,
+        AchievementUtil.improveClassCoverageByX(files, parameters, run, property, TaskListener.NULL,
             additionalParameters) shouldBe false
 
         every { challenge.solvedCoverage } returns 0.8
-        AchievementUtil.improveClassCoverageByX(classes, parameters, run, property, TaskListener.NULL,
+        AchievementUtil.improveClassCoverageByX(files, parameters, run, property, TaskListener.NULL,
             additionalParameters) shouldBe true
 
         every { challenge.solvedCoverage } returns 0.85
-        AchievementUtil.improveClassCoverageByX(classes, parameters, run, property, TaskListener.NULL,
+        AchievementUtil.improveClassCoverageByX(files, parameters, run, property, TaskListener.NULL,
             additionalParameters) shouldBe true
 
         additionalParameters["maxCoverage"] = "0.15"
-        AchievementUtil.improveClassCoverageByX(classes, parameters, run, property, TaskListener.NULL,
+        AchievementUtil.improveClassCoverageByX(files, parameters, run, property, TaskListener.NULL,
             additionalParameters) shouldBe false
 
         additionalParameters["maxCoverage"] = "0.2"
-        AchievementUtil.improveClassCoverageByX(classes, parameters, run, property, TaskListener.NULL,
+        AchievementUtil.improveClassCoverageByX(files, parameters, run, property, TaskListener.NULL,
             additionalParameters) shouldBe true
     }
 
@@ -362,7 +363,7 @@ class AchievementUtilTest: AnnotationSpec() {
         every { GitUtil.mapUser(any(), userList) } returns user
         every { property.getUser() } returns user2
         parameters.workspace = path
-        AchievementUtil.improveProjectCoverageByX(classes, parameters, run, property, TaskListener.NULL,
+        AchievementUtil.improveProjectCoverageByX(files, parameters, run, property, TaskListener.NULL,
             additionalParameters) shouldBe false
 
         every { property.getUser() } returns user
@@ -375,34 +376,34 @@ class AchievementUtilTest: AnnotationSpec() {
         every { job.getProperty(any()) } returns jobProperty
         every { jobProperty.getStatistics() } returns statistics
         every { statistics.getLastRun("master") } returns null
-        AchievementUtil.improveProjectCoverageByX(classes, parameters, run, property, TaskListener.NULL,
+        AchievementUtil.improveProjectCoverageByX(files, parameters, run, property, TaskListener.NULL,
             additionalParameters) shouldBe false
 
         val runEntry = mockkClass(Statistics.RunEntry::class)
         parameters.projectCoverage = 0.7
         every { runEntry.coverage } returns 0.6
         every { statistics.getLastRun("master") } returns runEntry
-        AchievementUtil.improveProjectCoverageByX(classes, parameters, run, property, TaskListener.NULL,
+        AchievementUtil.improveProjectCoverageByX(files, parameters, run, property, TaskListener.NULL,
             additionalParameters) shouldBe false
 
         additionalParameters["haveCoverage"] = "0.2"
-        AchievementUtil.improveProjectCoverageByX(classes, parameters, run, property, TaskListener.NULL,
+        AchievementUtil.improveProjectCoverageByX(files, parameters, run, property, TaskListener.NULL,
             additionalParameters) shouldBe false
 
         additionalParameters["haveCoverage"] = "0.1"
-        AchievementUtil.improveProjectCoverageByX(classes, parameters, run, property, TaskListener.NULL,
+        AchievementUtil.improveProjectCoverageByX(files, parameters, run, property, TaskListener.NULL,
             additionalParameters) shouldBe true
 
         additionalParameters["haveCoverage"] = "0.05"
-        AchievementUtil.improveProjectCoverageByX(classes, parameters, run, property, TaskListener.NULL,
+        AchievementUtil.improveProjectCoverageByX(files, parameters, run, property, TaskListener.NULL,
             additionalParameters) shouldBe true
 
         additionalParameters["maxCoverage"] = "0.09"
-        AchievementUtil.improveProjectCoverageByX(classes, parameters, run, property, TaskListener.NULL,
+        AchievementUtil.improveProjectCoverageByX(files, parameters, run, property, TaskListener.NULL,
             additionalParameters) shouldBe false
 
         additionalParameters["maxCoverage"] = "0.2"
-        AchievementUtil.improveProjectCoverageByX(classes, parameters, run, property, TaskListener.NULL,
+        AchievementUtil.improveProjectCoverageByX(files, parameters, run, property, TaskListener.NULL,
             additionalParameters) shouldBe true
     }
 
@@ -411,23 +412,23 @@ class AchievementUtilTest: AnnotationSpec() {
         additionalParameters.clear()
         every { challenge.getSolved() } returns 100000000
         every { challenge.getCreated() } returns 10000000
-        AchievementUtil.solveChallengeInXSeconds(classes, parameters, run, property, TaskListener.NULL,
+        AchievementUtil.solveChallengeInXSeconds(files, parameters, run, property, TaskListener.NULL,
             additionalParameters) shouldBe false
 
         additionalParameters["timeDifference"] = "3600"
-        AchievementUtil.solveChallengeInXSeconds(classes, parameters, run, property, TaskListener.NULL,
+        AchievementUtil.solveChallengeInXSeconds(files, parameters, run, property, TaskListener.NULL,
             additionalParameters) shouldBe false
 
         additionalParameters["minTimeDifference"] = "3000"
-        AchievementUtil.solveChallengeInXSeconds(classes, parameters, run, property, TaskListener.NULL,
+        AchievementUtil.solveChallengeInXSeconds(files, parameters, run, property, TaskListener.NULL,
             additionalParameters) shouldBe false
 
         every { challenge.getCreated() } returns 99996400
-        AchievementUtil.solveChallengeInXSeconds(classes, parameters, run, property, TaskListener.NULL,
+        AchievementUtil.solveChallengeInXSeconds(files, parameters, run, property, TaskListener.NULL,
             additionalParameters) shouldBe false
 
         every { challenge.getCreated() } returns 96990000
-        AchievementUtil.solveChallengeInXSeconds(classes, parameters, run, property, TaskListener.NULL,
+        AchievementUtil.solveChallengeInXSeconds(files, parameters, run, property, TaskListener.NULL,
             additionalParameters) shouldBe true
     }
 
@@ -436,46 +437,46 @@ class AchievementUtilTest: AnnotationSpec() {
         additionalParameters.clear()
         val buildProperty = mockkClass(org.gamekins.GameUserProperty::class)
         every { buildProperty.getCompletedChallenges(any()) } returns CopyOnWriteArrayList(listOf())
-        AchievementUtil.solveFirstBuildFail(classes, parameters, run, buildProperty, TaskListener.NULL,
+        AchievementUtil.solveFirstBuildFail(files, parameters, run, buildProperty, TaskListener.NULL,
             additionalParameters) shouldBe false
 
         val build = mockkClass(BuildChallenge::class)
         every { buildProperty.getCompletedChallenges(any()) } returns CopyOnWriteArrayList(listOf(build))
-        AchievementUtil.solveFirstBuildFail(classes, parameters, run, buildProperty, TaskListener.NULL,
+        AchievementUtil.solveFirstBuildFail(files, parameters, run, buildProperty, TaskListener.NULL,
             additionalParameters) shouldBe true
     }
 
     @Test
     fun solveXChallenges() {
         additionalParameters.clear()
-        AchievementUtil.solveXChallenges(classes, parameters, run, property, TaskListener.NULL,
+        AchievementUtil.solveXChallenges(files, parameters, run, property, TaskListener.NULL,
             additionalParameters) shouldBe false
 
         additionalParameters["solveNumber"] = "1"
-        AchievementUtil.solveXChallenges(classes, parameters, run, property, TaskListener.NULL,
+        AchievementUtil.solveXChallenges(files, parameters, run, property, TaskListener.NULL,
             additionalParameters) shouldBe true
 
         additionalParameters["solveNumber"] = "2"
-        AchievementUtil.solveXChallenges(classes, parameters, run, property, TaskListener.NULL,
+        AchievementUtil.solveXChallenges(files, parameters, run, property, TaskListener.NULL,
             additionalParameters) shouldBe false
     }
 
     @Test
     fun solveXAtOnce() {
         additionalParameters.clear()
-        AchievementUtil.solveXAtOnce(classes, parameters, run, property, TaskListener.NULL,
+        AchievementUtil.solveXAtOnce(files, parameters, run, property, TaskListener.NULL,
             additionalParameters) shouldBe false
 
         parameters.solved = 1
-        AchievementUtil.solveXAtOnce(classes, parameters, run, property, TaskListener.NULL,
+        AchievementUtil.solveXAtOnce(files, parameters, run, property, TaskListener.NULL,
             additionalParameters) shouldBe false
 
         additionalParameters["solveNumber"] = "1"
-        AchievementUtil.solveXAtOnce(classes, parameters, run, property, TaskListener.NULL,
+        AchievementUtil.solveXAtOnce(files, parameters, run, property, TaskListener.NULL,
             additionalParameters) shouldBe true
 
         additionalParameters["solveNumber"] = "2"
-        AchievementUtil.solveXAtOnce(classes, parameters, run, property, TaskListener.NULL,
+        AchievementUtil.solveXAtOnce(files, parameters, run, property, TaskListener.NULL,
             additionalParameters) shouldBe false
     }
 }

@@ -16,7 +16,6 @@
 
 package org.gamekins.achievement
 
-import hudson.FilePath
 import hudson.model.Run
 import hudson.model.TaskListener
 import io.kotest.core.spec.style.AnnotationSpec
@@ -27,18 +26,17 @@ import io.mockk.mockkClass
 import io.mockk.mockkStatic
 import io.mockk.unmockkAll
 import org.gamekins.GameUserProperty
-import org.gamekins.file.SourceFileDetails
+import org.gamekins.file.FileDetails
 import org.gamekins.util.AchievementUtil
 import org.gamekins.util.Constants.Parameters
 
 class AchievementTest: AnnotationSpec() {
 
     private lateinit var achievement: Achievement
-    private val classes = arrayListOf<SourceFileDetails>()
+    private val files = arrayListOf<FileDetails>()
     private val parameters = Parameters()
     private val run = mockkClass(Run::class)
     private val property = mockkClass(GameUserProperty::class)
-    private val workspace = mockkClass(FilePath::class)
 
     @BeforeEach
     fun init() {
@@ -63,7 +61,7 @@ class AchievementTest: AnnotationSpec() {
         achievement.solvedTimeString shouldBe "Not solved"
 
         every { AchievementUtil.solveXChallenges(any(), any(), any(), any(), any(), any()) } returns true
-        achievement.isSolved(classes, parameters, run, property, TaskListener.NULL) shouldBe true
+        achievement.isSolved(files, parameters, run, property, TaskListener.NULL) shouldBe true
         achievement.solvedTimeString shouldNotBe "Not solved"
     }
 
@@ -71,7 +69,7 @@ class AchievementTest: AnnotationSpec() {
     fun testEquals() {
         achievement.equals(null) shouldBe false
 
-        achievement.equals(classes) shouldBe false
+        achievement.equals(files) shouldBe false
 
         val achievement2 = mockkClass(Achievement::class)
         every { achievement2.description } returns ""
@@ -92,10 +90,10 @@ class AchievementTest: AnnotationSpec() {
     @Test
     fun isSolved() {
         every { AchievementUtil.solveXChallenges(any(), any(), any(), any(), any(), any()) } returns false
-        achievement.isSolved(classes, parameters, run, property, TaskListener.NULL) shouldBe false
+        achievement.isSolved(files, parameters, run, property, TaskListener.NULL) shouldBe false
 
         every { AchievementUtil.solveXChallenges(any(), any(), any(), any(), any(), any()) } returns true
-        achievement.isSolved(classes, parameters, run, property, TaskListener.NULL) shouldBe true
+        achievement.isSolved(files, parameters, run, property, TaskListener.NULL) shouldBe true
     }
 
     @Test

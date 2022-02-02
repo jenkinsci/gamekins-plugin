@@ -46,14 +46,14 @@ object QuestFactory {
     @JvmStatic
     fun generateNewQuests(
         user: User, property: GameUserProperty, parameters: Constants.Parameters, listener: TaskListener,
-        classes: ArrayList<FileDetails>, maxQuests: Int = Constants.DEFAULT_CURRENT_QUESTS
+        files: ArrayList<FileDetails>, maxQuests: Int = Constants.DEFAULT_CURRENT_QUESTS
     ): Int {
 
         var generated = 0
         if (property.getCurrentQuests(parameters.projectName).size < maxQuests) {
             listener.logger.println("[Gamekins] Start generating quests for user ${user.fullName}")
 
-            val userClasses = ArrayList(classes)
+            val userClasses = ArrayList(files)
             userClasses.removeIf { details: FileDetails ->
                 !details.changedByUsers.contains(GitUtil.GameUser(user))
             }
@@ -307,9 +307,9 @@ object QuestFactory {
     @JvmStatic
     fun generatePackageQuest(
         user: User, property: GameUserProperty, parameters: Constants.Parameters, listener: TaskListener,
-        classes: ArrayList<FileDetails>
+        files: ArrayList<FileDetails>
     ): Quest? {
-        val suitableClasses = classes.filterIsInstance<SourceFileDetails>()
+        val suitableClasses = files.filterIsInstance<SourceFileDetails>()
             .filter { it.coverage < 1.0  && it.filesExists() }
         if (suitableClasses.isEmpty()) return null
         var selectedClass = suitableClasses.random()
@@ -330,7 +330,7 @@ object QuestFactory {
         val steps = arrayListOf<QuestStep>()
         for (cla in selectedClasses) {
             val challenge = ChallengeFactory.generateChallenge(user, parameters, listener,
-                classes as ArrayList<SourceFileDetails>, cla)
+                files, cla)
             steps.add(QuestStep("", challenge))
         }
 

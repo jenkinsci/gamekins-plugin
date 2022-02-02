@@ -48,12 +48,12 @@ object PublisherUtil {
     /**
      * Checks whether one or more achievements are solved.
      */
-    private fun checkAchievements(property: GameUserProperty, run: Run<*, *>, classes: ArrayList<SourceFileDetails>,
+    private fun checkAchievements(property: GameUserProperty, run: Run<*, *>, files: ArrayList<FileDetails>,
                                   parameters: Parameters, listener: TaskListener): Int {
 
         var solved = 0
         for (achievement in property.getUnsolvedAchievements(parameters.projectName)) {
-            if (achievement.isSolved(classes, parameters, run, property, listener)) {
+            if (achievement.isSolved(files, parameters, run, property, listener)) {
                 property.completeAchievement(parameters.projectName, achievement)
                 EventHandler.addEvent(AchievementSolvedEvent(parameters.projectName, parameters.branch,
                     property.getUser(), achievement))
@@ -152,7 +152,7 @@ object PublisherUtil {
      * Checks the solved and solvable state of a [user] and generates new Challenges if needed. Returns a [HashMap]
      * with the number of generated and solved Challenges.
      */
-    fun checkUser(user: User, run: Run<*, *>, classes: ArrayList<SourceFileDetails>,
+    fun checkUser(user: User, run: Run<*, *>, files: ArrayList<FileDetails>,
                   parameters: Parameters, result: Result?, listener: TaskListener = TaskListener.NULL)
             : HashMap<String, Int> {
 
@@ -184,19 +184,19 @@ object PublisherUtil {
 
             //Generate new Challenges if the user has less than three
             val userGenerated = ChallengeFactory.generateNewChallenges(
-                user, property, parameters, classes, listener,
+                user, property, parameters, files, listener,
                 maxChallenges = parameters.currentChallengesCount)
 
             //Check if an achievement is solved
             listener.logger.println("[Gamekins] Start checking solved status of achievements for user ${user.fullName}")
             parameters.solved = userSolved
             parameters.generated = userGenerated
-            solvedAchievements = checkAchievements(property, run, classes, parameters, listener)
+            solvedAchievements = checkAchievements(property, run, files, parameters, listener)
 
             listener.logger.println("[Gamekins] Start checking solved status of quests for user ${user.fullName}")
             solvedQuests = checkQuests(run, property, parameters, listener)
             generatedQuests = QuestFactory.generateNewQuests(user, property, parameters, listener,
-                classes as ArrayList<FileDetails>, maxQuests = parameters.currentQuestsCount)
+                files, maxQuests = parameters.currentQuestsCount)
 
             solved += userSolved
             generated += userGenerated
@@ -323,6 +323,43 @@ object PublisherUtil {
         }
 
         return classes
+    }
+
+    /**
+     * Retrieves all last changed classes and removes fully covered classes [removeFullyCoveredClasses] and classes
+     * without JaCoCo files [removeClassesWithoutJacocoFiles] and sorts them according to their coverage [sort] if
+     * activated.
+     */
+    @JvmStatic
+    fun retrieveLastChangedSourceAndTestFiles(searchCommitCount: Int, parameters: Parameters,
+                                   users: Collection<User> = User.getAll(), listener: TaskListener = TaskListener.NULL,
+                                   removeFullyCoveredClasses: Boolean = true,
+                                   removeClassesWithoutJacocoFiles: Boolean = true)
+            : List<FileDetails> {
+
+        val files: ArrayList<FileDetails>
+        try {
+            files = ArrayList(GitUtil.getLastChangedSourceAndTestFiles(searchCommitCount, "",
+                parameters, listener, GitUtil.mapUsersToGameUsers(users)))
+            listener.logger.println("[Gamekins] Found ${files.size} last changed files")
+
+            if (removeFullyCoveredClasses) {
+                files.removeIf { file: FileDetails -> file is SourceFileDetails && file.coverage == 1.0 }
+                listener.logger.println("[Gamekins] Found ${files.filterIsInstance<SourceFileDetails>().size} " +
+                        "last changed source files without 100% coverage")
+            }
+
+            if (removeClassesWithoutJacocoFiles) {
+                files.removeIf { file: FileDetails -> !file.filesExists() }
+                listener.logger.println("[Gamekins] Found ${files.size} last changed files with " +
+                        "existing source code file and coverage reports")
+            }
+        } catch (e: Exception) {
+            e.printStackTrace(listener.logger)
+            return arrayListOf()
+        }
+
+        return files
     }
 
     /**

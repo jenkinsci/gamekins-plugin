@@ -30,7 +30,7 @@ import org.gamekins.util.JacocoUtil
  * @since 0.1
  */
 class MethodCoverageChallenge(data: ChallengeGenerationData)
-    : CoverageChallenge(data.selectedClass, data.parameters.workspace) {
+    : CoverageChallenge(data.selectedFile as SourceFileDetails, data.parameters.workspace) {
 
     private val lines = data.method!!.lines
     private val methodName = data.method!!.methodName

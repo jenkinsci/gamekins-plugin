@@ -276,6 +276,18 @@ object GitUtil {
     }
 
     /**
+     * Returns a list of last changed source and test files. It searches the last [count] of commits in the history
+     * (or until a certain [commitHash]) and assigns the files changed in these commits to the
+     * according [users]. [parameters] are needed for information about the JaCoCo paths and the [listener] reports
+     * the events to the console output of Jenkins.
+     */
+    fun getLastChangedSourceAndTestFiles(count: Int, commitHash: String, parameters: Parameters, listener: TaskListener, users: ArrayList<GameUser>
+    ): List<FileDetails> {
+        return parameters.workspace.act(LastChangedFilesCallable(parameters, count, commitHash, users, listener))
+            .filter{ it is SourceFileDetails || it is TestFileDetails }
+    }
+
+    /**
      * Returns a list of last changed tests. It searches the last [count] of commits in the history
      * (or until a certain [commitHash]) and assigns the files changed in these commits to the
      * according [users]. [parameters] are needed for information about the JaCoCo paths and the [listener] reports

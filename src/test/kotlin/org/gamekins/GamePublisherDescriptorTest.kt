@@ -2,7 +2,6 @@ package org.gamekins
 
 import hudson.util.FormValidation
 import io.kotest.core.spec.style.AnnotationSpec
-import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockkClass

@@ -30,11 +30,11 @@ import org.jsoup.nodes.Document
  * @since 0.1
  */
 class ClassCoverageChallenge(data: Challenge.ChallengeGenerationData)
-    : CoverageChallenge(data.selectedClass, data.parameters.workspace) {
+    : CoverageChallenge(data.selectedFile as SourceFileDetails, data.parameters.workspace) {
 
     init {
         //TODO: Optimize for Kotlin objects
-        codeSnippet = createCodeSnippet(data.selectedClass, "class ${data.selectedClass.fileName}",
+        codeSnippet = createCodeSnippet(data.selectedFile as SourceFileDetails, "class ${data.selectedFile.fileName}",
             data.parameters.workspace)
     }
 
@@ -64,16 +64,15 @@ class ClassCoverageChallenge(data: Challenge.ChallengeGenerationData)
     /**
      * Checks whether the [ClassCoverageChallenge] is solvable if the [run] was in the branch (taken from
      * [parameters]), where it has been generated. There must be uncovered or not fully covered lines left in the class.
-     * The [workspace] is the folder with the code and execution rights, and the [listener] reports the events to the
-     * console output of Jenkins.
+     * The workspace in [parameters] is the folder with the code and execution rights, and the [listener] reports the
+     * events to the console output of Jenkins.
      */
     override fun isSolvable(parameters: Constants.Parameters, run: Run<*, *>, listener: TaskListener): Boolean {
         if (details.parameters.branch != parameters.branch) return true
 
         val jacocoSourceFile = JacocoUtil.calculateCurrentFilePath(parameters.workspace,
                 details.jacocoSourceFile, details.parameters.remote)
-        val document: Document
-        document = try {
+        val document: Document = try {
             if (!jacocoSourceFile.exists()) {
                 listener.logger.println("[Gamekins] JaCoCo source file "
                         + jacocoSourceFile.remote + Constants.EXISTS + jacocoSourceFile.exists())
@@ -91,8 +90,8 @@ class ClassCoverageChallenge(data: Challenge.ChallengeGenerationData)
 
     /**
      * The [ClassCoverageChallenge] is solved if the coverage, according to the [details] JaCoCo files, is higher
-     * than during generation. The [workspace] is the folder with the code and execution rights, and the [listener]
-     * reports the events to the console output of Jenkins.
+     * than during generation. The workspace in [parameters] is the folder with the code and execution rights, and the
+     * [listener] reports the events to the console output of Jenkins.
      */
     override fun isSolved(parameters: Constants.Parameters, run: Run<*, *>, listener: TaskListener): Boolean {
         val jacocoSourceFile = JacocoUtil.getJacocoFileInMultiBranchProject(run, parameters,

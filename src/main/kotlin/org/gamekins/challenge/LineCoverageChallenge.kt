@@ -32,7 +32,7 @@ import kotlin.math.abs
  * @since 0.1
  */
 class LineCoverageChallenge(data: Challenge.ChallengeGenerationData)
-    : CoverageChallenge(data.selectedClass, data.parameters.workspace) {
+    : CoverageChallenge(data.selectedFile as SourceFileDetails, data.parameters.workspace) {
 
     private val coverageType: String = data.line!!.attr("class")
     private val currentCoveredBranches: Int

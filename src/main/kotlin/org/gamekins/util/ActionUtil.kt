@@ -25,7 +25,7 @@ import org.gamekins.challenge.Challenge
 import org.gamekins.challenge.ChallengeFactory
 import org.gamekins.challenge.DummyChallenge
 import org.gamekins.challenge.quest.Quest
-import org.gamekins.file.SourceFileDetails
+import org.gamekins.file.FileDetails
 import org.gamekins.util.Constants.Parameters
 import java.io.IOException
 
@@ -134,7 +134,7 @@ object ActionUtil {
         }
 
         if (parameters.workspace.exists()) {
-            val classes = PublisherUtil.retrieveLastChangedClasses(
+            val classes = PublisherUtil.retrieveLastChangedSourceAndTestFiles(
                 Constants.DEFAULT_SEARCH_COMMIT_COUNT, parameters)
             generatedText = ": New Challenge generated"
 
@@ -154,9 +154,9 @@ object ActionUtil {
      * Generates a new [Challenge] and updates the Statistics
      */
     private fun generateAndUpdate(user: User, property: GameUserProperty, job: AbstractItem,
-                                  parameters: Parameters, classes: ArrayList<SourceFileDetails>) {
+                                  parameters: Parameters, files: ArrayList<FileDetails>) {
         val generated = ChallengeFactory.generateNewChallenges(
-            user, property, parameters, classes, maxChallenges = parameters.currentChallengesCount
+            user, property, parameters, files, maxChallenges = parameters.currentChallengesCount
         )
         val branch = if (parameters.remote.contains(parameters.branch.toRegex()))
             parameters.branch else "master"
