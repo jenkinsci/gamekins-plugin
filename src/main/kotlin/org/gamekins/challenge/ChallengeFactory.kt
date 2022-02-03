@@ -142,7 +142,8 @@ object ChallengeFactory {
                     }
                     selectClass(tempList, initializeRankSelection(tempList))
                 } else if (challengeClass == MutationTestChallenge::class.java) {
-                    selectClass(workList, initializeRankSelection(workList.filterIsInstance<SourceFileDetails>()))
+                    val tempList = workList.filterIsInstance<SourceFileDetails>()
+                    selectClass(tempList, initializeRankSelection(tempList))
                 } else {
                     selectClass(workList, initializeRankSelection(workList))
                 }
