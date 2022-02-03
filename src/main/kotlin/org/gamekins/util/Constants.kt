@@ -19,6 +19,7 @@ package org.gamekins.util
 import hudson.FilePath
 import java.io.File
 import java.io.Serializable
+import jenkins.model.Jenkins
 import java.nio.file.Path
 
 /**
@@ -88,12 +89,11 @@ object Constants {
 
     /**
      * Returns the path to the most recent jar file of the Sonar-Java-Plugin for SonarLint.
-     *
-     * TODO: Path inside packed Gamekins
      */
     private fun pathToSonarJavaPlugin(): Path {
         val projectPath = System.getProperty("user.dir")
-        val libFolder = File("$projectPath/target/lib")
+        var libFolder = File("$projectPath/target/lib")
+        if (!libFolder.exists()) libFolder = File("${Jenkins.getInstanceOrNull()?.root?.absolutePath}/plugins/gamekins/WEB-INF/lib")
         val jars = libFolder.listFiles()!!.filter { it.nameWithoutExtension.contains("sonar-java-plugin") }
         return jars.last().toPath()
     }
