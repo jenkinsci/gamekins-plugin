@@ -232,10 +232,6 @@ class MutationTestChallenge(
         solved = newSolved
     }
 
-    override fun toEscapedString(): String {
-        return toString().replace(Regex("<.+?>"), "")
-    }
-
     override fun toString(): String {
         val mName = if (methodName == "<init>") "init" else methodName
         return ("Write a test to kill the mutant \"<b>$mutationDescription</b>\" at line <b>$lineOfCode</b> " +

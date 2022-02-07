@@ -119,8 +119,4 @@ class DummyChallenge(private var parameters: Parameters, private var reason: Str
     override fun toString(): String {
         return reason
     }
-
-    override fun toEscapedString(): String {
-        return toString()
-    }
 }

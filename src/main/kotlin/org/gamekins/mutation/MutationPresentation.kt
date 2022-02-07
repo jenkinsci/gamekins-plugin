@@ -210,20 +210,18 @@ object MutationPresentation {
             } else {
                 return null
             }
-            if (betweenOperatorAndOperand != null) {
-                if (betweenOperatorAndOperand.isEmpty() ||
-                    betweenOperatorAndOperand.all { it.isWhitespace() }
-                ) {
-                    val firstOperandChar = originalLine.getOrNull(operandRange.first)
-                    val lastOperandIChar = originalLine.getOrNull(operandRange.last)
-                    val start = if (removedPosition == "F") operandRange.first else operatorRange.last
-                    val end = if (removedPosition == "F") operatorRange.first else operandRange.last
-                    return if (firstOperandChar == '(' && lastOperandIChar != ')'){
-                        Pair(start + 1, end)
-                    } else if (firstOperandChar != '(' && lastOperandIChar == ')'){
-                        Pair(start, end - 1) }
-                    else Pair(start, end)
-                }
+            if (betweenOperatorAndOperand != null && (betweenOperatorAndOperand.isEmpty() ||
+                        betweenOperatorAndOperand.all { it.isWhitespace() })
+            ) {
+                val firstOperandChar = originalLine.getOrNull(operandRange.first)
+                val lastOperandIChar = originalLine.getOrNull(operandRange.last)
+                val start = if (removedPosition == "F") operandRange.first else operatorRange.last
+                val end = if (removedPosition == "F") operatorRange.first else operandRange.last
+                return if (firstOperandChar == '(' && lastOperandIChar != ')') {
+                    Pair(start + 1, end)
+                } else if (firstOperandChar != '(' && lastOperandIChar == ')') {
+                    Pair(start, end - 1)
+                } else Pair(start, end)
             }
         }
         return null

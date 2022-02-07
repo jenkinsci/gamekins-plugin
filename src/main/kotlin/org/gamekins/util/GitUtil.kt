@@ -281,7 +281,8 @@ object GitUtil {
      * according [users]. [parameters] are needed for information about the JaCoCo paths and the [listener] reports
      * the events to the console output of Jenkins.
      */
-    fun getLastChangedSourceAndTestFiles(count: Int, commitHash: String, parameters: Parameters, listener: TaskListener, users: ArrayList<GameUser>
+    fun getLastChangedSourceAndTestFiles(count: Int, commitHash: String, parameters: Parameters,
+                                         listener: TaskListener, users: ArrayList<GameUser>
     ): List<FileDetails> {
         return parameters.workspace.act(LastChangedFilesCallable(parameters, count, commitHash, users, listener))
             .filter{ it is SourceFileDetails || it is TestFileDetails }

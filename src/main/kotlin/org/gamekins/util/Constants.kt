@@ -93,7 +93,8 @@ object Constants {
     private fun pathToSonarJavaPlugin(): Path {
         val projectPath = System.getProperty("user.dir")
         var libFolder = File("$projectPath/target/lib")
-        if (!libFolder.exists()) libFolder = File("${Jenkins.getInstanceOrNull()?.root?.absolutePath}/plugins/gamekins/WEB-INF/lib")
+        if (!libFolder.exists()) libFolder =
+            File("${Jenkins.getInstanceOrNull()?.root?.absolutePath}/plugins/gamekins/WEB-INF/lib")
         val jars = libFolder.listFiles()!!.filter { it.nameWithoutExtension.contains("sonar-java-plugin") }
         return jars.last().toPath()
     }

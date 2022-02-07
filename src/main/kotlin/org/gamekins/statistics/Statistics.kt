@@ -24,7 +24,6 @@ import org.jenkinsci.plugins.workflow.job.WorkflowJob
 import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject
 import java.text.Collator
 import java.util.*
-import kotlin.Comparator
 import kotlin.collections.ArrayList
 
 /**

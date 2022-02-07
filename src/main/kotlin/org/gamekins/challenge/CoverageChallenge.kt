@@ -129,10 +129,6 @@ abstract class CoverageChallenge(var details: SourceFileDetails, workspace: File
         solved = newSolved
     }
 
-    override fun toEscapedString(): String {
-        return toString().replace(Regex("<.+?>"), "")
-    }
-
     override fun update(parameters: Parameters) {
         val document = JacocoUtil.generateDocument(JacocoUtil.calculateCurrentFilePath(parameters.workspace,
             details.jacocoSourceFile, details.parameters.remote))

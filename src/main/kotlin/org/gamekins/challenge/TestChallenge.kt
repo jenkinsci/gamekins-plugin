@@ -140,10 +140,6 @@ class TestChallenge(data: Challenge.ChallengeGenerationData) : Challenge {
         return this
     }
 
-    override fun toEscapedString(): String {
-        return toString()
-    }
-
     override fun toString(): String {
         return "Write a new test in branch ${parameters.branch}"
     }

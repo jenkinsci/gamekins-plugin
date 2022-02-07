@@ -120,7 +120,12 @@ interface Challenge {
      */
     fun printToXML(reason: String, indentation: String): String?
 
-    fun toEscapedString(): String
+    /**
+     * Removes all HTML formatting of the [Challenge.toString] method.
+     */
+    fun toEscapedString(): String {
+        return toString().replace(Regex("<[^>]++>"), "")
+    }
 
     /**
      * Returns the String representation of the [Challenge] for the [LeaderboardAction].

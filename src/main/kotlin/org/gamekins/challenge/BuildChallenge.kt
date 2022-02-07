@@ -101,10 +101,6 @@ class BuildChallenge(private var parameters: Parameters) : Challenge {
         return this
     }
 
-    override fun toEscapedString(): String {
-        return toString()
-    }
-
     override fun toString(): String {
         return "Let the Build run successfully"
     }

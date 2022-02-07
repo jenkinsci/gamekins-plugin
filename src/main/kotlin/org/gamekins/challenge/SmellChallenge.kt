@@ -33,7 +33,7 @@ import org.sonarsource.sonarlint.core.client.api.common.analysis.Issue
  */
 class SmellChallenge(val details: FileDetails, val issue: Issue): Challenge {
 
-    private var codeSnippet: String = createCodeSnippet()
+    private val codeSnippet: String = createCodeSnippet()
     private val created = System.currentTimeMillis()
     private val lineContent = SmellUtil.getLineContent(details, issue.startLine, issue.endLine)
     private var solved: Long = 0
@@ -44,7 +44,9 @@ class SmellChallenge(val details: FileDetails, val issue: Issue): Challenge {
     private fun createCodeSnippet(): String {
         return "<pre class='prettyprint mt-2 linenums:${issue.startLine?.minus(2)}'><code class='language-java'>" +
                 SmellUtil.getLineContent(details, issue.startLine?.minus(2), issue.endLine?.plus(2)) +
-                "</code></pre><br><em>" + issue.message + "</em>"
+                "</code></pre><br><em>" + issue.message +
+                " <a href=\"https://rules.sonarsource.com/java/RSPEC-${issue.ruleKey.takeLast(4)}\" " +
+                "target=\"_blank\">More Information</a> " + "</em>"
     }
 
     override fun equals(other: Any?): Boolean {
@@ -148,10 +150,6 @@ class SmellChallenge(val details: FileDetails, val issue: Issue): Challenge {
         }
         print += "\"/>"
         return print
-    }
-
-    override fun toEscapedString(): String {
-        return toString().replace(Regex("<.+?>"), "")
     }
 
     override fun toString(): String {
