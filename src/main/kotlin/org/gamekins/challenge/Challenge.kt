@@ -59,6 +59,13 @@ interface Challenge {
     fun getCreated(): Long
 
     /**
+     * Returns the highlighted file content underneath the [Challenge] like the source code.
+     */
+    fun getHighlightedFileContent(): String {
+        return ""
+    }
+
+    /**
      * Returns the name of the category of the current [Challenge].
      */
     fun getName(): String
@@ -67,6 +74,13 @@ interface Challenge {
      * Returns the score for the specific [Challenge].
      */
     fun getScore(): Int
+
+    /**
+     * Returns the code snippet to be displayed in the leaderboard.
+     */
+    fun getSnippet(): String {
+        return ""
+    }
 
     /**
      * Returns the time when the [Challenge] has been solved in milliseconds since 01.01.1970.

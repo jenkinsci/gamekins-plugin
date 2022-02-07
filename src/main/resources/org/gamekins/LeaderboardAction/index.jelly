@@ -281,6 +281,21 @@
                                               </p>
                                         </j:if>
 
+                                        <j:if test='${currentChallenge.highlightedFileContent != ""}'>
+                                            <br/>
+                                            <br/>
+                                            <button type="button" class="btn btn-secondary"
+                                                    style="font-size: 14px;"
+                                                    data-toggle="modal" data-target="#contentModal"
+                                                    data-file="${currentChallenge.details.fileName}.${currentChallenge.details.fileExtension}"
+                                                    data-challenge-id="${index + 1}">
+                                                View Source
+                                            </button>
+                                            <div id="highlightedSource${index + 1}" style="display: none">
+                                                ${currentChallenge.highlightedFileContent}
+                                            </div>
+                                        </j:if>
+
                                     </div>
                                 </div>
                             </div>
@@ -310,6 +325,27 @@
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" id="closeModalBtn" data-dismiss="modal">Close</button>
                                 <button type="button" class="btn btn-danger" id="rejectButtonConfirm">Reject</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal fade bd-example-modal-xl" id="contentModal" tabindex="-1" role="dialog" aria-labelledby="contentModalLabel"
+                     aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="contentModalLabel">View Source</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    x
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <form>
+                                    <div class="form-group" id="fileContentDisplay">
+
+                                    </div>
+                                </form>
                             </div>
                         </div>
                     </div>
@@ -510,6 +546,17 @@
                 jQuery3("#closeModalBtn").on("click", () => {
                     jQuery3("#error-text")[0].innerHTML = ""
                     jQuery3("#reason-text").val("")
+                })
+
+                jQuery3("#contentModal").on('show.bs.modal', function (event) {
+                    let modal = jQuery3(this)
+                    let button = jQuery3(event.relatedTarget)
+                    modal.find('.modal-title').text(button.data('file'))
+                    let fileContentDisplay = document.getElementById('fileContentDisplay')
+                    let highlightedSource = document.getElementById('highlightedSource' + button.data('challenge-id'))
+                    highlightedSource.style.display = 'block'
+                    fileContentDisplay.innerHTML = ""
+                    fileContentDisplay.appendChild(highlightedSource)
                 })
 
 

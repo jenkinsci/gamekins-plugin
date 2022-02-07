@@ -82,15 +82,18 @@ abstract class CoverageChallenge(var details: SourceFileDetails, workspace: File
         return ""
     }
 
-    override fun getParameters(): Parameters {
-        return details.parameters
-    }
-
     override fun getCreated(): Long {
         return created
     }
 
-    abstract fun getSnippet(): String
+    override fun getHighlightedFileContent(): String {
+        return "<pre class='prettyprint mt-2 linenums:1'><code class='language-java'>" +
+                details.contents() + "</code></pre>"
+    }
+
+    override fun getParameters(): Parameters {
+        return details.parameters
+    }
 
     override fun getSolved(): Long {
         return solved

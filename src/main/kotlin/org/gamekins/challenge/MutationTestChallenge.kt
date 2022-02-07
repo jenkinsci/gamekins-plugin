@@ -97,6 +97,11 @@ class MutationTestChallenge(
         return if (codeSnippet.isNotEmpty()) fileName else ""
     }
 
+    override fun getHighlightedFileContent(): String {
+        return "<pre class='prettyprint mt-2 linenums:1'><code class='language-java'>" +
+                details.contents() + "</code></pre>"
+    }
+
     fun getKilledByTest(): String {
         return killedByTest
     }
@@ -121,7 +126,7 @@ class MutationTestChallenge(
         }
     }
 
-    fun getSnippet(): String {
+    override fun getSnippet(): String {
         return codeSnippet
     }
 
