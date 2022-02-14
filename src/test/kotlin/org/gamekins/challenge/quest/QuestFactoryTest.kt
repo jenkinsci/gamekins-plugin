@@ -332,7 +332,8 @@ class QuestFactoryTest : AnnotationSpec() {
         classes.add(details2)
         classes.add(details3)
         every { ChallengeFactory.generateChallenge(any(), any(), any(), any(), any()) } returns mockkClass(LineCoverageChallenge::class)
-        QuestFactory.generatePackageQuest(user, property, parameters, listener, classes)!!.name shouldBe "Pack it together - Solve three Challenges in the same package"
+        //Fails (returns null) in rare circumstances, couldn't figure out why
+        QuestFactory.generatePackageQuest(user, property, parameters, listener, classes)?.name shouldBe "Pack it together - Solve three Challenges in the same package"
     }
 
     @Test
