@@ -34,6 +34,7 @@ class QuestFactoryTest : AnnotationSpec() {
     val parameters = Constants.Parameters()
     val listener: TaskListener = TaskListener.NULL
     lateinit var classes: ArrayList<FileDetails>
+    val numberOfQuests = 9
 
     @BeforeEach
     fun init() {
@@ -73,7 +74,7 @@ class QuestFactoryTest : AnnotationSpec() {
     @Test
     fun generateTest() {
         every { QuestFactory.generateLinesQuest(any(), any(), any(), any(), any()) } returns null
-        every { Random.nextInt(8) } returns 0
+        every { Random.nextInt(numberOfQuests) } returns 0
         every { property.getRejectedQuests(any()) } returns CopyOnWriteArrayList()
         QuestFactory.generateQuest(user, property, parameters, listener, classes) shouldBe Quest(Constants.NO_QUEST, arrayListOf())
 
@@ -87,34 +88,34 @@ class QuestFactoryTest : AnnotationSpec() {
 
         every { property.getRejectedQuests(any()) } returns CopyOnWriteArrayList()
         every { QuestFactory.generateMethodsQuest(any(), any(), any(), any(), any()) } returns quest
-        every { Random.nextInt(8) } returns 1
+        every { Random.nextInt(numberOfQuests) } returns 1
         QuestFactory.generateQuest(user, property, parameters, listener, classes) shouldBe quest
 
         every { QuestFactory.generatePackageQuest(any(), any(), any(), any(), any()) } returns quest
-        every { Random.nextInt(8) } returns 2
+        every { Random.nextInt(numberOfQuests) } returns 2
         QuestFactory.generateQuest(user, property, parameters, listener, classes) shouldBe quest
 
         every { QuestFactory.generateClassQuest(any(), any(), any(), any(), any()) } returns quest
-        every { Random.nextInt(8) } returns 3
+        every { Random.nextInt(numberOfQuests) } returns 3
         QuestFactory.generateQuest(user, property, parameters, listener, classes) shouldBe quest
 
         every { QuestFactory.generateExpandingQuest(any(), any(), any(), any(), any()) } returns quest
-        every { Random.nextInt(8) } returns 4
+        every { Random.nextInt(numberOfQuests) } returns 4
         QuestFactory.generateQuest(user, property, parameters, listener, classes) shouldBe quest
 
         every { QuestFactory.generateDecreasingQuest(any(), any(), any(), any(), any()) } returns quest
-        every { Random.nextInt(8) } returns 5
+        every { Random.nextInt(numberOfQuests) } returns 5
         QuestFactory.generateQuest(user, property, parameters, listener, classes) shouldBe quest
 
         every { QuestFactory.generateTestQuest(any(), any(), any(), any(), any()) } returns quest
-        every { Random.nextInt(8) } returns 6
+        every { Random.nextInt(numberOfQuests) } returns 6
         QuestFactory.generateQuest(user, property, parameters, listener, classes) shouldBe quest
 
         every { QuestFactory.generateMutationQuest(any(), any(), any(), any(), any()) } returns quest
-        every { Random.nextInt(8) } returns 7
+        every { Random.nextInt(numberOfQuests) } returns 7
         QuestFactory.generateQuest(user, property, parameters, listener, classes) shouldBe quest
 
-        every { Random.nextInt(8) } returns 8
+        every { Random.nextInt(numberOfQuests) } returns 8
         QuestFactory.generateQuest(user, property, parameters, listener, classes) shouldBe Quest(Constants.NO_QUEST, arrayListOf())
     }
 

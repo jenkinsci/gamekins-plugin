@@ -25,10 +25,8 @@ import org.gamekins.event.EventHandler
 import org.gamekins.event.user.QuestGeneratedEvent
 import org.gamekins.file.FileDetails
 import org.gamekins.file.SourceFileDetails
-import org.gamekins.util.Constants
-import org.gamekins.util.GitUtil
-import org.gamekins.util.JUnitUtil
-import org.gamekins.util.JacocoUtil
+import org.gamekins.file.TestFileDetails
+import org.gamekins.util.*
 import org.jsoup.nodes.Element
 import kotlin.random.Random
 
@@ -99,7 +97,7 @@ object QuestFactory {
     ): Quest {
 
         for (i in 0..2) {
-            val quest = when (Random.nextInt(8)) {
+            val quest = when (Random.nextInt(9)) {
                 0 -> generateLinesQuest(user, property, parameters, listener, classes)
                 1 -> generateMethodsQuest(user, property, parameters, listener, classes)
                 2 -> generatePackageQuest(user, property, parameters, listener, classes)
@@ -108,6 +106,7 @@ object QuestFactory {
                 5 -> generateDecreasingQuest(user, property, parameters, listener, classes)
                 6 -> generateTestQuest(user, property, parameters, listener, classes)
                 7 -> generateMutationQuest(user, property, parameters, listener, classes)
+                8 -> generateSmellQuest(user, property, parameters, listener, classes)
                 else -> null
             }
 
@@ -335,6 +334,34 @@ object QuestFactory {
         }
 
         return Quest("Pack it together - Solve three Challenges in the same package", steps)
+    }
+
+    /**
+     * Generates a new SmellQuest with [SmellChallenge]s.
+     */
+    @JvmStatic
+    fun generateSmellQuest(
+        user: User, property: GameUserProperty, parameters: Constants.Parameters, listener: TaskListener,
+        classes: ArrayList<FileDetails>
+    ): Quest? {
+        val suitableFiles = classes.filter { it is SourceFileDetails || it is TestFileDetails }.shuffled()
+        if (suitableFiles.isEmpty()) return null
+
+        suitableFiles.forEach {file ->
+            val smells = SmellUtil.getSmellsOfFile(file, listener)
+            if (smells.size < 4) return@forEach
+
+            val selectedSmells = smells.shuffled().take(3)
+            val steps = arrayListOf<QuestStep>()
+            selectedSmells.forEach {issue ->
+                val challenge = SmellChallenge(file, issue)
+                steps.add(QuestStep("", challenge))
+            }
+
+            return Quest("Smelly - Solve three Smell Challenges in the same class", steps)
+        }
+
+        return null
     }
 
     /**
