@@ -349,7 +349,7 @@ object QuestFactory {
 
         suitableFiles.forEach {file ->
             val smells = SmellUtil.getSmellsOfFile(file, listener)
-            if (smells.size < 4) return@forEach
+            if (smells.size < 3) return@forEach
 
             val selectedSmells = smells.shuffled().take(3)
             val steps = arrayListOf<QuestStep>()
