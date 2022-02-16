@@ -19,9 +19,11 @@ import org.gamekins.file.SourceFileDetails
 import org.gamekins.util.Constants
 import org.gamekins.util.GitUtil
 import org.gamekins.util.JacocoUtil
+import org.gamekins.util.SmellUtil
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import org.jsoup.select.Elements
+import org.sonarsource.sonarlint.core.client.api.common.analysis.Issue
 import java.io.File
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.CopyOnWriteArraySet
@@ -29,12 +31,12 @@ import kotlin.random.Random
 
 class QuestFactoryTest : AnnotationSpec() {
 
-    val user = mockkClass(User::class)
-    val property = mockkClass(GameUserProperty::class)
-    val parameters = Constants.Parameters()
-    val listener: TaskListener = TaskListener.NULL
-    lateinit var classes: ArrayList<FileDetails>
-    val numberOfQuests = 9
+    private val user = mockkClass(User::class)
+    private val property = mockkClass(GameUserProperty::class)
+    private val parameters = Constants.Parameters()
+    private val listener: TaskListener = TaskListener.NULL
+    private lateinit var classes: ArrayList<FileDetails>
+    private val numberOfQuests = 9
 
     @BeforeEach
     fun init() {
@@ -42,7 +44,7 @@ class QuestFactoryTest : AnnotationSpec() {
         mockkObject(Random)
         mockkStatic(JacocoUtil::class)
         mockkStatic(ChallengeFactory::class)
-        classes = arrayListOf<FileDetails>()
+        classes = arrayListOf()
 
         parameters.projectName = "project"
         every { property.getCurrentQuests(any()) } returns CopyOnWriteArrayList()
@@ -115,7 +117,11 @@ class QuestFactoryTest : AnnotationSpec() {
         every { Random.nextInt(numberOfQuests) } returns 7
         QuestFactory.generateQuest(user, property, parameters, listener, classes) shouldBe quest
 
+        every { QuestFactory.generateSmellQuest(any(), any(), any(), any(), any()) } returns quest
         every { Random.nextInt(numberOfQuests) } returns 8
+        QuestFactory.generateQuest(user, property, parameters, listener, classes) shouldBe quest
+
+        every { Random.nextInt(numberOfQuests) } returns 9
         QuestFactory.generateQuest(user, property, parameters, listener, classes) shouldBe Quest(Constants.NO_QUEST, arrayListOf())
     }
 
@@ -133,12 +139,12 @@ class QuestFactoryTest : AnnotationSpec() {
         every { sourceDetail.coverage } returns 0.9
         val challenge = mockkClass(ClassCoverageChallenge::class)
         val classDetails = mockkClass(SourceFileDetails::class)
-        every { sourceDetail.equals(any()) } returns true
+        every { sourceDetail == any() } returns true
         every { challenge.details } returns classDetails
         every { property.getRejectedChallenges(any()) } returns CopyOnWriteArrayList(arrayListOf(Pair(challenge, "")))
         QuestFactory.generateClassQuest(user, property, parameters, listener, classes) shouldBe null
 
-        every { sourceDetail.equals(any()) } returns false
+        every { sourceDetail == any() } returns false
         every { sourceDetail.jacocoSourceFile } returns File("")
         every { sourceDetail.parameters } returns Constants.Parameters()
         every { sourceDetail.fileName } returns "file"
@@ -243,12 +249,12 @@ class QuestFactoryTest : AnnotationSpec() {
         QuestFactory.generateLinesQuest(user, property, parameters, listener, classes)!!.name shouldBe "Lines over lines - Solve three Line Coverage Challenges"
 
         val challenge = mockkClass(LineCoverageChallenge::class)
-        every { challenge.equals(any()) } returns true
+        every { challenge == any() } returns true
         every { property.getRejectedChallenges(any()) } returns CopyOnWriteArrayList(arrayListOf(Pair(challenge, "")))
         every { JacocoUtil.chooseRandomLine(any(), any()) } returns line1 andThen line2 andThen line3
         QuestFactory.generateLinesQuest(user, property, parameters, listener, classes) shouldBe null
 
-        every { challenge.equals(any()) } returns false
+        every { challenge == any() } returns false
         every { JacocoUtil.chooseRandomLine(any(), any()) } returns line1 andThen line2 andThen line3
         QuestFactory.generateLinesQuest(user, property, parameters, listener, classes)!!.name shouldBe "Lines over lines - Solve three Line Coverage Challenges"
     }
@@ -298,7 +304,7 @@ class QuestFactoryTest : AnnotationSpec() {
         QuestFactory.generateMethodsQuest(user, property, parameters, listener, classes)!!.name shouldBe "More than methods - Solve three Method Coverage Challenge"
 
         val challenge = mockkClass(LineCoverageChallenge::class)
-        every { challenge.equals(any()) } returns true
+        every { challenge == any() } returns true
         every { property.getRejectedChallenges(any()) } returns CopyOnWriteArrayList(arrayListOf(Pair(challenge, "")))
         QuestFactory.generateMethodsQuest(user, property, parameters, listener, classes) shouldBe null
     }
@@ -334,6 +340,42 @@ class QuestFactoryTest : AnnotationSpec() {
         classes.add(details3)
         every { ChallengeFactory.generateChallenge(any(), any(), any(), any(), any()) } returns mockkClass(LineCoverageChallenge::class)
         QuestFactory.generatePackageQuest(user, property, parameters, listener, classes)!!.name shouldBe "Pack it together - Solve three Challenges in the same package"
+    }
+
+    @Test
+    fun generateSmellQuest() {
+        val file = mockkClass(SourceFileDetails::class)
+        every { file.contents() } returns ""
+        val issue1 = mockkClass(Issue::class)
+        val issue2 = mockkClass(Issue::class)
+        val issue3 = mockkClass(Issue::class)
+
+        every { issue1.startLine } returns 1
+        every { issue2.startLine } returns 1
+        every { issue3.startLine } returns 1
+        every { issue1.endLine } returns 2
+        every { issue2.endLine } returns 2
+        every { issue3.endLine } returns 2
+        every { issue1.message } returns ""
+        every { issue2.message } returns ""
+        every { issue3.message } returns ""
+        every { issue1.ruleKey } returns ""
+        every { issue2.ruleKey } returns ""
+        every { issue3.ruleKey } returns ""
+
+        val issueList = arrayListOf(issue1, issue2, issue3)
+        mockkStatic(SmellUtil::class)
+
+        QuestFactory.generateSmellQuest(user, property, parameters, listener, arrayListOf()) shouldBe null
+
+        every { SmellUtil.getSmellsOfFile(file, any()) } returns arrayListOf()
+        QuestFactory.generateSmellQuest(user, property, parameters, listener, arrayListOf(file)) shouldBe null
+
+        every { SmellUtil.getSmellsOfFile(file, any()) } returns arrayListOf(issue1, issue2)
+        QuestFactory.generateSmellQuest(user, property, parameters, listener, arrayListOf(file)) shouldBe null
+
+        every { SmellUtil.getSmellsOfFile(file, any()) } returns issueList
+        QuestFactory.generateSmellQuest(user, property, parameters, listener, arrayListOf(file))!!.name shouldBe "Smelly - Solve three Smell Challenges in the same class"
     }
 
     @Test

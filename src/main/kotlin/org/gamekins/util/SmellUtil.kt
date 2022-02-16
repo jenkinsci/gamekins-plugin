@@ -36,6 +36,7 @@ import java.io.File
  */
 object SmellUtil {
 
+    @JvmStatic
     fun getSmellsOfFile(file: FileDetails, listener: TaskListener = TaskListener.NULL): List<Issue> {
         val globalConfig = StandaloneGlobalConfiguration.builder()
             .addEnabledLanguage(Language.JAVA)
