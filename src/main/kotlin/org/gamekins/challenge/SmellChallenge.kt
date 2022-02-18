@@ -60,10 +60,6 @@ class SmellChallenge(val details: FileDetails, val issue: Issue): Challenge {
                 && other.lineContent == this.lineContent
     }
 
-    override fun getParameters(): Constants.Parameters {
-        return details.parameters
-    }
-
     override fun getCreated(): Long {
         return created
     }
@@ -79,6 +75,10 @@ class SmellChallenge(val details: FileDetails, val issue: Issue): Challenge {
             is TestFileDetails -> "Test Smell"
             else -> "Smell"
         }
+    }
+
+    override fun getParameters(): Constants.Parameters {
+        return details.parameters
     }
 
     override fun getScore(): Int {
@@ -138,6 +138,7 @@ class SmellChallenge(val details: FileDetails, val issue: Issue): Challenge {
             }
         }
 
+        solved = System.currentTimeMillis()
         return true
     }
 

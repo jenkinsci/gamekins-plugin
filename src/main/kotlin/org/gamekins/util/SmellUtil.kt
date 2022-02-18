@@ -63,6 +63,7 @@ object SmellUtil {
     /**
      * @param startLine Starts with 1 not 0!
      */
+    @JvmStatic
     fun getLineContent(file: FileDetails, startLine: Int?, endLine: Int?): String {
         if (startLine == null || endLine == null) return file.contents()
         return file.contents()
