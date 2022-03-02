@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Gamekins contributors
+ * Copyright 2022 Gamekins contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -234,7 +234,7 @@ class GameMultiBranchProperty
 
         @Nonnull
         override fun getDisplayName(): String {
-            return "Set the activation of the Gamekins plugin."
+            return "Activate Gamekins"
         }
 
         /**

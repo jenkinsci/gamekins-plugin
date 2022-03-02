@@ -1,4 +1,4 @@
 <?jelly escape-by-default='true'?>
 <div>
-    Plugin for Jenkins to add Gamification for testing
+    This plugin integrates Gamification into Jenkins
 </div>

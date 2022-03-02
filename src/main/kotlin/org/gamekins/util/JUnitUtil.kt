@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Gamekins contributors
+ * Copyright 2022 Gamekins contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,7 +70,7 @@ object JUnitUtil {
     fun getTestCountOfSingleJUnitResult(file: FilePath): Int {
         val document = Jsoup.parse(file.readToString(), "", Parser.xmlParser())
         val elements = document.select("testsuite")
-        return elements.first().attr("tests").toInt()
+        return elements.first()?.attr("tests")!!.toInt()
     }
 
     /**
@@ -113,7 +113,7 @@ object JUnitUtil {
     fun getTestFailCountOfSingleJUnitResult(file: FilePath): Int {
         val document = Jsoup.parse(file.readToString(), "", Parser.xmlParser())
         val elements = document.select("testsuite")
-        return elements.first().attr("failures").toInt() + elements.first().attr("errors").toInt()
+        return elements.first()?.attr("failures")!!.toInt() + elements.first()?.attr("errors")!!.toInt()
     }
 
     /**

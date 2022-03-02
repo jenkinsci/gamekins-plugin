@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Gamekins contributors
+ * Copyright 2022 Gamekins contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -245,7 +245,7 @@ object PropertyUtil {
      */
     @JvmStatic
     fun realUser(user: User): Boolean {
-        return !user.properties.values.filter { it is UserDetails || it is Details }.isNullOrEmpty()
+        return user.properties.values.any { it is UserDetails || it is Details }
     }
 
     /**

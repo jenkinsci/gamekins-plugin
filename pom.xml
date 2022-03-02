@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
@@ -9,20 +8,20 @@
     </parent>
     <groupId>org.gamekins</groupId>
     <artifactId>gamekins</artifactId>
-    <version>0.3.1</version>
+    <version>0.4.2-SNAPSHOT</version>
     <packaging>hpi</packaging>
 
     <properties>
         <!-- Baseline Jenkins version you use to build the plugin. Users must have this version or newer to run. -->
-        <jenkins.version>2.277.4</jenkins.version>
+        <jenkins.version>2.303.3</jenkins.version>
         <!-- Error occurs which should already be solved https://issues.jenkins-ci.org/browse/JENKINS-46602 -->
         <!-- Parent pom uses 1.${java.level}, see to resolve: https://www.baeldung.com/maven-plugin-override-parent -->
         <!-- <maven.compiler.release>11</maven.compiler.release> -->
         <java.level>8</java.level>
-        <!-- JaCoCo 0.8.6 does not work with Kotlin 1.5.0 https://youtrack.jetbrains.com/issue/KT-44757 -->
-        <kotlin.version>1.4.32</kotlin.version>
+        <kotlin.version>1.6.0</kotlin.version>
         <maven.compiler.debug>true</maven.compiler.debug>
         <maven.compiler.debuglevel>lines,source</maven.compiler.debuglevel>
+        <githubSuffix>jenkinsci/gamekins-plugin</githubSuffix>
         <!-- <maven.test.skip>true</maven.test.skip> -->
         <!-- Other properties you may want to use:
           ~ jenkins-test-harness.version: Jenkins Test Harness version you use to test the plugin. For Jenkins version >= 1.580.1 use JTH 2.0 or higher.
@@ -33,6 +32,7 @@
 
 
     <name>Gamekins Plugin</name>
+    <url>https://github.com/jenkinsci/gamekins-plugin</url>
     <!-- The default licence for Jenkins OSS Plugins is MIT. Substitute for the applicable one if needed. -->
     <licenses>
         <license>
@@ -41,6 +41,14 @@
             <distribution>repo</distribution>
         </license>
     </licenses>
+
+    <scm>
+        <connection>scm:git:git://github.com/${githubSuffix}.git</connection>
+        <developerConnection>scm:git:git@github.com:${githubSuffix}.git</developerConnection>
+        <url>https://github.com/${githubSuffix}</url>
+        <tag>v0.4.1</tag>
+    </scm>
+
     <dependencies>
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
@@ -59,7 +67,7 @@
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>structs</artifactId>
-            <version>1.22</version>
+            <version>1.24</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.jenkins-ci</groupId>
@@ -70,24 +78,29 @@
         <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-cps</artifactId>
-            <version>2.90</version>
+            <version>2.93</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-job</artifactId>
-            <version>2.40</version>
+            <version>2.42</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jenkins-ci.plugins.workflow</groupId>
+            <artifactId>workflow-step-api</artifactId>
+            <version>2.24</version>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-basic-steps</artifactId>
-            <version>2.23</version>
+            <version>2.24</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-durable-task-step</artifactId>
-            <version>2.38</version>
+            <version>2.40</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -98,22 +111,22 @@
         <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-scm-step</artifactId>
-            <version>2.12</version>
+            <version>2.13</version>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-multibranch</artifactId>
-            <version>2.22</version>
+            <version>2.26</version>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-api</artifactId>
-            <version>2.42</version>
+            <version>2.47</version>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>script-security</artifactId>
-            <version>1.76</version>
+            <version>1.78</version>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
@@ -123,7 +136,7 @@
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>git-client</artifactId>
-            <version>3.7.1</version>
+            <version>3.9.0</version>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
@@ -139,25 +152,25 @@
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>credentials</artifactId>
-            <version>2.4.1</version>
+            <version>2.6.1</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.eclipse.jgit/org.eclipse.jgit -->
         <dependency>
             <groupId>org.eclipse.jgit</groupId>
             <artifactId>org.eclipse.jgit</artifactId>
-            <version>5.11.0.202103091610-r</version>
+            <version>5.12.0.202106070339-r</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.jenkins-ci.plugins/git -->
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>git</artifactId>
-            <version>4.7.0</version>
+            <version>4.8.1</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.jenkins-ci.main/maven-plugin -->
         <dependency>
             <groupId>org.jenkins-ci.main</groupId>
             <artifactId>maven-plugin</artifactId>
-            <version>3.10</version>
+            <version>3.14</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.jenkins-ci</groupId>
@@ -177,7 +190,7 @@
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>junit</artifactId>
-            <version>1.49</version>
+            <version>1.53</version>
             <exclusions>
                 <exclusion>
                     <groupId>com.github.spotbugs</groupId>
@@ -205,21 +218,21 @@
         <dependency>
             <groupId>io.kotest</groupId>
             <artifactId>kotest-runner-junit5-jvm</artifactId>
-            <version>4.4.3</version>
+            <version>5.0.3</version>
             <scope>test</scope>
         </dependency>
         <!-- https://mvnrepository.com/artifact/io.kotest/kotest-assertions-core-jvm -->
         <dependency>
             <groupId>io.kotest</groupId>
             <artifactId>kotest-assertions-core-jvm</artifactId>
-            <version>4.4.3</version>
+            <version>5.0.3</version>
             <scope>test</scope>
         </dependency>
         <!-- https://mvnrepository.com/artifact/io.mockk/mockk -->
         <dependency>
             <groupId>io.mockk</groupId>
             <artifactId>mockk</artifactId>
-            <version>1.11.0</version>
+            <version>1.12.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -232,7 +245,7 @@
         <dependency>
             <groupId>io.kotest</groupId>
             <artifactId>kotest-framework-engine-jvm</artifactId>
-            <version>4.4.3</version>
+            <version>5.0.3</version>
             <scope>test</scope>
         </dependency>
 
@@ -247,7 +260,7 @@
         <dependency>
             <groupId>com.fasterxml.jackson.module</groupId>
             <artifactId>jackson-module-kotlin</artifactId>
-            <version>2.12.3</version>
+            <version>2.13.1</version>
         </dependency>
         <!-- New UI dependencies -->
         <dependency>
@@ -258,7 +271,7 @@
         <dependency>
             <groupId>io.jenkins.plugins</groupId>
             <artifactId>font-awesome-api</artifactId>
-            <version>5.15.2-2</version>
+            <version>5.15.3-4</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.apache.commons</groupId>
@@ -284,7 +297,7 @@
         <dependency>
             <groupId>io.jenkins.plugins</groupId>
             <artifactId>jquery3-api</artifactId>
-            <version>3.6.0-1</version>
+            <version>3.6.0-2</version>
         </dependency>
 
 
@@ -415,7 +428,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.6</version>
+                <version>0.8.7</version>
                 <executions>
                     <execution>
                         <goals>
@@ -434,6 +447,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.1</version>
                 <executions>
                     <execution>
                         <id>default-compile</id>
@@ -472,6 +486,13 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>com.github.spotbugs</groupId>
+                <artifactId>spotbugs-maven-plugin</artifactId>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
             </plugin>
         </plugins>
     </build>

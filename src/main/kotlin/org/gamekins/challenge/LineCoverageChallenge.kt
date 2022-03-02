@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Gamekins contributors
+ * Copyright 2022 Gamekins contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -102,7 +102,7 @@ class LineCoverageChallenge(data: Challenge.ChallengeGenerationData)
     }
 
     override fun getSnippet(): String {
-        return if (codeSnippet.isNotEmpty()) codeSnippet else "Code snippet is not available"
+        return codeSnippet.ifEmpty { "Code snippet is not available" }
     }
 
     override fun getToolTipText(): String {

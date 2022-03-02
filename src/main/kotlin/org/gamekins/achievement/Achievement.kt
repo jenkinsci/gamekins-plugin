@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Gamekins contributors
+ * Copyright 2022 Gamekins contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.gamekins.achievement
 
-import hudson.FilePath
 import hudson.model.Run
 import hudson.model.TaskListener
 import org.gamekins.GameUserProperty

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Gamekins contributors
+ * Copyright 2022 Gamekins contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -161,9 +161,8 @@ object PublisherUtil {
         var solvedAchievements = 0
         var solvedQuests = 0
         var generatedQuests = 0
-        if (!PropertyUtil.realUser(user)) return hashMapOf("generated" to generated, "solved" to solved,
-            "solvedAchievements" to solvedAchievements, "solvedQuests" to solvedQuests,
-            "generatedQuests" to generatedQuests)
+        if (!PropertyUtil.realUser(user)) return hashMapOf("generated" to 0, "solved" to 0,
+            "solvedAchievements" to 0, "solvedQuests" to 0, "generatedQuests" to 0)
 
         val property = user.getProperty(GameUserProperty::class.java)
         if (property != null && property.isParticipating(parameters.projectName)) {

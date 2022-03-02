@@ -1,5 +1,11 @@
 ## Gamekins Plugin
-This is the repository of the Gamekins Plugin for Jenkins to add Gamifcation to Jenkins.
+This is the repository of the Gamekins Plugin for Jenkins to integrate Gamification into Jenkins.
+
+Gamekins is a neologism consisting of the words Gamification and Jenkins. This describes best what Gamekins is built 
+for: The integration of Gamification into Jenkins. Gamekins can be used on project level to add various Gamification 
+elements to the Continuous Integration lifecycle of the project. This enables a better and more motivated environment
+for developers in the project, especially for testing. Gamekins aims to improve the motivation of developers to test 
+their project more thoroughly and therefore to increase the quality of the software.
 
 ### Software requirements
 - Java Version 11
@@ -16,6 +22,9 @@ http://localhost:8080/jenkins/ with the plugin installed.
 
 The plugin can also be opened by IntelliJ Idea and started by adding a new configuration with the command line
 argument ```hpi:run```. It can also be debugged this way.
+
+Use the file ```Jenkinsfile``` for Continuous Integration without the invocation of Gamekins, 
+and ```Jenkinsfile-Gamekins``` with the execution of Gamekins.
 
 ### Installation
 To install the plugin on a dedicated Jenkins, the Jenkins must have version 2.249.3 or higher. Create the compiled 
@@ -39,6 +48,7 @@ Gamekins support the following project types:
  - Pipeline
  - Multibranch Pipeline
  - Organization folders with Multibranch Pipelines
+ - Folders for grouping projects (Leaderboard only)
 
 #### Non-Pipeline projects
 
@@ -75,6 +85,10 @@ To use the Jenkinsfile, you may need to install additional plugins on your Jenki
 Since an organization folder consists of multiple projects, which configuration cannot (easily) be changed, Gamekins 
 has to be enabled for each project. To do this, enable Gamekins for the project in the main configuration page of 
 the folder. It can be disabled in the same way and now configured in the desired project as described before.
+
+#### Folders
+In the configuration of a folder, the Leaderboard can be activated to show the cumulated progress of each user 
+participating in one of the sub-projects.
 
 #### Adding teams and users
 In the configuration page of the job underneath the checkboxes of the Gamekins section, new teams can be added and 

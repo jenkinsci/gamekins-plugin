@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Gamekins contributors
+ * Copyright 2022 Gamekins contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -220,7 +220,10 @@ object GitUtil {
                 for (i in lines.indices) {
                     val line = lines[i]
 
-                    if (i + 1 < lines.size && (line.contains("diff --git") && !lines[i + 1].contains("deleted"))) {
+                    if (i + 1 < lines.size
+                        && (line.contains("diff --git") && !lines[i + 1].contains("deleted"))
+                        && line.split(" ".toRegex())[2].isNotEmpty()
+                    ) {
                         val path = line.split(" ".toRegex())[2].substring(1)
                         val pathSplit = path.split("/".toRegex())
 

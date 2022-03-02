@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Gamekins contributors
+ * Copyright 2022 Gamekins contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -114,7 +114,6 @@ class MutationTestChallenge(
     }
 
     override fun getScore(): Int {
-        //TODO: Include coverage of line and/or mutation score
         return when {
             details.coverage < 0.8 -> 3
             details.coverage < 1.0 -> 4
