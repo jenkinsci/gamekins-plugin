@@ -34,7 +34,6 @@ import org.gamekins.statistics.Statistics
 import org.gamekins.util.Constants.Parameters
 import org.gamekins.util.JacocoUtil.FilesOfAllSubDirectoriesCallable
 import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject
-import java.io.File
 import java.io.IOException
 import java.util.Comparator
 
@@ -279,7 +278,8 @@ object PublisherUtil {
         }
         for (file in files) {
             val path = file.remote
-            if (path.substring(0, path.length - 10).endsWith(resultsPath) || path.substring(0, path.length - 10).endsWith(resultsPath.replace("/", "\\"))) {
+            if (path.substring(0, path.length - 10).endsWith(resultsPath)
+                || path.substring(0, path.length - 10).endsWith(resultsPath.replace("/", "\\"))) {
                 return true
             }
         }

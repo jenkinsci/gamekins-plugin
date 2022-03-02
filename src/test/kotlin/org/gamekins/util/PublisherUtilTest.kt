@@ -196,13 +196,11 @@ class PublisherUtilTest : AnnotationSpec() {
     fun doCheckJacocoCSVPathOSCompatibility() {
         val filepathWin = mockkClass(FilePath::class)
         val pathWin = mockkClass(FilePath::class)
-        val listWin = ArrayList<FilePath>()
-        listWin.add(filepathWin)
+        val listWin = arrayListOf(filepathWin)
 
         val filepathLinux = mockkClass(FilePath::class)
         val pathLinux = mockkClass(FilePath::class)
-        val listLinux = ArrayList<FilePath>()
-        listLinux.add(filepathLinux)
+        val listLinux = arrayListOf(filepathLinux)
 
         every { pathWin.act(any<JacocoUtil.FilesOfAllSubDirectoriesCallable>()) } returns listWin
         every { filepathWin.remote } returns jacocoCSVPath.replace('/', '\\')
