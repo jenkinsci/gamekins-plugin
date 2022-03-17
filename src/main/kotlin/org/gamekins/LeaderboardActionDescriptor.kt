@@ -54,6 +54,14 @@ class LeaderboardActionDescriptor : Descriptor<LeaderboardAction>(LeaderboardAct
         return ActionUtil.doRejectQuest(job, reject, reason)
     }
 
+    /**
+     * Restores a [Challenge] with the String representation [reject].
+     */
+    fun doRestoreChallenge(@AncestorInPath job: AbstractItem, @QueryParameter reject: String,
+                          ): FormValidation {
+        return ActionUtil.doRestoreChallenge(job, reject)
+    }
+
     @Nonnull
     override fun getDisplayName(): String {
         return super.getDisplayName()

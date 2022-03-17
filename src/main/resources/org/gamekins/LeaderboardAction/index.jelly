@@ -406,9 +406,17 @@
                                         <tr>
                                             <td data-toggle="tooltip" data-placement="right"
                                                 title="Reason: ${rejectedChallenge.second}" class="p-4"
-                                                style="background-color: #fff4e8;">
+                                                style="background-color: #fff4e8;"
+                                                id="rejectedChallengeText${index + 1}">
                                                 ${rejectedChallenge.first}
                                                 <span class="ml-2 badge badge-warning">${rejectedChallenge.first.name}</span>
+                                                <button type="button" class="btn btn-danger m-2 py-1"
+                                                        id = "undoRejection${index + 1}"
+                                                        style="font-size: 14px;"
+                                                        data-challenge-id="${index + 1}"
+                                                        data-descriptor-url="${it.descriptor.descriptorFullUrl}">
+                                                    Undo
+                                                </button>
                                             </td>
                                         </tr>
                                     </j:if>
@@ -598,6 +606,35 @@
                         })
                     }
                 })
+
+                let restore = function () {
+
+                let btn = jQuery3(this)
+                let challengeID = btn.data('challenge-id')
+                let descriptorFullUrl = btn.data('descriptor-url')
+                let parameters = {}
+
+                console.log("#rejectedChallengeText" + challengeID)
+                let challenge = jQuery3("#rejectedChallengeText" + challengeID)[0].innerText.substring(0 ,jQuery3("#rejectedChallengeText" + challengeID)[0].innerText.length - 9)
+                //TODO
+                let url = descriptorFullUrl + "/restoreChallenge"
+                console.log(challenge)
+                console.log(url)
+                parameters["reject"] = challenge
+
+                new Ajax.Request(url, {
+                parameters: parameters,
+                onComplete: function (rsp) {//TODO
+                //location.reload()
+                }
+                })
+                }
+
+                for (let i = 1; /*jQuery3('#rejectedTable').TODO*/10 >= i; i++)
+                {
+                    jQuery3('#undoRejection' + i).on('click', restore)
+                }
+
             </script>
         </l:main-panel>
 

@@ -119,6 +119,39 @@ object ActionUtil {
     }
 
     /**
+     * Restores a [Challenge] with the String representation [reject].
+     */
+    fun doRestoreChallenge(job: AbstractItem, reject: String): FormValidation {
+        val user: User = User.current()
+            ?: return FormValidation.error("There is no user signed in")
+        val property = user.getProperty(GameUserProperty::class.java)
+            ?: return FormValidation.error("Unexpected error while retrieving the property")
+
+        val projectName = job.fullName
+        var challenge: Challenge? = null
+        for ((chal, _) in property.getRejectedChallenges(projectName)) {
+            if (chal.toEscapedString() == reject) {
+                challenge = chal
+                break
+            }
+        }
+
+        if (challenge == null) return FormValidation.error("The challenge does not exist")
+
+        property.restoreChallenge(projectName, challenge)
+
+        try {
+            user.save()
+            job.save()
+        } catch (e: IOException) {
+            e.printStackTrace()
+            return FormValidation.error("Unexpected error while saving")
+        }
+
+        return FormValidation.ok("Challenge restored")
+    }
+
+    /**
      * Generates a new Challenge according to the information in [challenge] for a [user] after rejection. Only
      * possible if the constants are set in the [challenge] (may not be after updating the plugin) and the workspace
      * is on the local machine.

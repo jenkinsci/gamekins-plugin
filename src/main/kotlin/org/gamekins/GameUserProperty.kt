@@ -732,4 +732,15 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
             completedAchievements[project] = list
         }
     }
+
+    /**
+     * Restores a given [challenge] of project [projectName].
+     */
+    fun restoreChallenge(projectName: String, challenge: Challenge) {
+
+        val chalReasonPair = rejectedChallenges[projectName]!!.find { (chal, _) -> chal == challenge }!!
+
+        rejectedChallenges[projectName]!!.remove(chalReasonPair)
+    }
+
 }
