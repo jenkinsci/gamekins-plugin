@@ -414,7 +414,7 @@
                                                     <button type="button" class="btn btn-danger m-2 py-1 undoReject"
                                                             id = "undoRejection${index + 1}"
                                                             style="font-size: 14px;"
-                                                            data-challenge-id="${index + 1}"
+                                                            data-challenge-id="${rejectedChallenge.first}"
                                                             data-descriptor-url="${it.descriptor.descriptorFullUrl}">
                                                         Undo
                                                     </button>
@@ -612,21 +612,21 @@
                 jQuery3('.undoReject').on('click', function () {
 
                     let btn = jQuery3(this)
-                    let challengeID = btn.data('challenge-id')
+                    let challenge = btn.data('challenge-id')
                     let descriptorFullUrl = btn.data('descriptor-url')
                     let parameters = {}
-
-                    console.log("#rejectedChallengeText" + challengeID)
-                    let challenge = jQuery3("#rejectedChallengeText" + challengeID)[0].innerText.substring(0 ,jQuery3("#rejectedChallengeText" + challengeID)[0].innerText.length - 9)
-                    //TODO
                     let url = descriptorFullUrl + "/restoreChallenge"
-                    console.log(challenge)
-                    console.log(url)
+
+                    challenge = challenge.replaceAll('<b>', '')
+                    challenge = challenge.replaceAll('</b>', '')
+
                     parameters["reject"] = challenge
 
                     new Ajax.Request(url, {
                         parameters: parameters,
-                        onComplete: location.reload
+                        onComplete: function () {
+                            location.reload()
+                        }
                     })
                 })
 
