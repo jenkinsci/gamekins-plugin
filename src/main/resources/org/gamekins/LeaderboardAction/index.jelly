@@ -478,6 +478,11 @@
                     <li>After rejection a new Challenge is generated if the code of the project is available</li>
                     <li>Hover over a rejected Challenge to see the reason for rejection</li>
 
+                    <li>Rejected <b>Class Coverage Challenge</b>s can be restored with the <b>Undo</b>-Button next to
+                        the Challenge
+                    </li>
+                    <li>The Challenge will not be immediately active again, it has to be generated again to appear</li>
+
                     <li>If there are no Challenges generated for you although you have committed something recently,
                         then checkout the <i>Git Names</i> in your profile settings
                     </li>
