@@ -62,6 +62,22 @@ class LeaderboardActionDescriptor : Descriptor<LeaderboardAction>(LeaderboardAct
         return ActionUtil.doRestoreChallenge(job, reject)
     }
 
+    /**
+     * Stores a [Challenge] with the String representation [store] for later use.
+     */
+    fun doStoreChallenge(@AncestorInPath job: AbstractItem, @QueryParameter store: String,
+    ): FormValidation {
+        return ActionUtil.doStoreChallenge(job, store)
+    }
+
+    /**
+     * Undo Stores a [Challenge] with the String representation [store] for later use.
+     */
+    fun doUndoStoreChallenge(@AncestorInPath job: AbstractItem, @QueryParameter store: String,
+    ): FormValidation {
+        return ActionUtil.doUndoStoreChallenge(job, store)
+    }
+
     @Nonnull
     override fun getDisplayName(): String {
         return super.getDisplayName()

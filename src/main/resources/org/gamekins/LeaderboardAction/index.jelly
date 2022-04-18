@@ -236,6 +236,12 @@
                                             </h5>
                                         </div>
                                         <div class="col-12 col-sm-2">
+                                            <button type="button" class="btn btn-danger m-2 py-1 storeChallenge"
+                                                    style="font-size: 14px;"
+                                                    data-challenge-id="${index + 1}"
+                                                    data-descriptor-url="${it.descriptor.descriptorFullUrl}">
+                                                Store
+                                            </button>
                                             <button type="button" class="btn btn-danger m-2 py-1"
                                                     style="font-size: 14px;"
                                                     data-toggle="modal" data-target="#rejectModal"
@@ -287,6 +293,13 @@
 
                         </j:forEach>
                     </div>
+                    <button type="button" class="btn btn-danger m-2"
+                            style="font-size: 14px;"
+                            data-toggle="modal" data-target="#storedModal">
+                        Stored Challenges
+                    </button>
+                    <div id="error-text-current-table" class="text-danger" style="margin-top: 2%"></div>
+
                 </div>
                 <div class="modal fade" id="rejectModal" tabindex="-1" role="dialog" aria-labelledby="rejectModalLabel"
                      aria-hidden="true">
@@ -310,6 +323,61 @@
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" id="closeModalBtn" data-dismiss="modal">Close</button>
                                 <button type="button" class="btn btn-danger" id="rejectButtonConfirm">Reject</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal fade" id="storedModal" tabindex="-1" role="dialog" aria-labelledby="storedModalLabel"
+                     aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="storedModalLabel">Stored Challenges</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">Gamekins</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <form>
+                                    <div class="form-group">
+                                        <div class="table-responsive p-4" style="height: 600px;">
+                                            <table class="mt-3 shadow table-hover table pane sortable bigtable" id="storedTable">
+                                                <thead class="thead-dark">
+                                                    <tr>
+                                                        <th scope="col" class="text-left"><h5 class="pl-4">Stored Challenges</h5></th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <j:forEach indexVar="index" var="storedChallenge" items="${it.storedChallenges}">
+                                                        <j:if test="${!storedChallenge.toString().contains(' nothing developed recently')}">
+                                                            <tr>
+                                                                <td data-toggle="tooltip" data-placement="right"
+                                                                    title="" class="p-4"
+                                                                    style="background-color: #fff4e8;"
+                                                                    id="storedChallengeText${index + 1}">
+                                                                    ${storedChallenge}
+                                                                    <span class="ml-2 badge badge-warning">${storedChallenge.name}</span>
+                                                                    <button type="button" class="btn btn-danger m-2 py-1 undoStore"
+                                                                            id = "getChallenge${index + 1}"
+                                                                            style="font-size: 14px;"
+                                                                            data-challenge-id="${storedChallenge}"
+                                                                            data-descriptor-url="${it.descriptor.descriptorFullUrl}">
+                                                                        Get Challenge
+                                                                    </button>
+                                                                </td>
+                                                            </tr>
+                                                        </j:if>
+                                                    </j:forEach>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <div id="error-text-stored" class="text-danger" style="margin-top: 2%"></div>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" id="closeModalBtn" data-dismiss="modal">Close</button>
                             </div>
                         </div>
                     </div>
@@ -638,6 +706,58 @@
                             } else {
                                 jQuery3('#error-text-rejected-table')[0].innerHTML = ""
                             }
+                            location.reload()
+                        }
+                    })
+                })
+
+                jQuery3('.storeChallenge').on('click', function () {
+                    let btn = jQuery3(this)
+                    let challengeID = btn.data('challenge-id')
+                    let descriptorFullUrl = btn.data('descriptor-url')
+                    let parameters = {}
+
+                    let challenge = jQuery3("#storedChallengeText" + challengeID)[0].innerText
+                    let url = descriptorFullUrl + "/storeChallenge"
+                    parameters["store"] = challenge
+
+                    new Ajax.Request(url, {
+                        parameters: parameters,
+                        onComplete: function (rsp) {
+                            if (rsp.responseText.includes("class=error")) {
+                                jQuery3('#error-text-current-table')[0].innerHTML = rsp.responseText;
+                                return false;
+                            } else {
+                                jQuery3('#error-text-current-table')[0].innerHTML = ""
+                            }
+                            location.reload()
+                        }
+                    })
+
+                })
+
+                jQuery3('.undoStore').on('click', function () {
+
+                    let btn = jQuery3(this)
+                    let challenge = btn.data('challenge-id')
+                    let descriptorFullUrl = btn.data('descriptor-url')
+                    let parameters = {}
+                    let url = descriptorFullUrl + "/undoStoreChallenge"
+
+                    challenge = challenge.replaceAll('<b>', '')
+                    challenge = challenge.replaceAll('</b>', '')
+
+                    parameters["store"] = challenge
+
+                    new Ajax.Request(url, {
+                    parameters: parameters,
+                    onComplete: function (rsp) {
+                        if (rsp.responseText.includes("class=error")) {
+                            jQuery3('#error-text-stored')[0].innerHTML = rsp.responseText;
+                            return false;
+                        } else {
+                            jQuery3('#error-text-stored')[0].innerHTML = ""
+                        }
                             location.reload()
                         }
                     })

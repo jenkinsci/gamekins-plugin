@@ -152,6 +152,73 @@ object ActionUtil {
     }
 
     /**
+     * Rejects a [Challenge] with the String representation [store] and a [reason] and generates a new one
+     * if possible.
+     */
+    fun doStoreChallenge(job: AbstractItem, store: String): FormValidation {
+        val user: User = User.current()
+            ?: return FormValidation.error("There is no user signed in")
+        val property = user.getProperty(GameUserProperty::class.java)
+            ?: return FormValidation.error("Unexpected error while retrieving the property")
+
+        val projectName = job.fullName
+        var challenge: Challenge? = null
+        for (chal in property.getCurrentChallenges(projectName)) {
+            if (chal.toEscapedString() == store) {
+                challenge = chal
+                break
+            }
+        }
+
+        if (challenge == null) return FormValidation.error("The challenge does not exist")
+        if (challenge is DummyChallenge) return FormValidation.error("Dummies cannot be stored " +
+                "- please run another build")
+        property.storeChallenge(projectName, challenge)
+
+        val generatedText = generateChallengeAfterRejection(challenge, user, property, job)
+
+        try {
+            user.save()
+            job.save()
+        } catch (e: IOException) {
+            e.printStackTrace()
+            return FormValidation.error("Unexpected error while saving")
+        }
+
+        return FormValidation.ok("Challenge stored$generatedText")
+    }
+
+    fun doUndoStoreChallenge(job: AbstractItem, store: String): FormValidation {
+        val user: User = User.current()
+            ?: return FormValidation.error("There is no user signed in")
+        val property = user.getProperty(GameUserProperty::class.java)
+            ?: return FormValidation.error("Unexpected error while retrieving the property")
+
+        val projectName = job.fullName
+        var challenge: Challenge? = null
+        for (chal in property.getStoredChallenges(projectName)) {
+            if (chal.toEscapedString() == store) {
+                challenge = chal
+                break
+            }
+        }
+
+        if (challenge == null) return FormValidation.error("The challenge does not exist")
+
+        property.undoStoreChallenge(projectName, challenge)
+
+        try {
+            user.save()
+            job.save()
+        } catch (e: IOException) {
+            e.printStackTrace()
+            return FormValidation.error("Unexpected error while saving")
+        }
+
+        return FormValidation.ok("Challenge restored")
+    }
+
+    /**
      * Generates a new Challenge according to the information in [challenge] for a [user] after rejection. Only
      * possible if the constants are set in the [challenge] (may not be after updating the plugin) and the workspace
      * is on the local machine.
@@ -166,7 +233,11 @@ object ActionUtil {
             parameters.workspace = FilePath(null, parameters.remote.replace(parameters.branch, "master"))
         }
 
-        if (parameters.workspace.exists()) {
+        if (parameters.currentChallengesCount <= property.getCurrentChallenges(parameters.projectName).size)
+        {
+            generatedText += " (Enough Challenges already)"
+        }
+        else if (parameters.workspace.exists()) {
             val classes = PublisherUtil.retrieveLastChangedClasses(
                 Constants.DEFAULT_SEARCH_COMMIT_COUNT, parameters)
             generatedText = ": New Challenge generated"
