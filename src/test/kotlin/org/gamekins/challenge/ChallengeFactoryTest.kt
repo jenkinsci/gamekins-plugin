@@ -128,6 +128,7 @@ class ChallengeFactoryTest : AnnotationSpec() {
         every { mailProperty.address } returns "philipp.straubinger@uni-passau.de"
         every { user.getProperty(UserProperty::class.java) } returns mailProperty
         every { property.getRejectedChallenges(any()) } returns CopyOnWriteArrayList()
+        every { property.getStoredChallenges(any()) } returns CopyOnWriteArrayList()
         every { property.getGitNames() } returns CopyOnWriteArraySet(listOf("Philipp Straubinger"))
         every { JacocoUtil.calculateCurrentFilePath(any(), any()) } returns path
         every { JacocoUtil.getCoverageInPercentageFromJacoco(any(), any()) } returns coverage

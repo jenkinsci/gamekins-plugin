@@ -154,6 +154,7 @@ class PublisherUtilTest : AnnotationSpec() {
         every { userProperty.isParticipating(any()) } returns true
         every { ChallengeFactory.generateBuildChallenge(any(), any(), any(), any(), any()) } returns true
         every { userProperty.getCurrentChallenges(any()) } returns CopyOnWriteArrayList()
+        every { userProperty.getStoredChallenges(any()) } returns CopyOnWriteArrayList()
         every { userProperty.getUnsolvedAchievements(any()) } returns CopyOnWriteArrayList()
         every { userProperty.getCurrentQuests(any()) } returns CopyOnWriteArrayList()
         every { ChallengeFactory.generateNewChallenges(any(), any(), any(), any(), any()) } returns 0
