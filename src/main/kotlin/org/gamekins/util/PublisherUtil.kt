@@ -149,6 +149,47 @@ object PublisherUtil {
     }
 
     /**
+     * Checks whether one or more stored Challenges are unsolvable.
+     */
+    private fun checkStoredSolvable(run: Run<*, *>, property: GameUserProperty, parameters: Parameters,
+                              listener: TaskListener) {
+
+        for (challenge in property.getStoredChallenges(parameters.projectName)) {
+            if (!challenge.isSolvable(parameters, run, listener)) {
+                var reason = "Not solvable"
+                if (challenge is MutationTestChallenge) reason = "Source file changed"
+                property.rejectStoredChallenge(parameters.projectName, challenge, reason)
+                EventHandler.addEvent(ChallengeUnsolvableEvent(parameters.projectName, parameters.branch,
+                    property.getUser(), challenge))
+                listener.logger.println("[Gamekins] Challenge ${challenge?.toEscapedString()} " +
+                        "can not be solved anymore")
+            }
+        }
+    }
+
+    /**
+     * Checks whether one or more stored Challenges are solved and removes them.
+     */
+    private fun checkStoredSolved(run: Run<*, *>, property: GameUserProperty, parameters: Parameters,
+                            listener: TaskListener) {
+
+        for (challenge in property.getStoredChallenges(parameters.projectName)) {
+            if (challenge is MutationTestChallenge && parameters.mocoJSONPath.isEmpty()) {
+                listener.logger.println("[Gamekins] Cannot check this mutation test challenge is solved or not " +
+                        "because moco.json can't be found - ${challenge.toEscapedString()}")
+                continue
+            }
+            if (challenge.isSolved(parameters, run, listener)) {
+                property.rejectStoredChallenge(parameters.projectName, challenge, "Solved, but was stored")
+                EventHandler.addEvent(ChallengeUnsolvableEvent(parameters.projectName, parameters.branch,
+                    property.getUser(), challenge))
+                listener.logger.println("[Gamekins] Challenge ${challenge?.toEscapedString()} " +
+                        "was solved while in storage")
+            }
+        }
+    }
+
+    /**
      * Checks the solved and solvable state of a [user] and generates new Challenges if needed. Returns a [HashMap]
      * with the number of generated and solved Challenges.
      */
@@ -181,6 +222,16 @@ object PublisherUtil {
 
             //Check if the Challenges are still solvable
             checkSolvable(run, property, parameters, listener)
+
+            listener.logger.println("[Gamekins] Start checking solved status of stored challenges for user ${user.fullName}")
+
+            //Check if a stored Challenges is solved
+            val userStoredSolved = checkStoredSolved(run, property, parameters, listener)
+
+            listener.logger.println("[Gamekins] Start checking solvable state of challenges for user ${user.fullName}")
+
+            //Check if the stored Challenges are still solvable
+            checkStoredSolvable(run, property, parameters, listener)
 
             //Generate new Challenges if the user has less than three
             val userGenerated = ChallengeFactory.generateNewChallenges(

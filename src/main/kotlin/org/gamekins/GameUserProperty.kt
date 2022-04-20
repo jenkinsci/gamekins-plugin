@@ -604,6 +604,19 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
     }
 
     /**
+     * Rejects a given stored [challenge] of project [projectName] with a [reason].
+     */
+    fun rejectStoredChallenge(projectName: String, challenge: Challenge, reason: String) {
+        rejectedChallenges.computeIfAbsent(projectName) { CopyOnWriteArrayList() }
+        val challenges = rejectedChallenges[projectName]!!
+        challenges.add(Pair(challenge, reason))
+        rejectedChallenges[projectName] = challenges
+        val storedChallenges = storedChallenges[projectName]!!
+        storedChallenges.remove(challenge)
+        this.storedChallenges[projectName] = storedChallenges
+    }
+
+    /**
      * Rejects a given [quest] of project [projectName] with a [reason].
      */
     fun rejectQuest(projectName: String, quest: Quest, reason: String) {

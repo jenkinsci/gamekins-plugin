@@ -168,6 +168,24 @@ object ChallengeFactory {
                 continue
             }
 
+            val storedChallenges = user.getProperty(GameUserProperty::class.java)
+                .getStoredChallenges(parameters.projectName)
+
+            //Remove classes where a ClassCoverageChallenge has been stored
+            if (!storedChallenges.filter {
+                    it is ClassCoverageChallenge
+                            && it.details.fileName == selectedClass.fileName
+                            && it.details.packageName == selectedClass.packageName
+                }
+                    .isNullOrEmpty()) {
+                listener.logger.println(
+                    "[Gamekins] Class ${selectedClass.fileName} in package " +
+                            "${selectedClass.packageName} is currently stored"
+                )
+                challenge = null
+                continue
+            }
+
             val data = ChallengeGenerationData(parameters, user, selectedClass, listener)
 
             when {
@@ -202,6 +220,11 @@ object ChallengeFactory {
             if (rejectedChallenges.any { it.first == challenge }) {
                 listener.logger.println("[Gamekins] Challenge ${challenge?.toEscapedString()} was already " +
                         "rejected previously")
+                challenge = null
+            }
+
+            if (storedChallenges.any { it == challenge }) {
+                listener.logger.println("[Gamekins] Challenge ${challenge?.toEscapedString()} is already stored")
                 challenge = null
             }
 
