@@ -152,7 +152,7 @@ object ActionUtil {
     }
 
     /**
-     * Rejects a [Challenge] with the String representation [store] and a [reason] and generates a new one
+     * Stores a [Challenge] with the String representation [store] and generates a new one
      * if possible.
      */
     fun doStoreChallenge(job: AbstractItem, store: String): FormValidation {
@@ -188,6 +188,9 @@ object ActionUtil {
         return FormValidation.ok("Challenge stored$generatedText")
     }
 
+    /**
+     * Unshelves a [Challenge] with the String representation [store].
+     */
     fun doUndoStoreChallenge(job: AbstractItem, store: String): FormValidation {
         val user: User = User.current()
             ?: return FormValidation.error("There is no user signed in")
