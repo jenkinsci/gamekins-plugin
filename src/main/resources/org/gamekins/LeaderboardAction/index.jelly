@@ -721,7 +721,7 @@
                     let descriptorFullUrl = btn.data('descriptor-url')
                     let parameters = {}
 
-                    let challenge = jQuery3("#storedChallengeText" + challengeID)[0].innerText
+                    let challenge = jQuery3("#currentChallengeText" + challengeID)[0].innerText
                     let url = descriptorFullUrl + "/storeChallenge"
                     parameters["store"] = challenge
 
