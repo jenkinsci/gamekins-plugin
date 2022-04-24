@@ -236,7 +236,7 @@
                                             </h5>
                                         </div>
                                         <div class="col-12 col-sm-2">
-                                            <button type="button" class="btn btn-danger m-2 py-1 storeChallenge"
+                                            <button type="button" class="btn btn-secondary m-2 py-1 storeChallenge"
                                                     style="font-size: 14px;"
                                                     data-challenge-id="${index + 1}"
                                                     data-descriptor-url="${it.descriptor.descriptorFullUrl}">
@@ -293,7 +293,7 @@
 
                         </j:forEach>
                     </div>
-                    <button type="button" class="btn btn-danger m-2"
+                    <button type="button" class="btn btn-secondary m-2"
                             style="font-size: 14px;"
                             data-toggle="modal" data-target="#storedModal">
                         Stored Challenges
@@ -358,7 +358,7 @@
                                                                     id="storedChallengeText${index + 1}">
                                                                     ${storedChallenge}
                                                                     <span class="ml-2 badge badge-warning">${storedChallenge.name}</span>
-                                                                    <button type="button" class="btn btn-danger m-2 py-1 undoStore"
+                                                                    <button type="button" class="btn btn-secondary m-2 py-1 undoStore"
                                                                             id = "getChallenge${index + 1}"
                                                                             style="font-size: 14px;"
                                                                             data-challenge-id="${storedChallenge}"
