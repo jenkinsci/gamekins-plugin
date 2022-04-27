@@ -50,7 +50,8 @@ class GameMultiBranchProperty
                                   @set:DataBoundSetter var showLeaderboard: Boolean,
                                   @set:DataBoundSetter var showStatistics: Boolean,
                                   @set:DataBoundSetter var currentChallengesCount: Int,
-                                  @set:DataBoundSetter var currentQuestsCount: Int)
+                                  @set:DataBoundSetter var currentQuestsCount: Int,
+                                  @set:DataBoundSetter var storedChallengesCount: Int)
     : AbstractFolderProperty<AbstractFolder<*>?>(), GameProperty, StaplerProxy {
 
     private var statistics: Statistics
@@ -64,6 +65,7 @@ class GameMultiBranchProperty
         PropertyUtil.reconfigure(job, showLeaderboard, showStatistics)
         if (currentChallengesCount <= 0) currentChallengesCount = Constants.DEFAULT_CURRENT_CHALLENGES
         if (currentQuestsCount <= 0) currentQuestsCount = Constants.DEFAULT_CURRENT_QUESTS
+        if (storedChallengesCount < 0) storedChallengesCount = Constants.DEFAULT_STORED_CHALLENGES
     }
 
     @Throws(IOException::class)
@@ -119,6 +121,8 @@ class GameMultiBranchProperty
                 currentChallengesCount = form.getInt("currentChallengesCount")
             if (form.getValue("currentQuestsCount") is String)
                 currentQuestsCount = form.getInt("currentQuestsCount")
+            if (form.getValue("storedChallengesCount") is String)
+                currentQuestsCount = form.getInt("storedChallengesCount")
         }
         
         PropertyUtil.reconfigure(owner!!, showLeaderboard, showStatistics)
@@ -263,7 +267,9 @@ class GameMultiBranchProperty
                 if (formData.getValue("currentChallengesCount") is Int)
                     formData.getInt("currentChallengesCount") else Constants.DEFAULT_CURRENT_CHALLENGES,
                 if (formData.getValue("currentQuestsCount") is Int)
-                    formData.getInt("currentQuestsCount") else Constants.DEFAULT_CURRENT_QUESTS
+                    formData.getInt("currentQuestsCount") else Constants.DEFAULT_CURRENT_QUESTS,
+                if (formData.getValue("storedChallengesCount") is Int)
+                    formData.getInt("storedChallengesCount") else Constants.DEFAULT_STORED_CHALLENGES
             )
         }
     }

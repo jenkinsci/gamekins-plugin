@@ -31,6 +31,8 @@ object Constants {
 
     const val DEFAULT_CURRENT_QUESTS = 1
 
+    const val DEFAULT_STORED_CHALLENGES = 2
+
     const val DEFAULT_SEARCH_COMMIT_COUNT = 50
 
     const val UNEXPECTED_ERROR = "Unexpected Error"
@@ -92,6 +94,7 @@ object Constants {
         var branch: String = "",
         var currentChallengesCount: Int = DEFAULT_CURRENT_CHALLENGES,
         var currentQuestsCount: Int = DEFAULT_CURRENT_QUESTS,
+        var storedChallengesCount: Int = DEFAULT_STORED_CHALLENGES,
         var generated: Int = 0,
         var jacocoCSVPath: String = "",
         var jacocoResultsPath: String = "",
