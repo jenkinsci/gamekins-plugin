@@ -110,6 +110,7 @@ class GameJobProperty
     private fun readResolve(): Any {
         if (currentChallengesCount == 0) currentChallengesCount = Constants.DEFAULT_CURRENT_CHALLENGES
         if (currentQuestsCount <= 0) currentQuestsCount = Constants.DEFAULT_CURRENT_QUESTS
+        if (storedChallengesCount < 0) storedChallengesCount = Constants.DEFAULT_STORED_CHALLENGES
 
         return this
     }
@@ -131,7 +132,7 @@ class GameJobProperty
             if (form.getValue("currentQuestsCount") is String)
                 currentQuestsCount = form.getInt("currentQuestsCount")
             if (form.getValue("storedChallengesCount") is String)
-                currentQuestsCount = form.getInt("storedChallengesCount")
+                storedChallengesCount = form.getInt("storedChallengesCount")
         }
 
         PropertyUtil.reconfigure(owner, showLeaderboard, showStatistics)

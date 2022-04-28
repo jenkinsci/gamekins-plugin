@@ -18,6 +18,7 @@ package org.gamekins.util
 
 import hudson.FilePath
 import hudson.model.AbstractItem
+import hudson.model.AbstractProject
 import hudson.model.User
 import hudson.util.FormValidation
 import org.gamekins.GameUserProperty
@@ -26,6 +27,7 @@ import org.gamekins.challenge.ChallengeFactory
 import org.gamekins.challenge.DummyChallenge
 import org.gamekins.challenge.quest.Quest
 import org.gamekins.file.SourceFileDetails
+import org.gamekins.property.GameJobProperty
 import org.gamekins.util.Constants.Parameters
 import java.io.IOException
 
@@ -173,6 +175,11 @@ object ActionUtil {
         if (challenge == null) return FormValidation.error("The challenge does not exist")
         if (challenge is DummyChallenge) return FormValidation.error("Dummies cannot be stored " +
                 "- please run another build")
+
+        if (property.getStoredChallenges(projectName).size >=
+            (job as AbstractProject<*, *>).getProperty(GameJobProperty::class.java).storedChallengesCount)
+            return FormValidation.error("Storage Limit reached")
+
         property.storeChallenge(projectName, challenge)
 
         val generatedText = generateChallengeAfterRejection(challenge, user, property, job)
