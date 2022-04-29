@@ -4,7 +4,6 @@ import hudson.model.TaskListener
 import io.kotest.core.spec.style.AnnotationSpec
 import io.kotest.matchers.longs.shouldBeGreaterThan
 import io.kotest.matchers.shouldBe
-import io.kotest.matchers.shouldNotBe
 import io.mockk.every
 import io.mockk.mockkClass
 import io.mockk.mockkStatic
@@ -145,6 +144,10 @@ class SmellChallengeTest : AnnotationSpec() {
         challenge.isSolvable(parameters, run, TaskListener.NULL) shouldBe true
 
         every { issue.textRange } returns TextRange(1)
+        every { file.filesExists() } returns false
+        challenge.isSolvable(parameters, run, TaskListener.NULL) shouldBe false
+
+        every { file.filesExists() } returns true
         every { SmellUtil.getSmellsOfFile(file, any()) } returns arrayListOf(issue)
         challenge.isSolvable(parameters, run, TaskListener.NULL) shouldBe true
 
@@ -184,7 +187,11 @@ class SmellChallengeTest : AnnotationSpec() {
         val parameters = Constants.Parameters()
         every { issue.textRange } returns TextRange(1)
 
+        every { file.filesExists() } returns false
+        challenge.isSolved(parameters, run, TaskListener.NULL) shouldBe false
+
         every { SmellUtil.getSmellsOfFile(any(), any()) } returns arrayListOf(issue)
+        every { file.filesExists() } returns true
         challenge.isSolved(parameters, run, TaskListener.NULL) shouldBe false
 
         val secondIssue = mockkClass(Issue::class)

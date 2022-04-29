@@ -109,8 +109,9 @@ class SmellChallenge(val details: FileDetails, val issue: Issue): Challenge {
     override fun isSolvable(parameters: Constants.Parameters, run: Run<*, *>, listener: TaskListener): Boolean {
         if (details.parameters.branch != parameters.branch) return true
         if (issue.textRange == null) return true
+        if (!details.update(parameters).filesExists()) return false
 
-        val issues = SmellUtil.getSmellsOfFile(details.update(parameters), listener)
+        val issues = SmellUtil.getSmellsOfFile(details, listener)
         if (issues.contains(issue)) return true
         issues.forEach {
             if (it.ruleKey == issue.ruleKey && it.type == issue.type && it.severity == issue.severity) {
@@ -126,7 +127,8 @@ class SmellChallenge(val details: FileDetails, val issue: Issue): Challenge {
     }
 
     override fun isSolved(parameters: Constants.Parameters, run: Run<*, *>, listener: TaskListener): Boolean {
-        val issues = SmellUtil.getSmellsOfFile(details.update(parameters), listener)
+        if (!details.update(parameters).filesExists()) return false
+        val issues = SmellUtil.getSmellsOfFile(details, listener)
         if (issues.contains(issue)) return false
         issues.forEach {
             if (it.ruleKey == issue.ruleKey && it.type == issue.type && it.severity == issue.severity) {
