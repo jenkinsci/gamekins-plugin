@@ -544,7 +544,7 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
         }
 
         rejectedChallenges.forEach { (p, challenges) ->
-            val rejChallenges = CopyOnWriteArrayList(challenges)
+            val rejChallenges = CopyOnWriteArrayList(challenges.filter { it.first is CoverageChallenge })
             rejChallenges.removeIf { (challenge, _) ->
                 challenge is CoverageChallenge && challenge.details == null
             }
