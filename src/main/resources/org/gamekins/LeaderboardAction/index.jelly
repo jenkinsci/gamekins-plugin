@@ -236,12 +236,14 @@
                                             </h5>
                                         </div>
                                         <div class="col-12 col-sm-2">
-                                            <button type="button" class="btn btn-secondary m-2 py-1 storeChallenge"
-                                                    style="font-size: 14px;"
-                                                    data-challenge-id="${index + 1}"
-                                                    data-descriptor-url="${it.descriptor.descriptorFullUrl}">
-                                                Store
-                                            </button>
+                                            <j:if test='${it.storedChallengesLimit > 0}'>
+                                                <button type="button" class="btn btn-secondary m-2 py-1 storeChallenge"
+                                                        style="font-size: 14px;"
+                                                        data-challenge-id="${index + 1}"
+                                                        data-descriptor-url="${it.descriptor.descriptorFullUrl}">
+                                                    Store
+                                                </button>
+                                            </j:if>
                                             <button type="button" class="btn btn-danger m-2 py-1"
                                                     style="font-size: 14px;"
                                                     data-toggle="modal" data-target="#rejectModal"
@@ -293,12 +295,16 @@
 
                         </j:forEach>
                     </div>
-                    <button type="button" class="btn btn-secondary m-2"
-                            style="font-size: 14px;"
-                            data-toggle="modal" data-target="#storedModal">
-                        Stored Challenges
-                    </button>
-                    <div id="error-text-current-table" class="text-danger" style="margin-top: 2%"></div>
+                    <div>
+                    <j:if test='${it.storedChallengesLimit > 0 || it.storedChallengesCount > 0}'>
+                        <button type="button" class="btn btn-secondary m-2"
+                                style="font-size: 14px;"
+                                data-toggle="modal" data-target="#storedModal">
+                            Stored Challenges (${it.storedChallengesCount}/${it.storedChallengesLimit})
+                        </button>
+                    </j:if>
+                    <div id="error-text-current-table" class="text-danger" style="margin-top: 2%"/>
+                    </div>
 
                 </div>
                 <div class="modal fade" id="rejectModal" tabindex="-1" role="dialog" aria-labelledby="rejectModalLabel"
