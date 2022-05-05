@@ -487,6 +487,7 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
         if (currentQuests == null) currentQuests = HashMap()
         if (completedQuests == null) completedQuests = HashMap()
         if (rejectedQuests == null) rejectedQuests = HashMap()
+        if (storedChallenges == null) storedChallenges = HashMap()
 
         //Add achievements if newly introduced
         if (participation.size != 0) {
