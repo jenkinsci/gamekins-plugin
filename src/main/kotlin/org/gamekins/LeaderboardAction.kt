@@ -228,7 +228,7 @@ class LeaderboardAction(val job: AbstractItem) : ProminentProjectAction, Describ
      * Returns the current Amount of stored Challenges
      */
     fun getStoredChallengesCount(): Int {
-        return getStoredChallenges().size
+        return if (getStoredChallenges() == null) 0 else getStoredChallenges().size
     }
 
     /**
