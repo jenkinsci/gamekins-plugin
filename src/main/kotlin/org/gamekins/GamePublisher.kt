@@ -172,7 +172,7 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
         parameters.currentQuestsCount = build.project.getProperty(GameJobProperty::class.java)
             .currentQuestsCount
         parameters.storedChallengesCount = build.project.getProperty(GameJobProperty::class.java)
-            .storedChallengesCount
+            .currentStoredChallengesCount
         executePublisher(build, parameters, build.result, listener)
         return true
     }
@@ -204,7 +204,7 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
             parameters.currentQuestsCount = project.properties.get(GameMultiBranchProperty::class.java)
                 .currentQuestsCount
             parameters.storedChallengesCount = project.properties.get(GameMultiBranchProperty::class.java)
-                .storedChallengesCount
+                .currentStoredChallengesCount
         } else {
             if (run.parent.getProperty(GameJobProperty::class.java) == null
                 || !run.parent.getProperty(GameJobProperty::class.java).activated
@@ -218,7 +218,7 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
             parameters.currentQuestsCount = run.parent.getProperty(GameJobProperty::class.java)
                 .currentQuestsCount
             parameters.storedChallengesCount =run.parent.getProperty(GameJobProperty::class.java)
-                .storedChallengesCount
+                .currentStoredChallengesCount
         }
 
         executePublisher(run, parameters, run.result, listener)

@@ -121,7 +121,7 @@ class ActionUtilTest: AnnotationSpec() {
         val job = mockkClass(AbstractProject::class)
         every { job.fullName } returns "test-project"
         every { job.save() } returns Unit
-        every { job.getProperty(GameJobProperty::class.java).storedChallengesCount } returns 1
+        every { job.getProperty(GameJobProperty::class.java).currentStoredChallengesCount } returns 1
         ActionUtil.doStoreChallenge(job, stringChallenge).kind shouldBe FormValidation.Kind.OK
     }
 

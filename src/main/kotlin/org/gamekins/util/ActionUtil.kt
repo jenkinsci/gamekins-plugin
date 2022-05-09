@@ -177,7 +177,7 @@ object ActionUtil {
                 "- please run another build")
 
         if (property.getStoredChallenges(projectName).size >=
-            (job as AbstractProject<*, *>).getProperty(GameJobProperty::class.java).storedChallengesCount)
+            (job as AbstractProject<*, *>).getProperty(GameJobProperty::class.java).currentStoredChallengesCount)
             return FormValidation.error("Storage Limit reached")
 
         property.storeChallenge(projectName, challenge)

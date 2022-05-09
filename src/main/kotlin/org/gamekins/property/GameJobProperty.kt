@@ -44,7 +44,7 @@ class GameJobProperty
                                   @set:DataBoundSetter var showStatistics: Boolean,
                                   @set:DataBoundSetter var currentChallengesCount: Int,
                                   @set:DataBoundSetter var currentQuestsCount: Int,
-                                  @set:DataBoundSetter var storedChallengesCount: Int)
+                                  @set:DataBoundSetter var currentStoredChallengesCount: Int)
     : JobProperty<Job<*, *>>(), GameProperty, StaplerProxy {
 
     private var statistics: Statistics
@@ -54,7 +54,7 @@ class GameJobProperty
         statistics = Statistics(job)
         if (currentChallengesCount <= 0) currentChallengesCount = Constants.DEFAULT_CURRENT_CHALLENGES
         if (currentQuestsCount <= 0) currentQuestsCount = Constants.DEFAULT_CURRENT_QUESTS
-        if (storedChallengesCount < 0) storedChallengesCount = Constants.DEFAULT_STORED_CHALLENGES
+        if (currentStoredChallengesCount < 0) currentStoredChallengesCount = Constants.DEFAULT_STORED_CHALLENGES
     }
 
     @Throws(IOException::class)
@@ -110,7 +110,7 @@ class GameJobProperty
     private fun readResolve(): Any {
         if (currentChallengesCount == 0) currentChallengesCount = Constants.DEFAULT_CURRENT_CHALLENGES
         if (currentQuestsCount <= 0) currentQuestsCount = Constants.DEFAULT_CURRENT_QUESTS
-        if (storedChallengesCount < 0) storedChallengesCount = Constants.DEFAULT_STORED_CHALLENGES
+        if (currentStoredChallengesCount < 0) currentStoredChallengesCount = Constants.DEFAULT_STORED_CHALLENGES
 
         return this
     }
@@ -131,8 +131,8 @@ class GameJobProperty
                 currentChallengesCount = form.getInt("currentChallengesCount")
             if (form.getValue("currentQuestsCount") is String)
                 currentQuestsCount = form.getInt("currentQuestsCount")
-            if (form.getValue("storedChallengesCount") is String)
-                storedChallengesCount = form.getInt("storedChallengesCount")
+            if (form.getValue("currentStoredChallengesCount") is String)
+                currentStoredChallengesCount = form.getInt("currentStoredChallengesCount")
         }
 
         PropertyUtil.reconfigure(owner, showLeaderboard, showStatistics)

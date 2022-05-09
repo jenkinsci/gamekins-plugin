@@ -57,8 +57,8 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
     private var rejectedQuests: HashMap<String, CopyOnWriteArrayList<Pair<Quest, String>>> = HashMap()
     private val score: HashMap<String, Int> = HashMap()
     private var sendNotifications: Boolean = true
-    private var unsolvedAchievements: HashMap<String, CopyOnWriteArrayList<Achievement>> = HashMap()
     private var storedChallenges: HashMap<String, CopyOnWriteArrayList<Challenge>> = HashMap()
+    private var unsolvedAchievements: HashMap<String, CopyOnWriteArrayList<Achievement>> = HashMap()
 
     /**
      * Adds an additional [score] to one project [projectName], since one user can participate in multiple projects.
@@ -520,6 +520,15 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
             if (rejectedQuests.size == 0) {
                 participation.keys.forEach { project ->
                     rejectedQuests[project] = CopyOnWriteArrayList()
+                }
+            }
+        }
+
+        //Add stored challenges if newly introduced
+        if (participation.size != 0) {
+            if (storedChallenges.size == 0) {
+                participation.keys.forEach { project ->
+                    storedChallenges[project] = CopyOnWriteArrayList()
                 }
             }
         }

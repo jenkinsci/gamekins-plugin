@@ -23,8 +23,6 @@ import jenkins.model.Jenkins
 import org.gamekins.challenge.quest.Quest
 import org.gamekins.property.GameJobProperty
 import org.gamekins.property.GameMultiBranchProperty
-import org.gamekins.property.GameProperty
-import org.gamekins.util.Constants
 import org.jenkinsci.plugins.workflow.job.WorkflowJob
 import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject
 import org.kohsuke.stapler.StaplerProxy
@@ -213,13 +211,13 @@ class LeaderboardAction(val job: AbstractItem) : ProminentProjectAction, Describ
     fun getStoredChallengesLimit(): Int {
         return when (job) {
             is WorkflowMultiBranchProject -> {
-                job.properties.get(GameMultiBranchProperty::class.java).storedChallengesCount
+                job.properties.get(GameMultiBranchProperty::class.java).currentStoredChallengesCount
             }
             is WorkflowJob -> {
-                job.getProperty(GameJobProperty::class.java).storedChallengesCount
+                job.getProperty(GameJobProperty::class.java).currentStoredChallengesCount
             }
             else -> {
-                (job as AbstractProject<*, *>).getProperty(GameJobProperty::class.java).storedChallengesCount
+                (job as AbstractProject<*, *>).getProperty(GameJobProperty::class.java).currentStoredChallengesCount
             }
         }
     }

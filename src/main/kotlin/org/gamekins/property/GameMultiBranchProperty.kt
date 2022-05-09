@@ -51,7 +51,7 @@ class GameMultiBranchProperty
                                   @set:DataBoundSetter var showStatistics: Boolean,
                                   @set:DataBoundSetter var currentChallengesCount: Int,
                                   @set:DataBoundSetter var currentQuestsCount: Int,
-                                  @set:DataBoundSetter var storedChallengesCount: Int)
+                                  @set:DataBoundSetter var currentStoredChallengesCount: Int)
     : AbstractFolderProperty<AbstractFolder<*>?>(), GameProperty, StaplerProxy {
 
     private var statistics: Statistics
@@ -65,7 +65,7 @@ class GameMultiBranchProperty
         PropertyUtil.reconfigure(job, showLeaderboard, showStatistics)
         if (currentChallengesCount <= 0) currentChallengesCount = Constants.DEFAULT_CURRENT_CHALLENGES
         if (currentQuestsCount <= 0) currentQuestsCount = Constants.DEFAULT_CURRENT_QUESTS
-        if (storedChallengesCount < 0) storedChallengesCount = Constants.DEFAULT_STORED_CHALLENGES
+        if (currentStoredChallengesCount < 0) currentStoredChallengesCount = Constants.DEFAULT_STORED_CHALLENGES
     }
 
     @Throws(IOException::class)
@@ -101,6 +101,7 @@ class GameMultiBranchProperty
     private fun readResolve(): Any {
         if (currentChallengesCount == 0) currentChallengesCount = Constants.DEFAULT_CURRENT_CHALLENGES
         if (currentQuestsCount <= 0) currentQuestsCount = Constants.DEFAULT_CURRENT_QUESTS
+        if (currentStoredChallengesCount < 0) currentStoredChallengesCount = Constants.DEFAULT_STORED_CHALLENGES
 
         return this
     }
