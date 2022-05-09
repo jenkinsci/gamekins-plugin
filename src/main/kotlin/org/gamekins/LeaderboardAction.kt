@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Gamekins contributors
+ * Copyright 2022 Gamekins contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,12 @@ import org.gamekins.challenge.Challenge
 import org.gamekins.util.PropertyUtil
 import jenkins.model.Jenkins
 import org.gamekins.challenge.quest.Quest
+import org.gamekins.property.GameJobProperty
+import org.gamekins.property.GameMultiBranchProperty
+import org.gamekins.property.GameProperty
+import org.gamekins.util.Constants
+import org.jenkinsci.plugins.workflow.job.WorkflowJob
+import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject
 import org.kohsuke.stapler.StaplerProxy
 import org.kohsuke.stapler.export.Exported
 import org.kohsuke.stapler.export.ExportedBean
@@ -62,6 +68,16 @@ class LeaderboardAction(val job: AbstractItem) : ProminentProjectAction, Describ
         val property = user.getProperty(GameUserProperty::class.java)
                 ?: return CopyOnWriteArrayList()
         return property.getCurrentChallenges(job.fullName)
+    }
+
+    /**
+     * Returns the list of stored Challenges of the current project and user.
+     */
+    fun getStoredChallenges(): CopyOnWriteArrayList<Challenge> {
+        val user: User = User.current() ?: return CopyOnWriteArrayList()
+        val property = user.getProperty(GameUserProperty::class.java)
+            ?: return CopyOnWriteArrayList()
+        return property.getStoredChallenges(job.fullName)
     }
 
     /**
@@ -190,6 +206,29 @@ class LeaderboardAction(val job: AbstractItem) : ProminentProjectAction, Describ
         val user: User = User.current() ?: return false
         val property = user.getProperty(GameUserProperty::class.java) ?: return false
         return property.isParticipating(job.fullName)
+    }
+    /**
+     * Returns the maximal Amount of stored Challenges
+     */
+    fun getStoredChallengesLimit(): Int {
+        return when (job) {
+            is WorkflowMultiBranchProject -> {
+                job.properties.get(GameMultiBranchProperty::class.java).storedChallengesCount
+            }
+            is WorkflowJob -> {
+                job.getProperty(GameJobProperty::class.java).storedChallengesCount
+            }
+            else -> {
+                (job as AbstractProject<*, *>).getProperty(GameJobProperty::class.java).storedChallengesCount
+            }
+        }
+    }
+
+    /**
+     * Returns the current Amount of stored Challenges
+     */
+    fun getStoredChallengesCount(): Int {
+        return if (getStoredChallenges() == null) 0 else getStoredChallenges().size
     }
 
     /**

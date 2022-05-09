@@ -9,7 +9,7 @@
     </parent>
     <groupId>org.gamekins</groupId>
     <artifactId>gamekins</artifactId>
-    <version>0.4</version>
+    <version>0.4.3-SNAPSHOT</version>
     <packaging>hpi</packaging>
 
     <properties>
@@ -24,6 +24,7 @@
         <maven.compiler.debuglevel>lines,source</maven.compiler.debuglevel>
         <animal.sniffer.version>1.20</animal.sniffer.version>
         <hpi-plugin.version>3.22</hpi-plugin.version>
+	<githubSuffix>jenkinsci/gamekins-plugin</githubSuffix>
         <!-- <maven.test.skip>true</maven.test.skip> -->
         <!-- Other properties you may want to use:
           ~ jenkins-test-harness.version: Jenkins Test Harness version you use to test the plugin. For Jenkins version >= 1.580.1 use JTH 2.0 or higher.
@@ -33,6 +34,7 @@
     </properties>
 
     <name>Gamekins Plugin</name>
+    <url>https://github.com/jenkinsci/gamekins-plugin</url>
     <!-- The default licence for Jenkins OSS Plugins is MIT. Substitute for the applicable one if needed. -->
     <licenses>
         <license>
@@ -41,6 +43,14 @@
             <distribution>repo</distribution>
         </license>
     </licenses>
+
+    <scm>
+        <connection>scm:git:git://github.com/${githubSuffix}.git</connection>
+        <developerConnection>scm:git:git@github.com:${githubSuffix}.git</developerConnection>
+        <url>https://github.com/${githubSuffix}</url>
+        <tag>v0.4.1</tag>
+    </scm>
+
     <dependencies>
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
@@ -536,6 +546,13 @@
                             <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
                         </manifest>
                     </archive>
+                </configuration>
+            </plugin>
+	    <plugin>
+                <groupId>com.github.spotbugs</groupId>
+                <artifactId>spotbugs-maven-plugin</artifactId>
+                <configuration>
+                    <skip>true</skip>
                 </configuration>
             </plugin>
         </plugins>

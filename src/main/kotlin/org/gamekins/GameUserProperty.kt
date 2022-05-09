@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Gamekins contributors
+ * Copyright 2022 Gamekins contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,6 +58,7 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
     private val score: HashMap<String, Int> = HashMap()
     private var sendNotifications: Boolean = true
     private var unsolvedAchievements: HashMap<String, CopyOnWriteArrayList<Achievement>> = HashMap()
+    private var storedChallenges: HashMap<String, CopyOnWriteArrayList<Challenge>> = HashMap()
 
     /**
      * Adds an additional [score] to one project [projectName], since one user can participate in multiple projects.
@@ -298,6 +299,13 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
     }
 
     /**
+     * Returns the list of stored Challenges by [projectName].
+     */
+    fun getStoredChallenges(projectName: String?): CopyOnWriteArrayList<Challenge> {
+        return storedChallenges[projectName]!!
+    }
+
+    /**
      * Returns the list of rejected Quests by [projectName].
      */
     fun getRejectedQuests(projectName: String?): CopyOnWriteArrayList<Pair<Quest, String>> {
@@ -429,6 +437,13 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
         }
         print.append(indentation).append("    </RejectedChallenges>\n")
 
+        print.append(indentation).append("    <StoredChallenges count=\"")
+            .append(getStoredChallenges(projectName).size).append("\">\n")
+        for (challenge in getStoredChallenges(projectName)) {
+            print.append(challenge.printToXML("", "$indentation        ")).append("\n")
+        }
+        print.append(indentation).append("    </StoredChallenges>\n")
+
         print.append(indentation).append("    <CurrentQuests count=\"")
             .append(getCurrentQuests(projectName).size).append("\">\n")
         for (quest in getCurrentQuests(projectName)) {
@@ -472,6 +487,7 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
         if (currentQuests == null) currentQuests = HashMap()
         if (completedQuests == null) completedQuests = HashMap()
         if (rejectedQuests == null) rejectedQuests = HashMap()
+        if (storedChallenges == null) storedChallenges = HashMap()
 
         //Add achievements if newly introduced
         if (participation.size != 0) {
@@ -544,13 +560,21 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
         }
 
         rejectedChallenges.forEach { (p, challenges) ->
-            val rejChallenges = CopyOnWriteArrayList(challenges)
+            val rejChallenges = CopyOnWriteArrayList(challenges.filter { it.first is CoverageChallenge })
             rejChallenges.removeIf { (challenge, _) ->
                 challenge is CoverageChallenge && challenge.details == null
             }
             val finalChallenges = ArrayList(challenges.filter { it.first !is CoverageChallenge })
             finalChallenges.addAll(rejChallenges)
             rejectedChallenges[p] = CopyOnWriteArrayList(finalChallenges)
+        }
+
+        storedChallenges.forEach { (p, challenges) ->
+            val coverageChallenges = ArrayList(challenges.filterIsInstance<CoverageChallenge>())
+            coverageChallenges.removeIf { it.details == null }
+            val finalChallenges = ArrayList(challenges.filter { it !is CoverageChallenge })
+            finalChallenges.addAll(coverageChallenges)
+            storedChallenges[p] = CopyOnWriteArrayList(finalChallenges)
         }
 
         return this
@@ -578,6 +602,19 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
         val currentChallenges = currentChallenges[projectName]!!
         currentChallenges.remove(challenge)
         this.currentChallenges[projectName] = currentChallenges
+    }
+
+    /**
+     * Rejects a given stored [challenge] of project [projectName] with a [reason].
+     */
+    fun rejectStoredChallenge(projectName: String, challenge: Challenge, reason: String) {
+        rejectedChallenges.computeIfAbsent(projectName) { CopyOnWriteArrayList() }
+        val challenges = rejectedChallenges[projectName]!!
+        challenges.add(Pair(challenge, reason))
+        rejectedChallenges[projectName] = challenges
+        val storedChallenges = storedChallenges[projectName]!!
+        storedChallenges.remove(challenge)
+        this.storedChallenges[projectName] = storedChallenges
     }
 
     /**
@@ -611,6 +648,7 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
         completedChallenges[projectName] = CopyOnWriteArrayList()
         currentChallenges[projectName] = CopyOnWriteArrayList()
         rejectedChallenges[projectName] = CopyOnWriteArrayList()
+        storedChallenges[projectName] = CopyOnWriteArrayList()
         score[projectName] = 0
         completedAchievements[projectName] = CopyOnWriteArrayList()
         val list = CopyOnWriteArrayList<Achievement>()
@@ -653,6 +691,7 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
         completedChallenges.putIfAbsent(projectName, CopyOnWriteArrayList())
         currentChallenges.putIfAbsent(projectName, CopyOnWriteArrayList())
         rejectedChallenges.putIfAbsent(projectName, CopyOnWriteArrayList())
+        storedChallenges.putIfAbsent(projectName, CopyOnWriteArrayList())
         unsolvedAchievements.putIfAbsent(projectName, CopyOnWriteArrayList(GamePublisherDescriptor.achievements))
         completedAchievements.putIfAbsent(projectName, CopyOnWriteArrayList())
         completedQuests.putIfAbsent(projectName, CopyOnWriteArrayList())
@@ -732,4 +771,33 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
             completedAchievements[project] = list
         }
     }
+
+    /**
+     * Restores a given [challenge] of project [projectName].
+     */
+    fun restoreChallenge(projectName: String, challenge: Challenge) {
+
+        val chalReasonPair = rejectedChallenges[projectName]!!.find { (chal, _) -> chal == challenge }!!
+
+        rejectedChallenges[projectName]!!.remove(chalReasonPair)
+    }
+
+    /**
+     * Stores a given [challenge] of project [projectName].
+     */
+    fun storeChallenge(projectName: String, challenge: Challenge) {
+        storedChallenges.computeIfAbsent(projectName) { CopyOnWriteArrayList() }
+        val challenges = storedChallenges[projectName]!!
+        challenges.add(challenge)
+        storedChallenges[projectName] = challenges
+        val currentChallenges = currentChallenges[projectName]!!
+        currentChallenges.remove(challenge)
+        this.currentChallenges[projectName] = currentChallenges
+    }
+
+    fun undoStoreChallenge(projectName: String, challenge: Challenge) {
+        storedChallenges[projectName]!!.remove(challenge)
+        currentChallenges[projectName]!!.add(challenge)
+    }
+
 }

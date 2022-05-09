@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Gamekins contributors
+ * Copyright 2022 Gamekins contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,8 @@ object Constants {
     const val DEFAULT_CURRENT_CHALLENGES = 3
 
     const val DEFAULT_CURRENT_QUESTS = 1
+
+    const val DEFAULT_STORED_CHALLENGES = 2
 
     const val DEFAULT_SEARCH_COMMIT_COUNT = 50
 
@@ -109,6 +111,7 @@ object Constants {
         var branch: String = "",
         var currentChallengesCount: Int = DEFAULT_CURRENT_CHALLENGES,
         var currentQuestsCount: Int = DEFAULT_CURRENT_QUESTS,
+        var storedChallengesCount: Int = DEFAULT_STORED_CHALLENGES,
         var generated: Int = 0,
         var jacocoCSVPath: String = "",
         var jacocoResultsPath: String = "",

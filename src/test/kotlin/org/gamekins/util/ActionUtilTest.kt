@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Gamekins contributors
+ * Copyright 2022 Gamekins contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.gamekins.util
 
 import hudson.FilePath
 import hudson.model.AbstractItem
+import hudson.model.AbstractProject
 import hudson.model.Job
 import hudson.model.User
 import hudson.util.FormValidation
@@ -61,6 +62,8 @@ class ActionUtilTest: AnnotationSpec() {
         every { challenge.toEscapedString() } returns stringChallenge
         every { userProperty.rejectChallenge(any(), any(), any()) } returns Unit
         every { userProperty.newChallenge(any(), any()) } returns Unit
+        every { userProperty.storeChallenge(any(), any()) } returns Unit
+        every { userProperty.undoStoreChallenge(any(), any()) } returns Unit
 
         val rootDirectory = javaClass.classLoader.getResource("test-project.zip")
         rootDirectory shouldNotBe null
@@ -94,6 +97,52 @@ class ActionUtilTest: AnnotationSpec() {
         every { ActionUtil.generateChallengeAfterRejection(any(), any(), any(), any()) } returns ""
         every { userProperty.getCurrentChallenges(any()) } returns CopyOnWriteArrayList(listOf(challenge))
         ActionUtil.doRejectChallenge(job, stringChallenge, "reason").kind shouldBe FormValidation.Kind.OK
+    }
+
+    @Test
+    fun doStoreChallenge() {
+        ActionUtil.doStoreChallenge(job, "").kind shouldBe FormValidation.Kind.ERROR
+
+        every { User.current() } returns null
+        ActionUtil.doStoreChallenge(job, "").kind shouldBe FormValidation.Kind.ERROR
+
+        every { User.current() } returns user
+        every { user.getProperty(GameUserProperty::class.java) } returns null
+        ActionUtil.doStoreChallenge(job, "").kind shouldBe FormValidation.Kind.ERROR
+
+        every { user.getProperty(GameUserProperty::class.java) } returns userProperty
+        every { userProperty.getCurrentChallenges(any()) } returns CopyOnWriteArrayList()
+        ActionUtil.doStoreChallenge(job, "").kind shouldBe FormValidation.Kind.ERROR
+
+        mockkStatic(ActionUtil::class)
+        every { ActionUtil.generateChallengeAfterRejection(any(), any(), any(), any()) } returns ""
+        every { userProperty.getCurrentChallenges(any()) } returns CopyOnWriteArrayList(listOf(challenge))
+        every { userProperty.getStoredChallenges(any()).size } returns 0
+        val job = mockkClass(AbstractProject::class)
+        every { job.fullName } returns "test-project"
+        every { job.save() } returns Unit
+        every { job.getProperty(GameJobProperty::class.java).storedChallengesCount } returns 1
+        ActionUtil.doStoreChallenge(job, stringChallenge).kind shouldBe FormValidation.Kind.OK
+    }
+
+    @Test
+    fun doUndoStoreChallenge() {
+        every { userProperty.getStoredChallenges(any()) } returns CopyOnWriteArrayList(listOf(challenge))
+
+        ActionUtil.doUndoStoreChallenge(job, "").kind shouldBe FormValidation.Kind.ERROR
+
+        every { User.current() } returns null
+        ActionUtil.doUndoStoreChallenge(job, "").kind shouldBe FormValidation.Kind.ERROR
+
+        every { User.current() } returns user
+        every { user.getProperty(GameUserProperty::class.java) } returns null
+        ActionUtil.doUndoStoreChallenge(job, "").kind shouldBe FormValidation.Kind.ERROR
+
+        every { user.getProperty(GameUserProperty::class.java) } returns userProperty
+        every { userProperty.getCurrentChallenges(any()) } returns CopyOnWriteArrayList()
+        ActionUtil.doUndoStoreChallenge(job, "").kind shouldBe FormValidation.Kind.ERROR
+
+        ActionUtil.doUndoStoreChallenge(job, stringChallenge).kind shouldBe FormValidation.Kind.OK
     }
 
     @Test

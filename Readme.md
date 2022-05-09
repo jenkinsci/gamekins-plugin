@@ -23,6 +23,9 @@ http://localhost:8080/jenkins/ with the plugin installed.
 The plugin can also be opened by IntelliJ Idea and started by adding a new configuration with the command line
 argument ```hpi:run```. It can also be debugged this way.
 
+Use the file ```Jenkinsfile``` for Continuous Integration without the invocation of Gamekins, 
+and ```Jenkinsfile-Gamekins``` with the execution of Gamekins.
+
 ### Installation
 To install the plugin on a dedicated Jenkins, the Jenkins must have version 2.249.3 or higher. Create the compiled 
 plugin by executing ```mvn clean package``` on the command line in the root project folder. The package is located in 

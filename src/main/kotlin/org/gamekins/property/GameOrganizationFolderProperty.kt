@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Gamekins contributors
+ * Copyright 2022 Gamekins contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -107,7 +107,7 @@ class GameOrganizationFolderProperty private constructor()
                                 ?: project.addProperty(GameMultiBranchProperty(project,
                                     formData.getBoolean("activated"), formData.getBoolean("showLeaderboard"),
                                     formData.getBoolean("showStatistics"), formData.getInt("currentChallengesCount"),
-                                    formData.getInt("currentQuestsCount")))
+                                    formData.getInt("currentQuestsCount"), formData.getInt("storedChallengesCount")))
                         folder.save()
                         break
                     } catch (e: IOException) {

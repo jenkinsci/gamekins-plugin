@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Gamekins contributors
+ * Copyright 2022 Gamekins contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,6 +52,30 @@ class LeaderboardActionDescriptor : Descriptor<LeaderboardAction>(LeaderboardAct
     fun doRejectQuest(@AncestorInPath job: AbstractItem, @QueryParameter reject: String,
                           @QueryParameter reason: String): FormValidation {
         return ActionUtil.doRejectQuest(job, reject, reason)
+    }
+
+    /**
+     * Restores a [Challenge] with the String representation [reject].
+     */
+    fun doRestoreChallenge(@AncestorInPath job: AbstractItem, @QueryParameter reject: String,
+                          ): FormValidation {
+        return ActionUtil.doRestoreChallenge(job, reject)
+    }
+
+    /**
+     * Stores a [Challenge] with the String representation [store] for later use.
+     */
+    fun doStoreChallenge(@AncestorInPath job: AbstractItem, @QueryParameter store: String,
+    ): FormValidation {
+        return ActionUtil.doStoreChallenge(job, store)
+    }
+
+    /**
+     * Undo Stores a [Challenge] with the String representation [store] for later use.
+     */
+    fun doUndoStoreChallenge(@AncestorInPath job: AbstractItem, @QueryParameter store: String,
+    ): FormValidation {
+        return ActionUtil.doUndoStoreChallenge(job, store)
     }
 
     @Nonnull

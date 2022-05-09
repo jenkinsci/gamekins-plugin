@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Gamekins contributors
+ * Copyright 2022 Gamekins contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -159,10 +159,25 @@ object ChallengeFactory {
                             && (it.first as ClassCoverageChallenge).details.fileName == selectedFile.fileName
                             && (it.first as ClassCoverageChallenge)
                         .details.packageName == selectedFile.packageName }) {
-
                 listener.logger.println(
                     "[Gamekins] Class ${selectedFile.fileName} in package " +
                             "${selectedFile.packageName} was rejected previously"
+                )
+                challenge = null
+                continue
+            }
+
+            val storedChallenges = user.getProperty(GameUserProperty::class.java)
+                .getStoredChallenges(parameters.projectName)
+
+            //Remove classes where a ClassCoverageChallenge has been stored
+            if (!storedChallenges.none {
+                    it is ClassCoverageChallenge
+                            && it.details.fileName == selectedFile.fileName
+                            && it.details.packageName == selectedFile.packageName }) {
+                listener.logger.println(
+                    "[Gamekins] Class ${selectedFile.fileName} in package " +
+                            "${selectedFile.packageName} is currently stored"
                 )
                 challenge = null
                 continue
@@ -209,6 +224,11 @@ object ChallengeFactory {
             if (rejectedChallenges.any { it.first == challenge }) {
                 listener.logger.println("[Gamekins] Challenge ${challenge?.toEscapedString()} was already " +
                         "rejected previously")
+                challenge = null
+            }
+
+            if (storedChallenges.any { it == challenge }) {
+                listener.logger.println("[Gamekins] Challenge ${challenge?.toEscapedString()} is already stored")
                 challenge = null
             }
 

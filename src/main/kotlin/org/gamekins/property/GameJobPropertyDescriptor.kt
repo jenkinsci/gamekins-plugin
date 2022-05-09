@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Gamekins contributors
+ * Copyright 2022 Gamekins contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -156,7 +156,9 @@ class GameJobPropertyDescriptor : JobPropertyDescriptor(GameJobProperty::class.j
             if (formData.getValue("currentChallengesCount") is Int)
                 formData.getInt("currentChallengesCount") else Constants.DEFAULT_CURRENT_CHALLENGES,
             if (formData.getValue("currentQuestsCount") is Int)
-                formData.getInt("currentQuestsCount") else Constants.DEFAULT_CURRENT_QUESTS
+                formData.getInt("currentQuestsCount") else Constants.DEFAULT_CURRENT_QUESTS,
+            if (formData.getValue("storedChallengesCount") is Int)
+                formData.getInt("storedChallengesCount") else Constants.DEFAULT_STORED_CHALLENGES
         )
     }
 }

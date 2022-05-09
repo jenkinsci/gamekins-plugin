@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Gamekins contributors
+ * Copyright 2022 Gamekins contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,9 +83,9 @@ class JacocoUtilTest : AnnotationSpec() {
 
     @Test
     fun calculateCurrentFilePath() {
-        JacocoUtil.calculateCurrentFilePath(path, File(path.remote)) shouldBe path
+        JacocoUtil.calculateCurrentFilePath(path, File(path.remote)).toURI().path shouldBe path.toURI().path
 
-        JacocoUtil.calculateCurrentFilePath(path, File(jacocoSourceFile.remote), path.remote) shouldBe jacocoSourceFile
+        JacocoUtil.calculateCurrentFilePath(path, File(jacocoSourceFile.remote), path.remote).toURI().path shouldBe jacocoSourceFile.toURI().path
     }
 
     @Test
@@ -232,18 +232,18 @@ class JacocoUtilTest : AnnotationSpec() {
 
     @Test
     fun isGetLinesInRange() {
-        JacocoUtil.getLinesInRange(jacocoSourceFile, 41, 4) shouldBe Pair("    double ns = a * a + b * b;\n" +
-                "    double dArg = d / 2;\n" +
-                "    double cArg = c * arg();\n" +
-                "    double dDenom = Math.pow(Math.E, d * arg());\n" +
-                "\n", "    double cArg = c * arg();")
+        JacocoUtil.getLinesInRange(jacocoSourceFile, 41, 4) shouldBe Pair("    double ns = a * a + b * b;" + System.lineSeparator() +
+                "    double dArg = d / 2;" + System.lineSeparator() +
+                "    double cArg = c * arg();" + System.lineSeparator() +
+                "    double dDenom = Math.pow(Math.E, d * arg());" + System.lineSeparator() +
+                System.lineSeparator(), "    double cArg = c * arg();")
 
 
-        JacocoUtil.getLinesInRange(jacocoSourceFile, "dDenom", 4) shouldBe Pair("    double dArg = d / 2;\n" +
-                "    double cArg = c * arg();\n" +
-                "    double dDenom = Math.pow(Math.E, d * arg());\n" +
-                "\n" +
-                "    double newReal =\n", "")
+        JacocoUtil.getLinesInRange(jacocoSourceFile, "dDenom", 4) shouldBe Pair("    double dArg = d / 2;" + System.lineSeparator() +
+                "    double cArg = c * arg();" + System.lineSeparator() +
+                "    double dDenom = Math.pow(Math.E, d * arg());" + System.lineSeparator() +
+                System.lineSeparator() +
+                "    double newReal =" + System.lineSeparator(), "")
 
         JacocoUtil.getLinesInRange(jacocoSourceFile, 5.0, 4) shouldBe Pair("", "")
     }
