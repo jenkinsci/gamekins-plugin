@@ -49,9 +49,9 @@ object ActionUtil {
         if (rejectReason.matches(Regex("\\s+"))) rejectReason = "No reason provided"
 
         val user: User = User.current()
-                ?: return FormValidation.error("There is no user signed in")
+                ?: return FormValidation.error(Constants.ERROR_NO_USER_SIGNED_IN)
         val property = user.getProperty(GameUserProperty::class.java)
-                ?: return FormValidation.error("Unexpected error while retrieving the property")
+                ?: return FormValidation.error(Constants.ERROR_RETRIEVING_PROPERTY)
 
         val projectName = job.fullName
         var challenge: Challenge? = null
@@ -62,7 +62,7 @@ object ActionUtil {
             }
         }
 
-        if (challenge == null) return FormValidation.error("The challenge does not exist")
+        if (challenge == null) return FormValidation.error(Constants.ERROR_NO_CHALLENGE_EXISTS)
         if (challenge is DummyChallenge) return FormValidation.error("Dummies cannot be rejected " +
                 "- please run another build")
         property.rejectChallenge(projectName, challenge, rejectReason)
@@ -74,7 +74,7 @@ object ActionUtil {
             job.save()
         } catch (e: IOException) {
             e.printStackTrace()
-            return FormValidation.error("Unexpected error while saving")
+            return FormValidation.error(Constants.ERROR_SAVING)
         }
 
         return FormValidation.ok("Challenge rejected$generatedText")
@@ -89,9 +89,9 @@ object ActionUtil {
         if (rejectReason.matches(Regex("\\s+"))) rejectReason = "No reason provided"
 
         val user: User = User.current()
-            ?: return FormValidation.error("There is no user signed in")
+            ?: return FormValidation.error(Constants.ERROR_NO_USER_SIGNED_IN)
         val property = user.getProperty(GameUserProperty::class.java)
-            ?: return FormValidation.error("Unexpected error while retrieving the property")
+            ?: return FormValidation.error(Constants.ERROR_RETRIEVING_PROPERTY)
 
         val projectName = job.fullName
         var quest: Quest? = null
@@ -114,7 +114,7 @@ object ActionUtil {
             job.save()
         } catch (e: IOException) {
             e.printStackTrace()
-            return FormValidation.error("Unexpected error while saving")
+            return FormValidation.error(Constants.ERROR_SAVING)
         }
 
         return FormValidation.ok("Quest rejected")
@@ -125,9 +125,9 @@ object ActionUtil {
      */
     fun doRestoreChallenge(job: AbstractItem, reject: String): FormValidation {
         val user: User = User.current()
-            ?: return FormValidation.error("There is no user signed in")
+            ?: return FormValidation.error(Constants.ERROR_NO_USER_SIGNED_IN)
         val property = user.getProperty(GameUserProperty::class.java)
-            ?: return FormValidation.error("Unexpected error while retrieving the property")
+            ?: return FormValidation.error(Constants.ERROR_RETRIEVING_PROPERTY)
 
         val projectName = job.fullName
         var challenge: Challenge? = null
@@ -138,7 +138,7 @@ object ActionUtil {
             }
         }
 
-        if (challenge == null) return FormValidation.error("The challenge does not exist")
+        if (challenge == null) return FormValidation.error(Constants.ERROR_NO_CHALLENGE_EXISTS)
 
         property.restoreChallenge(projectName, challenge)
 
@@ -147,7 +147,7 @@ object ActionUtil {
             job.save()
         } catch (e: IOException) {
             e.printStackTrace()
-            return FormValidation.error("Unexpected error while saving")
+            return FormValidation.error(Constants.ERROR_SAVING)
         }
 
         return FormValidation.ok("Challenge restored")
@@ -159,9 +159,9 @@ object ActionUtil {
      */
     fun doStoreChallenge(job: AbstractItem, store: String): FormValidation {
         val user: User = User.current()
-            ?: return FormValidation.error("There is no user signed in")
+            ?: return FormValidation.error("Constants.ERROR_NO_USER_SIGNED_IN")
         val property = user.getProperty(GameUserProperty::class.java)
-            ?: return FormValidation.error("Unexpected error while retrieving the property")
+            ?: return FormValidation.error(Constants.ERROR_RETRIEVING_PROPERTY)
 
         val projectName = job.fullName
         var challenge: Challenge? = null
@@ -172,7 +172,7 @@ object ActionUtil {
             }
         }
 
-        if (challenge == null) return FormValidation.error("The challenge does not exist")
+        if (challenge == null) return FormValidation.error(Constants.ERROR_NO_CHALLENGE_EXISTS)
         if (challenge is DummyChallenge) return FormValidation.error("Dummies cannot be stored " +
                 "- please run another build")
 
@@ -189,7 +189,7 @@ object ActionUtil {
             job.save()
         } catch (e: IOException) {
             e.printStackTrace()
-            return FormValidation.error("Unexpected error while saving")
+            return FormValidation.error(Constants.ERROR_SAVING)
         }
 
         return FormValidation.ok("Challenge stored$generatedText")
@@ -200,9 +200,9 @@ object ActionUtil {
      */
     fun doUndoStoreChallenge(job: AbstractItem, store: String): FormValidation {
         val user: User = User.current()
-            ?: return FormValidation.error("There is no user signed in")
+            ?: return FormValidation.error("Constants.ERROR_NO_USER_SIGNED_IN")
         val property = user.getProperty(GameUserProperty::class.java)
-            ?: return FormValidation.error("Unexpected error while retrieving the property")
+            ?: return FormValidation.error(Constants.ERROR_RETRIEVING_PROPERTY)
 
         val projectName = job.fullName
         var challenge: Challenge? = null
@@ -213,7 +213,7 @@ object ActionUtil {
             }
         }
 
-        if (challenge == null) return FormValidation.error("The challenge does not exist")
+        if (challenge == null) return FormValidation.error(Constants.ERROR_NO_CHALLENGE_EXISTS)
 
         property.undoStoreChallenge(projectName, challenge)
 
@@ -222,7 +222,7 @@ object ActionUtil {
             job.save()
         } catch (e: IOException) {
             e.printStackTrace()
-            return FormValidation.error("Unexpected error while saving")
+            return FormValidation.error(Constants.ERROR_SAVING)
         }
 
         return FormValidation.ok("Challenge restored")

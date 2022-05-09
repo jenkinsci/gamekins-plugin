@@ -38,13 +38,19 @@ object Constants {
 
     const val DEFAULT_SEARCH_COMMIT_COUNT = 50
 
-    const val UNEXPECTED_ERROR = "Unexpected Error"
-
-    const val ERROR_PARENT = "$UNEXPECTED_ERROR: Parent job is null"
-
-    const val ERROR_SAVING = "There was an error with saving"
+    const val ERROR_UNEXPECTED = "Unexpected Error"
 
     const val ERROR_GENERATION = "There was an error with generating a new challenge"
+
+    const val ERROR_NO_CHALLENGE_EXISTS = "The challenge does not exist"
+
+    const val ERROR_NO_USER_SIGNED_IN = "There is no user signed in"
+
+    const val ERROR_PARENT = "$ERROR_UNEXPECTED: Parent job is null"
+
+    const val ERROR_RETRIEVING_PROPERTY = "Unexpected error while retrieving the property"
+
+    const val ERROR_SAVING = "There was an error with saving"
 
     const val EXISTS = " exists "
 
