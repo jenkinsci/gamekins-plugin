@@ -206,7 +206,7 @@ class LeaderboardAction(val job: AbstractItem) : ProminentProjectAction, Describ
         return property.isParticipating(job.fullName)
     }
     /**
-     * Returns the maximal Amount of stored Challenges
+     * Returns the maximal amount of stored Challenges
      */
     fun getStoredChallengesLimit(): Int {
         return when (job) {
@@ -223,10 +223,10 @@ class LeaderboardAction(val job: AbstractItem) : ProminentProjectAction, Describ
     }
 
     /**
-     * Returns the current Amount of stored Challenges
+     * Returns the current amount of stored Challenges
      */
     fun getStoredChallengesCount(): Int {
-        return if (getStoredChallenges() == null) 0 else getStoredChallenges().size
+        return getStoredChallenges().size
     }
 
     /**

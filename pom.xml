@@ -9,7 +9,7 @@
     </parent>
     <groupId>org.gamekins</groupId>
     <artifactId>gamekins</artifactId>
-    <version>0.4.3-SNAPSHOT</version>
+    <version>0.5-SNAPSHOT</version>
     <packaging>hpi</packaging>
 
     <properties>
@@ -48,7 +48,7 @@
         <connection>scm:git:git://github.com/${githubSuffix}.git</connection>
         <developerConnection>scm:git:git@github.com:${githubSuffix}.git</developerConnection>
         <url>https://github.com/${githubSuffix}</url>
-        <tag>v0.4.1</tag>
+        <tag>v0.4.2</tag>
     </scm>
 
     <dependencies>

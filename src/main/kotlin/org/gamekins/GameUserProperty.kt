@@ -525,11 +525,9 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
         }
 
         //Add stored challenges if newly introduced
-        if (participation.size != 0) {
-            if (storedChallenges.size == 0) {
-                participation.keys.forEach { project ->
-                    storedChallenges[project] = CopyOnWriteArrayList()
-                }
+        if (participation.size != 0 && storedChallenges.size == 0) {
+            participation.keys.forEach { project ->
+                storedChallenges[project] = CopyOnWriteArrayList()
             }
         }
 
