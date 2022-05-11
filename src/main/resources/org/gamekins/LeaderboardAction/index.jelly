@@ -407,6 +407,14 @@
                                                                             data-descriptor-url="${it.descriptor.descriptorFullUrl}">
                                                                         Unshelve
                                                                     </button>
+                                                                    <j:if test='${it.canSend}'>
+                                                                        <button type="button" class="btn btn-secondary m-2 py-1 storeChallenge"
+                                                                                style="font-size: 14px;"
+                                                                                data-challenge-id="${index + 1}"
+                                                                                data-descriptor-url="${it.descriptor.descriptorFullUrl}">
+                                                                            Send
+                                                                        </button>
+                                                                    </j:if>
                                                                 </td>
                                                             </tr>
                                                         </j:if>

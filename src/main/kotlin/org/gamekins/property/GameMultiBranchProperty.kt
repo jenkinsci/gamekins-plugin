@@ -51,7 +51,8 @@ class GameMultiBranchProperty
                                   @set:DataBoundSetter var showStatistics: Boolean,
                                   @set:DataBoundSetter var currentChallengesCount: Int,
                                   @set:DataBoundSetter var currentQuestsCount: Int,
-                                  @set:DataBoundSetter var currentStoredChallengesCount: Int)
+                                  @set:DataBoundSetter var currentStoredChallengesCount: Int,
+                                  @set:DataBoundSetter var canSendChallenge: Boolean)
     : AbstractFolderProperty<AbstractFolder<*>?>(), GameProperty, StaplerProxy {
 
     private var statistics: Statistics
@@ -124,6 +125,7 @@ class GameMultiBranchProperty
                 currentQuestsCount = form.getInt("currentQuestsCount")
             if (form.getValue("storedChallengesCount") is String)
                 currentQuestsCount = form.getInt("storedChallengesCount")
+            canSendChallenge = form.getBoolean("canSendChallenge")
         }
         
         PropertyUtil.reconfigure(owner!!, showLeaderboard, showStatistics)
@@ -270,7 +272,8 @@ class GameMultiBranchProperty
                 if (formData.getValue("currentQuestsCount") is Int)
                     formData.getInt("currentQuestsCount") else Constants.DEFAULT_CURRENT_QUESTS,
                 if (formData.getValue("storedChallengesCount") is Int)
-                    formData.getInt("storedChallengesCount") else Constants.DEFAULT_STORED_CHALLENGES
+                    formData.getInt("storedChallengesCount") else Constants.DEFAULT_STORED_CHALLENGES,
+                formData.getBoolean("canSendChallenge")
             )
         }
     }

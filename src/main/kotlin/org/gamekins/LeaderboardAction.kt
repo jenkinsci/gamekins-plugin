@@ -230,6 +230,23 @@ class LeaderboardAction(val job: AbstractItem) : ProminentProjectAction, Describ
     }
 
     /**
+     * Returns the maximal amount of stored Challenges
+     */
+    fun getCanSend(): Boolean {
+        return when (job) {
+            is WorkflowMultiBranchProject -> {
+                job.properties.get(GameMultiBranchProperty::class.java).canSendChallenge
+            }
+            is WorkflowJob -> {
+                job.getProperty(GameJobProperty::class.java).canSendChallenge
+            }
+            else -> {
+                (job as AbstractProject<*, *>).getProperty(GameJobProperty::class.java).canSendChallenge
+            }
+        }
+    }
+
+    /**
      * Container for the details of a user displayed on the Leaderboard.
      *
      * @author Philipp Straubinger
