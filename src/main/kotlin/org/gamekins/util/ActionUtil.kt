@@ -30,6 +30,7 @@ import org.gamekins.file.FileDetails
 import org.gamekins.property.GameJobProperty
 import org.gamekins.util.Constants.Parameters
 import java.io.IOException
+import java.util.Collections
 
 /**
  * Util object for interaction with actions.
@@ -178,7 +179,7 @@ object ActionUtil {
 
         if (property.getStoredChallenges(projectName).size >=
             (job as AbstractProject<*, *>).getProperty(GameJobProperty::class.java).currentStoredChallengesCount)
-            return FormValidation.error("Storage Limit reached")
+            return FormValidation.error(Constants.ERROR_STORAGE_CAPACITY_REACHED)
 
         property.storeChallenge(projectName, challenge)
 
@@ -248,7 +249,8 @@ object ActionUtil {
 
         if (challenge == null) return FormValidation.error(Constants.ERROR_NO_CHALLENGE_EXISTS)
 
-        val other: User = User.get(to)//TODO
+        val other: User = User.get(to, false, Collections.EMPTY_MAP)
+            ?: return FormValidation.error(Constants.ERROR_USER_NOT_FOUND)
         val otherProperty = other.getProperty(GameUserProperty::class.java)
             ?: return FormValidation.error(Constants.ERROR_RETRIEVING_PROPERTY)
 
@@ -257,7 +259,7 @@ object ActionUtil {
 
         if (otherProperty.getStoredChallenges(job.fullName).size >=
             (job as AbstractProject<*, *>).getProperty(GameJobProperty::class.java).currentStoredChallengesCount)
-            return FormValidation.error("User can't store another challenge")
+            return FormValidation.error(Constants.ERROR_STORAGE_CAPACITY_REACHED)
         property.removeStoredChallenge(projectName, challenge)
         otherProperty.addStoredChallenge(projectName, challenge)
 
