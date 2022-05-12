@@ -52,6 +52,8 @@ object Constants {
 
     const val ERROR_SAVING = "There was an error with saving"
 
+    const val ERROR_RECEIVER_IS_SELF = "Cannot send to yourself"
+
     const val EXISTS = " exists "
 
     const val NO_QUEST = "No quest could be generated. This could mean that none of the prerequisites was met, " +

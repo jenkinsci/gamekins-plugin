@@ -229,6 +229,51 @@ object ActionUtil {
     }
 
     /**
+     * Sends a [Challenge] with the String representation [send] to [to].
+     */
+    fun doSendChallenge(job: AbstractItem, send: String, to: String): FormValidation {
+        val user: User = User.current()
+            ?: return FormValidation.error(Constants.ERROR_NO_USER_SIGNED_IN)
+        val property = user.getProperty(GameUserProperty::class.java)
+            ?: return FormValidation.error(Constants.ERROR_RETRIEVING_PROPERTY)
+
+        val projectName = job.fullName
+        var challenge: Challenge? = null
+        for (chal in property.getStoredChallenges(projectName)) {
+            if (chal.toEscapedString() == send) {
+                challenge = chal
+                break
+            }
+        }
+
+        if (challenge == null) return FormValidation.error(Constants.ERROR_NO_CHALLENGE_EXISTS)
+
+        val other: User = User.get(to)//TODO
+        val otherProperty = other.getProperty(GameUserProperty::class.java)
+            ?: return FormValidation.error(Constants.ERROR_RETRIEVING_PROPERTY)
+
+        if (user == other)
+            return FormValidation.error(Constants.ERROR_RECEIVER_IS_SELF)
+
+        if (otherProperty.getStoredChallenges(job.fullName).size >=
+            (job as AbstractProject<*, *>).getProperty(GameJobProperty::class.java).currentStoredChallengesCount)
+            return FormValidation.error("User can't store another challenge")
+        property.removeStoredChallenge(projectName, challenge)
+        otherProperty.addStoredChallenge(projectName, challenge)
+
+        try {
+            user.save()
+            other.save()
+            job.save()
+        } catch (e: IOException) {
+            e.printStackTrace()
+            return FormValidation.error(Constants.ERROR_SAVING)
+        }
+
+        return FormValidation.ok("Challenge sent")
+    }
+
+    /**
      * Generates a new Challenge according to the information in [challenge] for a [user] after rejection. Only
      * possible if the constants are set in the [challenge] (may not be after updating the plugin) and the workspace
      * is on the local machine.
