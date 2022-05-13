@@ -180,4 +180,49 @@ class ActionUtilTest: AnnotationSpec() {
         ActionUtil.generateChallengeAfterRejection(challenge, user, userProperty, job1) shouldBe
                 ": New Challenge generated"
     }
+
+    @Test
+    fun doSendChallenge()
+    {
+        every { userProperty.getStoredChallenges(any()) } returns CopyOnWriteArrayList(listOf(challenge))
+
+        ActionUtil.doSendChallenge(job, "", "").kind shouldBe FormValidation.Kind.ERROR
+
+        every { User.current() } returns null
+        ActionUtil.doSendChallenge(job, "", "").kind shouldBe FormValidation.Kind.ERROR
+
+        every { User.current() } returns user
+        every { user.getProperty(GameUserProperty::class.java) } returns null
+        ActionUtil.doSendChallenge(job, "", "").kind shouldBe FormValidation.Kind.ERROR
+
+        every { user.getProperty(GameUserProperty::class.java) } returns userProperty
+        every { User.get("User1", false, any()) } returns null
+        every { User.get("User0", false, any()) } returns user
+
+        ActionUtil.doSendChallenge(job, stringChallenge, "User1").kind shouldBe FormValidation.Kind.ERROR
+
+        ActionUtil.doSendChallenge(job, stringChallenge, "User0").kind shouldBe FormValidation.Kind.ERROR
+
+        val user1 = mockkClass(User::class)
+        every { User.get("User1", false, any()) } returns user1
+        every { user1.save() } returns Unit
+        every { user1.getProperty(GameUserProperty::class.java) } returns null
+        ActionUtil.doSendChallenge(job, stringChallenge, "User1").kind shouldBe FormValidation.Kind.ERROR
+
+        val userProperty1 = mockkClass(GameUserProperty::class)
+        every { user1.getProperty(GameUserProperty::class.java) } returns userProperty1
+        every { userProperty1.getStoredChallenges(any()).size } returns 1
+        val job = mockkClass(AbstractProject::class)
+        every { job.fullName } returns "test-project"
+        every { job.save() } returns Unit
+        every { job.getProperty(GameJobProperty::class.java).currentStoredChallengesCount } returns 1
+
+        ActionUtil.doSendChallenge(job, stringChallenge, "User1").kind shouldBe FormValidation.Kind.ERROR
+
+        every { userProperty1.getStoredChallenges(any()).size } returns 0
+        every { userProperty.removeStoredChallenge(any(), any()) } returns Unit
+        every { userProperty1.addStoredChallenge(any(), any()) } returns Unit
+        ActionUtil.doSendChallenge(job, stringChallenge, "User1").kind shouldBe FormValidation.Kind.OK
+
+    }
 }
