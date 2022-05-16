@@ -655,7 +655,8 @@
 
                     <li>To store a Challenge, click the store button</li>
                     <li>Stored Challenges can not be completed and will count as rejected should they be solved</li>
-                    <li>To view and unshelve stored Challenges press the Stored Challenges Button</li>
+                    <li>To view, unshelve and send stored Challenges press the Stored Challenges Button</li>
+                    <li>Stored Challenges can be sent to another participant if that option is enabled</li>
 
                     <li>If there are no Challenges generated for you although you have committed something recently,
                         then checkout the <i>Git Names</i> in your profile settings
