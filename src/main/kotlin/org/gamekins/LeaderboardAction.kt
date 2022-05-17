@@ -230,7 +230,7 @@ class LeaderboardAction(val job: AbstractItem) : ProminentProjectAction, Describ
     }
 
     /**
-     * Returns the maximal amount of stored Challenges
+     * Returns whether challenges can be sent
      */
     fun getCanSend(): Boolean {
         return when (job) {
