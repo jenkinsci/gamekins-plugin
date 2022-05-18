@@ -408,8 +408,8 @@
                                                                         Unshelve
                                                                     </button>
                                                                     <j:if test='${it.canSend}'>
-                                                                        <button type="button" class="btn btn-secondary m-2 py-1"
-                                                                                style="font-size: 14px;"
+                                                                        <button type="button" class="btn m-2 py-1"
+                                                                                style="font-size: 14px; background-color: lightsteelblue"
                                                                                 data-toggle="modal" data-target="#sendModal"
                                                                                 data-challenge-id="${storedChallenge}"
                                                                                 data-descriptor-url="${it.descriptor.descriptorFullUrl}">
