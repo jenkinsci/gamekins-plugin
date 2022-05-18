@@ -413,7 +413,7 @@
                                                                                 data-toggle="modal" data-target="#sendModal"
                                                                                 data-challenge-id="${storedChallenge}"
                                                                                 data-descriptor-url="${it.descriptor.descriptorFullUrl}">
-                                                                            Send
+                                                                            Send To:
                                                                         </button>
                                                                     </j:if>
                                                                 </td>
