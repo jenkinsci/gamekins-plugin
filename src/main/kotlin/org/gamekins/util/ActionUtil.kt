@@ -20,6 +20,8 @@ import hudson.FilePath
 import hudson.model.AbstractItem
 import hudson.model.AbstractProject
 import hudson.model.User
+import hudson.tasks.MailAddressResolver
+import hudson.tasks.Mailer
 import hudson.util.FormValidation
 import org.gamekins.GameUserProperty
 import org.gamekins.challenge.Challenge
@@ -30,7 +32,12 @@ import org.gamekins.file.FileDetails
 import org.gamekins.property.GameJobProperty
 import org.gamekins.util.Constants.Parameters
 import java.io.IOException
-import java.util.Collections
+import java.util.*
+import javax.mail.Message
+import javax.mail.MessagingException
+import javax.mail.Transport
+import javax.mail.internet.InternetAddress
+import javax.mail.internet.MimeMessage
 
 /**
  * Util object for interaction with actions.
@@ -272,7 +279,38 @@ object ActionUtil {
             return FormValidation.error(Constants.ERROR_SAVING)
         }
 
+        val mailer = Mailer.descriptor()
+        if (user.getProperty(GameUserProperty::class.java).getNotifications()) {
+            val mail = MailAddressResolver.resolve(other)
+            val msg = MimeMessage(mailer.createSession())
+            msg.subject = "New Gamekins Challenge"
+            msg.setFrom(InternetAddress("challenges@gamekins.org", "Gamekins"))
+            msg.sentDate = Date()
+            msg.addRecipient(Message.RecipientType.TO, Mailer.stringToAddress(mail, mailer.charset))
+            msg.setText(generateMailText(projectName, challenge, other, user))
+            try {
+                Transport.send(msg)
+            } catch (e: MessagingException) {
+                e.printStackTrace()
+            }
+        }
+
         return FormValidation.ok("Challenge sent")
+    }
+
+    /**
+     * Generates the mail text for receiving a challenge.
+     */
+    private fun generateMailText(projectName: String, challenge: Challenge, receiver: User, sender: User): String {
+        var text = "Hello ${receiver.fullName},\n\n"
+        text += "you have a received a new challenge:\n\n"
+        text += "Project: $projectName\n"
+        text += "Sender: ${sender.fullName}\n"
+        text += "Challenge: ${challenge.getName()}\n"
+
+        text += "\nThe challenge is not immediately active and has to be unshelved from storage first.\n"
+
+        return text
     }
 
     /**
