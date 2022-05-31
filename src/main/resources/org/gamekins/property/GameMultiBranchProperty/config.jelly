@@ -58,6 +58,10 @@
                      description="Default: 1">
                 <f:number />
             </f:entry>
+            <f:entry title="Simultaneous stored challenges" field="currentStoredChallengesCount"
+                     description="Default: 2">
+                <f:number />
+            </f:entry>
         </f:advanced>
     </f:section>
 
