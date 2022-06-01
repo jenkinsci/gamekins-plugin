@@ -280,7 +280,7 @@ object ActionUtil {
         }
 
         val mailer = Mailer.descriptor()
-        if (user.getProperty(GameUserProperty::class.java).getNotifications()) {
+        if (other.getProperty(GameUserProperty::class.java).getNotifications()) {
             val mail = MailAddressResolver.resolve(other)
             val msg = MimeMessage(mailer.createSession())
             msg.subject = "New Gamekins Challenge"

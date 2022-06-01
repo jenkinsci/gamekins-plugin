@@ -229,11 +229,7 @@ class ActionUtilTest: AnnotationSpec() {
         mockkStatic(Mailer::class)
         every { Mailer.descriptor() } returns null
 
-        mockkStatic(MailAddressResolver::class)
-        every { MailAddressResolver.resolve(any()) } returns ""
-
-        mockkStatic(Transport::class)
-        every { Transport.send(any()) } returns Unit
+        every { user1.getProperty(GameUserProperty::class.java).getNotifications() } returns false
 
 
         ActionUtil.doSendChallenge(job, stringChallenge, "User1").kind shouldBe FormValidation.Kind.OK
