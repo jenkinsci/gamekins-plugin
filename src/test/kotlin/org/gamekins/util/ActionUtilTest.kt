@@ -229,7 +229,7 @@ class ActionUtilTest: AnnotationSpec() {
         mockkStatic(Mailer::class)
         every { Mailer.descriptor() } returns null
 
-        every { user1.getProperty(GameUserProperty::class.java).getNotifications() } returns false
+        every { userProperty1.getNotifications() } returns false
 
 
         ActionUtil.doSendChallenge(job, stringChallenge, "User1").kind shouldBe FormValidation.Kind.OK
