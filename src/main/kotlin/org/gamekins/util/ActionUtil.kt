@@ -159,7 +159,7 @@ object ActionUtil {
      */
     fun doStoreChallenge(job: AbstractItem, store: String): FormValidation {
         val user: User = User.current()
-            ?: return FormValidation.error("Constants.ERROR_NO_USER_SIGNED_IN")
+            ?: return FormValidation.error(Constants.ERROR_NO_USER_SIGNED_IN)
         val property = user.getProperty(GameUserProperty::class.java)
             ?: return FormValidation.error(Constants.ERROR_RETRIEVING_PROPERTY)
 
@@ -200,7 +200,7 @@ object ActionUtil {
      */
     fun doUndoStoreChallenge(job: AbstractItem, store: String): FormValidation {
         val user: User = User.current()
-            ?: return FormValidation.error("Constants.ERROR_NO_USER_SIGNED_IN")
+            ?: return FormValidation.error(Constants.ERROR_NO_USER_SIGNED_IN)
         val property = user.getProperty(GameUserProperty::class.java)
             ?: return FormValidation.error(Constants.ERROR_RETRIEVING_PROPERTY)
 
