@@ -52,6 +52,10 @@ object Constants {
 
     const val ERROR_SAVING = "There was an error with saving"
 
+    const val ERROR_NO_REASON = "Please insert your reason for rejection"
+
+    const val ERROR_REJECT_DUMMY = "Dummies cannot be rejected - please run another build"
+
     const val EXISTS = " exists "
 
     const val NO_QUEST = "No quest could be generated. This could mean that none of the prerequisites was met, " +
