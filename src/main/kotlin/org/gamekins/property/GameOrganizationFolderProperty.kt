@@ -107,7 +107,7 @@ class GameOrganizationFolderProperty private constructor()
                                 ?: project.addProperty(GameMultiBranchProperty(project,
                                     formData.getBoolean("activated"), formData.getBoolean("showLeaderboard"),
                                     formData.getBoolean("showStatistics"), formData.getInt("currentChallengesCount"),
-                                    formData.getInt("currentQuestsCount"), formData.getInt("storedChallengesCount"),
+                                    formData.getInt("currentQuestsCount"), formData.getInt("currentStoredChallengesCount"),
                                     formData.getBoolean("canSendChallenge")))
                         folder.save()
                         break

@@ -53,7 +53,7 @@ object ActionUtil {
      */
     fun doRejectChallenge(job: AbstractItem, reject: String, reason: String): FormValidation {
         var rejectReason = reason
-        if (rejectReason.isEmpty()) return FormValidation.error("Please insert your reason for rejection")
+        if (rejectReason.isEmpty()) return FormValidation.error(Constants.ERROR_NO_REASON)
         if (rejectReason.matches(Regex("\\s+"))) rejectReason = "No reason provided"
 
         val user: User = User.current()
@@ -71,8 +71,7 @@ object ActionUtil {
         }
 
         if (challenge == null) return FormValidation.error(Constants.ERROR_NO_CHALLENGE_EXISTS)
-        if (challenge is DummyChallenge) return FormValidation.error("Dummies cannot be rejected " +
-                "- please run another build")
+        if (challenge is DummyChallenge) return FormValidation.error(Constants.ERROR_REJECT_DUMMY)
         property.rejectChallenge(projectName, challenge, rejectReason)
 
         val generatedText = generateChallengeAfterRejection(challenge, user, property, job)
@@ -93,7 +92,7 @@ object ActionUtil {
      */
     fun doRejectQuest(job: AbstractItem, reject: String, reason: String): FormValidation {
         var rejectReason = reason
-        if (rejectReason.isEmpty()) return FormValidation.error("Please insert your reason for rejection")
+        if (rejectReason.isEmpty()) return FormValidation.error(Constants.ERROR_NO_REASON)
         if (rejectReason.matches(Regex("\\s+"))) rejectReason = "No reason provided"
 
         val user: User = User.current()
@@ -112,7 +111,7 @@ object ActionUtil {
 
         if (quest == null) return FormValidation.error("The quest does not exist")
         if (quest.name == Constants.NO_QUEST || quest.name == Constants.REJECTED_QUEST) {
-            return FormValidation.error("Dummies cannot be rejected - please run another build")
+            return FormValidation.error(Constants.ERROR_REJECT_DUMMY)
         }
         property.rejectQuest(projectName, quest, rejectReason)
         property.newQuest(projectName, Quest(Constants.REJECTED_QUEST, arrayListOf()))
@@ -167,7 +166,7 @@ object ActionUtil {
      */
     fun doStoreChallenge(job: AbstractItem, store: String): FormValidation {
         val user: User = User.current()
-            ?: return FormValidation.error("Constants.ERROR_NO_USER_SIGNED_IN")
+            ?: return FormValidation.error(Constants.ERROR_NO_USER_SIGNED_IN)
         val property = user.getProperty(GameUserProperty::class.java)
             ?: return FormValidation.error(Constants.ERROR_RETRIEVING_PROPERTY)
 
@@ -208,7 +207,7 @@ object ActionUtil {
      */
     fun doUndoStoreChallenge(job: AbstractItem, store: String): FormValidation {
         val user: User = User.current()
-            ?: return FormValidation.error("Constants.ERROR_NO_USER_SIGNED_IN")
+            ?: return FormValidation.error(Constants.ERROR_NO_USER_SIGNED_IN)
         val property = user.getProperty(GameUserProperty::class.java)
             ?: return FormValidation.error(Constants.ERROR_RETRIEVING_PROPERTY)
 

@@ -52,6 +52,10 @@ object Constants {
 
     const val ERROR_SAVING = "There was an error with saving"
 
+    const val ERROR_NO_REASON = "Please insert your reason for rejection"
+
+    const val ERROR_REJECT_DUMMY = "Dummies cannot be rejected - please run another build"
+
     const val ERROR_RECEIVER_IS_SELF = "Cannot send to yourself"
 
     const val ERROR_USER_NOT_FOUND = "User not found"
