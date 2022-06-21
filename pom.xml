@@ -339,6 +339,12 @@
                     <groupId>com.fasterxml.woodstox</groupId>
                     <artifactId>woodstox-core</artifactId>
                 </exclusion>
+                <!--Temporary fix for:
+               Cannot resolve No versions available for org.osgi.service:org.osgi.service.prefs:jar:[1.1.0,1.2.0) within specified range-->
+                <exclusion>
+                    <groupId>org.osgi.service</groupId>
+                    <artifactId>org.osgi.service.prefs</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
     </dependencies>
