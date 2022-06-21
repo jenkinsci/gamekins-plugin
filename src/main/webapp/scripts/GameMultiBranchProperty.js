@@ -52,7 +52,6 @@ jQuery3("#removeUserFromTeam").on('click', function () {
 
 jQuery3("#deleteTeam").on('click', function () {
     let teamsBox = jQuery3("#teamsBox")[0].value
-    let usersBox = jQuery3("#usersBox")[0].value
     let descriptorFullUrl = jQuery3(this).data('descriptor-url')
     let url = descriptorFullUrl + "/deleteTeam"
     let parameters = {}
