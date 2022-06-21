@@ -6,7 +6,7 @@ window.onload = function () {
     new Ajax.Request(url, {
         onComplete: function (rsp) {
             let obj = JSON.parse(rsp.responseText)
-            for(var i = 0; i < obj.length; i++) {
+            for(let i = 0; i < obj.length; i++) {
                 let option = document.createElement("option")
                 option.text = obj[i]
                 projects.add(option)
@@ -68,7 +68,7 @@ function loadAchievements() {
                         header.innerText = "You have not solved any achievements yet"
                         div.appendChild(header)
                     } else {
-                        for(var i = 0; i < list.length; i++) {
+                        for(let i = 0; i < list.length; i++) {
                             createAchievement(div, list[i], false)
                             div.appendChild(document.createElement("br"))
                         }
@@ -91,7 +91,7 @@ function loadAchievements() {
                             div.removeChild(div.lastChild)
                         }
 
-                        for(var i = 0; i < list.length; i++) {
+                        for(let i = 0; i < list.length; i++) {
                             createAchievement(div, list[i], true)
                             div.appendChild(document.createElement("br"))
                         }

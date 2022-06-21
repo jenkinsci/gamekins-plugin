@@ -76,8 +76,8 @@ jQuery3('#rejectButtonConfirm').on('click', function () {
                     modal.find('#error-text')[0].innerHTML = ""
                     modal.find('#reason-text').val("")
                     // Update UI after successful rejection
-                    var temp = jQuery3("#heading" + challengeID)
-                    var challengeText = temp.find("#currentChallengeText" + challengeID).html()
+                    const temp = jQuery3("#heading" + challengeID);
+                    const challengeText = temp.find("#currentChallengeText" + challengeID).html();
                     if (challengeText != null) {
                         if (!challengeText.includes("You have nothing developed recently")) {
                             var appendedVal = '<tr>' +

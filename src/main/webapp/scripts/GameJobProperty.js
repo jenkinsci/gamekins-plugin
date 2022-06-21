@@ -52,7 +52,6 @@ jQuery3("#removeUserFromTeam").on('click', function () {
 
 jQuery3("#deleteTeam").on('click', function () {
     let teamsBox = jQuery3("#teamsBox")[0].value
-    let usersBox = jQuery3("#usersBox")[0].value
     let descriptorFullUrl = jQuery3(this).data('descriptor-url')
     let url = descriptorFullUrl + "/deleteTeam"
     let parameters = {}
@@ -82,9 +81,9 @@ function buildTeamsList(descriptorFullUrl) {
             let values = rsp.responseJSON.values
 
             teamsBox.innerHTML = ""
-            for (var i = 0; i < values.length; i++) {
-                var opt = values[i].name;
-                var el = document.createElement("option");
+            for (let i = 0; i < values.length; i++) {
+                const opt = values[i].name;
+                const el = document.createElement("option");
                 el.textContent = opt;
                 el.value = opt;
                 teamsBox.appendChild(el);

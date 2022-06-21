@@ -29,7 +29,7 @@ jQuery3("#changeAvatarBtn").on("click", function () {
                 let response = rsp.responseText.replace("[", "")
                 response = response.replace("]", "")
                 let avatars = response.split(", ")
-                for (var i = 0; i < avatars.length; i++) {
+                for (let i = 0; i < avatars.length; i++) {
                     let item = document.createElement("div")
                     let currentAvatarSplit = jQuery3("#currentAvatar").attr("src").split("/")
                     if (avatars[i].endsWith(currentAvatarSplit[currentAvatarSplit.length - 1])) {
