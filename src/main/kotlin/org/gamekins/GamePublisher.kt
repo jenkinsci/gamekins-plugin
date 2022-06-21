@@ -50,10 +50,12 @@ import javax.annotation.Nonnull
 
 class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var jacocoResultsPath: String?,
                                                       @set:DataBoundSetter var jacocoCSVPath: String?,
-                                                      @set:DataBoundSetter var mocoJSONPath: String?,
+                                                      mocoJSONPath: String?,
                                                       searchCommitCount: Int)
     : Notifier(), SimpleBuildStep, StaplerProxy {
 
+    @set:DataBoundSetter
+    var mocoJSONPath: String = mocoJSONPath ?: ""
     @set:DataBoundSetter
     var searchCommitCount: Int = if (searchCommitCount > 0) searchCommitCount else Constants.DEFAULT_SEARCH_COMMIT_COUNT
 

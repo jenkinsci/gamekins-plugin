@@ -57,12 +57,12 @@ here as well as the activation of Gamekins. Some new data is only displayed afte
 addition, the publisher for Gamekins has to be added to the **Post-build Actions** with the following properties:
 
 - Root folder of JaCoCo results: Starting from the project workspace with ```**/``` where the file ```index.html```
-  is located
+  is located (*Mandatory* Property)
 - Path to jacoco.csv: Starting from the project workspace with ```**/``` where the file ```jacoco.csv``` is located
-  (Note: include also the file name since it can be different from ```jacoco.csv```)
+  (Note: include also the file name since it can be different from ```jacoco.csv```) (*Mandatory* Property)
 - Path to moco.json: Starting from the project workspace with ```**/``` where the file ```moco.json``` is located
-  (Note: include also the file name since it can be different from ```moco.json```)
-- Commits to be searched: Mainly for performance reasons (50 per default)
+  (Note: include also the file name since it can be different from ```moco.json```) (*Optional* Property)
+- Commits to be searched: Mainly for performance reasons (50 per default) (*Optional* Property)
 
 #### Pipeline projects
 
