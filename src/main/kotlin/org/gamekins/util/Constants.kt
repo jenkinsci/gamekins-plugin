@@ -73,6 +73,8 @@ object Constants {
 
     const val ERROR_STORAGE_CAPACITY_REACHED = "User can't store another challenge"
 
+    const val ERROR_NO_TEAM_NAME = "Insert a name for the team"
+
     const val EXISTS = " exists "
 
     const val NO_QUEST = "No quest could be generated. This could mean that none of the prerequisites was met, " +
