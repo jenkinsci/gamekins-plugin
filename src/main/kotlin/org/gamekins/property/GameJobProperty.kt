@@ -124,15 +124,15 @@ class GameJobProperty
      */
     override fun reconfigure(req: StaplerRequest, form: JSONObject?): JobProperty<*> {
         if (form != null) {
-            activated = form.getBoolean("activated")
-            showStatistics = form.getBoolean("showStatistics")
-            showLeaderboard = form.getBoolean("showLeaderboard")
-            if (form.getValue("currentChallengesCount") is String)
-                currentChallengesCount = form.getInt("currentChallengesCount")
-            if (form.getValue("currentQuestsCount") is String)
-                currentQuestsCount = form.getInt("currentQuestsCount")
-            if (form.getValue("currentStoredChallengesCount") is String)
-                currentStoredChallengesCount = form.getInt("currentStoredChallengesCount")
+            activated = form.getBoolean(Constants.FormKeys.ACTIVATED)
+            showStatistics = form.getBoolean(Constants.FormKeys.SHOW_STATISTICS)
+            showLeaderboard = form.getBoolean(Constants.FormKeys.SHOW_LEADERBOARD)
+            if (form.getValue(Constants.FormKeys.CHALLENGES_COUNT) is String)
+                currentChallengesCount = form.getInt(Constants.FormKeys.CHALLENGES_COUNT)
+            if (form.getValue(Constants.FormKeys.QUEST_COUNT) is String)
+                currentQuestsCount = form.getInt(Constants.FormKeys.QUEST_COUNT)
+            if (form.getValue(Constants.FormKeys.STORED_CHALLENGES_COUNT) is String)
+                currentStoredChallengesCount = form.getInt(Constants.FormKeys.STORED_CHALLENGES_COUNT)
         }
 
         PropertyUtil.reconfigure(owner, showLeaderboard, showStatistics)
