@@ -45,7 +45,7 @@ class GameJobPropertyDescriptor : JobPropertyDescriptor(GameJobProperty::class.j
      * adds them to the [job], from which the button has been clicked, via the method [PropertyUtil.doAddTeam].
      */
     fun doAddTeam(@AncestorInPath job: Job<*, *>?, @QueryParameter teamName: String): FormValidation {
-        if (teamName.isEmpty()) return FormValidation.error("Insert a name for the team")
+        if (teamName.isEmpty()) return FormValidation.error(Constants.ERROR_NO_TEAM_NAME)
         val property = if (job == null) null else job.properties[this] as GameJobProperty?
         val validation = PropertyUtil.doAddTeam(property, teamName)
         save()
@@ -66,7 +66,7 @@ class GameJobPropertyDescriptor : JobPropertyDescriptor(GameJobProperty::class.j
      * [job] via the method [PropertyUtil.doDeleteTeam].
      */
     fun doDeleteTeam(@AncestorInPath job: Job<*, *>?, @QueryParameter teamsBox: String?): FormValidation {
-        if (job == null) return FormValidation.error("Unexpected error: Parent job is null")
+        if (job == null) return FormValidation.error(Constants.ERROR_PARENT)
         val projectName = job.fullName
         val property = job.properties[this] as GameJobProperty
         val validation = PropertyUtil.doDeleteTeam(projectName, property, teamsBox!!)

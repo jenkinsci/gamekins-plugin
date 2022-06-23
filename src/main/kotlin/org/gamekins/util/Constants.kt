@@ -67,6 +67,8 @@ object Constants {
 
     const val ERROR_REJECT_DUMMY = "Dummies cannot be rejected - please run another build"
 
+    const val ERROR_NO_TEAM_NAME = "Insert a name for the team"
+
     const val EXISTS = " exists "
 
     const val NO_QUEST = "No quest could be generated. This could mean that none of the prerequisites was met, " +
