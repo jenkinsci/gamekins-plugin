@@ -27,6 +27,7 @@ import hudson.model.Item
 import hudson.model.JobPropertyDescriptor
 import net.sf.json.JSONObject
 import org.gamekins.FolderLeaderboardAction
+import org.gamekins.util.Constants
 import org.kohsuke.stapler.*
 import javax.annotation.Nonnull
 
@@ -77,7 +78,7 @@ class GameFolderProperty
 
         override fun newInstance(req: StaplerRequest?, formData: JSONObject): AbstractFolderProperty<*>? {
             if (req == null)  return null
-            val leaderboard = formData.getBoolean("leaderboard")
+            val leaderboard = formData.getBoolean(Constants.FormKeys.SHOW_LEADERBOARD)
 
             val folder = req.findAncestor(Folder::class.java).`object` as Folder
             try {

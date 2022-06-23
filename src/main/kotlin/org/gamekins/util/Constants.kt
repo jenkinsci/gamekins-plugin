@@ -30,6 +30,17 @@ import java.nio.file.Path
  */
 object Constants {
 
+    object FormKeys
+    {
+        const val PROJECT_NAME = "project"
+        const val ACTIVATED = "activated"
+        const val SHOW_STATISTICS = "showStatistics"
+        const val SHOW_LEADERBOARD = "showLeaderboard"
+        const val CHALLENGES_COUNT = "currentChallengesCount"
+        const val QUEST_COUNT = "currentQuestsCount"
+        const val STORED_CHALLENGES_COUNT = "currentStoredChallengesCount"
+    }
+
     const val DEFAULT_CURRENT_CHALLENGES = 3
 
     const val DEFAULT_CURRENT_QUESTS = 1

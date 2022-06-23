@@ -150,15 +150,15 @@ class GameJobPropertyDescriptor : JobPropertyDescriptor(GameJobProperty::class.j
         return if (req == null || req.findAncestor(AbstractItem::class.java).getObject() == null) null
         else GameJobProperty(
             req.findAncestor(AbstractItem::class.java).getObject() as AbstractItem,
-            formData.getBoolean("activated"),
-            formData.getBoolean("showLeaderboard"),
-            formData.getBoolean("showStatistics"),
-            if (formData.getValue("currentChallengesCount") is Int)
-                formData.getInt("currentChallengesCount") else Constants.DEFAULT_CURRENT_CHALLENGES,
-            if (formData.getValue("currentQuestsCount") is Int)
-                formData.getInt("currentQuestsCount") else Constants.DEFAULT_CURRENT_QUESTS,
-            if (formData.getValue("currentStoredChallengesCount") is Int)
-                formData.getInt("currentStoredChallengesCount") else Constants.DEFAULT_STORED_CHALLENGES,
+            formData.getBoolean(Constants.FormKeys.ACTIVATED),
+            formData.getBoolean(Constants.FormKeys.SHOW_LEADERBOARD),
+            formData.getBoolean(Constants.FormKeys.SHOW_STATISTICS),
+            if (formData.getValue(Constants.FormKeys.CHALLENGES_COUNT) is Int)
+                formData.getInt(Constants.FormKeys.CHALLENGES_COUNT) else Constants.DEFAULT_CURRENT_CHALLENGES,
+            if (formData.getValue(Constants.FormKeys.QUEST_COUNT) is Int)
+                formData.getInt(Constants.FormKeys.QUEST_COUNT) else Constants.DEFAULT_CURRENT_QUESTS,
+            if (formData.getValue(Constants.FormKeys.STORED_CHALLENGES_COUNT) is Int)
+                formData.getInt(Constants.FormKeys.STORED_CHALLENGES_COUNT) else Constants.DEFAULT_STORED_CHALLENGES,
             formData.getBoolean("canSendChallenge")
         )
     }
