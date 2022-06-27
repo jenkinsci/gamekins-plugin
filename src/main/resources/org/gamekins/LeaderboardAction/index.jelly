@@ -1,7 +1,6 @@
 <?jelly escape-by-default='true'?>
 
-<j:jelly xmlns:j="jelly:core" xmlns:l="/lib/layout" xmlns:st="jelly:stapler" xmlns:f="/lib/form"
-         xmlns:fa="/font-awesome" xmlns:bs="/bootstrap">
+<j:jelly xmlns:j="jelly:core" xmlns:l="/lib/layout" xmlns:st="jelly:stapler">
 
     <l:layout title="Leaderboard">
 
@@ -336,8 +335,8 @@
                                 <form>
                                     <div class="form-group">
                                         <label for="reason-text" class="col-form-label">Reason:</label>
-                                        <textarea class="form-control" id="reason-text"></textarea>
-                                        <div id="error-text" class="text-danger" style="margin-top: 2%"></div>
+                                        <textarea class="form-control" id="reason-text"/>
+                                        <div id="error-text" class="text-danger" style="margin-top: 2%"/>
                                     </div>
                                 </form>
                             </div>
@@ -423,7 +422,7 @@
                                                 </tbody>
                                             </table>
                                         </div>
-                                        <div id="error-text-stored" class="text-danger" style="margin-top: 2%"></div>
+                                        <div id="error-text-stored" class="text-danger" style="margin-top: 2%"/>
                                     </div>
                                 </form>
                             </div>
@@ -594,7 +593,7 @@
                                 </tbody>
                             </table>
                         </div>
-                        <div id="error-text-rejected-table" class="text-danger" style="margin-top: 2%"></div>
+                        <div id="error-text-rejected-table" class="text-danger" style="margin-top: 2%"/>
                     </div>
                 </div>
 
@@ -658,11 +657,11 @@
                     <li>To view, unshelve and send stored Challenges press the Stored Challenges Button</li>
                     <li>Stored Challenges can be sent to another participant if that option is enabled</li>
 
-                    <li>If there are no Challenges generated for you although you have committed something recently,
+                    <li>If there are no Challenges generated for you, although you have committed something recently,
                         then checkout the <i>Git Names</i> in your profile settings
                     </li>
                     <li>In addition to Challenges, <b>Quests</b> are generated and can be solved step by step,
-                        since they are consisting of different Challenges. The Challenges of a quest must be solved
+                        since they consist of different Challenges. The Challenges of a quest must be solved
                         in the given order
                     </li>
 
@@ -676,7 +675,7 @@
                     <li>The <b>Avatar</b> displayed in the leaderboard can be changed in your profile settings.
                         There are 50 different avatars you can choose from
                     </li>
-                    <li>When a build for example solves a Challenge or generates a new one, notifications are send to
+                    <li>When a build for example solves a Challenge or generates a new one, notifications are sent to
                         the stored email address. You can disable this option in your profile settings
                     </li>
                 </ul>
