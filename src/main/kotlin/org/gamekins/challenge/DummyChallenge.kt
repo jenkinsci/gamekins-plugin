@@ -107,7 +107,7 @@ class DummyChallenge(private var parameters: Parameters, private var reason: Str
     @Suppress("unused", "SENSELESS_COMPARISON")
     private fun readResolve(): Any {
         if (parameters == null) parameters = Parameters()
-        if (reason == null) reason = Constants.ERROR_GENERATION
+        if (reason == null) reason = Constants.Error.GENERATION
         return this
     }
 

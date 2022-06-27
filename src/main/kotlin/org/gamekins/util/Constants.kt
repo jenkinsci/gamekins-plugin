@@ -33,49 +33,62 @@ object Constants {
     object FormKeys
     {
         const val PROJECT_NAME = "project"
+
         const val ACTIVATED = "activated"
+
         const val SHOW_STATISTICS = "showStatistics"
+
         const val SHOW_LEADERBOARD = "showLeaderboard"
+
         const val SHOW_FOLDER_LEADERBOARD = "leaderboard"
+
         const val CHALLENGES_COUNT = "currentChallengesCount"
+
         const val QUEST_COUNT = "currentQuestsCount"
+
         const val STORED_CHALLENGES_COUNT = "currentStoredChallengesCount"
     }
 
-    const val DEFAULT_CURRENT_CHALLENGES = 3
+    object Default
+    {
+        const val CURRENT_CHALLENGES = 3
 
-    const val DEFAULT_CURRENT_QUESTS = 1
+        const val CURRENT_QUESTS = 1
 
-    const val DEFAULT_STORED_CHALLENGES = 2
+        const val STORED_CHALLENGES = 2
 
-    const val DEFAULT_SEARCH_COMMIT_COUNT = 50
+        const val SEARCH_COMMIT_COUNT = 50
+    }
 
-    const val ERROR_UNEXPECTED = "Unexpected Error"
+    object Error
+    {
+        const val UNEXPECTED = "Unexpected Error"
 
-    const val ERROR_GENERATION = "There was an error with generating a new challenge"
+        const val GENERATION = "There was an error with generating a new challenge"
 
-    const val ERROR_NO_CHALLENGE_EXISTS = "The challenge does not exist"
+        const val NO_CHALLENGE_EXISTS = "The challenge does not exist"
 
-    const val ERROR_NO_USER_SIGNED_IN = "There is no user signed in"
+        const val NO_USER_SIGNED_IN = "There is no user signed in"
 
-    const val ERROR_PARENT = "$ERROR_UNEXPECTED: Parent job is null"
+        const val PARENT = "$UNEXPECTED: Parent job is null"
 
-    const val ERROR_RETRIEVING_PROPERTY = "Unexpected error while retrieving the property"
+        const val RETRIEVING_PROPERTY = "Unexpected error while retrieving the property"
 
-    const val ERROR_SAVING = "There was an error with saving"
+        const val SAVING = "There was an error with saving"
 
-    const val ERROR_NO_REASON = "Please insert your reason for rejection"
+        const val NO_REASON = "Please insert your reason for rejection"
 
-    const val ERROR_REJECT_DUMMY = "Dummies cannot be rejected - please run another build"
+        const val REJECT_DUMMY = "Dummies cannot be rejected - please run another build"
 
-    const val ERROR_NO_TEAM_NAME = "Insert a name for the team"
+        const val NO_TEAM_NAME = "Insert a name for the team"
+
+        const val STORAGE_LIMIT = "Storage Limit reached"
+    }
 
     const val EXISTS = " exists "
 
     const val NO_QUEST = "No quest could be generated. This could mean that none of the prerequisites was met, " +
             "please try again later."
-
-    const val NO_TEAM = "No team specified"
 
     const val NOT_ACTIVATED = "[Gamekins] Not activated"
 
@@ -133,9 +146,9 @@ object Constants {
      */
     class Parameters(
         var branch: String = "",
-        var currentChallengesCount: Int = DEFAULT_CURRENT_CHALLENGES,
-        var currentQuestsCount: Int = DEFAULT_CURRENT_QUESTS,
-        var storedChallengesCount: Int = DEFAULT_STORED_CHALLENGES,
+        var currentChallengesCount: Int = Default.CURRENT_CHALLENGES,
+        var currentQuestsCount: Int = Default.CURRENT_QUESTS,
+        var storedChallengesCount: Int = Default.STORED_CHALLENGES,
         var generated: Int = 0,
         var jacocoCSVPath: String = "",
         var jacocoResultsPath: String = "",
@@ -162,7 +175,7 @@ object Constants {
         private fun readResolve(): Any {
             if (remote == null) remote = ""
             if (workspace == null) workspace = FilePath(null, remote)
-            if (currentQuestsCount == null) currentQuestsCount = DEFAULT_CURRENT_QUESTS
+            if (currentQuestsCount == null) currentQuestsCount = Default.CURRENT_QUESTS
             return this
         }
     }

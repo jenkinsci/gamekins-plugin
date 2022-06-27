@@ -63,9 +63,9 @@ class GameMultiBranchProperty
     init {
         statistics = Statistics(job!!)
         PropertyUtil.reconfigure(job, showLeaderboard, showStatistics)
-        if (currentChallengesCount <= 0) currentChallengesCount = Constants.DEFAULT_CURRENT_CHALLENGES
-        if (currentQuestsCount <= 0) currentQuestsCount = Constants.DEFAULT_CURRENT_QUESTS
-        if (currentStoredChallengesCount < 0) currentStoredChallengesCount = Constants.DEFAULT_STORED_CHALLENGES
+        if (currentChallengesCount <= 0) currentChallengesCount = Constants.Default.CURRENT_CHALLENGES
+        if (currentQuestsCount <= 0) currentQuestsCount = Constants.Default.CURRENT_QUESTS
+        if (currentStoredChallengesCount < 0) currentStoredChallengesCount = Constants.Default.STORED_CHALLENGES
     }
 
     @Throws(IOException::class)
@@ -99,9 +99,9 @@ class GameMultiBranchProperty
      */
     @Suppress("unused", "SENSELESS_COMPARISON")
     private fun readResolve(): Any {
-        if (currentChallengesCount == 0) currentChallengesCount = Constants.DEFAULT_CURRENT_CHALLENGES
-        if (currentQuestsCount <= 0) currentQuestsCount = Constants.DEFAULT_CURRENT_QUESTS
-        if (currentStoredChallengesCount < 0) currentStoredChallengesCount = Constants.DEFAULT_STORED_CHALLENGES
+        if (currentChallengesCount == 0) currentChallengesCount = Constants.Default.CURRENT_CHALLENGES
+        if (currentQuestsCount <= 0) currentQuestsCount = Constants.Default.CURRENT_QUESTS
+        if (currentStoredChallengesCount < 0) currentStoredChallengesCount = Constants.Default.STORED_CHALLENGES
 
         return this
     }
@@ -160,8 +160,8 @@ class GameMultiBranchProperty
          */
         fun doAddTeam(@AncestorInPath job: WorkflowMultiBranchProject?,
                       @QueryParameter teamName: String): FormValidation {
-            if (job == null) return FormValidation.error(Constants.ERROR_PARENT)
-            if (teamName.isEmpty()) return FormValidation.error(Constants.ERROR_NO_TEAM_NAME)
+            if (job == null) return FormValidation.error(Constants.Error.PARENT)
+            if (teamName.isEmpty()) return FormValidation.error(Constants.Error.NO_TEAM_NAME)
             val property = job.properties[this] as GameMultiBranchProperty
             val validation = PropertyUtil.doAddTeam(property, teamName)
             save()
@@ -183,7 +183,7 @@ class GameMultiBranchProperty
          */
         fun doDeleteTeam(@AncestorInPath job: WorkflowMultiBranchProject?,
                          @QueryParameter teamsBox: String?): FormValidation {
-            if (job == null) return FormValidation.error(Constants.ERROR_PARENT)
+            if (job == null) return FormValidation.error(Constants.Error.PARENT)
             val projectName = job.fullName
             val property = job.properties[this] as GameMultiBranchProperty
             val validation = PropertyUtil.doDeleteTeam(projectName, property, teamsBox!!)
@@ -266,11 +266,11 @@ class GameMultiBranchProperty
                 formData.getBoolean(Constants.FormKeys.SHOW_LEADERBOARD),
                 formData.getBoolean(Constants.FormKeys.SHOW_STATISTICS),
                 if (formData.getValue(Constants.FormKeys.CHALLENGES_COUNT) is Int)
-                    formData.getInt(Constants.FormKeys.CHALLENGES_COUNT) else Constants.DEFAULT_CURRENT_CHALLENGES,
+                    formData.getInt(Constants.FormKeys.CHALLENGES_COUNT) else Constants.Default.CURRENT_CHALLENGES,
                 if (formData.getValue(Constants.FormKeys.QUEST_COUNT) is Int)
-                    formData.getInt(Constants.FormKeys.QUEST_COUNT) else Constants.DEFAULT_CURRENT_QUESTS,
+                    formData.getInt(Constants.FormKeys.QUEST_COUNT) else Constants.Default.CURRENT_QUESTS,
                 if (formData.getValue(Constants.FormKeys.STORED_CHALLENGES_COUNT) is Int)
-                    formData.getInt(Constants.FormKeys.STORED_CHALLENGES_COUNT) else Constants.DEFAULT_STORED_CHALLENGES
+                    formData.getInt(Constants.FormKeys.STORED_CHALLENGES_COUNT) else Constants.Default.STORED_CHALLENGES
             )
         }
     }

@@ -45,7 +45,7 @@ class GameJobPropertyDescriptor : JobPropertyDescriptor(GameJobProperty::class.j
      * adds them to the [job], from which the button has been clicked, via the method [PropertyUtil.doAddTeam].
      */
     fun doAddTeam(@AncestorInPath job: Job<*, *>?, @QueryParameter teamName: String): FormValidation {
-        if (teamName.isEmpty()) return FormValidation.error(Constants.ERROR_NO_TEAM_NAME)
+        if (teamName.isEmpty()) return FormValidation.error(Constants.Error.NO_TEAM_NAME)
         val property = if (job == null) null else job.properties[this] as GameJobProperty?
         val validation = PropertyUtil.doAddTeam(property, teamName)
         save()
@@ -66,7 +66,7 @@ class GameJobPropertyDescriptor : JobPropertyDescriptor(GameJobProperty::class.j
      * [job] via the method [PropertyUtil.doDeleteTeam].
      */
     fun doDeleteTeam(@AncestorInPath job: Job<*, *>?, @QueryParameter teamsBox: String?): FormValidation {
-        if (job == null) return FormValidation.error(Constants.ERROR_PARENT)
+        if (job == null) return FormValidation.error(Constants.Error.PARENT)
         val projectName = job.fullName
         val property = job.properties[this] as GameJobProperty
         val validation = PropertyUtil.doDeleteTeam(projectName, property, teamsBox!!)
@@ -154,11 +154,11 @@ class GameJobPropertyDescriptor : JobPropertyDescriptor(GameJobProperty::class.j
             formData.getBoolean(Constants.FormKeys.SHOW_LEADERBOARD),
             formData.getBoolean(Constants.FormKeys.SHOW_STATISTICS),
             if (formData.getValue(Constants.FormKeys.CHALLENGES_COUNT) is Int)
-                formData.getInt(Constants.FormKeys.CHALLENGES_COUNT) else Constants.DEFAULT_CURRENT_CHALLENGES,
+                formData.getInt(Constants.FormKeys.CHALLENGES_COUNT) else Constants.Default.CURRENT_CHALLENGES,
             if (formData.getValue(Constants.FormKeys.QUEST_COUNT) is Int)
-                formData.getInt(Constants.FormKeys.QUEST_COUNT) else Constants.DEFAULT_CURRENT_QUESTS,
+                formData.getInt(Constants.FormKeys.QUEST_COUNT) else Constants.Default.CURRENT_QUESTS,
             if (formData.getValue(Constants.FormKeys.STORED_CHALLENGES_COUNT) is Int)
-                formData.getInt(Constants.FormKeys.STORED_CHALLENGES_COUNT) else Constants.DEFAULT_STORED_CHALLENGES
+                formData.getInt(Constants.FormKeys.STORED_CHALLENGES_COUNT) else Constants.Default.STORED_CHALLENGES
         )
     }
 }

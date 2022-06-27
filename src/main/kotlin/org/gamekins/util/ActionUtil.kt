@@ -45,13 +45,13 @@ object ActionUtil {
      */
     fun doRejectChallenge(job: AbstractItem, reject: String, reason: String): FormValidation {
         var rejectReason = reason
-        if (rejectReason.isEmpty()) return FormValidation.error(Constants.ERROR_NO_REASON)
+        if (rejectReason.isEmpty()) return FormValidation.error(Constants.Error.NO_REASON)
         if (rejectReason.matches(Regex("\\s+"))) rejectReason = "No reason provided"
 
         val user: User = User.current()
-                ?: return FormValidation.error(Constants.ERROR_NO_USER_SIGNED_IN)
+                ?: return FormValidation.error(Constants.Error.NO_USER_SIGNED_IN)
         val property = user.getProperty(GameUserProperty::class.java)
-                ?: return FormValidation.error(Constants.ERROR_RETRIEVING_PROPERTY)
+                ?: return FormValidation.error(Constants.Error.RETRIEVING_PROPERTY)
 
         val projectName = job.fullName
         var challenge: Challenge? = null
@@ -62,8 +62,8 @@ object ActionUtil {
             }
         }
 
-        if (challenge == null) return FormValidation.error(Constants.ERROR_NO_CHALLENGE_EXISTS)
-        if (challenge is DummyChallenge) return FormValidation.error(Constants.ERROR_REJECT_DUMMY)
+        if (challenge == null) return FormValidation.error(Constants.Error.NO_CHALLENGE_EXISTS)
+        if (challenge is DummyChallenge) return FormValidation.error(Constants.Error.REJECT_DUMMY)
         property.rejectChallenge(projectName, challenge, rejectReason)
 
         val generatedText = generateChallengeAfterRejection(challenge, user, property, job)
@@ -73,7 +73,7 @@ object ActionUtil {
             job.save()
         } catch (e: IOException) {
             e.printStackTrace()
-            return FormValidation.error(Constants.ERROR_SAVING)
+            return FormValidation.error(Constants.Error.SAVING)
         }
 
         return FormValidation.ok("Challenge rejected$generatedText")
@@ -84,13 +84,13 @@ object ActionUtil {
      */
     fun doRejectQuest(job: AbstractItem, reject: String, reason: String): FormValidation {
         var rejectReason = reason
-        if (rejectReason.isEmpty()) return FormValidation.error(Constants.ERROR_NO_REASON)
+        if (rejectReason.isEmpty()) return FormValidation.error(Constants.Error.NO_REASON)
         if (rejectReason.matches(Regex("\\s+"))) rejectReason = "No reason provided"
 
         val user: User = User.current()
-            ?: return FormValidation.error(Constants.ERROR_NO_USER_SIGNED_IN)
+            ?: return FormValidation.error(Constants.Error.NO_USER_SIGNED_IN)
         val property = user.getProperty(GameUserProperty::class.java)
-            ?: return FormValidation.error(Constants.ERROR_RETRIEVING_PROPERTY)
+            ?: return FormValidation.error(Constants.Error.RETRIEVING_PROPERTY)
 
         val projectName = job.fullName
         var quest: Quest? = null
@@ -103,7 +103,7 @@ object ActionUtil {
 
         if (quest == null) return FormValidation.error("The quest does not exist")
         if (quest.name == Constants.NO_QUEST || quest.name == Constants.REJECTED_QUEST) {
-            return FormValidation.error(Constants.ERROR_REJECT_DUMMY)
+            return FormValidation.error(Constants.Error.REJECT_DUMMY)
         }
         property.rejectQuest(projectName, quest, rejectReason)
         property.newQuest(projectName, Quest(Constants.REJECTED_QUEST, arrayListOf()))
@@ -113,7 +113,7 @@ object ActionUtil {
             job.save()
         } catch (e: IOException) {
             e.printStackTrace()
-            return FormValidation.error(Constants.ERROR_SAVING)
+            return FormValidation.error(Constants.Error.SAVING)
         }
 
         return FormValidation.ok("Quest rejected")
@@ -124,9 +124,9 @@ object ActionUtil {
      */
     fun doRestoreChallenge(job: AbstractItem, reject: String): FormValidation {
         val user: User = User.current()
-            ?: return FormValidation.error(Constants.ERROR_NO_USER_SIGNED_IN)
+            ?: return FormValidation.error(Constants.Error.NO_USER_SIGNED_IN)
         val property = user.getProperty(GameUserProperty::class.java)
-            ?: return FormValidation.error(Constants.ERROR_RETRIEVING_PROPERTY)
+            ?: return FormValidation.error(Constants.Error.RETRIEVING_PROPERTY)
 
         val projectName = job.fullName
         var challenge: Challenge? = null
@@ -137,7 +137,7 @@ object ActionUtil {
             }
         }
 
-        if (challenge == null) return FormValidation.error(Constants.ERROR_NO_CHALLENGE_EXISTS)
+        if (challenge == null) return FormValidation.error(Constants.Error.NO_CHALLENGE_EXISTS)
 
         property.restoreChallenge(projectName, challenge)
 
@@ -146,7 +146,7 @@ object ActionUtil {
             job.save()
         } catch (e: IOException) {
             e.printStackTrace()
-            return FormValidation.error(Constants.ERROR_SAVING)
+            return FormValidation.error(Constants.Error.SAVING)
         }
 
         return FormValidation.ok("Challenge restored")
@@ -158,9 +158,9 @@ object ActionUtil {
      */
     fun doStoreChallenge(job: AbstractItem, store: String): FormValidation {
         val user: User = User.current()
-            ?: return FormValidation.error(Constants.ERROR_NO_USER_SIGNED_IN)
+            ?: return FormValidation.error(Constants.Error.NO_USER_SIGNED_IN)
         val property = user.getProperty(GameUserProperty::class.java)
-            ?: return FormValidation.error(Constants.ERROR_RETRIEVING_PROPERTY)
+            ?: return FormValidation.error(Constants.Error.RETRIEVING_PROPERTY)
 
         val projectName = job.fullName
         var challenge: Challenge? = null
@@ -171,13 +171,13 @@ object ActionUtil {
             }
         }
 
-        if (challenge == null) return FormValidation.error(Constants.ERROR_NO_CHALLENGE_EXISTS)
+        if (challenge == null) return FormValidation.error(Constants.Error.NO_CHALLENGE_EXISTS)
         if (challenge is DummyChallenge) return FormValidation.error("Dummies cannot be stored " +
                 "- please run another build")
 
         if (property.getStoredChallenges(projectName).size >=
             (job as AbstractProject<*, *>).getProperty(GameJobProperty::class.java).currentStoredChallengesCount)
-            return FormValidation.error("Storage Limit reached")
+            return FormValidation.error(Constants.Error.STORAGE_LIMIT)
 
         property.storeChallenge(projectName, challenge)
 
@@ -188,7 +188,7 @@ object ActionUtil {
             job.save()
         } catch (e: IOException) {
             e.printStackTrace()
-            return FormValidation.error(Constants.ERROR_SAVING)
+            return FormValidation.error(Constants.Error.SAVING)
         }
 
         return FormValidation.ok("Challenge stored$generatedText")
@@ -199,9 +199,9 @@ object ActionUtil {
      */
     fun doUndoStoreChallenge(job: AbstractItem, store: String): FormValidation {
         val user: User = User.current()
-            ?: return FormValidation.error(Constants.ERROR_NO_USER_SIGNED_IN)
+            ?: return FormValidation.error(Constants.Error.NO_USER_SIGNED_IN)
         val property = user.getProperty(GameUserProperty::class.java)
-            ?: return FormValidation.error(Constants.ERROR_RETRIEVING_PROPERTY)
+            ?: return FormValidation.error(Constants.Error.RETRIEVING_PROPERTY)
 
         val projectName = job.fullName
         var challenge: Challenge? = null
@@ -212,7 +212,7 @@ object ActionUtil {
             }
         }
 
-        if (challenge == null) return FormValidation.error(Constants.ERROR_NO_CHALLENGE_EXISTS)
+        if (challenge == null) return FormValidation.error(Constants.Error.NO_CHALLENGE_EXISTS)
 
         property.undoStoreChallenge(projectName, challenge)
 
@@ -221,7 +221,7 @@ object ActionUtil {
             job.save()
         } catch (e: IOException) {
             e.printStackTrace()
-            return FormValidation.error(Constants.ERROR_SAVING)
+            return FormValidation.error(Constants.Error.SAVING)
         }
 
         return FormValidation.ok("Challenge restored")
@@ -248,13 +248,13 @@ object ActionUtil {
         }
         else if (parameters.workspace.exists()) {
             val classes = PublisherUtil.retrieveLastChangedSourceAndTestFiles(
-                Constants.DEFAULT_SEARCH_COMMIT_COUNT, parameters)
+                Constants.Default.SEARCH_COMMIT_COUNT, parameters)
             generatedText = ": New Challenge generated"
 
             if (classes.isNotEmpty()) {
                 generateAndUpdate(user, property, job, parameters, ArrayList(classes))
             } else {
-                property.newChallenge(parameters.projectName, DummyChallenge(parameters, Constants.ERROR_GENERATION))
+                property.newChallenge(parameters.projectName, DummyChallenge(parameters, Constants.Error.GENERATION))
             }
         } else {
             generatedText += " (Workspace deleted or on remote machine)"
