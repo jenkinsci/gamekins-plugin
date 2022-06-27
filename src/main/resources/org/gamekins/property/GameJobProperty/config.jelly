@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?jelly escape-by-default='true'?>
-<j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form" xmlns:st="jelly:stapler" xmlns:fa="/font-awesome" xmlns:bs="/bootstrap">
+<j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form" xmlns:st="jelly:stapler">
     <link rel="stylesheet" href="${rootURL}/plugin/gamekins/css/prettify.css" type="text/css"/>
     <script src="${rootURL}/plugin/gamekins/vendor/prettify.js" type="text/javascript"/>
     <st:adjunct includes="io.jenkins.plugins.popper"/>
