@@ -36,6 +36,7 @@ object Constants {
         const val ACTIVATED = "activated"
         const val SHOW_STATISTICS = "showStatistics"
         const val SHOW_LEADERBOARD = "showLeaderboard"
+        const val SHOW_FOLDER_LEADERBOARD = "leaderboard"
         const val CHALLENGES_COUNT = "currentChallengesCount"
         const val QUEST_COUNT = "currentQuestsCount"
         const val STORED_CHALLENGES_COUNT = "currentStoredChallengesCount"
