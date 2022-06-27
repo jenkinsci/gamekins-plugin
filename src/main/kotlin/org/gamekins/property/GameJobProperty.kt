@@ -53,9 +53,9 @@ class GameJobProperty
 
     init {
         statistics = Statistics(job)
-        if (currentChallengesCount <= 0) currentChallengesCount = Constants.DEFAULT_CURRENT_CHALLENGES
-        if (currentQuestsCount <= 0) currentQuestsCount = Constants.DEFAULT_CURRENT_QUESTS
-        if (currentStoredChallengesCount < 0) currentStoredChallengesCount = Constants.DEFAULT_STORED_CHALLENGES
+        if (currentChallengesCount <= 0) currentChallengesCount = Constants.Default.CURRENT_CHALLENGES
+        if (currentQuestsCount <= 0) currentQuestsCount = Constants.Default.CURRENT_QUESTS
+        if (currentStoredChallengesCount < 0) currentStoredChallengesCount = Constants.Default.STORED_CHALLENGES
     }
 
     @Throws(IOException::class)
@@ -109,9 +109,9 @@ class GameJobProperty
      */
     @Suppress("unused", "SENSELESS_COMPARISON")
     private fun readResolve(): Any {
-        if (currentChallengesCount == 0) currentChallengesCount = Constants.DEFAULT_CURRENT_CHALLENGES
-        if (currentQuestsCount <= 0) currentQuestsCount = Constants.DEFAULT_CURRENT_QUESTS
-        if (currentStoredChallengesCount < 0) currentStoredChallengesCount = Constants.DEFAULT_STORED_CHALLENGES
+        if (currentChallengesCount == 0) currentChallengesCount = Constants.Default.CURRENT_CHALLENGES
+        if (currentQuestsCount <= 0) currentQuestsCount = Constants.Default.CURRENT_QUESTS
+        if (currentStoredChallengesCount < 0) currentStoredChallengesCount = Constants.Default.STORED_CHALLENGES
 
         return this
     }

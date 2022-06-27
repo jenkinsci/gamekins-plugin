@@ -44,7 +44,7 @@ object QuestFactory {
     @JvmStatic
     fun generateNewQuests(
         user: User, property: GameUserProperty, parameters: Constants.Parameters, listener: TaskListener,
-        files: ArrayList<FileDetails>, maxQuests: Int = Constants.DEFAULT_CURRENT_QUESTS
+        files: ArrayList<FileDetails>, maxQuests: Int = Constants.Default.CURRENT_QUESTS
     ): Int {
 
         var generated = 0
