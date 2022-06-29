@@ -30,6 +30,11 @@ import java.nio.file.Path
  */
 object Constants {
 
+    /**
+     * Object with key constants for configuration forms
+     *
+     * @author Matthias Rainer
+     */
     object FormKeys
     {
         const val PROJECT_NAME = "project"
@@ -49,6 +54,11 @@ object Constants {
         const val STORED_CHALLENGES_COUNT = "currentStoredChallengesCount"
     }
 
+    /**
+     * Object with default values
+     *
+     * @author Matthias Rainer
+     */
     object Default
     {
         const val CURRENT_CHALLENGES = 3
@@ -60,6 +70,11 @@ object Constants {
         const val SEARCH_COMMIT_COUNT = 50
     }
 
+    /**
+     * Object with Error messages
+     *
+     * @author Matthias Rainer
+     */
     object Error
     {
         const val UNEXPECTED = "Unexpected Error"
