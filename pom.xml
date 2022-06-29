@@ -359,6 +359,11 @@
             <name>Tran Phan</name>
             <email>phantran197@gmail.com</email>
         </developer>
+        <developer>
+            <id>Matthias Rainer</id>
+            <name>Matthias Rainer</name>
+            <email>rainer08@ads.uni-passau.de</email>
+        </developer>
     </developers>
 
     <!-- Assuming you want to host on @jenkinsci:
