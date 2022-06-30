@@ -1,5 +1,6 @@
 window.onload = (function () {
     prettyPrint();
+    jQuery3('[data-toggle="tooltip"]').tooltip()
 
     let avatars = jQuery3('[id^=imageUser]')
     let src = document.getElementsByTagName("img")[0].src

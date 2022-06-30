@@ -606,6 +606,7 @@
                 jQuery("#helpText").load("${rootURL}/plugin/gamekins/help/helptext-leaderboard.jelly");
                 });
             </script>
+            <script src="${rootURL}/plugin/gamekins/scripts/LeaderboardActionOnload.js" type="text/javascript"/>
             <script src="${rootURL}/plugin/gamekins/scripts/LeaderboardAction.js" type="text/javascript"/>
         </l:main-panel>
 

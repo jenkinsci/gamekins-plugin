@@ -50,7 +50,7 @@
             </div>
             <br/>
 
-            <script src="${rootURL}/plugin/gamekins/scripts/FolderLeaderboardAction.js" type="text/javascript"/>
+            <script src="${rootURL}/plugin/gamekins/scripts/LeaderboardActionOnload.js" type="text/javascript"/>
 
         </l:main-panel>
 
