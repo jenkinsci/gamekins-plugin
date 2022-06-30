@@ -65,5 +65,5 @@
         </f:advanced>
     </f:section>
 
-    <script src="${rootURL}/plugin/gamekins/scripts/GameMultiBranchProperty.js" type="text/javascript"/>
+    <script src="${rootURL}/plugin/gamekins/scripts/GameJobProperty.js" type="text/javascript"/>
 </j:jelly>
