@@ -1,0 +1,85 @@
+<?jelly escape-by-default='true'?>
+
+<j:jelly xmlns:j="jelly:core">
+
+        <h1 class="ml-2">
+            Help
+        </h1>
+        <ul>
+            <li>The current challenges table displays the current Challenges you can solve</li>
+            <li>All necessary information about the Challenge like <i>class</i>, <i>package</i> or <i>branch</i>
+                can be found in the description of the Challenge
+            </li>
+            <li>There are six types of Challenges:</li>
+            <ol>
+                <li><b>Build Challenge</b>: Generated after a build failed because of your commit. Fix the build
+                    to solve the Challenge
+                </li>
+                <li><b>Test Challenge</b>: Just write a new test without specific requirements</li>
+                <li><b>Class Coverage Challenge</b>: Cover more lines in a specific class. It does not matter
+                    which lines
+                </li>
+                <li><b>Method Coverage Challenge</b>: Cover more lines in a specific method. It does not matter
+                    which lines
+                </li>
+                <li><b>Line Coverage Challenge</b>: Cover the specified line or at least one more branch if
+                    available
+                </li>
+                <li><b>Mutation Test Challenge</b>: Write a test or improve an existing one to kill the
+                    generated mutant.
+                </li>
+            </ol>
+            <li>Click on a <b>Challenge</b> to get the content and more details,</li>
+            <li>The <i>branch</i> information states in which branch the Challenges was generated</li>
+            <li>Challenges can also be solved in other branches if the mentioned code is available</li>
+            <li>Challenges are only generated and solved during the <i>run/build</i> of a project/job in Jenkins
+            </li>
+            <li>Normally, the build is triggered after each commit or after a specific amount of time. If you
+                don't want to wait, you can start the build manually by clicking <b>Build Now</b> in the left
+                panel
+            </li>
+            <li>If the Challenge cannot be solved for some reason or the class/method under test should not be
+                tested, the Challenges can be rejected
+            </li>
+            <li>To reject a Challenge, click the Reject button on each Challenge and add a reason, why the
+                Challenge was rejected
+            </li>
+            <li>Rejected Challenges won't appear to be generated a second time</li>
+            <li>If a <b>Class Coverage Challenge</b> is rejected, the whole <i>class</i> is not considered again
+                for new Challenges
+            </li>
+            <li>After rejection a new Challenge is generated if the code of the project is available</li>
+            <li>Hover over a rejected Challenge to see the reason for rejection</li>
+
+            <li>Rejected <b>Class Coverage Challenge</b>s can be restored with the <b>Undo</b>-Button next to
+                the Challenge
+            </li>
+            <li>The Challenge will not be immediately active again, it has to be generated again to appear</li>
+
+            <li>To store a Challenge, click the store button</li>
+            <li>Stored Challenges can not be completed and will count as rejected should they be solved</li>
+            <li>To view and unshelve stored Challenges press the Stored Challenges Button</li>
+
+            <li>If there are no Challenges generated for you, although you have committed something recently,
+                then checkout the <i>Git Names</i> in your profile settings
+            </li>
+            <li>In addition to Challenges, <b>Quests</b> are generated and can be solved step by step,
+                since they consist of different Challenges. The Challenges of a quest must be solved
+                in the given order
+            </li>
+
+            <li>Also have a look at the <b>Achievements</b> available in your profile. You can access them
+                by clicking on the link of your name in the Leaderboard. Remember to choose the right project
+                in the dropdown in your profile.
+            </li>
+            <li>You can also view the Achievements of other players by clicking on their name in the leaderboard
+            </li>
+
+            <li>The <b>Avatar</b> displayed in the leaderboard can be changed in your profile settings.
+                There are 50 different avatars you can choose from
+            </li>
+            <li>When a build for example solves a Challenge or generates a new one, notifications are sent to
+                the stored email address. You can disable this option in your profile settings
+            </li>
+        </ul>
+</j:jelly>

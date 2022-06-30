@@ -1,19 +1,15 @@
 <?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form">
     <f:entry title="Root folder of JaCoCo results" field="jacocoResultsPath"
-             description="Starting from the project workspace with '**/' where the file 'index.html' is located">
+             help="/plugin/gamekins/help/help-jacocoResultsPath.html">
         <f:textbox />
     </f:entry>
 
-    <f:entry title="Path to jacoco.csv" field="jacocoCSVPath"
-             description="Starting from the project workspace with '**/' where the file 'jacoco.csv' is located
-             (Note: include also the file name since it can be different from 'jacoco.csv')">
+    <f:entry title="Path to jacoco.csv" field="jacocoCSVPath" help="/plugin/gamekins/help/help-jacocoCSVPath.html">
         <f:textbox />
     </f:entry>
 
-    <f:entry title="Path to moco.json" field="mocoJSONPath"
-             description="Starting from the project workspace with '**/' where the file 'moco.json' is located
-             (Note: This path must be similar to the configured path in pom.xml for MoCo Maven Plugin)">
+    <f:entry title="Path to moco.json" field="mocoJSONPath" help="/plugin/gamekins/help/help-mocoJSONPath.html">
         <f:textbox />
     </f:entry>
 
