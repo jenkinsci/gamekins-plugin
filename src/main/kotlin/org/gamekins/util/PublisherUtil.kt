@@ -224,13 +224,15 @@ object PublisherUtil {
             checkSolvable(run, property, parameters, listener)
 
             listener.logger.println("[Gamekins] Start checking solved status of stored challenges for user " +
-                    "user.fullName"
+                    user.fullName
             )
 
             //Check if a stored Challenges is solved
             checkStoredSolved(run, property, parameters, listener)
 
-            listener.logger.println("[Gamekins] Start checking solvable state of challenges for user ${user.fullName}")
+            listener.logger.println("[Gamekins] Start checking solvable state of stored challenges for user " +
+                    user.fullName
+            )
 
             //Check if the stored Challenges are still solvable
             checkStoredSolvable(run, property, parameters, listener)
