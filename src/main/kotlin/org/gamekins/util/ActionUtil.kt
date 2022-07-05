@@ -16,6 +16,7 @@
 
 package org.gamekins.util
 
+import com.cloudbees.hudson.plugins.folder.Folder
 import hudson.FilePath
 import hudson.model.AbstractItem
 import hudson.model.AbstractProject
@@ -29,8 +30,11 @@ import org.gamekins.challenge.ChallengeFactory
 import org.gamekins.challenge.DummyChallenge
 import org.gamekins.challenge.quest.Quest
 import org.gamekins.file.FileDetails
+import org.gamekins.property.GameFolderProperty
 import org.gamekins.property.GameJobProperty
+import org.gamekins.property.GameMultiBranchProperty
 import org.gamekins.util.Constants.Parameters
+import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject
 import java.io.IOException
 import java.util.*
 import javax.mail.Message
@@ -286,7 +290,7 @@ object ActionUtil {
             msg.setFrom(InternetAddress("challenges@gamekins.org", "Gamekins"))
             msg.sentDate = Date()
             msg.addRecipient(Message.RecipientType.TO, Mailer.stringToAddress(mail, mailer.charset))
-            msg.setText(generateMailText(projectName, challenge, other, user))
+            msg.setText(generateMailText(projectName, challenge, other, user, job))
             try {
                 Transport.send(msg)
             } catch (e: MessagingException) {
@@ -300,14 +304,32 @@ object ActionUtil {
     /**
      * Generates the mail text for receiving a challenge.
      */
-    private fun generateMailText(projectName: String, challenge: Challenge, receiver: User, sender: User): String {
+    private fun generateMailText(projectName: String, challenge: Challenge, receiver: User, sender: User, job: AbstractProject<*, *>): String {
         var text = "Hello ${receiver.fullName},\n\n"
-        text += "you have a received a new challenge:\n\n"
+        text += "you have received a new challenge:\n\n"
         text += "Project: $projectName\n"
         text += "Sender: ${sender.fullName}\n"
         text += "Challenge: ${challenge.getName()}\n"
 
-        text += "\nThe challenge is not immediately active and has to be unshelved from storage first.\n"
+        text += "\nThe challenge is not immediately active and has to be unshelved from storage first.\n\n"
+        text += "View the leaderboard on ${job.absoluteUrl}leaderboard/\n"
+        val property = PropertyUtil.retrieveGameProperty(job)
+        if (property is GameJobProperty || property is GameMultiBranchProperty) {
+            if (job.parent is Folder
+                && (job.parent as Folder).properties.get(GameFolderProperty::class.java).leaderboard) {
+                text += "View the comprehensive leaderboard on " +
+                        "${(job.parent as Folder).absoluteUrl}leaderboard/\n"
+            }
+            if (job.parent is WorkflowMultiBranchProject
+                && (job.parent as WorkflowMultiBranchProject).parent is Folder
+                && ((job.parent as WorkflowMultiBranchProject).parent as Folder)
+                    .properties.get(GameFolderProperty::class.java).leaderboard) {
+                text += "View the comprehensive leaderboard on " +
+                        "${((job.parent as WorkflowMultiBranchProject).parent as Folder)
+                            .absoluteUrl}leaderboard/\n"
+            }
+        }
+
 
         return text
     }
