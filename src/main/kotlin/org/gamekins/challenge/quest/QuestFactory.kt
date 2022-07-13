@@ -97,22 +97,24 @@ object QuestFactory {
     ): Quest {
 
         for (i in 0..2) {
-            val quest = when (Random.nextInt(9)) {
-                0 -> generateLinesQuest(user, property, parameters, listener, classes)
-                1 -> generateMethodsQuest(user, property, parameters, listener, classes)
-                2 -> generatePackageQuest(user, property, parameters, listener, classes)
-                3 -> generateClassQuest(user, property, parameters, listener, classes)
-                4 -> generateExpandingQuest(user, property, parameters, listener, classes)
-                5 -> generateDecreasingQuest(user, property, parameters, listener, classes)
-                6 -> generateTestQuest(user, property, parameters, listener, classes)
-                7 -> generateMutationQuest(user, property, parameters, listener, classes)
-                8 -> generateSmellQuest(user, property, parameters, listener, classes)
-                else -> null
-            }
+            try {
+                val quest = when (Random.nextInt(9)) {
+                    0 -> generateLinesQuest(user, property, parameters, listener, classes)
+                    1 -> generateMethodsQuest(user, property, parameters, listener, classes)
+                    2 -> generatePackageQuest(user, property, parameters, listener, classes)
+                    3 -> generateClassQuest(user, property, parameters, listener, classes)
+                    4 -> generateExpandingQuest(user, property, parameters, listener, classes)
+                    5 -> generateDecreasingQuest(user, property, parameters, listener, classes)
+                    6 -> generateTestQuest(user, property, parameters, listener, classes)
+                    7 -> generateMutationQuest(user, property, parameters, listener, classes)
+                    8 -> generateSmellQuest(user, property, parameters, listener, classes)
+                    else -> null
+                }
 
-            if (property.getRejectedQuests(parameters.projectName).map { it.first }.contains(quest)) continue
+                if (property.getRejectedQuests(parameters.projectName).map { it.first }.contains(quest)) continue
 
-            if (quest != null) return quest
+                if (quest != null) return quest
+            } catch (_: NullPointerException) {}
         }
 
         return Quest(Constants.NO_QUEST, arrayListOf())

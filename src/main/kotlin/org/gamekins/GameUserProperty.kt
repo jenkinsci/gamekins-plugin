@@ -807,4 +807,12 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
         currentChallenges[projectName]!!.add(challenge)
     }
 
+    fun removeStoredChallenge(projectName: String, challenge: Challenge) {
+        storedChallenges[projectName]!!.remove(challenge)
+    }
+
+    fun addStoredChallenge(projectName: String, challenge: Challenge) {
+        storedChallenges[projectName]!!.add(challenge)
+    }
+
 }

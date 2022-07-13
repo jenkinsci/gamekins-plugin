@@ -78,6 +78,14 @@ class LeaderboardActionDescriptor : Descriptor<LeaderboardAction>(LeaderboardAct
         return ActionUtil.doUndoStoreChallenge(job, store)
     }
 
+    /**
+     * Send a [Challenge] with the String representation [send] to [to].
+     */
+    fun doSendChallenge(@AncestorInPath job: AbstractItem, @QueryParameter send: String, @QueryParameter to: String
+    ): FormValidation {
+        return ActionUtil.doSendChallenge(job, send, to)
+    }
+
     @Nonnull
     override fun getDisplayName(): String {
         return super.getDisplayName()

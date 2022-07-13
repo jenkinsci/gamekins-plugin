@@ -406,6 +406,15 @@
                                                                             data-descriptor-url="${it.descriptor.descriptorFullUrl}">
                                                                         Unshelve
                                                                     </button>
+                                                                    <j:if test='${it.canSend}'>
+                                                                        <button type="button" class="btn m-2 py-1"
+                                                                                style="font-size: 14px; background-color: lightsteelblue"
+                                                                                data-toggle="modal" data-target="#sendModal"
+                                                                                data-challenge-id="${storedChallenge}"
+                                                                                data-descriptor-url="${it.descriptor.descriptorFullUrl}">
+                                                                            Send To:
+                                                                        </button>
+                                                                    </j:if>
                                                                 </td>
                                                             </tr>
                                                         </j:if>
@@ -414,6 +423,55 @@
                                             </table>
                                         </div>
                                         <div id="error-text-stored" class="text-danger" style="margin-top: 2%"/>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" id="closeModalBtn" data-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal fade" id="sendModal" tabindex="-1" role="dialog" aria-labelledby="sendModalLabel"
+                     aria-hidden="true" data-user-name="">
+                    <div class="modal-dialog modal-dialog-centered" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="sendModalLabel">Send Challenge</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">Gamekins</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <form>
+                                    <div class="form-group">
+                                        <div class="table-responsive p-4" style="height: 600px;">
+                                            <table class="mt-3 shadow table-hover table pane sortable bigtable">
+                                                <thead class="thead-dark">
+                                                    <tr>
+                                                        <th scope="col" class="text-center">Participant</th>
+                                                        <th scope="col" class="text-center">Team</th>
+                                                        <th scope="col"/>
+                                                    </tr>
+                                                </thead>
+                                                <j:forEach indexVar="index" var="userDetail" items="${it.userDetailsForSending}">
+                                                    <tr>
+                                                        <td style="vertical-align: middle"><a href="${userDetail.url}/achievements">${userDetail.userName}</a></td>
+                                                        <td class="text-center" style="vertical-align: middle">${userDetail.teamName}</td>
+                                                        <td>
+                                                            <button type="button" class="btn btn-secondary m-2 py-1 sendChallenge"
+                                                                    style="font-size: 14px;"
+                                                                    data-user-name="${userDetail.userName}"
+                                                                    data-descriptor-url="${it.descriptor.descriptorFullUrl}">
+                                                            Send
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                </j:forEach>
+                                            </table>
+                                        </div>
+                                        <div id="error-text-send" class="text-danger" style="margin-top: 2%"></div>
                                     </div>
                                 </form>
                             </div>

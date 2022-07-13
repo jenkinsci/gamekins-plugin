@@ -197,6 +197,18 @@ class LeaderboardAction(val job: AbstractItem) : ProminentProjectAction, Describ
     }
 
     /**
+     * Returns the details of all users participating in the current project that are eligible for getting sent
+     * Challenges from you.
+     */
+    fun getUserDetailsForSending(): List<UserDetails> {
+        val details = CopyOnWriteArrayList(getUserDetails())
+
+        details.removeIf { ud -> User.current()?.fullName.equals(ud.userName) }
+
+        return details
+    }
+
+    /**
      * Returns whether the current logged in user is participating in the project. Shows his Challenges in the
      * Leaderboard if true.
      */
@@ -227,6 +239,23 @@ class LeaderboardAction(val job: AbstractItem) : ProminentProjectAction, Describ
      */
     fun getStoredChallengesCount(): Int {
         return getStoredChallenges().size
+    }
+
+    /**
+     * Returns whether challenges can be sent
+     */
+    fun getCanSend(): Boolean {
+        return when (job) {
+            is WorkflowMultiBranchProject -> {
+                job.properties.get(GameMultiBranchProperty::class.java).canSendChallenge
+            }
+            is WorkflowJob -> {
+                job.getProperty(GameJobProperty::class.java).canSendChallenge
+            }
+            else -> {
+                (job as AbstractProject<*, *>).getProperty(GameJobProperty::class.java).canSendChallenge
+            }
+        }
     }
 
     /**

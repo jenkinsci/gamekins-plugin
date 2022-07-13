@@ -44,7 +44,8 @@ class GameJobProperty
                                   @set:DataBoundSetter var showStatistics: Boolean,
                                   @set:DataBoundSetter var currentChallengesCount: Int,
                                   @set:DataBoundSetter var currentQuestsCount: Int,
-                                  @set:DataBoundSetter var currentStoredChallengesCount: Int)
+                                  @set:DataBoundSetter var currentStoredChallengesCount: Int,
+                                  @set:DataBoundSetter var canSendChallenge: Boolean)
     : JobProperty<Job<*, *>>(), GameProperty, StaplerProxy {
 
     private var statistics: Statistics
@@ -133,6 +134,7 @@ class GameJobProperty
                 currentQuestsCount = form.getInt(Constants.FormKeys.QUEST_COUNT)
             if (form.getValue(Constants.FormKeys.STORED_CHALLENGES_COUNT) is String)
                 currentStoredChallengesCount = form.getInt(Constants.FormKeys.STORED_CHALLENGES_COUNT)
+            canSendChallenge = form.getBoolean("canSendChallenge")
         }
 
         PropertyUtil.reconfigure(owner, showLeaderboard, showStatistics)

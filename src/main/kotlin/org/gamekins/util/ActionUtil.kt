@@ -16,10 +16,13 @@
 
 package org.gamekins.util
 
+import com.cloudbees.hudson.plugins.folder.Folder
 import hudson.FilePath
 import hudson.model.AbstractItem
 import hudson.model.AbstractProject
 import hudson.model.User
+import hudson.tasks.MailAddressResolver
+import hudson.tasks.Mailer
 import hudson.util.FormValidation
 import org.gamekins.GameUserProperty
 import org.gamekins.challenge.Challenge
@@ -27,9 +30,18 @@ import org.gamekins.challenge.ChallengeFactory
 import org.gamekins.challenge.DummyChallenge
 import org.gamekins.challenge.quest.Quest
 import org.gamekins.file.FileDetails
+import org.gamekins.property.GameFolderProperty
 import org.gamekins.property.GameJobProperty
+import org.gamekins.property.GameMultiBranchProperty
 import org.gamekins.util.Constants.Parameters
+import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject
 import java.io.IOException
+import java.util.*
+import javax.mail.Message
+import javax.mail.MessagingException
+import javax.mail.Transport
+import javax.mail.internet.InternetAddress
+import javax.mail.internet.MimeMessage
 
 /**
  * Util object for interaction with actions.
@@ -225,6 +237,101 @@ object ActionUtil {
         }
 
         return FormValidation.ok("Challenge restored")
+    }
+
+    /**
+     * Sends a [Challenge] with the String representation [send] to [to].
+     */
+    fun doSendChallenge(job: AbstractItem, send: String, to: String): FormValidation {
+        val user: User = User.current()
+            ?: return FormValidation.error(Constants.Error.NO_USER_SIGNED_IN)
+        val property = user.getProperty(GameUserProperty::class.java)
+            ?: return FormValidation.error(Constants.Error.RETRIEVING_PROPERTY)
+
+        val projectName = job.fullName
+        var challenge: Challenge? = null
+        for (chal in property.getStoredChallenges(projectName)) {
+            if (chal.toEscapedString() == send) {
+                challenge = chal
+                break
+            }
+        }
+
+        if (challenge == null) return FormValidation.error(Constants.Error.NO_CHALLENGE_EXISTS)
+
+        val other: User = User.get(to, false, Collections.EMPTY_MAP)
+            ?: return FormValidation.error(Constants.Error.USER_NOT_FOUND)
+        val otherProperty = other.getProperty(GameUserProperty::class.java)
+            ?: return FormValidation.error(Constants.Error.RETRIEVING_PROPERTY)
+
+        if (user == other)
+            return FormValidation.error(Constants.Error.RECEIVER_IS_SELF)
+
+        if (otherProperty.getStoredChallenges(job.fullName).size >=
+            (job as AbstractProject<*, *>).getProperty(GameJobProperty::class.java).currentStoredChallengesCount)
+            return FormValidation.error(Constants.Error.STORAGE_LIMIT)
+        property.removeStoredChallenge(projectName, challenge)
+        otherProperty.addStoredChallenge(projectName, challenge)
+
+        try {
+            user.save()
+            other.save()
+            job.save()
+        } catch (e: IOException) {
+            e.printStackTrace()
+            return FormValidation.error(Constants.Error.SAVING)
+        }
+
+        val mailer = Mailer.descriptor()
+        if (other.getProperty(GameUserProperty::class.java).getNotifications()) {
+            val mail = MailAddressResolver.resolve(other)
+            val msg = MimeMessage(mailer.createSession())
+            msg.subject = "New Gamekins Challenge"
+            msg.setFrom(InternetAddress("challenges@gamekins.org", "Gamekins"))
+            msg.sentDate = Date()
+            msg.addRecipient(Message.RecipientType.TO, Mailer.stringToAddress(mail, mailer.charset))
+            msg.setText(generateMailText(projectName, challenge, other, user, job))
+            try {
+                Transport.send(msg)
+            } catch (e: MessagingException) {
+                e.printStackTrace()
+            }
+        }
+
+        return FormValidation.ok("Challenge sent")
+    }
+
+    /**
+     * Generates the mail text for receiving a challenge.
+     */
+    private fun generateMailText(projectName: String, challenge: Challenge, receiver: User, sender: User, job: AbstractProject<*, *>): String {
+        var text = "Hello ${receiver.fullName},\n\n"
+        text += "you have received a new challenge:\n\n"
+        text += "Project: $projectName\n"
+        text += "Sender: ${sender.fullName}\n"
+        text += "Challenge: ${challenge.getName()}\n"
+
+        text += "\nThe challenge is not immediately active and has to be unshelved from storage first.\n\n"
+        text += "View the leaderboard on ${job.absoluteUrl}leaderboard/\n"
+        val property = PropertyUtil.retrieveGameProperty(job)
+        if (property is GameJobProperty || property is GameMultiBranchProperty) {
+            if (job.parent is Folder
+                && (job.parent as Folder).properties.get(GameFolderProperty::class.java).leaderboard) {
+                text += "View the comprehensive leaderboard on " +
+                        "${(job.parent as Folder).absoluteUrl}leaderboard/\n"
+            }
+            if (job.parent is WorkflowMultiBranchProject
+                && (job.parent as WorkflowMultiBranchProject).parent is Folder
+                && ((job.parent as WorkflowMultiBranchProject).parent as Folder)
+                    .properties.get(GameFolderProperty::class.java).leaderboard) {
+                text += "View the comprehensive leaderboard on " +
+                        "${((job.parent as WorkflowMultiBranchProject).parent as Folder)
+                            .absoluteUrl}leaderboard/\n"
+            }
+        }
+
+
+        return text
     }
 
     /**

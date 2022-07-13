@@ -158,7 +158,8 @@ class GameJobPropertyDescriptor : JobPropertyDescriptor(GameJobProperty::class.j
             if (formData.getValue(Constants.FormKeys.QUEST_COUNT) is Int)
                 formData.getInt(Constants.FormKeys.QUEST_COUNT) else Constants.Default.CURRENT_QUESTS,
             if (formData.getValue(Constants.FormKeys.STORED_CHALLENGES_COUNT) is Int)
-                formData.getInt(Constants.FormKeys.STORED_CHALLENGES_COUNT) else Constants.Default.STORED_CHALLENGES
+                formData.getInt(Constants.FormKeys.STORED_CHALLENGES_COUNT) else Constants.Default.STORED_CHALLENGES,
+            formData.getBoolean("canSendChallenge")
         )
     }
 }

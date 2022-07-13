@@ -100,6 +100,12 @@ object Constants {
         const val STORAGE_LIMIT = "Storage Limit reached"
     }
 
+    const val ERROR_RECEIVER_IS_SELF = "Cannot send to yourself"
+
+    const val ERROR_USER_NOT_FOUND = "User not found"
+
+    const val ERROR_STORAGE_CAPACITY_REACHED = "User can't store another challenge"
+
     const val EXISTS = " exists "
 
     const val NO_QUEST = "No quest could be generated. This could mean that none of the prerequisites was met, " +

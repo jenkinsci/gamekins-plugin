@@ -108,7 +108,8 @@ class GameOrganizationFolderProperty private constructor()
                                 ?: project.addProperty(GameMultiBranchProperty(project,
                                     formData.getBoolean(Constants.FormKeys.ACTIVATED), formData.getBoolean(Constants.FormKeys.SHOW_LEADERBOARD),
                                     formData.getBoolean(Constants.FormKeys.SHOW_STATISTICS), formData.getInt(Constants.FormKeys.CHALLENGES_COUNT),
-                                    formData.getInt(Constants.FormKeys.QUEST_COUNT), formData.getInt(Constants.FormKeys.STORED_CHALLENGES_COUNT)))
+                                    formData.getInt(Constants.FormKeys.QUEST_COUNT), formData.getInt(Constants.FormKeys.STORED_CHALLENGES_COUNT),
+                                    formData.getBoolean("canSendChallenge")))
                         folder.save()
                         break
                     } catch (e: IOException) {
