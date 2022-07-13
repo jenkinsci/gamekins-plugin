@@ -134,7 +134,7 @@ class GameJobProperty
                 currentQuestsCount = form.getInt(Constants.FormKeys.QUEST_COUNT)
             if (form.getValue(Constants.FormKeys.STORED_CHALLENGES_COUNT) is String)
                 currentStoredChallengesCount = form.getInt(Constants.FormKeys.STORED_CHALLENGES_COUNT)
-            canSendChallenge = form.getBoolean("canSendChallenge")
+            canSendChallenge = form.getBoolean(Constants.FormKeys.CAN_SEND_CHALLENGE)
         }
 
         PropertyUtil.reconfigure(owner, showLeaderboard, showStatistics)

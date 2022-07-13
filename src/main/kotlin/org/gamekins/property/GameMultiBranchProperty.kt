@@ -125,7 +125,7 @@ class GameMultiBranchProperty
                 currentQuestsCount = form.getInt(Constants.FormKeys.QUEST_COUNT)
             if (form.getValue(Constants.FormKeys.STORED_CHALLENGES_COUNT) is String)
                 currentStoredChallengesCount = form.getInt(Constants.FormKeys.STORED_CHALLENGES_COUNT)
-            canSendChallenge = form.getBoolean("canSendChallenge")
+            canSendChallenge = form.getBoolean(Constants.FormKeys.CAN_SEND_CHALLENGE)
         }
         
         PropertyUtil.reconfigure(owner!!, showLeaderboard, showStatistics)
@@ -273,7 +273,7 @@ class GameMultiBranchProperty
                     formData.getInt(Constants.FormKeys.QUEST_COUNT) else Constants.Default.CURRENT_QUESTS,
                 if (formData.getValue(Constants.FormKeys.STORED_CHALLENGES_COUNT) is Int)
                     formData.getInt(Constants.FormKeys.STORED_CHALLENGES_COUNT) else Constants.Default.STORED_CHALLENGES,
-                formData.getBoolean("canSendChallenge")
+                formData.getBoolean(Constants.FormKeys.CAN_SEND_CHALLENGE)
             )
         }
     }
