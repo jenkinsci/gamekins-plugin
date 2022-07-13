@@ -52,6 +52,8 @@ object Constants {
         const val QUEST_COUNT = "currentQuestsCount"
 
         const val STORED_CHALLENGES_COUNT = "currentStoredChallengesCount"
+
+        const val  CAN_SEND_CHALLENGE = "canSendChallenge"
     }
 
     /**
@@ -95,16 +97,20 @@ object Constants {
 
         const val REJECT_DUMMY = "Dummies cannot be rejected - please run another build"
 
-        const val ERROR_RECEIVER_IS_SELF = "Cannot send to yourself"
+        const val NO_TEAM_NAME = "Insert a name for the team"
+
+        const val STORAGE_LIMIT = "Storage Limit reached"
+
+        const val RECEIVER_IS_SELF = "Can't send challenges to yourself"
+
+        const val USER_NOT_FOUND = "User not found"
+    }
+
+    const val ERROR_RECEIVER_IS_SELF = "Cannot send to yourself"
 
     const val ERROR_USER_NOT_FOUND = "User not found"
 
     const val ERROR_STORAGE_CAPACITY_REACHED = "User can't store another challenge"
-
-    const val NO_TEAM_NAME = "Insert a name for the team"
-
-        const val STORAGE_LIMIT = "Storage Limit reached"
-    }
 
     const val EXISTS = " exists "
 

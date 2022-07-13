@@ -179,3 +179,46 @@ jQuery3('.undoStore').on('click', function () {
         }
     })
 })
+
+jQuery3("#sendModal").on('show.bs.modal', function (event) {
+    let modal = jQuery3(this)
+    let button = jQuery3(event.relatedTarget)
+    modal.data('challenge-id', button.data('challenge-id'))
+})
+
+jQuery3("#sendModal").on('close.bs.modal', function (event) {
+    let modal = jQuery3(this)
+    modal.data('challenge-id', "")
+})
+
+
+
+jQuery3('.sendChallenge').on('click', function () {
+
+    let btn = jQuery3(this)
+    let modal = jQuery("#sendModal")
+    let challenge = modal.data('challenge-id')
+    let user = btn.data('user-name')
+    let descriptorFullUrl = btn.data('descriptor-url')
+    let parameters = {}
+    let url = descriptorFullUrl + "/sendChallenge"
+
+    challenge = challenge.replaceAll('<b>', '')
+    challenge = challenge.replaceAll('</b>', '')
+
+    parameters["send"] = challenge
+    parameters["to"] = user
+
+    new Ajax.Request(url, {
+        parameters: parameters,
+        onComplete: function (rsp) {
+            if (rsp.responseText.includes("class=error")) {
+                jQuery3('#error-text-send')[0].innerHTML = rsp.responseText;
+                return false;
+            } else {
+                jQuery3('#error-text-send')[0].innerHTML = ""
+            }
+        location.reload()
+        }
+    })
+})
