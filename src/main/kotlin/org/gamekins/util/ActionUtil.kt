@@ -16,13 +16,10 @@
 
 package org.gamekins.util
 
-import com.cloudbees.hudson.plugins.folder.Folder
 import hudson.FilePath
 import hudson.model.AbstractItem
 import hudson.model.AbstractProject
 import hudson.model.User
-import hudson.tasks.MailAddressResolver
-import hudson.tasks.Mailer
 import hudson.util.FormValidation
 import org.gamekins.GameUserProperty
 import org.gamekins.challenge.Challenge
@@ -30,18 +27,10 @@ import org.gamekins.challenge.ChallengeFactory
 import org.gamekins.challenge.DummyChallenge
 import org.gamekins.challenge.quest.Quest
 import org.gamekins.file.FileDetails
-import org.gamekins.property.GameFolderProperty
 import org.gamekins.property.GameJobProperty
-import org.gamekins.property.GameMultiBranchProperty
 import org.gamekins.util.Constants.Parameters
-import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject
 import java.io.IOException
 import java.util.*
-import javax.mail.Message
-import javax.mail.MessagingException
-import javax.mail.Transport
-import javax.mail.internet.InternetAddress
-import javax.mail.internet.MimeMessage
 
 /**
  * Util object for interaction with actions.
@@ -282,20 +271,9 @@ object ActionUtil {
             return FormValidation.error(Constants.Error.SAVING)
         }
 
-        val mailer = Mailer.descriptor()
         if (other.getProperty(GameUserProperty::class.java).getNotifications()) {
-            val mail = MailAddressResolver.resolve(other)
-            val msg = MimeMessage(mailer.createSession())
-            msg.subject = "New Gamekins Challenge"
-            msg.setFrom(InternetAddress("challenges@gamekins.org", "Gamekins"))
-            msg.sentDate = Date()
-            msg.addRecipient(Message.RecipientType.TO, Mailer.stringToAddress(mail, mailer.charset))
-            msg.setText(generateMailText(projectName, challenge, other, user, job))
-            try {
-                Transport.send(msg)
-            } catch (e: MessagingException) {
-                e.printStackTrace()
-            }
+            MailUtil.sendMail(other, "New Gamekins Challenge", "challenges@gamekins.org", "Gamekins",
+                generateMailText(projectName, challenge, other, user, job))
         }
 
         return FormValidation.ok("Challenge sent")
@@ -312,24 +290,7 @@ object ActionUtil {
         text += "Challenge: ${challenge.getName()}\n"
 
         text += "\nThe challenge is not immediately active and has to be unshelved from storage first.\n\n"
-        text += "View the leaderboard on ${job.absoluteUrl}leaderboard/\n"
-        val property = PropertyUtil.retrieveGameProperty(job)
-        if (property is GameJobProperty || property is GameMultiBranchProperty) {
-            if (job.parent is Folder
-                && (job.parent as Folder).properties.get(GameFolderProperty::class.java).leaderboard) {
-                text += "View the comprehensive leaderboard on " +
-                        "${(job.parent as Folder).absoluteUrl}leaderboard/\n"
-            }
-            if (job.parent is WorkflowMultiBranchProject
-                && (job.parent as WorkflowMultiBranchProject).parent is Folder
-                && ((job.parent as WorkflowMultiBranchProject).parent as Folder)
-                    .properties.get(GameFolderProperty::class.java).leaderboard) {
-                text += "View the comprehensive leaderboard on " +
-                        "${((job.parent as WorkflowMultiBranchProject).parent as Folder)
-                            .absoluteUrl}leaderboard/\n"
-            }
-        }
-
+        text += MailUtil.generateViewLeaderboardText(job)
 
         return text
     }
