@@ -14,7 +14,7 @@
     </f:entry>
 
     <f:entry title="Commits to be searched" field="searchCommitCount"
-             help="/plugin/gamekins/help/help-searchCommitCount.html" description="Default: 50">
+             help="/plugin/gamekins/help/help-searchCommitCount.html">
         <f:number />
     </f:entry>
 </j:jelly>
