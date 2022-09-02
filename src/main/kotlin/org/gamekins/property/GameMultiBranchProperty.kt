@@ -52,7 +52,8 @@ class GameMultiBranchProperty
                                   @set:DataBoundSetter var currentChallengesCount: Int,
                                   @set:DataBoundSetter var currentQuestsCount: Int,
                                   @set:DataBoundSetter var currentStoredChallengesCount: Int,
-                                  @set:DataBoundSetter var canSendChallenge: Boolean)
+                                  @set:DataBoundSetter var canSendChallenge: Boolean,
+                                  @set:DataBoundSetter var searchCommitCount: Int)
     : AbstractFolderProperty<AbstractFolder<*>?>(), GameProperty, StaplerProxy {
 
     private var statistics: Statistics
@@ -67,6 +68,7 @@ class GameMultiBranchProperty
         if (currentChallengesCount <= 0) currentChallengesCount = Constants.DEFAULT_CURRENT_CHALLENGES
         if (currentQuestsCount <= 0) currentQuestsCount = Constants.DEFAULT_CURRENT_QUESTS
         if (currentStoredChallengesCount < 0) currentStoredChallengesCount = Constants.DEFAULT_STORED_CHALLENGES
+        if (searchCommitCount <= 0) searchCommitCount = Constants.DEFAULT_SEARCH_COMMIT_COUNT
     }
 
     @Throws(IOException::class)
@@ -103,6 +105,7 @@ class GameMultiBranchProperty
         if (currentChallengesCount == 0) currentChallengesCount = Constants.DEFAULT_CURRENT_CHALLENGES
         if (currentQuestsCount <= 0) currentQuestsCount = Constants.DEFAULT_CURRENT_QUESTS
         if (currentStoredChallengesCount < 0) currentStoredChallengesCount = Constants.DEFAULT_STORED_CHALLENGES
+        if (searchCommitCount <= 0) searchCommitCount = Constants.DEFAULT_SEARCH_COMMIT_COUNT
 
         return this
     }
@@ -126,6 +129,8 @@ class GameMultiBranchProperty
             if (form.getValue("currentStoredChallengesCount") is String)
                 currentQuestsCount = form.getInt("currentStoredChallengesCount")
             canSendChallenge = form.getBoolean("canSendChallenge")
+            if (form.getValue("searchCommitCount") is String)
+                searchCommitCount = form.getInt("searchCommitCount")
         }
         
         PropertyUtil.reconfigure(owner!!, showLeaderboard, showStatistics)
@@ -273,7 +278,9 @@ class GameMultiBranchProperty
                     formData.getInt("currentQuestsCount") else Constants.DEFAULT_CURRENT_QUESTS,
                 if (formData.getValue("currentStoredChallengesCount") is Int)
                     formData.getInt("currentStoredChallengesCount") else Constants.DEFAULT_STORED_CHALLENGES,
-                formData.getBoolean("canSendChallenge")
+                formData.getBoolean("canSendChallenge"),
+                if (formData.getValue("searchCommitCount") is Int)
+                    formData.getInt("searchCommitCount") else Constants.DEFAULT_SEARCH_COMMIT_COUNT
             )
         }
     }

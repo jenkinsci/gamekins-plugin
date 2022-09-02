@@ -45,7 +45,8 @@ class GameJobProperty
                                   @set:DataBoundSetter var currentChallengesCount: Int,
                                   @set:DataBoundSetter var currentQuestsCount: Int,
                                   @set:DataBoundSetter var currentStoredChallengesCount: Int,
-                                  @set:DataBoundSetter var canSendChallenge: Boolean)
+                                  @set:DataBoundSetter var canSendChallenge: Boolean,
+                                  @set:DataBoundSetter var searchCommitCount: Int)
     : JobProperty<Job<*, *>>(), GameProperty, StaplerProxy {
 
     private var statistics: Statistics
@@ -56,6 +57,7 @@ class GameJobProperty
         if (currentChallengesCount <= 0) currentChallengesCount = Constants.DEFAULT_CURRENT_CHALLENGES
         if (currentQuestsCount <= 0) currentQuestsCount = Constants.DEFAULT_CURRENT_QUESTS
         if (currentStoredChallengesCount < 0) currentStoredChallengesCount = Constants.DEFAULT_STORED_CHALLENGES
+        if (searchCommitCount <= 0) searchCommitCount = Constants.DEFAULT_SEARCH_COMMIT_COUNT
     }
 
     @Throws(IOException::class)
@@ -112,6 +114,7 @@ class GameJobProperty
         if (currentChallengesCount == 0) currentChallengesCount = Constants.DEFAULT_CURRENT_CHALLENGES
         if (currentQuestsCount <= 0) currentQuestsCount = Constants.DEFAULT_CURRENT_QUESTS
         if (currentStoredChallengesCount < 0) currentStoredChallengesCount = Constants.DEFAULT_STORED_CHALLENGES
+        if (searchCommitCount <= 0) searchCommitCount = Constants.DEFAULT_SEARCH_COMMIT_COUNT
 
         return this
     }
@@ -135,6 +138,8 @@ class GameJobProperty
             if (form.getValue("currentStoredChallengesCount") is String)
                 currentStoredChallengesCount = form.getInt("currentStoredChallengesCount")
             canSendChallenge = form.getBoolean("canSendChallenge")
+            if (form.getValue("searchCommitCount") is String)
+                searchCommitCount = form.getInt("searchCommitCount")
         }
 
         PropertyUtil.reconfigure(owner, showLeaderboard, showStatistics)

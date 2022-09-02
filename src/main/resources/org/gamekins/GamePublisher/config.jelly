@@ -16,9 +16,4 @@
              (Note: This path must be similar to the configured path in pom.xml for MoCo Maven Plugin)">
         <f:textbox />
     </f:entry>
-
-    <f:entry title="Commits to be searched" field="searchCommitCount"
-             description="Default: 50">
-        <f:number />
-    </f:entry>
 </j:jelly>

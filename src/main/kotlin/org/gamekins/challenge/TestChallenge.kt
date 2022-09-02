@@ -108,7 +108,7 @@ class TestChallenge(data: Challenge.ChallengeGenerationData) : Challenge {
                 return false
             }
             val lastChangedFilesOfUser = GitUtil.getLastChangedTestsOfUser(
-                Constants.DEFAULT_SEARCH_COMMIT_COUNT, currentCommit, parameters, listener, GitUtil.GameUser(user),
+                currentCommit, parameters, listener, GitUtil.GameUser(user),
                 GitUtil.mapUsersToGameUsers(User.getAll()))
             if (lastChangedFilesOfUser.isNotEmpty()) {
                 solved = System.currentTimeMillis()

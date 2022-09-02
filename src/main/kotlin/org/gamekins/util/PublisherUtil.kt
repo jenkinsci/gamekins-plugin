@@ -346,7 +346,7 @@ object PublisherUtil {
      * activated.
      */
     @JvmStatic
-    fun retrieveLastChangedClasses(searchCommitCount: Int, parameters: Parameters,
+    fun retrieveLastChangedClasses(parameters: Parameters,
                                    users: Collection<User> = User.getAll(), listener: TaskListener = TaskListener.NULL,
                                    removeFullyCoveredClasses: Boolean = true,
                                    removeClassesWithoutJacocoFiles: Boolean = true, sort: Boolean = true)
@@ -354,7 +354,7 @@ object PublisherUtil {
 
         val classes: ArrayList<SourceFileDetails>
         try {
-            classes = ArrayList(GitUtil.getLastChangedClasses(searchCommitCount, "",
+            classes = ArrayList(GitUtil.getLastChangedClasses("",
                 parameters, listener, GitUtil.mapUsersToGameUsers(users)))
             listener.logger.println("[Gamekins] Found ${classes.size} last changed files")
 
@@ -387,7 +387,7 @@ object PublisherUtil {
      * activated.
      */
     @JvmStatic
-    fun retrieveLastChangedSourceAndTestFiles(searchCommitCount: Int, parameters: Parameters,
+    fun retrieveLastChangedSourceAndTestFiles(parameters: Parameters,
                                    users: Collection<User> = User.getAll(), listener: TaskListener = TaskListener.NULL,
                                    removeFullyCoveredClasses: Boolean = true,
                                    removeClassesWithoutJacocoFiles: Boolean = true)
@@ -395,7 +395,7 @@ object PublisherUtil {
 
         val files: ArrayList<FileDetails>
         try {
-            files = ArrayList(GitUtil.getLastChangedSourceAndTestFiles(searchCommitCount, "",
+            files = ArrayList(GitUtil.getLastChangedSourceAndTestFiles( "",
                 parameters, listener, GitUtil.mapUsersToGameUsers(users)))
             listener.logger.println("[Gamekins] Found ${files.size} last changed files")
 

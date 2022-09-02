@@ -164,7 +164,7 @@ class ActionUtilTest: AnnotationSpec() {
                 ": No additional Challenge generated (Workspace deleted or on remote machine)"
 
         mockkStatic(PublisherUtil::class)
-        every { PublisherUtil.retrieveLastChangedClasses(any(), any(), any()) } returns arrayListOf()
+        every { PublisherUtil.retrieveLastChangedClasses(any(), any()) } returns arrayListOf()
         parameters.workspace = FilePath(null, root)
         parameters.projectName = "test-project"
         ActionUtil.generateChallengeAfterRejection(challenge, user, userProperty, job) shouldBe
@@ -178,7 +178,7 @@ class ActionUtilTest: AnnotationSpec() {
         every { job1.getProperty(any()) } returns jobProperty1
         every { jobProperty1.getStatistics() } returns statistics
         every { statistics.addGeneratedAfterRejection(any(), any()) } returns Unit
-        every { PublisherUtil.retrieveLastChangedClasses(any(), any(), any()) } returns
+        every { PublisherUtil.retrieveLastChangedClasses(any(), any()) } returns
                 arrayListOf(mockkClass(SourceFileDetails::class))
         ActionUtil.generateChallengeAfterRejection(challenge, user, userProperty, job1) shouldBe
                 ": New Challenge generated"

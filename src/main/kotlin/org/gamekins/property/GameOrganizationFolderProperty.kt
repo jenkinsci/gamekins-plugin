@@ -108,7 +108,7 @@ class GameOrganizationFolderProperty private constructor()
                                     formData.getBoolean("activated"), formData.getBoolean("showLeaderboard"),
                                     formData.getBoolean("showStatistics"), formData.getInt("currentChallengesCount"),
                                     formData.getInt("currentQuestsCount"), formData.getInt("currentStoredChallengesCount"),
-                                    formData.getBoolean("canSendChallenge")))
+                                    formData.getBoolean("canSendChallenge"), formData.getInt("searchCommitCount")))
                         folder.save()
                         break
                     } catch (e: IOException) {

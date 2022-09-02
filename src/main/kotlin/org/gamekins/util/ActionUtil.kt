@@ -354,8 +354,7 @@ object ActionUtil {
             generatedText += " (Enough Challenges already)"
         }
         else if (parameters.workspace.exists()) {
-            val classes = PublisherUtil.retrieveLastChangedSourceAndTestFiles(
-                Constants.DEFAULT_SEARCH_COMMIT_COUNT, parameters)
+            val classes = PublisherUtil.retrieveLastChangedSourceAndTestFiles(parameters)
             generatedText = ": New Challenge generated"
 
             if (classes.isNotEmpty()) {

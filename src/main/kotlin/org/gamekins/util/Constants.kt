@@ -128,6 +128,7 @@ object Constants {
         var currentChallengesCount: Int = DEFAULT_CURRENT_CHALLENGES,
         var currentQuestsCount: Int = DEFAULT_CURRENT_QUESTS,
         var storedChallengesCount: Int = DEFAULT_STORED_CHALLENGES,
+        var searchCommitCount: Int = DEFAULT_SEARCH_COMMIT_COUNT,
         var generated: Int = 0,
         var jacocoCSVPath: String = "",
         var jacocoResultsPath: String = "",
