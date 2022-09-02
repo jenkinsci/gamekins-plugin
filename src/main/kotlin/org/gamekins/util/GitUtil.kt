@@ -132,11 +132,11 @@ object GitUtil {
      */
     @JvmStatic
     fun getLastChangedClasses(
-        count: Int, commitHash: String, parameters: Parameters, listener: TaskListener,
+        commitHash: String, parameters: Parameters, listener: TaskListener,
         users: ArrayList<GameUser>
     ): List<SourceFileDetails> {
 
-        return parameters.workspace.act(LastChangedFilesCallable(parameters, count, commitHash, users, listener))
+        return parameters.workspace.act(LastChangedFilesCallable(parameters, commitHash, users, listener))
             .filterIsInstance<SourceFileDetails>()
     }
 
@@ -147,10 +147,10 @@ object GitUtil {
      * the events to the console output of Jenkins.
      */
     @JvmStatic
-    fun getLastChangedClassesOfUser(count: Int, commitHash: String, parameters: Parameters,
+    fun getLastChangedClassesOfUser(commitHash: String, parameters: Parameters,
                                     listener: TaskListener, user: GameUser, users: ArrayList<GameUser>,
     ): List<SourceFileDetails> {
-        return getLastChangedClasses(count, commitHash, parameters, listener, users)
+        return getLastChangedClasses(commitHash, parameters, listener, users)
             .filter { it.changedByUsers.contains(user) }
     }
 
@@ -161,7 +161,7 @@ object GitUtil {
      * the events to the console output of Jenkins.
      */
     @JvmStatic
-    fun getLastChangedFiles(count: Int, commitHash: String, parameters: Parameters,
+    fun getLastChangedFiles(commitHash: String, parameters: Parameters,
                             users: ArrayList<GameUser>, listener: TaskListener
     ): ArrayList<FileDetails> {
 
@@ -194,7 +194,7 @@ object GitUtil {
         val files = arrayListOf<FileDetails>()
         val authorMapping = HashMap<PersonIdent, GameUser>()
 
-        while (totalCount < count) {
+        while (totalCount < parameters.searchCommitCount) {
             listener.logger.println("[Gamekins] Searched through $totalCount Commits")
             if (currentCommits.isEmpty()) break
 
@@ -281,10 +281,10 @@ object GitUtil {
      * according [users]. [parameters] are needed for information about the JaCoCo paths and the [listener] reports
      * the events to the console output of Jenkins.
      */
-    fun getLastChangedSourceAndTestFiles(count: Int, commitHash: String, parameters: Parameters,
+    fun getLastChangedSourceAndTestFiles(commitHash: String, parameters: Parameters,
                                          listener: TaskListener, users: ArrayList<GameUser>
     ): List<FileDetails> {
-        return parameters.workspace.act(LastChangedFilesCallable(parameters, count, commitHash, users, listener))
+        return parameters.workspace.act(LastChangedFilesCallable(parameters, commitHash, users, listener))
             .filter{ it is SourceFileDetails || it is TestFileDetails }
     }
 
@@ -296,10 +296,10 @@ object GitUtil {
      */
     @JvmStatic
     fun getLastChangedTests(
-        count: Int, commitHash: String, parameters: Parameters, listener: TaskListener, users: ArrayList<GameUser>
+        commitHash: String, parameters: Parameters, listener: TaskListener, users: ArrayList<GameUser>
     ): List<TestFileDetails> {
 
-        return parameters.workspace.act(LastChangedFilesCallable(parameters, count, commitHash, users, listener))
+        return parameters.workspace.act(LastChangedFilesCallable(parameters, commitHash, users, listener))
             .filterIsInstance<TestFileDetails>()
     }
 
@@ -310,10 +310,10 @@ object GitUtil {
      * the events to the console output of Jenkins.
      */
     @JvmStatic
-    fun getLastChangedTestsOfUser(count: Int, commitHash: String, parameters: Parameters,
+    fun getLastChangedTestsOfUser(commitHash: String, parameters: Parameters,
                                   listener: TaskListener, user: GameUser, users: ArrayList<GameUser>
     ): List<TestFileDetails> {
-        return getLastChangedTests(count, commitHash, parameters, listener, users)
+        return getLastChangedTests(commitHash, parameters, listener, users)
             .filter { it.changedByUsers.contains(user) }
     }
 
@@ -506,7 +506,6 @@ object GitUtil {
      */
     private class LastChangedFilesCallable constructor(
         private val parameters: Parameters,
-        private val commitCount: Int,
         private val commitHash: String,
         private val users: ArrayList<GameUser>,
         private val listener: TaskListener
@@ -517,7 +516,7 @@ object GitUtil {
          * or throws some exception.
          */
         override fun call(): ArrayList<FileDetails> {
-            return getLastChangedFiles(commitCount, commitHash, parameters, users, listener)
+            return getLastChangedFiles(commitHash, parameters, users, listener)
         }
     }
 
