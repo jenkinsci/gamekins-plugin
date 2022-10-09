@@ -40,6 +40,8 @@ object Constants {
 
     const val ERROR_UNEXPECTED = "Unexpected Error"
 
+    const val ERROR_UNKNOWN_GAME_PROPERTY = "Unknown Game Property"
+
     const val ERROR_GENERATION = "There was an error with generating a new challenge"
 
     const val ERROR_NO_CHALLENGE_EXISTS = "The challenge does not exist"

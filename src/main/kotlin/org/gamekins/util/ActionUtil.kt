@@ -19,7 +19,6 @@ package org.gamekins.util
 import com.cloudbees.hudson.plugins.folder.Folder
 import hudson.FilePath
 import hudson.model.AbstractItem
-import hudson.model.AbstractProject
 import hudson.model.User
 import hudson.tasks.MailAddressResolver
 import hudson.tasks.Mailer
@@ -187,8 +186,15 @@ object ActionUtil {
         if (challenge is DummyChallenge) return FormValidation.error("Dummies cannot be stored " +
                 "- please run another build")
 
-        if (property.getStoredChallenges(projectName).size >=
-            (job as AbstractProject<*, *>).getProperty(GameJobProperty::class.java).currentStoredChallengesCount)
+        val currentStoredChallengesCount : Int =
+            when (val gameProperty = PropertyUtil.retrieveGameProperty(job)) {
+                is GameMultiBranchProperty -> gameProperty.currentStoredChallengesCount
+                is GameJobProperty -> gameProperty.currentStoredChallengesCount
+                else -> -1
+            }
+        if (currentStoredChallengesCount == -1)
+            return FormValidation.error(Constants.ERROR_UNKNOWN_GAME_PROPERTY)
+        if (property.getStoredChallenges(projectName).size >= currentStoredChallengesCount)
             return FormValidation.error(Constants.ERROR_STORAGE_CAPACITY_REACHED)
 
         property.storeChallenge(projectName, challenge)
@@ -267,8 +273,15 @@ object ActionUtil {
         if (user == other)
             return FormValidation.error(Constants.ERROR_RECEIVER_IS_SELF)
 
-        if (otherProperty.getStoredChallenges(job.fullName).size >=
-            (job as AbstractProject<*, *>).getProperty(GameJobProperty::class.java).currentStoredChallengesCount)
+        val currentStoredChallengesCount : Int =
+            when (val gameProperty = PropertyUtil.retrieveGameProperty(job)) {
+                is GameMultiBranchProperty -> gameProperty.currentStoredChallengesCount
+                is GameJobProperty -> gameProperty.currentStoredChallengesCount
+                else -> -1
+            }
+        if (currentStoredChallengesCount == -1)
+            return FormValidation.error(Constants.ERROR_UNKNOWN_GAME_PROPERTY)
+        if (otherProperty.getStoredChallenges(job.fullName).size >= currentStoredChallengesCount)
             return FormValidation.error(Constants.ERROR_STORAGE_CAPACITY_REACHED)
         property.removeStoredChallenge(projectName, challenge)
         otherProperty.addStoredChallenge(projectName, challenge)
@@ -304,7 +317,7 @@ object ActionUtil {
     /**
      * Generates the mail text for receiving a challenge.
      */
-    private fun generateMailText(projectName: String, challenge: Challenge, receiver: User, sender: User, job: AbstractProject<*, *>): String {
+    private fun generateMailText(projectName: String, challenge: Challenge, receiver: User, sender: User, job: AbstractItem): String {
         var text = "Hello ${receiver.fullName},\n\n"
         text += "you have received a new challenge:\n\n"
         text += "Project: $projectName\n"
