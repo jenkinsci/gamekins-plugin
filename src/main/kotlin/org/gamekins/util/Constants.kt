@@ -104,6 +104,8 @@ object Constants {
         const val RECEIVER_IS_SELF = "Can't send challenges to yourself"
 
         const val USER_NOT_FOUND = "User not found"
+
+        const val UNKNOWN_GAME_PROPERTY = "Unknown Game Property"
     }
 
     const val EXISTS = " exists "
