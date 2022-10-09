@@ -124,7 +124,10 @@ class ActionUtilTest: AnnotationSpec() {
         val job = mockkClass(AbstractProject::class)
         every { job.fullName } returns "test-project"
         every { job.save() } returns Unit
-        every { job.getProperty(GameJobProperty::class.java).currentStoredChallengesCount } returns 1
+        mockkStatic(PropertyUtil::class)
+        val gameProperty = mockkClass(GameJobProperty::class)
+        every { gameProperty.currentStoredChallengesCount } returns 1
+        every { PropertyUtil.retrieveGameProperty(any())} returns gameProperty
         ActionUtil.doStoreChallenge(job, stringChallenge).kind shouldBe FormValidation.Kind.OK
     }
 
@@ -218,7 +221,10 @@ class ActionUtilTest: AnnotationSpec() {
         val job = mockkClass(AbstractProject::class)
         every { job.fullName } returns "test-project"
         every { job.save() } returns Unit
-        every { job.getProperty(GameJobProperty::class.java).currentStoredChallengesCount } returns 1
+        mockkStatic(PropertyUtil::class)
+        val gameProperty = mockkClass(GameJobProperty::class)
+        every { gameProperty.currentStoredChallengesCount } returns 1
+        every { PropertyUtil.retrieveGameProperty(any())} returns gameProperty
 
         ActionUtil.doSendChallenge(job, stringChallenge, "User1").kind shouldBe FormValidation.Kind.ERROR
 
