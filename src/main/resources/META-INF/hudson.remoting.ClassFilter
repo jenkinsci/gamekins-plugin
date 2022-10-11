@@ -1,3 +1,4 @@
 kotlin.Pair
-org.sonarsource.sonarlint.core.client.api.common.analysis.DefaultClientIssue
+org.sonarsource.sonarlint.core.analysis.api.Flow
 org.sonarsource.sonarlint.core.analysis.api.TextRange
+org.sonarsource.sonarlint.core.client.api.common.analysis.DefaultClientIssue
