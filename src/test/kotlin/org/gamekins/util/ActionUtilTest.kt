@@ -104,8 +104,6 @@ class ActionUtilTest: AnnotationSpec() {
 
     @Test
     fun doStoreChallenge() {
-        ActionUtil.doStoreChallenge(job, "").kind shouldBe FormValidation.Kind.ERROR
-
         every { User.current() } returns null
         ActionUtil.doStoreChallenge(job, "").kind shouldBe FormValidation.Kind.ERROR
 
@@ -224,7 +222,10 @@ class ActionUtilTest: AnnotationSpec() {
         mockkStatic(PropertyUtil::class)
         val gameProperty = mockkClass(GameJobProperty::class)
         every { gameProperty.currentStoredChallengesCount } returns 1
-        every { PropertyUtil.retrieveGameProperty(any())} returns gameProperty
+        every {
+            hint(GameJobProperty::class)
+            PropertyUtil.retrieveGameProperty(any())
+        } returns gameProperty
 
         ActionUtil.doSendChallenge(job, stringChallenge, "User1").kind shouldBe FormValidation.Kind.ERROR
 
