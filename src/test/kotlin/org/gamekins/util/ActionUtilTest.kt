@@ -125,7 +125,10 @@ class ActionUtilTest: AnnotationSpec() {
         mockkStatic(PropertyUtil::class)
         val gameProperty = mockkClass(GameJobProperty::class)
         every { gameProperty.currentStoredChallengesCount } returns 1
-        every { PropertyUtil.retrieveGameProperty(any())} returns gameProperty
+        every {
+            hint(GameJobProperty::class)
+            PropertyUtil.retrieveGameProperty(any())
+        } returns gameProperty
         ActionUtil.doStoreChallenge(job, stringChallenge).kind shouldBe FormValidation.Kind.OK
     }
 
