@@ -21,7 +21,6 @@ import hudson.model.AbstractItem
 import hudson.model.AbstractProject
 import hudson.model.Job
 import hudson.model.User
-import hudson.tasks.MailAddressResolver
 import hudson.tasks.Mailer
 import hudson.util.FormValidation
 import org.gamekins.GameUserProperty
@@ -42,7 +41,6 @@ import io.mockk.unmockkAll
 import org.gamekins.file.SourceFileDetails
 import java.io.File
 import java.util.concurrent.CopyOnWriteArrayList
-import javax.mail.Transport
 
 class ActionUtilTest: AnnotationSpec() {
 
@@ -122,13 +120,9 @@ class ActionUtilTest: AnnotationSpec() {
         val job = mockkClass(AbstractProject::class)
         every { job.fullName } returns "test-project"
         every { job.save() } returns Unit
-        mockkStatic(PropertyUtil::class)
         val gameProperty = mockkClass(GameJobProperty::class)
         every { gameProperty.currentStoredChallengesCount } returns 1
-        every {
-            hint(GameJobProperty::class)
-            PropertyUtil.retrieveGameProperty(any())
-        } returns gameProperty
+        every { job.getProperty(any()) } returns gameProperty
         ActionUtil.doStoreChallenge(job, stringChallenge).kind shouldBe FormValidation.Kind.OK
     }
 
@@ -222,13 +216,9 @@ class ActionUtilTest: AnnotationSpec() {
         val job = mockkClass(AbstractProject::class)
         every { job.fullName } returns "test-project"
         every { job.save() } returns Unit
-        mockkStatic(PropertyUtil::class)
         val gameProperty = mockkClass(GameJobProperty::class)
         every { gameProperty.currentStoredChallengesCount } returns 1
-        every {
-            hint(GameJobProperty::class)
-            PropertyUtil.retrieveGameProperty(any())
-        } returns gameProperty
+        every { job.getProperty(any()) } returns gameProperty
 
         ActionUtil.doSendChallenge(job, stringChallenge, "User1").kind shouldBe FormValidation.Kind.ERROR
 
