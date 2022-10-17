@@ -233,9 +233,9 @@ object ActionUtil {
      */
     fun doSendChallenge(job: AbstractItem, send: String, to: String): FormValidation {
         val user: User = User.current()
-            ?: return FormValidation.error(Constants.ERROR_NO_USER_SIGNED_IN)
+            ?: return FormValidation.error(Constants.Error.NO_USER_SIGNED_IN)
         val property = user.getProperty(GameUserProperty::class.java)
-            ?: return FormValidation.error(Constants.ERROR_RETRIEVING_PROPERTY)
+            ?: return FormValidation.error(Constants.Error.RETRIEVING_PROPERTY)
 
         val projectName = job.fullName
         var challenge: Challenge? = null
@@ -246,19 +246,19 @@ object ActionUtil {
             }
         }
 
-        if (challenge == null) return FormValidation.error(Constants.ERROR_NO_CHALLENGE_EXISTS)
+        if (challenge == null) return FormValidation.error(Constants.Error.NO_CHALLENGE_EXISTS)
 
         val other: User = User.get(to, false, Collections.EMPTY_MAP)
-            ?: return FormValidation.error(Constants.ERROR_USER_NOT_FOUND)
+            ?: return FormValidation.error(Constants.Error.USER_NOT_FOUND)
         val otherProperty = other.getProperty(GameUserProperty::class.java)
-            ?: return FormValidation.error(Constants.ERROR_RETRIEVING_PROPERTY)
+            ?: return FormValidation.error(Constants.Error.RETRIEVING_PROPERTY)
 
         if (user == other)
-            return FormValidation.error(Constants.ERROR_RECEIVER_IS_SELF)
+            return FormValidation.error(Constants.Error.RECEIVER_IS_SELF)
 
         if (otherProperty.getStoredChallenges(job.fullName).size >=
             (job as AbstractProject<*, *>).getProperty(GameJobProperty::class.java).currentStoredChallengesCount)
-            return FormValidation.error(Constants.ERROR_STORAGE_CAPACITY_REACHED)
+            return FormValidation.error(Constants.Error.STORAGE_LIMIT)
         property.removeStoredChallenge(projectName, challenge)
         otherProperty.addStoredChallenge(projectName, challenge)
 
@@ -268,7 +268,7 @@ object ActionUtil {
             job.save()
         } catch (e: IOException) {
             e.printStackTrace()
-            return FormValidation.error(Constants.ERROR_SAVING)
+            return FormValidation.error(Constants.Error.SAVING)
         }
 
         if (other.getProperty(GameUserProperty::class.java).getNotifications()) {
