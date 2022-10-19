@@ -30,44 +30,86 @@ import java.nio.file.Path
  */
 object Constants {
 
-    const val DEFAULT_CURRENT_CHALLENGES = 3
+    /**
+     * Object with key constants for configuration forms
+     *
+     * @author Matthias Rainer
+     */
+    object FormKeys
+    {
+        const val PROJECT_NAME = "project"
 
-    const val DEFAULT_CURRENT_QUESTS = 1
+        const val ACTIVATED = "activated"
 
-    const val DEFAULT_STORED_CHALLENGES = 2
+        const val SHOW_STATISTICS = "showStatistics"
 
-    const val DEFAULT_SEARCH_COMMIT_COUNT = 50
+        const val SHOW_LEADERBOARD = "showLeaderboard"
 
-    const val ERROR_UNEXPECTED = "Unexpected Error"
+        const val SHOW_FOLDER_LEADERBOARD = "leaderboard"
 
-    const val ERROR_GENERATION = "There was an error with generating a new challenge"
+        const val CHALLENGES_COUNT = "currentChallengesCount"
 
-    const val ERROR_NO_CHALLENGE_EXISTS = "The challenge does not exist"
+        const val QUEST_COUNT = "currentQuestsCount"
 
-    const val ERROR_NO_USER_SIGNED_IN = "There is no user signed in"
+        const val STORED_CHALLENGES_COUNT = "currentStoredChallengesCount"
 
-    const val ERROR_PARENT = "$ERROR_UNEXPECTED: Parent job is null"
+        const val  CAN_SEND_CHALLENGE = "canSendChallenge"
+    }
 
-    const val ERROR_RETRIEVING_PROPERTY = "Unexpected error while retrieving the property"
+    /**
+     * Object with default values
+     *
+     * @author Matthias Rainer
+     */
+    object Default
+    {
+        const val CURRENT_CHALLENGES = 3
 
-    const val ERROR_SAVING = "There was an error with saving"
+        const val CURRENT_QUESTS = 1
 
-    const val ERROR_NO_REASON = "Please insert your reason for rejection"
+        const val STORED_CHALLENGES = 2
 
-    const val ERROR_REJECT_DUMMY = "Dummies cannot be rejected - please run another build"
+        const val SEARCH_COMMIT_COUNT = 50
+    }
 
-    const val ERROR_RECEIVER_IS_SELF = "Cannot send to yourself"
+    /**
+     * Object with Error messages
+     *
+     * @author Matthias Rainer
+     */
+    object Error
+    {
+        const val UNEXPECTED = "Unexpected Error"
 
-    const val ERROR_USER_NOT_FOUND = "User not found"
+        const val GENERATION = "There was an error with generating a new challenge"
 
-    const val ERROR_STORAGE_CAPACITY_REACHED = "User can't store another challenge"
+        const val NO_CHALLENGE_EXISTS = "The challenge does not exist"
+
+        const val NO_USER_SIGNED_IN = "There is no user signed in"
+
+        const val PARENT = "$UNEXPECTED: Parent job is null"
+
+        const val RETRIEVING_PROPERTY = "Unexpected error while retrieving the property"
+
+        const val SAVING = "There was an error with saving"
+
+        const val NO_REASON = "Please insert your reason for rejection"
+
+        const val REJECT_DUMMY = "Dummies cannot be rejected - please run another build"
+
+        const val NO_TEAM_NAME = "Insert a name for the team"
+
+        const val STORAGE_LIMIT = "Storage Limit reached"
+
+        const val RECEIVER_IS_SELF = "Can't send challenges to yourself"
+
+        const val USER_NOT_FOUND = "User not found"
+    }
 
     const val EXISTS = " exists "
 
     const val NO_QUEST = "No quest could be generated. This could mean that none of the prerequisites was met, " +
             "please try again later."
-
-    const val NO_TEAM = "No team specified"
 
     const val NOT_ACTIVATED = "[Gamekins] Not activated"
 
@@ -125,10 +167,10 @@ object Constants {
      */
     class Parameters(
         var branch: String = "",
-        var currentChallengesCount: Int = DEFAULT_CURRENT_CHALLENGES,
-        var currentQuestsCount: Int = DEFAULT_CURRENT_QUESTS,
-        var storedChallengesCount: Int = DEFAULT_STORED_CHALLENGES,
-        var searchCommitCount: Int = DEFAULT_SEARCH_COMMIT_COUNT,
+        var currentChallengesCount: Int = Default.CURRENT_CHALLENGES,
+        var currentQuestsCount: Int = Default.CURRENT_QUESTS,
+        var storedChallengesCount: Int = Default.STORED_CHALLENGES,
+        var searchCommitCount: Int = Default.SEARCH_COMMIT_COUNT,
         var generated: Int = 0,
         var jacocoCSVPath: String = "",
         var jacocoResultsPath: String = "",
@@ -155,7 +197,7 @@ object Constants {
         private fun readResolve(): Any {
             if (remote == null) remote = ""
             if (workspace == null) workspace = FilePath(null, remote)
-            if (currentQuestsCount == null) currentQuestsCount = DEFAULT_CURRENT_QUESTS
+            if (currentQuestsCount == null) currentQuestsCount = Default.CURRENT_QUESTS
             return this
         }
     }

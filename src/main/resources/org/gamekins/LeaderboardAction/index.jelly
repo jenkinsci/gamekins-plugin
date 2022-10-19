@@ -1,7 +1,6 @@
 <?jelly escape-by-default='true'?>
 
-<j:jelly xmlns:j="jelly:core" xmlns:l="/lib/layout" xmlns:st="jelly:stapler" xmlns:f="/lib/form"
-         xmlns:fa="/font-awesome" xmlns:bs="/bootstrap">
+<j:jelly xmlns:j="jelly:core" xmlns:l="/lib/layout" xmlns:st="jelly:stapler">
 
     <l:layout title="Leaderboard">
 
@@ -336,8 +335,8 @@
                                 <form>
                                     <div class="form-group">
                                         <label for="reason-text" class="col-form-label">Reason:</label>
-                                        <textarea class="form-control" id="reason-text"></textarea>
-                                        <div id="error-text" class="text-danger" style="margin-top: 2%"></div>
+                                        <textarea class="form-control" id="reason-text"/>
+                                        <div id="error-text" class="text-danger" style="margin-top: 2%"/>
                                     </div>
                                 </form>
                             </div>
@@ -423,7 +422,7 @@
                                                 </tbody>
                                             </table>
                                         </div>
-                                        <div id="error-text-stored" class="text-danger" style="margin-top: 2%"></div>
+                                        <div id="error-text-stored" class="text-danger" style="margin-top: 2%"/>
                                     </div>
                                 </form>
                             </div>
@@ -594,333 +593,21 @@
                                 </tbody>
                             </table>
                         </div>
-                        <div id="error-text-rejected-table" class="text-danger" style="margin-top: 2%"></div>
+                        <div id="error-text-rejected-table" class="text-danger" style="margin-top: 2%"/>
                     </div>
                 </div>
 
                 <br/>
-                <h1 class="ml-2">
-                    Help
-                </h1>
-                <ul>
-                    <li>The current challenges table displays the current Challenges you can solve</li>
-                    <li>All necessary information about the Challenge like <i>class</i>, <i>package</i> or <i>branch</i>
-                        can be found in the description of the Challenge
-                    </li>
-                    <li>There are six types of Challenges:</li>
-                    <ol>
-                        <li><b>Build Challenge</b>: Generated after a build failed because of your commit. Fix the build
-                            to solve the Challenge
-                        </li>
-                        <li><b>Test Challenge</b>: Just write a new test without specific requirements</li>
-                        <li><b>Class Coverage Challenge</b>: Cover more lines in a specific class. It does not matter
-                            which lines
-                        </li>
-                        <li><b>Method Coverage Challenge</b>: Cover more lines in a specific method. It does not matter
-                            which lines
-                        </li>
-                        <li><b>Line Coverage Challenge</b>: Cover the specified line or at least one more branch if
-                            available
-                        </li>
-                        <li><b>Mutation Test Challenge</b>: Write a test or improve an existing one to kill the
-                            generated mutant.
-                        </li>
-                    </ol>
-                    <li>Click on a <b>Challenge</b> to get the content and more details,</li>
-                    <li>The <i>branch</i> information states in which branch the Challenges was generated</li>
-                    <li>Challenges can also be solved in other branches if the mentioned code is available</li>
-                    <li>Challenges are only generated and solved during the <i>run/build</i> of a project/job in Jenkins
-                    </li>
-                    <li>Normally, the build is triggered after each commit or after a specific amount of time. If you
-                        don't want to wait, you can start the build manually by clicking <b>Build Now</b> in the left
-                        panel
-                    </li>
-                    <li>If the Challenge cannot be solved for some reason or the class/method under test should not be
-                        tested, the Challenges can be rejected
-                    </li>
-                    <li>To reject a Challenge, click the Reject button on each Challenge and add a reason, why the
-                        Challenge was rejected
-                    </li>
-                    <li>Rejected Challenges won't appear to be generated a second time</li>
-                    <li>If a <b>Class Coverage Challenge</b> is rejected, the whole <i>class</i> is not considered again
-                        for new Challenges
-                    </li>
-                    <li>After rejection a new Challenge is generated if the code of the project is available</li>
-                    <li>Hover over a rejected Challenge to see the reason for rejection</li>
-
-                    <li>Rejected <b>Class Coverage Challenge</b>s can be restored with the <b>Undo</b>-Button next to
-                        the Challenge
-                    </li>
-                    <li>The Challenge will not be immediately active again, it has to be generated again to appear</li>
-
-                    <li>To store a Challenge, click the store button</li>
-                    <li>Stored Challenges can not be completed and will count as rejected should they be solved</li>
-                    <li>To view, unshelve and send stored Challenges press the Stored Challenges Button</li>
-                    <li>Stored Challenges can be sent to another participant if that option is enabled</li>
-
-                    <li>If there are no Challenges generated for you although you have committed something recently,
-                        then checkout the <i>Git Names</i> in your profile settings
-                    </li>
-                    <li>In addition to Challenges, <b>Quests</b> are generated and can be solved step by step,
-                        since they are consisting of different Challenges. The Challenges of a quest must be solved
-                        in the given order
-                    </li>
-
-                    <li>Also have a look at the <b>Achievements</b> available in your profile. You can access them
-                        by clicking on the link of your name in the Leaderboard. Remember to choose the right project
-                        in the dropdown in your profile.
-                    </li>
-                    <li>You can also view the Achievements of other players by clicking on their name in the leaderboard
-                    </li>
-
-                    <li>The <b>Avatar</b> displayed in the leaderboard can be changed in your profile settings.
-                        There are 50 different avatars you can choose from
-                    </li>
-                    <li>When a build for example solves a Challenge or generates a new one, notifications are send to
-                        the stored email address. You can disable this option in your profile settings
-                    </li>
-                </ul>
+                <div id="helpText"/>
             </j:if>
 
             <script>
-                window.onload = (function () {
-                    prettyPrint();
-                    jQuery3('[data-toggle="tooltip"]').tooltip()
-
-                    let avatars = jQuery3('[id^=imageUser]')
-                    let src = document.getElementsByTagName("img")[0].src
-                    let base = src.substring(0, src.indexOf("static"))
-                    let endSplit = src.substring(src.indexOf("static")).split("/")
-                    for (let avatar of avatars) {
-                        let split = avatar.src.split("/")
-                        avatar.src = base + "static/" + endSplit[1] + "/plugin/gamekins/avatars/" + split[split.length - 1]
-                    }
+                jQuery(function(){
+                jQuery("#helpText").load("${rootURL}/plugin/gamekins/help/helptext-leaderboard.jelly");
                 });
-
-                jQuery3("#closeModalBtn").on("click", () => {
-                    jQuery3("#error-text")[0].innerHTML = ""
-                    jQuery3("#reason-text").val("")
-                })
-
-                jQuery3("#contentModal").on('show.bs.modal', function (event) {
-                    let modal = jQuery3(this)
-                    let button = jQuery3(event.relatedTarget)
-                    modal.find('.modal-title').text(button.data('file'))
-                    let fileContentDisplay = document.getElementById('fileContentDisplay')
-                    let highlightedSource = document.getElementById('highlightedSource' + button.data('challenge-id'))
-                    highlightedSource.style.display = 'block'
-                    fileContentDisplay.innerHTML = ""
-                    fileContentDisplay.appendChild(highlightedSource)
-                })
-
-
-                jQuery3("#rejectModal").on('show.bs.modal', function (event) {
-                    let modal = jQuery3(this)
-                    let button = jQuery3(event.relatedTarget)
-                    let descriptorFullUrl = button.data('descriptor-url')
-                    let rejectBtnConfirm = modal.find('#rejectButtonConfirm')
-                    if (button.data('challenge-id') === undefined) {
-                        rejectBtnConfirm.data("qid", button.data('quest-id'))
-                        modal.find('.modal-title').text('Reject Quest ' + button.data('quest-id'))
-                    } else {
-                        rejectBtnConfirm.data("cid", button.data('challenge-id'))
-                        modal.find('.modal-title').text('Reject Current Challenge ' + button.data('challenge-id'))
-                    }
-                    rejectBtnConfirm.data("url", descriptorFullUrl)
-                })
-
-                jQuery3("#rejectModal").on('shown.bs.modal', function () {
-                    jQuery3(this).find('#reason-text').focus()
-                })
-
-                jQuery3("#sendModal").on('show.bs.modal', function (event) {
-                let modal = jQuery3(this)
-                let button = jQuery3(event.relatedTarget)
-                modal.data('challenge-id', button.data('challenge-id'))
-                })
-
-                jQuery3("#sendModal").on('close.bs.modal', function (event) {
-                let modal = jQuery3(this)
-                modal.data('challenge-id', "")
-                })
-
-                jQuery3('#rejectButtonConfirm').on('click', function () {
-                    let btn = jQuery3(this)
-                    let questID = btn.data('qid')
-                    let challengeID = btn.data('cid')
-                    let descriptorFullUrl = btn.data('url')
-                    let modal = jQuery3("#rejectModal")
-                    let reason = modal.find('#reason-text').val()
-                    let parameters = {}
-                    parameters["reason"] = reason
-
-
-
-
-                    if (questID === undefined) {
-                        let challenge = jQuery3("#currentChallengeText" + challengeID)[0].innerText
-                        let url = descriptorFullUrl + "/rejectChallenge"
-                        parameters["reject"] = challenge
-
-                        new Ajax.Request(url, {
-                            parameters: parameters,
-                            onComplete: function (rsp) {
-                                if (rsp.responseText.includes("class=error")) {
-                                    modal.find('#error-text')[0].innerHTML = rsp.responseText;
-                                    return false;
-                                } else {
-                                    modal.find('#error-text')[0].innerHTML = ""
-                                    modal.find('#reason-text').val("")
-                                    // Update UI after successful rejection
-                                    var temp = jQuery3("#heading" + challengeID)
-                                    var challengeText = temp.find("#currentChallengeText" + challengeID).html()
-                                    if (challengeText != null) {
-                                        if (!challengeText.includes("You have nothing developed recently")) {
-                                            var appendedVal = '<tr>' +
-                                                '<td class="p-4" style="background-color: #fff4e8;" data-toggle="tooltip" data-placement="right" title="' + reason + '">' + challengeText + '</td>' +
-                                                '</tr>'
-                                            jQuery3("#rejectedTable").append(appendedVal)
-                                            jQuery3('[data-toggle="tooltip"]').tooltip()
-                                        }
-                                    }
-                                }
-                                modal.modal("hide")
-                                location.reload()
-                            }
-                        })
-                    } else {
-                        let quest = jQuery3("#currentQuestText" + questID)[0].innerText
-                        let url = descriptorFullUrl + "/rejectQuest"
-                        parameters["reject"] = quest
-
-                        new Ajax.Request(url, {
-                            parameters: parameters,
-                            onComplete: function (rsp) {
-                                if (rsp.responseText.includes("class=error")) {
-                                    modal.find('#error-text')[0].innerHTML = rsp.responseText;
-                                    return false;
-                                } else {
-                                    modal.find('#error-text')[0].innerHTML = ""
-                                    modal.find('#reason-text').val("")
-
-                                }
-                                modal.modal("hide")
-                                location.reload()
-                            }
-                        })
-                    }
-                })
-
-                jQuery3('.undoReject').on('click', function () {
-
-                    let btn = jQuery3(this)
-                    let challenge = btn.data('challenge-id')
-                    let descriptorFullUrl = btn.data('descriptor-url')
-                    let parameters = {}
-                    let url = descriptorFullUrl + "/restoreChallenge"
-
-                    challenge = challenge.replaceAll('<b>', '')
-                    challenge = challenge.replaceAll('</b>', '')
-
-                    parameters["reject"] = challenge
-
-                    new Ajax.Request(url, {
-                        parameters: parameters,
-                        onComplete: function (rsp) {
-                            if (rsp.responseText.includes("class=error")) {
-                                jQuery3('#error-text-rejected-table')[0].innerHTML = rsp.responseText;
-                                return false;
-                            } else {
-                                jQuery3('#error-text-rejected-table')[0].innerHTML = ""
-                            }
-                            location.reload()
-                        }
-                    })
-                })
-
-                jQuery3('.storeChallenge').on('click', function () {
-                    let btn = jQuery3(this)
-                    let challengeID = btn.data('challenge-id')
-                    let descriptorFullUrl = btn.data('descriptor-url')
-                    let parameters = {}
-
-                    let challenge = jQuery3("#currentChallengeText" + challengeID)[0].innerText
-                    let url = descriptorFullUrl + "/storeChallenge"
-                    parameters["store"] = challenge
-
-                    new Ajax.Request(url, {
-                        parameters: parameters,
-                        onComplete: function (rsp) {
-                            if (rsp.responseText.includes("class=error")) {
-                                jQuery3('#error-text-current-table')[0].innerHTML = rsp.responseText;
-                                return false;
-                            } else {
-                                jQuery3('#error-text-current-table')[0].innerHTML = ""
-                            }
-                            location.reload()
-                        }
-                    })
-
-                })
-
-                jQuery3('.undoStore').on('click', function () {
-
-                    let btn = jQuery3(this)
-                    let challenge = btn.data('challenge-id')
-                    let descriptorFullUrl = btn.data('descriptor-url')
-                    let parameters = {}
-                    let url = descriptorFullUrl + "/undoStoreChallenge"
-
-                    challenge = challenge.replaceAll('<b>', '')
-                    challenge = challenge.replaceAll('</b>', '')
-
-                    parameters["store"] = challenge
-
-                    new Ajax.Request(url, {
-                    parameters: parameters,
-                    onComplete: function (rsp) {
-                        if (rsp.responseText.includes("class=error")) {
-                            jQuery3('#error-text-stored')[0].innerHTML = rsp.responseText;
-                            return false;
-                        } else {
-                            jQuery3('#error-text-stored')[0].innerHTML = ""
-                        }
-                            location.reload()
-                        }
-                    })
-                })
-
-                jQuery3('.sendChallenge').on('click', function () {
-
-                    let btn = jQuery3(this)
-                    let modal = jQuery("#sendModal")
-                    let challenge = modal.data('challenge-id')
-                    let user = btn.data('user-name')
-                    let descriptorFullUrl = btn.data('descriptor-url')
-                    let parameters = {}
-                    let url = descriptorFullUrl + "/sendChallenge"
-
-                    challenge = challenge.replaceAll('<b>', '')
-                    challenge = challenge.replaceAll('</b>', '')
-
-                    parameters["send"] = challenge
-                    parameters["to"] = user
-
-                    new Ajax.Request(url, {
-                        parameters: parameters,
-                        onComplete: function (rsp) {
-                            if (rsp.responseText.includes("class=error")) {
-                                jQuery3('#error-text-send')[0].innerHTML = rsp.responseText;
-                                return false;
-                            } else {
-                                jQuery3('#error-text-send')[0].innerHTML = ""
-                            }
-                        location.reload()
-                        }
-                    })
-                })
-
             </script>
+            <script src="${rootURL}/plugin/gamekins/scripts/LeaderboardActionOnload.js" type="text/javascript"/>
+            <script src="${rootURL}/plugin/gamekins/scripts/LeaderboardAction.js" type="text/javascript"/>
         </l:main-panel>
 
     </l:layout>

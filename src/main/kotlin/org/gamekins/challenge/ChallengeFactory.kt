@@ -126,7 +126,7 @@ object ChallengeFactory {
         do {
             if (count == 5 || workList.isEmpty()) {
                 listener.logger.println("[Gamekins] No Challenge could be built")
-                return DummyChallenge(parameters, Constants.ERROR_GENERATION)
+                return DummyChallenge(parameters, Constants.Error.GENERATION)
             }
             count++
 
@@ -299,7 +299,7 @@ object ChallengeFactory {
     @JvmStatic
     fun generateNewChallenges(
         user: User, property: GameUserProperty, parameters: Parameters, files: ArrayList<FileDetails>,
-        listener: TaskListener = TaskListener.NULL, maxChallenges: Int = Constants.DEFAULT_CURRENT_CHALLENGES
+        listener: TaskListener = TaskListener.NULL, maxChallenges: Int = Constants.Default.CURRENT_CHALLENGES
     ): Int {
 
         var generated = 0
@@ -318,7 +318,7 @@ object ChallengeFactory {
                     property.newChallenge(parameters.projectName,
                         DummyChallenge(parameters, Constants.NOTHING_DEVELOPED))
                     EventHandler.addEvent(ChallengeGeneratedEvent(parameters.projectName, parameters.branch,
-                        property.getUser(), DummyChallenge(parameters, Constants.ERROR_GENERATION)))
+                        property.getUser(), DummyChallenge(parameters, Constants.Error.GENERATION)))
                     break
                 }
 
@@ -361,7 +361,7 @@ object ChallengeFactory {
             var count = 0
             do {
                 if (count == 3) {
-                    challenge = DummyChallenge(parameters, Constants.ERROR_GENERATION)
+                    challenge = DummyChallenge(parameters, Constants.Error.GENERATION)
                     break
                 }
                 isChallengeUnique = true

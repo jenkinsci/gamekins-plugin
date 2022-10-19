@@ -54,10 +54,10 @@ class GameJobProperty
 
     init {
         statistics = Statistics(job)
-        if (currentChallengesCount <= 0) currentChallengesCount = Constants.DEFAULT_CURRENT_CHALLENGES
-        if (currentQuestsCount <= 0) currentQuestsCount = Constants.DEFAULT_CURRENT_QUESTS
-        if (currentStoredChallengesCount < 0) currentStoredChallengesCount = Constants.DEFAULT_STORED_CHALLENGES
-        if (searchCommitCount <= 0) searchCommitCount = Constants.DEFAULT_SEARCH_COMMIT_COUNT
+        if (currentChallengesCount <= 0) currentChallengesCount = Constants.Default.CURRENT_CHALLENGES
+        if (currentQuestsCount <= 0) currentQuestsCount = Constants.Default.CURRENT_QUESTS
+        if (currentStoredChallengesCount < 0) currentStoredChallengesCount = Constants.Default.STORED_CHALLENGES
+        if (searchCommitCount <= 0) searchCommitCount = Constants.Default.SEARCH_COMMIT_COUNT
     }
 
     @Throws(IOException::class)
@@ -111,10 +111,10 @@ class GameJobProperty
      */
     @Suppress("unused", "SENSELESS_COMPARISON")
     private fun readResolve(): Any {
-        if (currentChallengesCount == 0) currentChallengesCount = Constants.DEFAULT_CURRENT_CHALLENGES
-        if (currentQuestsCount <= 0) currentQuestsCount = Constants.DEFAULT_CURRENT_QUESTS
-        if (currentStoredChallengesCount < 0) currentStoredChallengesCount = Constants.DEFAULT_STORED_CHALLENGES
-        if (searchCommitCount <= 0) searchCommitCount = Constants.DEFAULT_SEARCH_COMMIT_COUNT
+        if (currentChallengesCount == 0) currentChallengesCount = Constants.Default.CURRENT_CHALLENGES
+        if (currentQuestsCount <= 0) currentQuestsCount = Constants.Default.CURRENT_QUESTS
+        if (currentStoredChallengesCount < 0) currentStoredChallengesCount = Constants.Default.STORED_CHALLENGES
+        if (searchCommitCount <= 0) searchCommitCount = Constants.Default.SEARCH_COMMIT_COUNT
 
         return this
     }
@@ -128,18 +128,18 @@ class GameJobProperty
      */
     override fun reconfigure(req: StaplerRequest, form: JSONObject?): JobProperty<*> {
         if (form != null) {
-            activated = form.getBoolean("activated")
-            showStatistics = form.getBoolean("showStatistics")
-            showLeaderboard = form.getBoolean("showLeaderboard")
-            if (form.getValue("currentChallengesCount") is String)
-                currentChallengesCount = form.getInt("currentChallengesCount")
-            if (form.getValue("currentQuestsCount") is String)
-                currentQuestsCount = form.getInt("currentQuestsCount")
-            if (form.getValue("currentStoredChallengesCount") is String)
-                currentStoredChallengesCount = form.getInt("currentStoredChallengesCount")
-            canSendChallenge = form.getBoolean("canSendChallenge")
+            activated = form.getBoolean(Constants.FormKeys.ACTIVATED)
+            showStatistics = form.getBoolean(Constants.FormKeys.SHOW_STATISTICS)
+            showLeaderboard = form.getBoolean(Constants.FormKeys.SHOW_LEADERBOARD)
+            if (form.getValue(Constants.FormKeys.CHALLENGES_COUNT) is String)
+                currentChallengesCount = form.getInt(Constants.FormKeys.CHALLENGES_COUNT)
+            if (form.getValue(Constants.FormKeys.QUEST_COUNT) is String)
+                currentQuestsCount = form.getInt(Constants.FormKeys.QUEST_COUNT)
+            if (form.getValue(Constants.FormKeys.STORED_CHALLENGES_COUNT) is String)
+                currentStoredChallengesCount = form.getInt(Constants.FormKeys.STORED_CHALLENGES_COUNT)
+            canSendChallenge = form.getBoolean(Constants.FormKeys.CAN_SEND_CHALLENGE)
             if (form.getValue("searchCommitCount") is String)
-                searchCommitCount = form.getInt("searchCommitCount")
+                searchCommitCount = form.getInt(Constants.FormKeys.SEARCH_COMMIT_COUNT)
         }
 
         PropertyUtil.reconfigure(owner, showLeaderboard, showStatistics)
