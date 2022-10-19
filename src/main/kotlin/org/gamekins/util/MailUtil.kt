@@ -1,7 +1,7 @@
 package org.gamekins.util
 
 import com.cloudbees.hudson.plugins.folder.Folder
-import hudson.model.Job
+import hudson.model.AbstractItem
 import hudson.model.User
 import hudson.tasks.MailAddressResolver
 import hudson.tasks.Mailer
@@ -39,7 +39,7 @@ object MailUtil {
         }
     }
 
-    fun generateViewLeaderboardText(job: Job<*, *>): String {
+    fun generateViewLeaderboardText(job: AbstractItem): String {
         var text = "View the leaderboard on ${job.absoluteUrl}leaderboard/\n"
         val property = PropertyUtil.retrieveGameProperty(job)
         if (property is GameJobProperty || property is GameMultiBranchProperty) {
