@@ -57,7 +57,7 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
     @set:DataBoundSetter
     var mocoJSONPath: String = mocoJSONPath ?: ""
     @set:DataBoundSetter
-    var searchCommitCount: Int = if (searchCommitCount > 0) searchCommitCount else Constants.DEFAULT_SEARCH_COMMIT_COUNT
+    var searchCommitCount: Int = if (searchCommitCount > 0) searchCommitCount else Constants.Default.SEARCH_COMMIT_COUNT
 
     override fun getTarget(): Any {
         return this

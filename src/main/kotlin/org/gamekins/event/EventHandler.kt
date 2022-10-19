@@ -16,15 +16,10 @@
 
 package org.gamekins.event
 
-import com.cloudbees.hudson.plugins.folder.Folder
 import hudson.model.Run
 import hudson.model.User
 import org.gamekins.event.user.*
-import org.gamekins.property.GameFolderProperty
-import org.gamekins.property.GameJobProperty
-import org.gamekins.property.GameMultiBranchProperty
-import org.gamekins.util.PropertyUtil
-import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject
+import org.gamekins.util.MailUtil
 import java.util.concurrent.CopyOnWriteArrayList
 
 /**
@@ -98,23 +93,7 @@ object EventHandler {
         }
 
         text += "View the build on ${build.parent.absoluteUrl}${build.number}/\n"
-        text += "View the leaderboard on ${build.parent.absoluteUrl}leaderboard/\n"
-        val property = PropertyUtil.retrieveGamePropertyFromRun(build)
-        if (property is GameJobProperty || property is GameMultiBranchProperty) {
-            if (build.parent.parent is Folder
-                && (build.parent.parent as Folder).properties.get(GameFolderProperty::class.java).leaderboard) {
-                text += "View the comprehensive leaderboard on " +
-                        "${(build.parent.parent as Folder).absoluteUrl}leaderboard/\n"
-            }
-            if (build.parent.parent is WorkflowMultiBranchProject
-                && (build.parent.parent as WorkflowMultiBranchProject).parent is Folder
-                && ((build.parent.parent as WorkflowMultiBranchProject).parent as Folder)
-                    .properties.get(GameFolderProperty::class.java).leaderboard) {
-                text += "View the comprehensive leaderboard on " +
-                        "${((build.parent.parent as WorkflowMultiBranchProject).parent as Folder)
-                            .absoluteUrl}leaderboard/\n"
-            }
-        }
+        text += MailUtil.generateViewLeaderboardText(build.parent)
 
         text += "View your achievements on ${user.absoluteUrl}/achievements/"
 

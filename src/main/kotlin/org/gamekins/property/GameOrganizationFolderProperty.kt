@@ -26,6 +26,7 @@ import hudson.util.ListBoxModel
 import jenkins.branch.MultiBranchProject
 import jenkins.branch.OrganizationFolder
 import net.sf.json.JSONObject
+import org.gamekins.util.Constants
 import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject
 import org.kohsuke.stapler.AncestorInPath
 import org.kohsuke.stapler.StaplerProxy
@@ -100,15 +101,18 @@ class GameOrganizationFolderProperty private constructor()
             if (req == null) return null
             val folder = req.findAncestor(OrganizationFolder::class.java).getObject() as OrganizationFolder
             for (project in folder.items) {
-                if (project.fullName == formData.getString("project")) {
+                if (project.fullName == formData.getString(Constants.FormKeys.PROJECT_NAME)) {
                     try {
                         val property = project.properties.get(GameMultiBranchProperty::class.java)
                         property?.reconfigure(req, formData)
                                 ?: project.addProperty(GameMultiBranchProperty(project,
-                                    formData.getBoolean("activated"), formData.getBoolean("showLeaderboard"),
-                                    formData.getBoolean("showStatistics"), formData.getInt("currentChallengesCount"),
-                                    formData.getInt("currentQuestsCount"), formData.getInt("currentStoredChallengesCount"),
-                                    formData.getBoolean("canSendChallenge")))
+                                    formData.getBoolean(Constants.FormKeys.ACTIVATED),
+                                    formData.getBoolean(Constants.FormKeys.SHOW_LEADERBOARD),
+                                    formData.getBoolean(Constants.FormKeys.SHOW_STATISTICS),
+                                    formData.getInt(Constants.FormKeys.CHALLENGES_COUNT),
+                                    formData.getInt(Constants.FormKeys.QUEST_COUNT),
+                                    formData.getInt(Constants.FormKeys.STORED_CHALLENGES_COUNT),
+                                    formData.getBoolean(Constants.FormKeys.CAN_SEND_CHALLENGE)))
                         folder.save()
                         break
                     } catch (e: IOException) {

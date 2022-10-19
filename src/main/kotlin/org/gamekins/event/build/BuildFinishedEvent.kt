@@ -18,17 +18,10 @@ package org.gamekins.event.build
 
 import hudson.model.Run
 import hudson.model.User
-import hudson.tasks.MailAddressResolver
-import hudson.tasks.Mailer
 import org.gamekins.GameUserProperty
 import org.gamekins.event.EventHandler
 import org.gamekins.event.user.*
-import java.util.*
-import javax.mail.Message
-import javax.mail.MessagingException
-import javax.mail.Transport
-import javax.mail.internet.InternetAddress
-import javax.mail.internet.MimeMessage
+import org.gamekins.util.MailUtil
 import kotlin.collections.ArrayList
 
 /**
@@ -52,21 +45,10 @@ class BuildFinishedEvent(projectName: String, branch: String, build: Run<*, *>)
             userEvents[it.user] = list
         }
 
-        val mailer = Mailer.descriptor()
         for ((user, list) in userEvents) {
             if (user.getProperty(GameUserProperty::class.java).getNotifications()) {
-                val mail = MailAddressResolver.resolve(user)
-                val msg = MimeMessage(mailer.createSession())
-                msg.subject = "Gamekins results"
-                msg.setFrom(InternetAddress("results@gamekins.org", "Gamekins"))
-                msg.sentDate = Date()
-                msg.addRecipient(Message.RecipientType.TO, Mailer.stringToAddress(mail, mailer.charset))
-                msg.setText(EventHandler.generateMailText(projectName, build, user, list))
-                try {
-                    Transport.send(msg)
-                } catch (e: MessagingException) {
-                    e.printStackTrace()
-                }
+                MailUtil.sendMail(user, "Gamekins results", "results@gamekins.org", "Gamekins",
+                    EventHandler.generateMailText(projectName, build, user, list))
             }
         }
 

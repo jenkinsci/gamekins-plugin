@@ -45,7 +45,7 @@ class GameJobPropertyDescriptor : JobPropertyDescriptor(GameJobProperty::class.j
      * adds them to the [job], from which the button has been clicked, via the method [PropertyUtil.doAddTeam].
      */
     fun doAddTeam(@AncestorInPath job: Job<*, *>?, @QueryParameter teamName: String): FormValidation {
-        if (teamName.isEmpty()) return FormValidation.error("Insert a name for the team")
+        if (teamName.isEmpty()) return FormValidation.error(Constants.Error.NO_TEAM_NAME)
         val property = if (job == null) null else job.properties[this] as GameJobProperty?
         val validation = PropertyUtil.doAddTeam(property, teamName)
         save()
@@ -66,7 +66,7 @@ class GameJobPropertyDescriptor : JobPropertyDescriptor(GameJobProperty::class.j
      * [job] via the method [PropertyUtil.doDeleteTeam].
      */
     fun doDeleteTeam(@AncestorInPath job: Job<*, *>?, @QueryParameter teamsBox: String?): FormValidation {
-        if (job == null) return FormValidation.error("Unexpected error: Parent job is null")
+        if (job == null) return FormValidation.error(Constants.Error.PARENT)
         val projectName = job.fullName
         val property = job.properties[this] as GameJobProperty
         val validation = PropertyUtil.doDeleteTeam(projectName, property, teamsBox!!)
@@ -150,16 +150,16 @@ class GameJobPropertyDescriptor : JobPropertyDescriptor(GameJobProperty::class.j
         return if (req == null || req.findAncestor(AbstractItem::class.java).getObject() == null) null
         else GameJobProperty(
             req.findAncestor(AbstractItem::class.java).getObject() as AbstractItem,
-            formData.getBoolean("activated"),
-            formData.getBoolean("showLeaderboard"),
-            formData.getBoolean("showStatistics"),
-            if (formData.getValue("currentChallengesCount") is Int)
-                formData.getInt("currentChallengesCount") else Constants.DEFAULT_CURRENT_CHALLENGES,
-            if (formData.getValue("currentQuestsCount") is Int)
-                formData.getInt("currentQuestsCount") else Constants.DEFAULT_CURRENT_QUESTS,
-            if (formData.getValue("currentStoredChallengesCount") is Int)
-                formData.getInt("currentStoredChallengesCount") else Constants.DEFAULT_STORED_CHALLENGES,
-            formData.getBoolean("canSendChallenge")
+            formData.getBoolean(Constants.FormKeys.ACTIVATED),
+            formData.getBoolean(Constants.FormKeys.SHOW_LEADERBOARD),
+            formData.getBoolean(Constants.FormKeys.SHOW_STATISTICS),
+            if (formData.getValue(Constants.FormKeys.CHALLENGES_COUNT) is Int)
+                formData.getInt(Constants.FormKeys.CHALLENGES_COUNT) else Constants.Default.CURRENT_CHALLENGES,
+            if (formData.getValue(Constants.FormKeys.QUEST_COUNT) is Int)
+                formData.getInt(Constants.FormKeys.QUEST_COUNT) else Constants.Default.CURRENT_QUESTS,
+            if (formData.getValue(Constants.FormKeys.STORED_CHALLENGES_COUNT) is Int)
+                formData.getInt(Constants.FormKeys.STORED_CHALLENGES_COUNT) else Constants.Default.STORED_CHALLENGES,
+            formData.getBoolean(Constants.FormKeys.CAN_SEND_CHALLENGE)
         )
     }
 }
