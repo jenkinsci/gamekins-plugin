@@ -54,6 +54,8 @@ object Constants {
         const val STORED_CHALLENGES_COUNT = "currentStoredChallengesCount"
 
         const val  CAN_SEND_CHALLENGE = "canSendChallenge"
+
+        const val SEARCH_COMMIT_COUNT = "searchCommitCount"
     }
 
     /**
