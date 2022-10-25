@@ -52,6 +52,14 @@ class Statistics(job: AbstractItem) {
     }
 
     /**
+     * Increments the number of sent Challenges in the current run of [branch].
+     */
+    fun incrementSentChallenges(branch: String) {
+        val entry = runEntries!!.lastOrNull { it.branch == branch }
+        entry?.sentChallenges = entry?.sentChallenges?.inc()!!
+    }
+
+    /**
      * If Gamekins is not enabled when the [job] is created, this method adds the previous entries to the [Statistics]
      * according to the [branch] (only if [job] is of type [WorkflowMultiBranchProject]) recursively with the [number]
      * to the [runEntries]. It can happen that a job is aborted or fails and Gamekins is not executed. For this
@@ -97,6 +105,7 @@ class Statistics(job: AbstractItem) {
                     0,
                     0,
                     0,
+                    0,
                     JUnitUtil.getTestCount(null, abstractBuild),
                     0.0))
                 return
@@ -116,6 +125,7 @@ class Statistics(job: AbstractItem) {
                     "",
                     workflowRun.result,
                     workflowRun.startTimeInMillis,
+                    0,
                     0,
                     0,
                     0,
@@ -148,6 +158,7 @@ class Statistics(job: AbstractItem) {
                             0,
                             0,
                             0,
+                            0,
                             JUnitUtil.getTestCount(null, workflowRun),
                             0.0))
                         return
@@ -169,7 +180,7 @@ class Statistics(job: AbstractItem) {
     }
 
     /**
-     * Generates the [runEntries] during the creation of the the property of the [job]. Only adds the entries for the
+     * Generates the [runEntries] during the creation of the property of the [job]. Only adds the entries for the
      * branch master of a [WorkflowMultiBranchProject] to the [runEntries].
      */
     private fun generateRunEntries(job: AbstractItem): ArrayList<RunEntry> {
@@ -207,6 +218,7 @@ class Statistics(job: AbstractItem) {
                     0,
                     0,
                     0,
+                    0,
                     JUnitUtil.getTestCount(null, run),
                     0.0))
             }
@@ -234,6 +246,7 @@ class Statistics(job: AbstractItem) {
                     workflowJob.name,
                     workflowRun.result,
                     workflowRun.startTimeInMillis,
+                    0,
                     0,
                     0,
                     0,
@@ -333,7 +346,8 @@ class Statistics(job: AbstractItem) {
      * @since 0.1
      */
     class RunEntry(val runNumber: Int, val branch: String, val result: Result?, val startTime: Long,
-                   var generatedChallenges: Int, val solvedChallenges: Int, var solvedAchievements: Int,
+                   var generatedChallenges: Int, val solvedChallenges: Int, var sentChallenges: Int,
+                   var solvedAchievements: Int,
                    var solvedQuests: Int, var generatedQuests: Int, val testCount: Int, val coverage: Double)
         : Comparable<RunEntry> {
 
@@ -344,7 +358,8 @@ class Statistics(job: AbstractItem) {
             return (indentation + "<Run number=\"" + runNumber + "\" branch=\"" + branch +
                     "\" result=\"" + (result?.toString() ?: "NULL") + "\" startTime=\"" +
                     startTime + "\" generatedChallenges=\"" + generatedChallenges +
-                    "\" solvedChallenges=\"" + solvedChallenges + "\" solvedAchievements=\"" + solvedAchievements +
+                    "\" solvedChallenges=\"" + solvedChallenges + "\" sentChallenges=\"" + sentChallenges +
+                    "\" solvedAchievements=\"" + solvedAchievements +
                     "\" generatedQuests=\"" + generatedQuests + "\" solvedQuests=\"" + solvedQuests +
                     "\" tests=\"" + testCount + "\" coverage=\"" + coverage + "\"/>")
         }

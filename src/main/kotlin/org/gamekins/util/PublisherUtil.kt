@@ -450,6 +450,7 @@ object PublisherUtil {
                         run.startTimeInMillis,
                         generated,
                         solved,
+                        0,
                         solvedAchievements,
                         solvedQuests,
                         generatedQuests,
