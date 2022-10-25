@@ -19,7 +19,6 @@ package org.gamekins.util
 import com.cloudbees.hudson.plugins.folder.Folder
 import hudson.FilePath
 import hudson.model.AbstractItem
-import hudson.model.AbstractProject
 import hudson.model.User
 import hudson.tasks.MailAddressResolver
 import hudson.tasks.Mailer
