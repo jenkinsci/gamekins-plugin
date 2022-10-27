@@ -102,8 +102,6 @@ class TestChallengeTest : AnnotationSpec() {
         every { User.getAll() } returns listOf()
         challenge.isSolved(parameters, run, listener) shouldBe false
 
-        //every { GitUtil.getLastChangedTestsOfUser(GitUtil.DEFAULT_SEARCH_COMMIT_COUNT, "", map, listener, GitUtil.GameUser(user), arrayListOf(), path) } returns listOf(
-        //    mockkClass(TestFileDetails::class))
         every { GitUtil.getLastChangedTestsOfUser(any(), any(), any(), any(), any()) } returns listOf(
             mockkClass(TestFileDetails::class))
         challenge.isSolved(parameters, run, listener) shouldBe  true

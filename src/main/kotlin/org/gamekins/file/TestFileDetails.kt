@@ -34,10 +34,10 @@ class TestFileDetails(parameters: Parameters,
                       listener: TaskListener = TaskListener.NULL)
     : FileDetails(parameters, filePath) {
 
-    val junitFile: File
+    private val junitFile: File
     val testCount: Int
-    val testFailCount: Int
-    val testNames: HashSet<String>
+    private val testFailCount: Int
+    private val testNames: HashSet<String>
 
     init {
         val files: List<FilePath> = parameters.workspace.act(

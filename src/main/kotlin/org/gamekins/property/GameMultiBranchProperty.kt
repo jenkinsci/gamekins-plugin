@@ -65,10 +65,10 @@ class GameMultiBranchProperty
     init {
         statistics = Statistics(job!!)
         PropertyUtil.reconfigure(job, showLeaderboard, showStatistics)
-        if (currentChallengesCount <= 0) currentChallengesCount = Constants.DEFAULT_CURRENT_CHALLENGES
-        if (currentQuestsCount <= 0) currentQuestsCount = Constants.DEFAULT_CURRENT_QUESTS
-        if (currentStoredChallengesCount < 0) currentStoredChallengesCount = Constants.DEFAULT_STORED_CHALLENGES
-        if (searchCommitCount <= 0) searchCommitCount = Constants.DEFAULT_SEARCH_COMMIT_COUNT
+        if (currentChallengesCount <= 0) currentChallengesCount = Constants.Default.CURRENT_CHALLENGES
+        if (currentQuestsCount <= 0) currentQuestsCount = Constants.Default.CURRENT_QUESTS
+        if (currentStoredChallengesCount < 0) currentStoredChallengesCount = Constants.Default.STORED_CHALLENGES
+        if (searchCommitCount <= 0) searchCommitCount = Constants.Default.SEARCH_COMMIT_COUNT
     }
 
     @Throws(IOException::class)
@@ -102,10 +102,10 @@ class GameMultiBranchProperty
      */
     @Suppress("unused", "SENSELESS_COMPARISON")
     private fun readResolve(): Any {
-        if (currentChallengesCount == 0) currentChallengesCount = Constants.DEFAULT_CURRENT_CHALLENGES
-        if (currentQuestsCount <= 0) currentQuestsCount = Constants.DEFAULT_CURRENT_QUESTS
-        if (currentStoredChallengesCount < 0) currentStoredChallengesCount = Constants.DEFAULT_STORED_CHALLENGES
-        if (searchCommitCount <= 0) searchCommitCount = Constants.DEFAULT_SEARCH_COMMIT_COUNT
+        if (currentChallengesCount <= 0) currentChallengesCount = Constants.Default.CURRENT_CHALLENGES
+        if (currentQuestsCount <= 0) currentQuestsCount = Constants.Default.CURRENT_QUESTS
+        if (currentStoredChallengesCount < 0) currentStoredChallengesCount = Constants.Default.STORED_CHALLENGES
+        if (searchCommitCount <= 0) searchCommitCount = Constants.Default.SEARCH_COMMIT_COUNT
 
         return this
     }
@@ -277,10 +277,11 @@ class GameMultiBranchProperty
                 if (formData.getValue(Constants.FormKeys.QUEST_COUNT) is Int)
                     formData.getInt(Constants.FormKeys.QUEST_COUNT) else Constants.Default.CURRENT_QUESTS,
                 if (formData.getValue(Constants.FormKeys.STORED_CHALLENGES_COUNT) is Int)
-                    formData.getInt(Constants.FormKeys.STORED_CHALLENGES_COUNT) else Constants.Default.STORED_CHALLENGES,
+                    formData.getInt(Constants.FormKeys.STORED_CHALLENGES_COUNT) else
+                        Constants.Default.STORED_CHALLENGES,
                 formData.getBoolean(Constants.FormKeys.CAN_SEND_CHALLENGE),
-                if (formData.getValue("searchCommitCount") is Int)
-                    formData.getInt("searchCommitCount") else Constants.DEFAULT_SEARCH_COMMIT_COUNT
+                if (formData.getValue(Constants.FormKeys.SEARCH_COMMIT_COUNT) is Int)
+                    formData.getInt(Constants.FormKeys.SEARCH_COMMIT_COUNT) else Constants.Default.SEARCH_COMMIT_COUNT
             )
         }
     }

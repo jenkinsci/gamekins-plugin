@@ -35,8 +35,8 @@ abstract class CoverageChallenge(var details: SourceFileDetails, workspace: File
     val classDetails: JacocoUtil.ClassDetails? = null
     var coverage: Double
     protected var fullyCoveredLines: Int
-    protected var notCoveredLines: Int
-    protected var partiallyCoveredLines: Int
+    private var notCoveredLines: Int
+    private var partiallyCoveredLines: Int
     var solvedCoverage = 0.0
     private val created = System.currentTimeMillis()
     private var solved: Long = 0

@@ -470,7 +470,7 @@ object ChallengeFactory {
      * Generates a new [SmellChallenge] according the current [data]. Gets all smells of a file and chooses one of
      * them randomly for generation.
      */
-    fun generateSmellChallenge(data: ChallengeGenerationData, listener: TaskListener): SmellChallenge? {
+    private fun generateSmellChallenge(data: ChallengeGenerationData, listener: TaskListener): SmellChallenge? {
         val issues = SmellUtil.getSmellsOfFile(data.selectedFile, listener)
 
         if (issues.isEmpty()) return null

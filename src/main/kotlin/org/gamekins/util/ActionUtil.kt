@@ -16,12 +16,9 @@
 
 package org.gamekins.util
 
-import com.cloudbees.hudson.plugins.folder.Folder
 import hudson.FilePath
 import hudson.model.AbstractItem
 import hudson.model.User
-import hudson.tasks.MailAddressResolver
-import hudson.tasks.Mailer
 import hudson.util.FormValidation
 import org.gamekins.GameUserProperty
 import org.gamekins.challenge.Challenge
@@ -29,18 +26,11 @@ import org.gamekins.challenge.ChallengeFactory
 import org.gamekins.challenge.DummyChallenge
 import org.gamekins.challenge.quest.Quest
 import org.gamekins.file.FileDetails
-import org.gamekins.property.GameFolderProperty
 import org.gamekins.property.GameJobProperty
 import org.gamekins.property.GameMultiBranchProperty
 import org.gamekins.util.Constants.Parameters
-import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject
 import java.io.IOException
 import java.util.*
-import javax.mail.Message
-import javax.mail.MessagingException
-import javax.mail.Transport
-import javax.mail.internet.InternetAddress
-import javax.mail.internet.MimeMessage
 
 /**
  * Util object for interaction with actions.
@@ -297,26 +287,10 @@ object ActionUtil {
 
         if (other.getProperty(GameUserProperty::class.java).getNotifications()) {
             MailUtil.sendMail(other, "New Gamekins Challenge", "challenges@gamekins.org", "Gamekins",
-                generateMailText(projectName, challenge, other, user, job))
+                MailUtil.generateMailText(projectName, challenge, other, user, job))
         }
 
         return FormValidation.ok("Challenge sent")
-    }
-
-    /**
-     * Generates the mail text for receiving a challenge.
-     */
-    private fun generateMailText(projectName: String, challenge: Challenge, receiver: User, sender: User, job: AbstractItem): String {
-        var text = "Hello ${receiver.fullName},\n\n"
-        text += "you have received a new challenge:\n\n"
-        text += "Project: $projectName\n"
-        text += "Sender: ${sender.fullName}\n"
-        text += "Challenge: ${challenge.getName()}\n"
-
-        text += "\nThe challenge is not immediately active and has to be unshelved from storage first.\n\n"
-        text += MailUtil.generateViewLeaderboardText(job)
-
-        return text
     }
 
     /**

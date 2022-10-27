@@ -19,7 +19,6 @@ package org.gamekins.challenge
 import hudson.model.Run
 import hudson.model.TaskListener
 import hudson.model.User
-import org.gamekins.util.Constants
 import org.gamekins.util.Constants.Parameters
 import org.gamekins.util.GitUtil
 import org.gamekins.util.JUnitUtil

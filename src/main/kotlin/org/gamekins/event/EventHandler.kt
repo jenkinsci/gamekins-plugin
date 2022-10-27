@@ -103,7 +103,7 @@ object EventHandler {
     /**
      * Generates the text for all [Event]s based on Quests.
      */
-    fun generateQuestsText(list: ArrayList<UserEvent>): String {
+    private fun generateQuestsText(list: ArrayList<UserEvent>): String {
         var text = ""
         if (list.find { it is QuestStepSolvedEvent } != null) {
             text += "Quest step(s) solved:\n"

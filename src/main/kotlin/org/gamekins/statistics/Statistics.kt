@@ -292,7 +292,7 @@ class Statistics(job: AbstractItem) {
         return replaceClassesInString(print.toString())
     }
 
-    fun replaceClassesInString(file: String): String {
+    private fun replaceClassesInString(file: String): String {
         var regex = "class=\"[^\"]+\"".toRegex()
         var matchResults = regex.findAll(file)
         var map = hashMapOf<String, String>()
@@ -332,9 +332,10 @@ class Statistics(job: AbstractItem) {
      * @author Philipp Straubinger
      * @since 0.1
      */
-    class RunEntry(val runNumber: Int, val branch: String, val result: Result?, val startTime: Long,
-                   var generatedChallenges: Int, val solvedChallenges: Int, var solvedAchievements: Int,
-                   var solvedQuests: Int, var generatedQuests: Int, val testCount: Int, val coverage: Double)
+    class RunEntry(val runNumber: Int, val branch: String, val result: Result?, private val startTime: Long,
+                   var generatedChallenges: Int, private val solvedChallenges: Int, private var solvedAchievements: Int,
+                   private var solvedQuests: Int, private var generatedQuests: Int, val testCount: Int,
+                   val coverage: Double)
         : Comparable<RunEntry> {
 
         /**

@@ -164,7 +164,7 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
         }
 
         val parameters = Parameters(jacocoCSVPath = jacocoCSVPath!!, jacocoResultsPath = jacocoResultsPath!!,
-            mocoJSONPath = mocoJSONPath!!, workspace = build.workspace!!)
+            mocoJSONPath = mocoJSONPath, workspace = build.workspace!!)
         parameters.projectName = build.project.fullName
         parameters.currentChallengesCount = build.project.getProperty(GameJobProperty::class.java)
             .currentChallengesCount
