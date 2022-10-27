@@ -129,8 +129,8 @@ class GameMultiBranchProperty
             if (form.getValue(Constants.FormKeys.STORED_CHALLENGES_COUNT) is String)
                 currentStoredChallengesCount = form.getInt(Constants.FormKeys.STORED_CHALLENGES_COUNT)
             canSendChallenge = form.getBoolean(Constants.FormKeys.CAN_SEND_CHALLENGE)
-            if (form.getValue("searchCommitCount") is String)
-                searchCommitCount = form.getInt("searchCommitCount")
+            if (form.getValue(Constants.FormKeys.SEARCH_COMMIT_COUNT) is String)
+                searchCommitCount = form.getInt(Constants.FormKeys.SEARCH_COMMIT_COUNT)
         }
         
         PropertyUtil.reconfigure(owner!!, showLeaderboard, showStatistics)
