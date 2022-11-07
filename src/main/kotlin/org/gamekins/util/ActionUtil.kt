@@ -18,7 +18,6 @@ package org.gamekins.util
 
 import hudson.FilePath
 import hudson.model.AbstractItem
-import hudson.model.AbstractProject
 import hudson.model.User
 import hudson.util.FormValidation
 import org.gamekins.GameUserProperty
@@ -28,6 +27,7 @@ import org.gamekins.challenge.DummyChallenge
 import org.gamekins.challenge.quest.Quest
 import org.gamekins.file.FileDetails
 import org.gamekins.property.GameJobProperty
+import org.gamekins.property.GameMultiBranchProperty
 import org.gamekins.util.Constants.Parameters
 import java.io.IOException
 import java.util.*
@@ -176,8 +176,15 @@ object ActionUtil {
         if (challenge is DummyChallenge) return FormValidation.error("Dummies cannot be stored " +
                 "- please run another build")
 
-        if (property.getStoredChallenges(projectName).size >=
-            (job as AbstractProject<*, *>).getProperty(GameJobProperty::class.java).currentStoredChallengesCount)
+        val currentStoredChallengesCount : Int =
+            when (val gameProperty = PropertyUtil.retrieveGameProperty(job)) {
+                is GameMultiBranchProperty -> gameProperty.currentStoredChallengesCount
+                is GameJobProperty -> gameProperty.currentStoredChallengesCount
+                else -> -1
+            }
+        if (currentStoredChallengesCount == -1)
+            return FormValidation.error(Constants.Error.UNKNOWN_GAME_PROPERTY)
+        if (property.getStoredChallenges(projectName).size >= currentStoredChallengesCount)
             return FormValidation.error(Constants.Error.STORAGE_LIMIT)
 
         property.storeChallenge(projectName, challenge)
@@ -256,8 +263,15 @@ object ActionUtil {
         if (user == other)
             return FormValidation.error(Constants.Error.RECEIVER_IS_SELF)
 
-        if (otherProperty.getStoredChallenges(job.fullName).size >=
-            (job as AbstractProject<*, *>).getProperty(GameJobProperty::class.java).currentStoredChallengesCount)
+        val currentStoredChallengesCount : Int =
+            when (val gameProperty = PropertyUtil.retrieveGameProperty(job)) {
+                is GameMultiBranchProperty -> gameProperty.currentStoredChallengesCount
+                is GameJobProperty -> gameProperty.currentStoredChallengesCount
+                else -> -1
+            }
+        if (currentStoredChallengesCount == -1)
+            return FormValidation.error(Constants.Error.UNKNOWN_GAME_PROPERTY)
+        if (otherProperty.getStoredChallenges(job.fullName).size >= currentStoredChallengesCount)
             return FormValidation.error(Constants.Error.STORAGE_LIMIT)
         property.removeStoredChallenge(projectName, challenge)
         otherProperty.addStoredChallenge(projectName, challenge)
@@ -278,26 +292,10 @@ object ActionUtil {
 
         if (other.getProperty(GameUserProperty::class.java).getNotifications()) {
             MailUtil.sendMail(other, "New Gamekins Challenge", "challenges@gamekins.org", "Gamekins",
-                generateMailText(projectName, challenge, other, user, job))
+                MailUtil.generateMailText(projectName, challenge, other, user, job))
         }
 
         return FormValidation.ok("Challenge sent")
-    }
-
-    /**
-     * Generates the mail text for receiving a challenge.
-     */
-    private fun generateMailText(projectName: String, challenge: Challenge, receiver: User, sender: User, job: AbstractProject<*, *>): String {
-        var text = "Hello ${receiver.fullName},\n\n"
-        text += "you have received a new challenge:\n\n"
-        text += "Project: $projectName\n"
-        text += "Sender: ${sender.fullName}\n"
-        text += "Challenge: ${challenge.getName()}\n"
-
-        text += "\nThe challenge is not immediately active and has to be unshelved from storage first.\n\n"
-        text += MailUtil.generateViewLeaderboardText(job)
-
-        return text
     }
 
     /**
@@ -320,8 +318,7 @@ object ActionUtil {
             generatedText += " (Enough Challenges already)"
         }
         else if (parameters.workspace.exists()) {
-            val classes = PublisherUtil.retrieveLastChangedSourceAndTestFiles(
-                Constants.Default.SEARCH_COMMIT_COUNT, parameters)
+            val classes = PublisherUtil.retrieveLastChangedSourceAndTestFiles(parameters)
             generatedText = ": New Challenge generated"
 
             if (classes.isNotEmpty()) {

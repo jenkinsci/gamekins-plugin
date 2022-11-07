@@ -117,7 +117,7 @@ class PublisherUtilTest : AnnotationSpec() {
         every { multiProject.save() } returns Unit
 
         mockkStatic(GitUtil::class)
-        every { GitUtil.getLastChangedClasses(any(), any(), any(), any(), any()) } returns arrayListOf(classDetails)
+        every { GitUtil.getLastChangedClasses(any(), any(), any(), any()) } returns arrayListOf(classDetails)
 
         mockkStatic(PropertyUtil::class)
         mockkStatic(ChallengeFactory::class)
@@ -271,26 +271,26 @@ class PublisherUtilTest : AnnotationSpec() {
 
     @Test
     fun retrieveLastChangedClasses() {
-        PublisherUtil.retrieveLastChangedClasses(50, parameters, listOf(),
+        PublisherUtil.retrieveLastChangedClasses(parameters, listOf(),
                 removeClassesWithoutJacocoFiles = false, removeFullyCoveredClasses = false, sort = false) shouldHaveSize
                 1
 
         every { classDetails.coverage } returns 0.1
         every { classDetails.filesExists() } returns true
-        PublisherUtil.retrieveLastChangedClasses(50, parameters, listOf(),
+        PublisherUtil.retrieveLastChangedClasses(parameters, listOf(),
                 removeClassesWithoutJacocoFiles = true, removeFullyCoveredClasses = true, sort = true) shouldHaveSize
                 1
 
         every { classDetails.coverage } returns 1.0
-        every { GitUtil.getLastChangedClasses(any(), any(), any(), any(), any()) } returns arrayListOf(classDetails)
-        PublisherUtil.retrieveLastChangedClasses(50, parameters, listOf(),
+        every { GitUtil.getLastChangedClasses(any(), any(), any(), any()) } returns arrayListOf(classDetails)
+        PublisherUtil.retrieveLastChangedClasses(parameters, listOf(),
                 removeClassesWithoutJacocoFiles = true, removeFullyCoveredClasses = true, sort = true) shouldHaveSize
                 0
 
         every { classDetails.coverage } returns 0.1
         every { classDetails.filesExists() } returns false
-        every { GitUtil.getLastChangedClasses(any(), any(), any(), any(), any()) } returns arrayListOf(classDetails)
-        PublisherUtil.retrieveLastChangedClasses(50, parameters, listOf(),
+        every { GitUtil.getLastChangedClasses(any(), any(), any(), any()) } returns arrayListOf(classDetails)
+        PublisherUtil.retrieveLastChangedClasses(parameters, listOf(),
                 removeClassesWithoutJacocoFiles = true, removeFullyCoveredClasses = true, sort = true) shouldHaveSize
                 0
     }

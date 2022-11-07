@@ -50,14 +50,11 @@ import javax.annotation.Nonnull
 
 class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var jacocoResultsPath: String?,
                                                       @set:DataBoundSetter var jacocoCSVPath: String?,
-                                                      mocoJSONPath: String?,
-                                                      searchCommitCount: Int)
+                                                      mocoJSONPath: String?)
     : Notifier(), SimpleBuildStep, StaplerProxy {
 
     @set:DataBoundSetter
     var mocoJSONPath: String = mocoJSONPath ?: ""
-    @set:DataBoundSetter
-    var searchCommitCount: Int = if (searchCommitCount > 0) searchCommitCount else Constants.Default.SEARCH_COMMIT_COUNT
 
     override fun getTarget(): Any {
         return this
@@ -106,7 +103,7 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
         listener.logger.println("[Gamekins] Solve Challenges and generate new Challenges")
 
         //Computes the last changed classes
-        val files = PublisherUtil.retrieveLastChangedSourceAndTestFiles(searchCommitCount, parameters,
+        val files = PublisherUtil.retrieveLastChangedSourceAndTestFiles(parameters,
             removeFullyCoveredClasses = false, removeClassesWithoutJacocoFiles = false, listener = listener)
 
         //Generate some project statistics
@@ -167,7 +164,7 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
         }
 
         val parameters = Parameters(jacocoCSVPath = jacocoCSVPath!!, jacocoResultsPath = jacocoResultsPath!!,
-            mocoJSONPath = mocoJSONPath!!, workspace = build.workspace!!)
+            mocoJSONPath = mocoJSONPath, workspace = build.workspace!!)
         parameters.projectName = build.project.fullName
         parameters.currentChallengesCount = build.project.getProperty(GameJobProperty::class.java)
             .currentChallengesCount
@@ -175,6 +172,8 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
             .currentQuestsCount
         parameters.storedChallengesCount = build.project.getProperty(GameJobProperty::class.java)
             .currentStoredChallengesCount
+        parameters.searchCommitCount = build.project.getProperty(GameJobProperty::class.java)
+            .searchCommitCount
         executePublisher(build, parameters, build.result, listener)
         return true
     }
@@ -207,6 +206,8 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
                 .currentQuestsCount
             parameters.storedChallengesCount = project.properties.get(GameMultiBranchProperty::class.java)
                 .currentStoredChallengesCount
+            parameters.searchCommitCount = project.properties.get(GameMultiBranchProperty::class.java)
+                .searchCommitCount
         } else {
             if (run.parent.getProperty(GameJobProperty::class.java) == null
                 || !run.parent.getProperty(GameJobProperty::class.java).activated
@@ -221,6 +222,8 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
                 .currentQuestsCount
             parameters.storedChallengesCount =run.parent.getProperty(GameJobProperty::class.java)
                 .currentStoredChallengesCount
+            parameters.searchCommitCount =run.parent.getProperty(GameJobProperty::class.java)
+                .searchCommitCount
         }
 
         executePublisher(run, parameters, run.result, listener)

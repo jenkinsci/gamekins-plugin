@@ -19,7 +19,6 @@ package org.gamekins.challenge
 import hudson.model.Run
 import hudson.model.TaskListener
 import hudson.model.User
-import org.gamekins.util.Constants
 import org.gamekins.util.Constants.Parameters
 import org.gamekins.util.GitUtil
 import org.gamekins.util.JUnitUtil
@@ -108,7 +107,7 @@ class TestChallenge(data: Challenge.ChallengeGenerationData) : Challenge {
                 return false
             }
             val lastChangedFilesOfUser = GitUtil.getLastChangedTestsOfUser(
-                Constants.Default.SEARCH_COMMIT_COUNT, currentCommit, parameters, listener, GitUtil.GameUser(user),
+                currentCommit, parameters, listener, GitUtil.GameUser(user),
                 GitUtil.mapUsersToGameUsers(User.getAll()))
             if (lastChangedFilesOfUser.isNotEmpty()) {
                 solved = System.currentTimeMillis()

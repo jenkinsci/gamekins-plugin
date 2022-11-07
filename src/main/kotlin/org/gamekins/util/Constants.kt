@@ -54,6 +54,8 @@ object Constants {
         const val STORED_CHALLENGES_COUNT = "currentStoredChallengesCount"
 
         const val  CAN_SEND_CHALLENGE = "canSendChallenge"
+
+        const val SEARCH_COMMIT_COUNT = "searchCommitCount"
     }
 
     /**
@@ -104,6 +106,8 @@ object Constants {
         const val RECEIVER_IS_SELF = "Can't send challenges to yourself"
 
         const val USER_NOT_FOUND = "User not found"
+
+        const val UNKNOWN_GAME_PROPERTY = "Unknown Game Property"
     }
 
     const val EXISTS = " exists "
@@ -170,6 +174,7 @@ object Constants {
         var currentChallengesCount: Int = Default.CURRENT_CHALLENGES,
         var currentQuestsCount: Int = Default.CURRENT_QUESTS,
         var storedChallengesCount: Int = Default.STORED_CHALLENGES,
+        var searchCommitCount: Int = Default.SEARCH_COMMIT_COUNT,
         var generated: Int = 0,
         var jacocoCSVPath: String = "",
         var jacocoResultsPath: String = "",

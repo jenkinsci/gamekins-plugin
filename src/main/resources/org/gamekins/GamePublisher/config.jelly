@@ -12,9 +12,4 @@
     <f:entry title="Path to moco.json" field="mocoJSONPath" help="/plugin/gamekins/help/help-mocoJSONPath.html">
         <f:textbox />
     </f:entry>
-
-    <f:entry title="Commits to be searched" field="searchCommitCount"
-             help="/plugin/gamekins/help/help-searchCommitCount.html">
-        <f:number />
-    </f:entry>
 </j:jelly>

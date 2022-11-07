@@ -21,7 +21,6 @@ import hudson.model.AbstractItem
 import hudson.model.AbstractProject
 import hudson.model.Job
 import hudson.model.User
-import hudson.tasks.MailAddressResolver
 import hudson.tasks.Mailer
 import hudson.util.FormValidation
 import org.gamekins.GameUserProperty
@@ -42,7 +41,6 @@ import io.mockk.unmockkAll
 import org.gamekins.file.SourceFileDetails
 import java.io.File
 import java.util.concurrent.CopyOnWriteArrayList
-import javax.mail.Transport
 
 class ActionUtilTest: AnnotationSpec() {
 
@@ -104,8 +102,6 @@ class ActionUtilTest: AnnotationSpec() {
 
     @Test
     fun doStoreChallenge() {
-        ActionUtil.doStoreChallenge(job, "").kind shouldBe FormValidation.Kind.ERROR
-
         every { User.current() } returns null
         ActionUtil.doStoreChallenge(job, "").kind shouldBe FormValidation.Kind.ERROR
 
@@ -124,7 +120,9 @@ class ActionUtilTest: AnnotationSpec() {
         val job = mockkClass(AbstractProject::class)
         every { job.fullName } returns "test-project"
         every { job.save() } returns Unit
-        every { job.getProperty(GameJobProperty::class.java).currentStoredChallengesCount } returns 1
+        val gameProperty = mockkClass(GameJobProperty::class)
+        every { gameProperty.currentStoredChallengesCount } returns 1
+        every { job.getProperty(any()) } returns gameProperty
         ActionUtil.doStoreChallenge(job, stringChallenge).kind shouldBe FormValidation.Kind.OK
     }
 
@@ -164,7 +162,7 @@ class ActionUtilTest: AnnotationSpec() {
                 ": No additional Challenge generated (Workspace deleted or on remote machine)"
 
         mockkStatic(PublisherUtil::class)
-        every { PublisherUtil.retrieveLastChangedClasses(any(), any(), any()) } returns arrayListOf()
+        every { PublisherUtil.retrieveLastChangedClasses(any(), any()) } returns arrayListOf()
         parameters.workspace = FilePath(null, root)
         parameters.projectName = "test-project"
         ActionUtil.generateChallengeAfterRejection(challenge, user, userProperty, job) shouldBe
@@ -178,7 +176,7 @@ class ActionUtilTest: AnnotationSpec() {
         every { job1.getProperty(any()) } returns jobProperty1
         every { jobProperty1.getStatistics() } returns statistics
         every { statistics.addGeneratedAfterRejection(any(), any()) } returns Unit
-        every { PublisherUtil.retrieveLastChangedClasses(any(), any(), any()) } returns
+        every { PublisherUtil.retrieveLastChangedClasses(any(), any()) } returns
                 arrayListOf(mockkClass(SourceFileDetails::class))
         ActionUtil.generateChallengeAfterRejection(challenge, user, userProperty, job1) shouldBe
                 ": New Challenge generated"
@@ -218,7 +216,9 @@ class ActionUtilTest: AnnotationSpec() {
         val job = mockkClass(AbstractProject::class)
         every { job.fullName } returns "test-project"
         every { job.save() } returns Unit
-        every { job.getProperty(GameJobProperty::class.java).currentStoredChallengesCount } returns 1
+        val gameProperty = mockkClass(GameJobProperty::class)
+        every { gameProperty.currentStoredChallengesCount } returns 1
+        every { job.getProperty(any()) } returns gameProperty
 
         ActionUtil.doSendChallenge(job, stringChallenge, "User1").kind shouldBe FormValidation.Kind.ERROR
 

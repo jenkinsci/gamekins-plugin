@@ -95,8 +95,10 @@ class GitUtilTest : AnnotationSpec() {
 
     @Test
     fun getLastChangedClasses() {
-        GitUtil.getLastChangedClasses(50, "", parameters, TaskListener.NULL, arrayListOf(user)).size shouldBe 8
-        GitUtil.getLastChangedClasses(1, "", parameters, TaskListener.NULL, arrayListOf(user)) should beEmpty()
+        GitUtil.getLastChangedClasses("", parameters, TaskListener.NULL, arrayListOf(user)).size shouldBe 8
+        parameters.searchCommitCount = 1
+        GitUtil.getLastChangedClasses("", parameters, TaskListener.NULL, arrayListOf(user)) should beEmpty()
+        parameters.searchCommitCount = 50
     }
 
     @Test
@@ -115,7 +117,7 @@ class GitUtilTest : AnnotationSpec() {
         every { mailProperty1.address } returns mail
         every { user1.getProperty(UserProperty::class.java) } returns mailProperty1
 
-        GitUtil.getLastChangedFiles(50, "", parameters, arrayListOf(GitUtil.GameUser(user1)), TaskListener.NULL).size shouldBe 14
+        GitUtil.getLastChangedFiles("", parameters, arrayListOf(GitUtil.GameUser(user1)), TaskListener.NULL).size shouldBe 14
     }
 
     @Test
@@ -134,15 +136,15 @@ class GitUtilTest : AnnotationSpec() {
         every { mailProperty1.address } returns mail
         every { user1.getProperty(UserProperty::class.java) } returns mailProperty1
 
-        GitUtil.getLastChangedClasses(50, "", parameters, TaskListener.NULL, GitUtil.mapUsersToGameUsers(listOf(user1))).size shouldBe 8
-        GitUtil.getLastChangedClasses(50, headHash, parameters, TaskListener.NULL, GitUtil.mapUsersToGameUsers(listOf(user1))).size shouldBe 0
+        GitUtil.getLastChangedClasses("", parameters, TaskListener.NULL, GitUtil.mapUsersToGameUsers(listOf(user1))).size shouldBe 8
+        GitUtil.getLastChangedClasses(headHash, parameters, TaskListener.NULL, GitUtil.mapUsersToGameUsers(listOf(user1))).size shouldBe 0
 
         val firstCommit = "d3f574e28542876d4cd243c2ac730a6b9eed8b2c"
         //TODO: Should be 8, but see GitUtil.getDiffOfCommit()
-        GitUtil.getLastChangedClasses(50, firstCommit, parameters, TaskListener.NULL, GitUtil.mapUsersToGameUsers(listOf(user1))).size shouldBe 7
+        GitUtil.getLastChangedClasses(firstCommit, parameters, TaskListener.NULL, GitUtil.mapUsersToGameUsers(listOf(user1))).size shouldBe 7
 
         val commitHash = "02c7398664cc9a15508a2d96c2b10f341f1fa4de"
-        GitUtil.getLastChangedClasses(50, commitHash, parameters, TaskListener.NULL, GitUtil.mapUsersToGameUsers(listOf(user1))).size shouldBe 3
+        GitUtil.getLastChangedClasses(commitHash, parameters, TaskListener.NULL, GitUtil.mapUsersToGameUsers(listOf(user1))).size shouldBe 3
     }
 
     @Test
@@ -160,14 +162,14 @@ class GitUtilTest : AnnotationSpec() {
         every { mailProperty1.address } returns mail
         every { user1.getProperty(UserProperty::class.java) } returns mailProperty1
 
-        GitUtil.getLastChangedTestsOfUser(50, "", parameters, TaskListener.NULL,  GitUtil.GameUser(user1), GitUtil.mapUsersToGameUsers(listOf(user1))).size shouldBe 4
-        GitUtil.getLastChangedTestsOfUser(50, headHash, parameters, TaskListener.NULL,  GitUtil.GameUser(user1), GitUtil.mapUsersToGameUsers(listOf(user1))).size shouldBe 0
+        GitUtil.getLastChangedTestsOfUser("", parameters, TaskListener.NULL,  GitUtil.GameUser(user1), GitUtil.mapUsersToGameUsers(listOf(user1))).size shouldBe 4
+        GitUtil.getLastChangedTestsOfUser(headHash, parameters, TaskListener.NULL,  GitUtil.GameUser(user1), GitUtil.mapUsersToGameUsers(listOf(user1))).size shouldBe 0
 
         val firstCommit = "d3f574e28542876d4cd243c2ac730a6b9eed8b2c"
-        GitUtil.getLastChangedTestsOfUser(50, firstCommit, parameters, TaskListener.NULL,  GitUtil.GameUser(user1), GitUtil.mapUsersToGameUsers(listOf(user1))).size shouldBe 4
+        GitUtil.getLastChangedTestsOfUser(firstCommit, parameters, TaskListener.NULL,  GitUtil.GameUser(user1), GitUtil.mapUsersToGameUsers(listOf(user1))).size shouldBe 4
 
         val commitHash = "da1e195773389f37ff5898b10e1708707e7208ac"
-        GitUtil.getLastChangedTestsOfUser(50, commitHash, parameters, TaskListener.NULL,  GitUtil.GameUser(user1), GitUtil.mapUsersToGameUsers(listOf(user1))).size shouldBe 3
+        GitUtil.getLastChangedTestsOfUser(commitHash, parameters, TaskListener.NULL,  GitUtil.GameUser(user1), GitUtil.mapUsersToGameUsers(listOf(user1))).size shouldBe 3
     }
 
     @Test
