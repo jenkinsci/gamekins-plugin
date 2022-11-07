@@ -235,9 +235,7 @@ class ActionUtilTest: AnnotationSpec() {
         parameters.workspace = FilePath(null, root)
         parameters.branch = "branch1"
 
-        val gameProperty = mockkClass(GameJobProperty::class)
         every { gameProperty.getStatistics().incrementSentChallenges(any()) } returns Unit
-        every { job.getProperty(any()) } returns gameProperty
 
         ActionUtil.doSendChallenge(job, stringChallenge, "User1").kind shouldBe FormValidation.Kind.OK
 
