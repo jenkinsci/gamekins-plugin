@@ -27,7 +27,7 @@ class SmellChallengeTest : AnnotationSpec() {
         every { issue.startLine } returns 1
         every { issue.endLine } returns 2
         every { issue.message } returns "Message"
-        every { issue.ruleKey } returns "Key"
+        every { issue.ruleKey } returns "Key-155"
         every { issue.severity } returns "MAJOR"
         every { issue.type } returns "Type"
         every { file.contents() } returns "Content"
@@ -123,7 +123,7 @@ class SmellChallengeTest : AnnotationSpec() {
 
     @Test
     fun getSnippet() {
-        val snippet = "<pre class='prettyprint mt-2 linenums:-1'><code class='language-java'>Content</code></pre><br><em>Message <a href=\"https://rules.sonarsource.com/java/RSPEC-Key\" target=\"_blank\">More Information</a> </em>"
+        val snippet = "<pre class='prettyprint mt-2 linenums:-1'><code class='language-java'>Content</code></pre><br><em>Message <a href=\"https://rules.sonarsource.com/java/RSPEC-155\" target=\"_blank\">More Information</a> </em>"
         challenge.getSnippet() shouldBe snippet
     }
 
@@ -227,13 +227,13 @@ class SmellChallengeTest : AnnotationSpec() {
 
     @Test
     fun printToXML() {
-        var text = "<SmellChallenge created=\"${challenge.getCreated()}\" solved=\"0\" class=\"File\" type=\"Type\" severity=\"MAJOR\" line=\"1\" rule=\"Key\"/>"
+        var text = "<SmellChallenge created=\"${challenge.getCreated()}\" solved=\"0\" class=\"File\" type=\"Type\" severity=\"MAJOR\" line=\"1\" rule=\"Key-155\"/>"
         challenge.printToXML("", "") shouldBe text
 
-        text = "    <SmellChallenge created=\"${challenge.getCreated()}\" solved=\"0\" class=\"File\" type=\"Type\" severity=\"MAJOR\" line=\"1\" rule=\"Key\"/>"
+        text = "    <SmellChallenge created=\"${challenge.getCreated()}\" solved=\"0\" class=\"File\" type=\"Type\" severity=\"MAJOR\" line=\"1\" rule=\"Key-155\"/>"
         challenge.printToXML("", "    ") shouldBe text
 
-        text = "<SmellChallenge created=\"${challenge.getCreated()}\" solved=\"0\" class=\"File\" type=\"Type\" severity=\"MAJOR\" line=\"1\" rule=\"Key\" reason=\"reason\"/>"
+        text = "<SmellChallenge created=\"${challenge.getCreated()}\" solved=\"0\" class=\"File\" type=\"Type\" severity=\"MAJOR\" line=\"1\" rule=\"Key-155\" reason=\"reason\"/>"
         challenge.printToXML("reason", "") shouldBe text
     }
 

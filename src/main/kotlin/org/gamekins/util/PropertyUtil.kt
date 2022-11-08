@@ -131,7 +131,11 @@ object PropertyUtil {
     @JvmStatic
     fun doFillTeamsBoxItems(property: GameProperty?): ListBoxModel {
         val listBoxModel = ListBoxModel()
-        property?.getTeams()?.forEach(Consumer { nameAndValue: String? -> listBoxModel.add(nameAndValue) })
+        property?.getTeams()?.forEach(Consumer { nameAndValue: String? ->
+            if (nameAndValue != null) {
+                listBoxModel.add(nameAndValue)
+            }
+        })
         return listBoxModel
     }
 
@@ -160,7 +164,11 @@ object PropertyUtil {
         participatingUser.remove("root")
         participatingUser.remove("SYSTEM")
         val listBoxModel = ListBoxModel()
-        participatingUser.forEach(Consumer { nameAndValue: String? -> listBoxModel.add(nameAndValue) })
+        participatingUser.forEach(Consumer { nameAndValue: String? ->
+            if (nameAndValue != null) {
+                listBoxModel.add(nameAndValue)
+            }
+        })
         return listBoxModel
     }
 

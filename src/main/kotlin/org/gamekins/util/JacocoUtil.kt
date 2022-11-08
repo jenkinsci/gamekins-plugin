@@ -28,7 +28,7 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import org.jsoup.parser.Parser
-import org.jsoup.safety.Whitelist
+import org.jsoup.safety.Safelist
 import org.jsoup.select.Elements
 import java.io.File
 import java.io.IOException
@@ -311,10 +311,10 @@ object JacocoUtil {
         for (i in (lineIndex - (linesAround/2))..(lineIndex + (linesAround/2 + offset))) {
             val temp = lines.getOrNull(i)
             if (temp != null) {
-                res += Jsoup.clean(temp, "", Whitelist.none(), outputSettings) + System.lineSeparator()
+                res += Jsoup.clean(temp, "", Safelist.none(), outputSettings) + System.lineSeparator()
             }
         }
-        val cleanTargetLine = Jsoup.clean(targetLine, "", Whitelist.none(), outputSettings)
+        val cleanTargetLine = Jsoup.clean(targetLine, "", Safelist.none(), outputSettings)
         return Pair(res, Parser.unescapeEntities(cleanTargetLine, true))
     }
 

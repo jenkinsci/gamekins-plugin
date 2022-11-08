@@ -46,14 +46,18 @@ object AchievementInitializer {
 
     /**
      * Initializes the [Achievement] specified by the json file given via [fileName]. [fileName] has the path to the
-     * resources folder as root folder, which means that it has to start with / followed by the folders and ending by
+     * resources' folder as root folder, which means that it has to start with / followed by the folders and ending by
      * the json filename.
      *
      * Only for more than one [Achievement] per file.
      */
     @JvmStatic
     fun initializeAchievements(fileName: String): List<Achievement> {
-        val jsonContent = javaClass.classLoader.getResource(fileName).readText()
+        var json = javaClass.classLoader.getResource(fileName)
+        if (json == null && fileName.startsWith("/")) {
+            json = javaClass.classLoader.getResource(fileName.removePrefix("/"))
+        }
+        val jsonContent = json.readText()
         return initializeAchievementsWithContent(jsonContent)
     }
 

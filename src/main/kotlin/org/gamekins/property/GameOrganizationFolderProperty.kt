@@ -71,7 +71,11 @@ class GameOrganizationFolderProperty private constructor()
             if (job == null) return ListBoxModel()
             val listBoxModel = ListBoxModel()
             job.items.stream().map { obj: MultiBranchProject<*, *> -> obj.name }
-                    .forEach { nameAndValue: String? -> listBoxModel.add(nameAndValue) }
+                    .forEach { nameAndValue: String? ->
+                        if (nameAndValue != null) {
+                            listBoxModel.add(nameAndValue)
+                        }
+                    }
             return listBoxModel
         }
 

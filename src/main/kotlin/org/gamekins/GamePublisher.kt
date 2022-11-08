@@ -220,9 +220,9 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
                 .currentChallengesCount
             parameters.currentQuestsCount = run.parent.getProperty(GameJobProperty::class.java)
                 .currentQuestsCount
-            parameters.storedChallengesCount =run.parent.getProperty(GameJobProperty::class.java)
+            parameters.storedChallengesCount = run.parent.getProperty(GameJobProperty::class.java)
                 .currentStoredChallengesCount
-            parameters.searchCommitCount =run.parent.getProperty(GameJobProperty::class.java)
+            parameters.searchCommitCount = run.parent.getProperty(GameJobProperty::class.java)
                 .searchCommitCount
         }
 
