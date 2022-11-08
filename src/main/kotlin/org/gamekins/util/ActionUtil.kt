@@ -173,8 +173,7 @@ object ActionUtil {
         }
 
         if (challenge == null) return FormValidation.error(Constants.Error.NO_CHALLENGE_EXISTS)
-        if (challenge is DummyChallenge) return FormValidation.error("Dummies cannot be stored " +
-                "- please run another build")
+        if (challenge is DummyChallenge) return FormValidation.error(Constants.Error.STORE_DUMMY)
 
         val currentStoredChallengesCount : Int =
             when (val gameProperty = PropertyUtil.retrieveGameProperty(job)) {

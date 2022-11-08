@@ -99,11 +99,13 @@ object Constants {
 
         const val REJECT_DUMMY = "Dummies cannot be rejected - please run another build"
 
+        const val STORE_DUMMY = "Dummies cannot be stored - please run another build"
+
         const val NO_TEAM_NAME = "Insert a name for the team"
 
         const val STORAGE_LIMIT = "Storage Limit reached"
 
-        const val RECEIVER_IS_SELF = "Can't send challenges to yourself"
+        const val RECEIVER_IS_SELF = "Cannot send challenges to yourself"
 
         const val USER_NOT_FOUND = "User not found"
 

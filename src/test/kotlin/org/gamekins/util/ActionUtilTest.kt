@@ -81,18 +81,28 @@ class ActionUtilTest: AnnotationSpec() {
 
     @Test
     fun doRejectChallenge() {
-        ActionUtil.doRejectChallenge(job, "", "").kind shouldBe FormValidation.Kind.ERROR
+        var formValidation : FormValidation
+
+        formValidation = ActionUtil.doRejectChallenge(job, "", "")
+        formValidation.kind shouldBe FormValidation.Kind.ERROR
+        formValidation.message shouldBe Constants.Error.NO_REASON
 
         every { User.current() } returns null
-        ActionUtil.doRejectChallenge(job, "", " ").kind shouldBe FormValidation.Kind.ERROR
+        formValidation = ActionUtil.doRejectChallenge(job, "", " ")
+        formValidation.kind shouldBe FormValidation.Kind.ERROR
+        formValidation.message shouldBe Constants.Error.NO_USER_SIGNED_IN
 
         every { User.current() } returns user
         every { user.getProperty(GameUserProperty::class.java) } returns null
-        ActionUtil.doRejectChallenge(job, "", "reason").kind shouldBe FormValidation.Kind.ERROR
+        formValidation = ActionUtil.doRejectChallenge(job, "", "reason")
+        formValidation.kind shouldBe FormValidation.Kind.ERROR
+        formValidation.message shouldBe Constants.Error.RETRIEVING_PROPERTY
 
         every { user.getProperty(GameUserProperty::class.java) } returns userProperty
         every { userProperty.getCurrentChallenges(any()) } returns CopyOnWriteArrayList()
-        ActionUtil.doRejectChallenge(job, "", "reason").kind shouldBe FormValidation.Kind.ERROR
+        formValidation = ActionUtil.doRejectChallenge(job, "", "reason")
+        formValidation.kind shouldBe FormValidation.Kind.ERROR
+        formValidation.message shouldBe Constants.Error.NO_CHALLENGE_EXISTS
 
         mockkStatic(ActionUtil::class)
         every { ActionUtil.generateChallengeAfterRejection(any(), any(), any(), any()) } returns ""
@@ -102,46 +112,64 @@ class ActionUtilTest: AnnotationSpec() {
 
     @Test
     fun doStoreChallenge() {
+        var formValidation : FormValidation
+
         every { User.current() } returns null
-        ActionUtil.doStoreChallenge(job, "").kind shouldBe FormValidation.Kind.ERROR
+        formValidation = ActionUtil.doStoreChallenge(job, "")
+        formValidation.kind shouldBe FormValidation.Kind.ERROR
+        formValidation.message shouldBe Constants.Error.NO_USER_SIGNED_IN
 
         every { User.current() } returns user
         every { user.getProperty(GameUserProperty::class.java) } returns null
-        ActionUtil.doStoreChallenge(job, "").kind shouldBe FormValidation.Kind.ERROR
+        formValidation = ActionUtil.doStoreChallenge(job, "")
+        formValidation.kind shouldBe FormValidation.Kind.ERROR
+        formValidation.message shouldBe Constants.Error.RETRIEVING_PROPERTY
 
         every { user.getProperty(GameUserProperty::class.java) } returns userProperty
         every { userProperty.getCurrentChallenges(any()) } returns CopyOnWriteArrayList()
-        ActionUtil.doStoreChallenge(job, "").kind shouldBe FormValidation.Kind.ERROR
+        formValidation = ActionUtil.doStoreChallenge(job, "")
+        formValidation.kind shouldBe FormValidation.Kind.ERROR
+        formValidation.message shouldBe Constants.Error.NO_CHALLENGE_EXISTS
 
         mockkStatic(ActionUtil::class)
         every { ActionUtil.generateChallengeAfterRejection(any(), any(), any(), any()) } returns ""
         every { userProperty.getCurrentChallenges(any()) } returns CopyOnWriteArrayList(listOf(challenge))
-        every { userProperty.getStoredChallenges(any()).size } returns 0
+        every { userProperty.getStoredChallenges(any()).size } returns 1
         val job = mockkClass(AbstractProject::class)
         every { job.fullName } returns "test-project"
         every { job.save() } returns Unit
         val gameProperty = mockkClass(GameJobProperty::class)
         every { gameProperty.currentStoredChallengesCount } returns 1
         every { job.getProperty(any()) } returns gameProperty
+        formValidation = ActionUtil.doStoreChallenge(job, stringChallenge)
+        formValidation.kind shouldBe FormValidation.Kind.ERROR
+        formValidation.message shouldBe Constants.Error.STORAGE_LIMIT
+
+        every { userProperty.getStoredChallenges(any()).size } returns 0
         ActionUtil.doStoreChallenge(job, stringChallenge).kind shouldBe FormValidation.Kind.OK
     }
 
     @Test
     fun doUndoStoreChallenge() {
-        every { userProperty.getStoredChallenges(any()) } returns CopyOnWriteArrayList(listOf(challenge))
-
-        ActionUtil.doUndoStoreChallenge(job, "").kind shouldBe FormValidation.Kind.ERROR
+        var formValidation : FormValidation
 
         every { User.current() } returns null
-        ActionUtil.doUndoStoreChallenge(job, "").kind shouldBe FormValidation.Kind.ERROR
+        formValidation = ActionUtil.doUndoStoreChallenge(job, "")
+        formValidation.kind shouldBe FormValidation.Kind.ERROR
+        formValidation.message shouldBe Constants.Error.NO_USER_SIGNED_IN
 
         every { User.current() } returns user
         every { user.getProperty(GameUserProperty::class.java) } returns null
-        ActionUtil.doUndoStoreChallenge(job, "").kind shouldBe FormValidation.Kind.ERROR
+        formValidation = ActionUtil.doUndoStoreChallenge(job, "")
+        formValidation.kind shouldBe FormValidation.Kind.ERROR
+        formValidation.message shouldBe Constants.Error.RETRIEVING_PROPERTY
 
         every { user.getProperty(GameUserProperty::class.java) } returns userProperty
         every { userProperty.getCurrentChallenges(any()) } returns CopyOnWriteArrayList()
-        ActionUtil.doUndoStoreChallenge(job, "").kind shouldBe FormValidation.Kind.ERROR
+        every { userProperty.getStoredChallenges(any()) } returns CopyOnWriteArrayList(listOf(challenge))
+        formValidation = ActionUtil.doUndoStoreChallenge(job, "")
+        formValidation.kind shouldBe FormValidation.Kind.ERROR
+        formValidation.message shouldBe Constants.Error.NO_CHALLENGE_EXISTS
 
         ActionUtil.doUndoStoreChallenge(job, stringChallenge).kind shouldBe FormValidation.Kind.OK
     }
@@ -185,30 +213,44 @@ class ActionUtilTest: AnnotationSpec() {
     @Test
     fun doSendChallenge()
     {
+        var formValidation : FormValidation
+
         every { userProperty.getStoredChallenges(any()) } returns CopyOnWriteArrayList(listOf(challenge))
 
-        ActionUtil.doSendChallenge(job, "", "").kind shouldBe FormValidation.Kind.ERROR
+        formValidation = ActionUtil.doSendChallenge(job, "", "")
+        formValidation.kind shouldBe FormValidation.Kind.ERROR
+        formValidation.message shouldBe Constants.Error.NO_CHALLENGE_EXISTS
 
         every { User.current() } returns null
-        ActionUtil.doSendChallenge(job, "", "").kind shouldBe FormValidation.Kind.ERROR
+        formValidation = ActionUtil.doSendChallenge(job, "", "")
+        formValidation.kind shouldBe FormValidation.Kind.ERROR
+        formValidation.message shouldBe Constants.Error.NO_USER_SIGNED_IN
 
         every { User.current() } returns user
         every { user.getProperty(GameUserProperty::class.java) } returns null
-        ActionUtil.doSendChallenge(job, "", "").kind shouldBe FormValidation.Kind.ERROR
+        formValidation = ActionUtil.doSendChallenge(job, "", "")
+        formValidation.kind shouldBe FormValidation.Kind.ERROR
+        formValidation.message shouldBe Constants.Error.RETRIEVING_PROPERTY
 
         every { user.getProperty(GameUserProperty::class.java) } returns userProperty
         every { User.get("User1", false, any()) } returns null
         every { User.get("User0", false, any()) } returns user
 
-        ActionUtil.doSendChallenge(job, stringChallenge, "User1").kind shouldBe FormValidation.Kind.ERROR
+        formValidation = ActionUtil.doSendChallenge(job, stringChallenge, "User1")
+        formValidation.kind shouldBe FormValidation.Kind.ERROR
+        formValidation.message shouldBe Constants.Error.USER_NOT_FOUND
 
-        ActionUtil.doSendChallenge(job, stringChallenge, "User0").kind shouldBe FormValidation.Kind.ERROR
+        formValidation = ActionUtil.doSendChallenge(job, stringChallenge, "User0")
+        formValidation.kind shouldBe FormValidation.Kind.ERROR
+        formValidation.message shouldBe Constants.Error.RECEIVER_IS_SELF
 
         val user1 = mockkClass(User::class)
         every { User.get("User1", false, any()) } returns user1
         every { user1.save() } returns Unit
         every { user1.getProperty(GameUserProperty::class.java) } returns null
-        ActionUtil.doSendChallenge(job, stringChallenge, "User1").kind shouldBe FormValidation.Kind.ERROR
+        formValidation = ActionUtil.doSendChallenge(job, stringChallenge, "User1")
+        formValidation.kind shouldBe FormValidation.Kind.ERROR
+        formValidation.message shouldBe Constants.Error.RETRIEVING_PROPERTY
 
         val userProperty1 = mockkClass(GameUserProperty::class)
         every { user1.getProperty(GameUserProperty::class.java) } returns userProperty1
@@ -220,7 +262,9 @@ class ActionUtilTest: AnnotationSpec() {
         every { gameProperty.currentStoredChallengesCount } returns 1
         every { job.getProperty(any()) } returns gameProperty
 
-        ActionUtil.doSendChallenge(job, stringChallenge, "User1").kind shouldBe FormValidation.Kind.ERROR
+        formValidation = ActionUtil.doSendChallenge(job, stringChallenge, "User1")
+        formValidation.kind shouldBe FormValidation.Kind.ERROR
+        formValidation.message shouldBe Constants.Error.STORAGE_LIMIT
 
         every { userProperty1.getStoredChallenges(any()).size } returns 0
         every { userProperty.removeStoredChallenge(any(), any()) } returns Unit
