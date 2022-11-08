@@ -13,7 +13,7 @@
 
     <properties>
         <!-- Baseline Jenkins version you use to build the plugin. Users must have this version or newer to run. -->
-        <jenkins.version>2.303.3</jenkins.version>
+        <jenkins.version>2.361.3</jenkins.version>
         <!-- Error occurs which should already be solved https://issues.jenkins-ci.org/browse/JENKINS-46602 -->
         <!-- Parent pom uses 1.${java.level}, see to resolve: https://www.baeldung.com/maven-plugin-override-parent -->
         <!-- <maven.compiler.release>11</maven.compiler.release> -->
@@ -213,6 +213,10 @@
                     <groupId>com.fasterxml.jackson.core</groupId>
                     <artifactId>jackson-core</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>org.jenkins-ci.plugins</groupId>
+                    <artifactId>display-url-api</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <!-- https://mvnrepository.com/artifact/io.kotest/kotest-runner-junit5-jvm -->
@@ -344,6 +348,18 @@
                     <artifactId>org.osgi.service.prefs</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.jenkins-ci.plugins/mailer -->
+        <dependency>
+            <groupId>org.jenkins-ci.plugins</groupId>
+            <artifactId>mailer</artifactId>
+            <version>438.v02c7f0a_12fa_4</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/jakarta.mail/jakarta.mail-api -->
+        <dependency>
+            <groupId>jakarta.mail</groupId>
+            <artifactId>jakarta.mail-api</artifactId>
+            <version>2.1.0</version>
         </dependency>
     </dependencies>
 
