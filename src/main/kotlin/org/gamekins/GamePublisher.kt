@@ -190,7 +190,7 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
     ) {
 
         val parameters = Parameters(jacocoCSVPath = jacocoCSVPath!!,
-            jacocoResultsPath = jacocoResultsPath!!, mocoJSONPath = mocoJSONPath!!, workspace = workspace)
+            jacocoResultsPath = jacocoResultsPath!!, mocoJSONPath = mocoJSONPath, workspace = workspace)
         if (run.parent.parent is WorkflowMultiBranchProject) {
             val project = run.parent.parent as WorkflowMultiBranchProject
             if (project.properties.get(GameMultiBranchProperty::class.java) == null

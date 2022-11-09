@@ -24,6 +24,7 @@ import org.gamekins.file.TestFileDetails
 import org.gamekins.util.Constants
 import org.gamekins.util.SmellUtil
 import org.sonarsource.sonarlint.core.client.api.common.analysis.Issue
+import org.sonarsource.sonarlint.core.commons.IssueSeverity
 
 /**
  * Specific [Challenge] to motivate the user to remove code and test smells in their code.
@@ -84,9 +85,9 @@ class SmellChallenge(val details: FileDetails, val issue: Issue): Challenge {
 
     override fun getScore(): Int {
         return when (issue.severity) {
-            "BLOCKER" -> 4
-            "CRITICAL" -> 3
-            "MAJOR" -> 2
+            IssueSeverity.BLOCKER -> 4
+            IssueSeverity.CRITICAL -> 3
+            IssueSeverity.MAJOR -> 2
             else -> 1
         }
     }
