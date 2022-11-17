@@ -110,6 +110,20 @@ object Constants {
         const val USER_NOT_FOUND = "User not found"
 
         const val UNKNOWN_GAME_PROPERTY = "Unknown Game Property"
+
+        const val NO_TEAM = "No team specified"
+        
+        const val UNKNOWN_TEAM = "The specified team does not exist"
+        
+        const val USER_NOT_IN_TEAM = "The user is not in the specified team"
+
+        const val UNKNOWN_USER = "No user with the specified name found"
+
+        const val PARENT_WITHOUT_PROPERTY = "$UNEXPECTED: Parent job has no property"
+
+        const val USER_ALREADY_IN_TEAM = "The user is already participating in a team"
+
+        const val TEAM_NAME_TAKEN = "The team already exists - please use another name for your team"
     }
 
     const val EXISTS = " exists "

@@ -99,35 +99,65 @@ class PropertyUtilTest : AnnotationSpec() {
 
     @Test
     fun doAddTeam() {
-        PropertyUtil.doAddTeam(property2, " ").kind shouldBe FormValidation.Kind.ERROR
+        var formValidation : FormValidation
 
-        PropertyUtil.doAddTeam(null, team1).kind shouldBe FormValidation.Kind.ERROR
+        formValidation = PropertyUtil.doAddTeam(property2, " ")
+        formValidation.kind shouldBe FormValidation.Kind.ERROR
+        formValidation.message shouldBe Constants.Error.NO_TEAM
 
-        PropertyUtil.doAddTeam(property2, team1).kind shouldBe FormValidation.Kind.ERROR
+        formValidation = PropertyUtil.doAddTeam(null, team1)
+        formValidation.kind shouldBe FormValidation.Kind.ERROR
+        formValidation.message shouldBe Constants.Error.UNEXPECTED
+
+        formValidation = PropertyUtil.doAddTeam(property2, team1)
+        formValidation.kind shouldBe FormValidation.Kind.ERROR
+        formValidation.message shouldBe Constants.Error.TEAM_NAME_TAKEN
 
         PropertyUtil.doAddTeam(property2, team2).kind shouldBe FormValidation.Kind.OK
     }
 
     @Test
     fun doAddUserToTeam() {
-        PropertyUtil.doAddUserToTeam(job2, " ", "").kind shouldBe FormValidation.Kind.ERROR
+        var formValidation : FormValidation
 
-        PropertyUtil.doAddUserToTeam(null, team1, "").kind shouldBe FormValidation.Kind.ERROR
+        formValidation = PropertyUtil.doAddUserToTeam(job2, " ", "")
+        formValidation.kind shouldBe FormValidation.Kind.ERROR
+        formValidation.message shouldBe Constants.Error.NO_TEAM
 
-        PropertyUtil.doAddUserToTeam(job2, team1, userName3).kind shouldBe FormValidation.Kind.ERROR
+        formValidation = PropertyUtil.doAddUserToTeam(null, team1, "")
+        formValidation.kind shouldBe FormValidation.Kind.ERROR
+        formValidation.message shouldBe Constants.Error.PARENT
 
-        PropertyUtil.doAddUserToTeam(job2, team1, userName2).kind shouldBe FormValidation.Kind.ERROR
+        formValidation = PropertyUtil.doAddUserToTeam(job2, team1, userName3)
+        formValidation.kind shouldBe FormValidation.Kind.ERROR
+        formValidation.message shouldBe Constants.Error.USER_ALREADY_IN_TEAM
 
-        PropertyUtil.doAddUserToTeam(job2, team1, userName1).kind shouldBe FormValidation.Kind.ERROR
+        formValidation = PropertyUtil.doAddUserToTeam(job2, team1, userName2)
+        formValidation.kind shouldBe FormValidation.Kind.ERROR
+        formValidation.message shouldBe Constants.Error.USER_ALREADY_IN_TEAM
+
+        formValidation = PropertyUtil.doAddUserToTeam(job2, team1, userName1)
+        formValidation.kind shouldBe FormValidation.Kind.ERROR
+        formValidation.message shouldBe Constants.Error.USER_ALREADY_IN_TEAM
+
+        formValidation = PropertyUtil.doAddUserToTeam(job2, team1, "")
+        formValidation.kind shouldBe FormValidation.Kind.ERROR
+        formValidation.message shouldBe Constants.Error.UNKNOWN_USER
 
         PropertyUtil.doAddUserToTeam(job1, team1, userName1).kind shouldBe FormValidation.Kind.OK
     }
 
     @Test
     fun doDeleteTeam() {
-        PropertyUtil.doDeleteTeam(projectName1, property2, " ").kind shouldBe FormValidation.Kind.ERROR
+        var formValidation : FormValidation
 
-        PropertyUtil.doDeleteTeam(projectName1, null, team1).kind shouldBe FormValidation.Kind.ERROR
+        formValidation = PropertyUtil.doDeleteTeam(projectName1, property2, " ")
+        formValidation.kind shouldBe FormValidation.Kind.ERROR
+        formValidation.message shouldBe Constants.Error.NO_TEAM
+
+        formValidation = PropertyUtil.doDeleteTeam(projectName1, null, team1)
+        formValidation.kind shouldBe FormValidation.Kind.ERROR
+        formValidation.message shouldBe Constants.Error.UNEXPECTED
 
         PropertyUtil.doDeleteTeam(projectName1, property2, team1).kind shouldBe FormValidation.Kind.OK
 
@@ -148,24 +178,46 @@ class PropertyUtilTest : AnnotationSpec() {
 
     @Test
     fun doRemoveUserFromTeam() {
-        PropertyUtil.doRemoveUserFromTeam(job2, " ", "").kind shouldBe FormValidation.Kind.ERROR
+        var formValidation : FormValidation
 
-        PropertyUtil.doRemoveUserFromTeam(null, team1, "").kind shouldBe FormValidation.Kind.ERROR
+        formValidation = PropertyUtil.doRemoveUserFromTeam(job2, " ", "")
+        formValidation.kind shouldBe FormValidation.Kind.ERROR
+        formValidation.message shouldBe Constants.Error.NO_TEAM
 
-        PropertyUtil.doRemoveUserFromTeam(job2, team1, userName3).kind shouldBe FormValidation.Kind.ERROR
+        formValidation = PropertyUtil.doRemoveUserFromTeam(null, team1, "")
+        formValidation.kind shouldBe FormValidation.Kind.ERROR
+        formValidation.message shouldBe Constants.Error.PARENT
 
-        PropertyUtil.doRemoveUserFromTeam(job2, team1, userName2).kind shouldBe FormValidation.Kind.ERROR
+        formValidation = PropertyUtil.doRemoveUserFromTeam(job2, team1, userName3)
+        formValidation.kind shouldBe FormValidation.Kind.ERROR
+        formValidation.message shouldBe Constants.Error.USER_NOT_IN_TEAM
 
-        PropertyUtil.doRemoveUserFromTeam(job2, team1, userName1).kind shouldBe FormValidation.Kind.ERROR
+        formValidation = PropertyUtil.doRemoveUserFromTeam(job2, team1, userName2)
+        formValidation.kind shouldBe FormValidation.Kind.ERROR
+        formValidation.message shouldBe Constants.Error.USER_NOT_IN_TEAM
+
+        formValidation = PropertyUtil.doRemoveUserFromTeam(job2, team1, userName1)
+        formValidation.kind shouldBe FormValidation.Kind.ERROR
+        formValidation.message shouldBe Constants.Error.USER_NOT_IN_TEAM
+
+        formValidation = PropertyUtil.doRemoveUserFromTeam(job2, team1, "")
+        formValidation.kind shouldBe FormValidation.Kind.ERROR
+        formValidation.message shouldBe Constants.Error.UNKNOWN_USER
 
         PropertyUtil.doRemoveUserFromTeam(job1, team2, userName1).kind shouldBe FormValidation.Kind.OK
     }
 
     @Test
     fun doReset() {
-        PropertyUtil.doReset(null, null).kind shouldBe FormValidation.Kind.ERROR
+        var formValidation : FormValidation
 
-        PropertyUtil.doReset(job1, null).kind shouldBe FormValidation.Kind.ERROR
+        formValidation = PropertyUtil.doReset(null, null)
+        formValidation.kind shouldBe FormValidation.Kind.ERROR
+        formValidation.message shouldBe Constants.Error.PARENT
+
+        formValidation = PropertyUtil.doReset(job1, null)
+        formValidation.kind shouldBe FormValidation.Kind.ERROR
+        formValidation.message shouldBe Constants.Error.PARENT_WITHOUT_PROPERTY
 
         PropertyUtil.doReset(job1, property1).kind shouldBe FormValidation.Kind.OK
 

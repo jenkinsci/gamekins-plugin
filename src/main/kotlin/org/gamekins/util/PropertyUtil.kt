@@ -42,26 +42,21 @@ import hudson.security.HudsonPrivateSecurityRealm.Details as Details
  */
 object PropertyUtil {
 
-    private const val NO_TEAM = "No team specified"
-    private const val UNEXPECTED_ERROR = "Unexpected Error"
-    private const val ERROR_PARENT = "$UNEXPECTED_ERROR: Parent job is null"
-    private const val ERROR_SAVING = "There was an error with saving"
-
     /**
      * Adds a new team [teamName]] to the [property]. Returns errors if the [teamName] is empty, the property is null,
      * the [teamName] already exists or an Exception is thrown.
      */
     @JvmStatic
     fun doAddTeam(property: GameProperty?, teamName: String): FormValidation {
-        if (teamName.trim { it <= ' ' }.isEmpty()) return FormValidation.error(NO_TEAM)
-        if (property == null) return FormValidation.error(UNEXPECTED_ERROR)
+        if (teamName.trim { it <= ' ' }.isEmpty()) return FormValidation.error(Constants.Error.NO_TEAM)
+        if (property == null) return FormValidation.error(Constants.Error.UNEXPECTED)
         if (property.getTeams().contains(teamName))
-            return FormValidation.error("The team already exists - please use another name for your team")
+            return FormValidation.error(Constants.Error.TEAM_NAME_TAKEN)
         try {
             property.addTeam(teamName)
         } catch (e: IOException) {
             e.printStackTrace()
-            return FormValidation.error(UNEXPECTED_ERROR)
+            return FormValidation.error(Constants.Error.UNEXPECTED)
         }
         return FormValidation.ok("Team successfully added")
     }
@@ -72,8 +67,8 @@ object PropertyUtil {
      */
     @JvmStatic
     fun doAddUserToTeam(job: AbstractItem?, teamsBox: String, usersBox: String): FormValidation {
-        if (teamsBox.trim { it <= ' ' }.isEmpty()) return FormValidation.error(NO_TEAM)
-        if (job == null) return FormValidation.error(ERROR_PARENT)
+        if (teamsBox.trim { it <= ' ' }.isEmpty()) return FormValidation.error(Constants.Error.NO_TEAM)
+        if (job == null) return FormValidation.error(Constants.Error.PARENT)
 
         val user = retrieveUser(usersBox)
         if (user != null) {
@@ -84,15 +79,15 @@ object PropertyUtil {
                 try {
                     user.save()
                 } catch (e: IOException) {
-                    return FormValidation.error(e, ERROR_SAVING)
+                    return FormValidation.error(e, Constants.Error.SAVING)
                 }
                 FormValidation.ok("User successfully added")
             } else {
-                FormValidation.error("The user is already participating in a team")
+                FormValidation.error(Constants.Error.USER_ALREADY_IN_TEAM)
             }
         }
 
-        return FormValidation.error("No user with the specified name found")
+        return FormValidation.error(Constants.Error.UNKNOWN_USER)
     }
 
     /**
@@ -101,9 +96,9 @@ object PropertyUtil {
      */
     @JvmStatic
     fun doDeleteTeam(projectName: String, property: GameProperty?, teamsBox: String): FormValidation {
-        if (teamsBox.trim { it <= ' ' }.isEmpty()) return FormValidation.error(NO_TEAM)
-        if (property == null) return FormValidation.error(UNEXPECTED_ERROR)
-        if (!property.getTeams().contains(teamsBox)) return FormValidation.error("The specified team does not exist")
+        if (teamsBox.trim { it <= ' ' }.isEmpty()) return FormValidation.error(Constants.Error.NO_TEAM)
+        if (property == null) return FormValidation.error(Constants.Error.UNEXPECTED)
+        if (!property.getTeams().contains(teamsBox)) return FormValidation.error(Constants.Error.UNKNOWN_TEAM)
         for (user in User.getAll()) {
             if (!realUser(user)) continue
             val userProperty = user.getProperty(GameUserProperty::class.java)
@@ -112,7 +107,7 @@ object PropertyUtil {
                 try {
                     user.save()
                 } catch (e: IOException) {
-                    return FormValidation.error(e, ERROR_SAVING)
+                    return FormValidation.error(e, Constants.Error.SAVING)
                 }
             }
         }
@@ -120,7 +115,7 @@ object PropertyUtil {
             property.removeTeam(teamsBox)
         } catch (e: IOException) {
             e.printStackTrace()
-            return FormValidation.error(UNEXPECTED_ERROR)
+            return FormValidation.error(Constants.Error.UNEXPECTED)
         }
         return FormValidation.ok("Team successfully deleted")
     }
@@ -170,8 +165,8 @@ object PropertyUtil {
      */
     @JvmStatic
     fun doRemoveUserFromTeam(job: AbstractItem?, teamsBox: String, usersBox: String): FormValidation {
-        if (teamsBox.trim { it <= ' ' }.isEmpty()) return FormValidation.error(NO_TEAM)
-        if (job == null) return FormValidation.error(ERROR_PARENT)
+        if (teamsBox.trim { it <= ' ' }.isEmpty()) return FormValidation.error(Constants.Error.NO_TEAM)
+        if (job == null) return FormValidation.error(Constants.Error.PARENT)
 
         val user = retrieveUser(usersBox)
         if (user != null) {
@@ -182,15 +177,15 @@ object PropertyUtil {
                 try {
                     user.save()
                 } catch (e: IOException) {
-                    return FormValidation.error(e, ERROR_SAVING)
+                    return FormValidation.error(e, Constants.Error.SAVING)
                 }
                 FormValidation.ok("User successfully removed")
             } else {
-                FormValidation.error("The user is not in the specified team")
+                FormValidation.error(Constants.Error.USER_NOT_IN_TEAM)
             }
         }
 
-        return FormValidation.error("No user with the specified name found")
+        return FormValidation.error(Constants.Error.UNKNOWN_USER)
     }
 
     /**
@@ -198,8 +193,8 @@ object PropertyUtil {
      * participations.
      */
     fun doReset(job: AbstractItem?, property: GameProperty?): FormValidation {
-        if (job == null) return FormValidation.error(ERROR_PARENT)
-        if (property == null) return FormValidation.error("Unexpected error: Parent job has no property")
+        if (job == null) return FormValidation.error(Constants.Error.PARENT)
+        if (property == null) return FormValidation.error(Constants.Error.PARENT_WITHOUT_PROPERTY)
         property.resetStatistics(job)
         for (user in User.getAll()) {
             if (!realUser(user)) continue
@@ -209,7 +204,7 @@ object PropertyUtil {
                 try {
                     user.save()
                 } catch (e: IOException) {
-                    return FormValidation.error(e, ERROR_SAVING)
+                    return FormValidation.error(e, Constants.Error.SAVING)
                 }
             }
         }
