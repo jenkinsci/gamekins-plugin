@@ -117,7 +117,8 @@ class GameOrganizationFolderProperty private constructor()
                                     formData.getInt(Constants.FormKeys.QUEST_COUNT),
                                     formData.getInt(Constants.FormKeys.STORED_CHALLENGES_COUNT),
                                     formData.getBoolean(Constants.FormKeys.CAN_SEND_CHALLENGE),
-                                    formData.getInt(Constants.FormKeys.SEARCH_COMMIT_COUNT)))
+                                    formData.getInt(Constants.FormKeys.SEARCH_COMMIT_COUNT),
+                                    formData.getString(Constants.FormKeys.PIT_CONFIGURATION)))
                         folder.save()
                         break
                     } catch (e: IOException) {

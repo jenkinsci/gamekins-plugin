@@ -53,9 +53,11 @@ object Constants {
 
         const val STORED_CHALLENGES_COUNT = "currentStoredChallengesCount"
 
-        const val  CAN_SEND_CHALLENGE = "canSendChallenge"
+        const val CAN_SEND_CHALLENGE = "canSendChallenge"
 
         const val SEARCH_COMMIT_COUNT = "searchCommitCount"
+
+        const val PIT_CONFIGURATION = "pitConfiguration"
     }
 
     /**
@@ -72,6 +74,28 @@ object Constants {
         const val STORED_CHALLENGES = 2
 
         const val SEARCH_COMMIT_COUNT = 50
+
+        const val PIT_CONFIGURATION =
+                        "<plugin>\n" +
+                        "   <groupId>org.pitest</groupId>\n" +
+                        "   <artifactId>pitest-maven</artifactId>\n" +
+                        "   <version>1.9.10</version>\n" +
+                        "   <dependencies>\n" +
+                        "       <dependency>\n" +
+                        "           <groupId>org.pitest</groupId>\n" +
+                        "           <artifactId>pitest-junit5-plugin</artifactId>\n" +
+                        "           <version>1.1.0</version>\n" +
+                        "       </dependency>\n" +
+                        "   </dependencies>\n" +
+                        "   <configuration>\n" +
+                        "       <outputFormats>\n" +
+                        "           <outputFormat>XML</outputFormat>\n" +
+                        "       </outputFormats>\n" +
+                        "       <targetClasses>\n" +
+                        "            <param>{package}.{class}*</param>\n" +
+                        "       </targetClasses>\n" +
+                        "   </configuration>\n" +
+                        "</plugin>"
     }
 
     /**
@@ -175,6 +199,7 @@ object Constants {
         var currentQuestsCount: Int = Default.CURRENT_QUESTS,
         var storedChallengesCount: Int = Default.STORED_CHALLENGES,
         var searchCommitCount: Int = Default.SEARCH_COMMIT_COUNT,
+        var pitConfiguration: String = Default.PIT_CONFIGURATION,
         var generated: Int = 0,
         var jacocoCSVPath: String = "",
         var jacocoResultsPath: String = "",

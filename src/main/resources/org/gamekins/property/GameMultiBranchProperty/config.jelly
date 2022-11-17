@@ -69,6 +69,9 @@
                      description="Default: 50" help="/plugin/gamekins/help/help-searchCommitCount.html">
                 <f:number />
             </f:entry>
+            <f:entry title="Configuration for PIT" field="pitConfiguration">
+                <f:textarea />
+            </f:entry>
         </f:advanced>
     </f:section>
 

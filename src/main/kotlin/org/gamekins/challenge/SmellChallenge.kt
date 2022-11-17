@@ -92,7 +92,7 @@ class SmellChallenge(val details: FileDetails, val issue: Issue): Challenge {
         }
     }
 
-    override fun getSnippet():String {
+    override fun getSnippet(): String {
         return codeSnippet
     }
 

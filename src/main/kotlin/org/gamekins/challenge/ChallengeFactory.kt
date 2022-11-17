@@ -209,6 +209,14 @@ object ChallengeFactory {
                     challenge = generateMutationTestChallenge(selectedFile as SourceFileDetails, parameters.branch,
                         parameters.projectName, listener, parameters.workspace, user)
                 }
+                challengeClass == MutationChallenge::class.java -> {
+                    listener.logger.println(
+                        "[Gamekins] Try class " + selectedFile.fileName + " and type "
+                                + challengeClass
+                    )
+                    challenge = generateMutationChallenge(selectedFile as SourceFileDetails, parameters,
+                        listener, user)
+                }
                 challengeClass == SmellChallenge::class.java -> {
                     listener.logger.println(
                         "[Gamekins] Try class " + selectedFile.fileName + " and type "
@@ -290,6 +298,21 @@ object ChallengeFactory {
                 }
             }
         } else null
+    }
+
+    @JvmStatic
+    fun generateMutationChallenge(fileDetails: SourceFileDetails, parameters: Parameters,
+        listener: TaskListener, user: User) : MutationChallenge? {
+
+        MutationUtil.executePIT(fileDetails, parameters, listener)
+
+        val mutationReport = FilePath(parameters.workspace.channel,
+            parameters.workspace.remote + "/target/pit-reports/mutations.xml")
+        if (!mutationReport.exists()) return null
+        val mutants = mutationReport.readToString().split("\n").filter { it.startsWith("<mutation ") }
+        if (mutants.isEmpty()) return null
+        
+        return MutationChallenge(fileDetails, MutationUtil.MutationData(mutants[Random.nextInt(mutants.size)]))
     }
 
     /**

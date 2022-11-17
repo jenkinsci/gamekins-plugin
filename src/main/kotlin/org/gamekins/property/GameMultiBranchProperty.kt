@@ -53,14 +53,15 @@ class GameMultiBranchProperty
                                   @set:DataBoundSetter var currentQuestsCount: Int,
                                   @set:DataBoundSetter var currentStoredChallengesCount: Int,
                                   @set:DataBoundSetter var canSendChallenge: Boolean,
-                                  @set:DataBoundSetter var searchCommitCount: Int)
+                                  @set:DataBoundSetter var searchCommitCount: Int,
+                                  @set:DataBoundSetter var pitConfiguration: String)
     : AbstractFolderProperty<AbstractFolder<*>?>(), GameProperty, StaplerProxy {
 
     private var statistics: Statistics
     private val teams: ArrayList<String> = ArrayList()
 
     /**
-     * Call the reconfigure needed to add the actions to the left panel.
+     * Call the reconfigure() needed to add the actions to the left panel.
      */
     init {
         statistics = Statistics(job!!)
@@ -69,6 +70,7 @@ class GameMultiBranchProperty
         if (currentQuestsCount <= 0) currentQuestsCount = Constants.Default.CURRENT_QUESTS
         if (currentStoredChallengesCount < 0) currentStoredChallengesCount = Constants.Default.STORED_CHALLENGES
         if (searchCommitCount <= 0) searchCommitCount = Constants.Default.SEARCH_COMMIT_COUNT
+        if (pitConfiguration.isEmpty()) pitConfiguration = Constants.Default.PIT_CONFIGURATION
     }
 
     @Throws(IOException::class)
@@ -100,12 +102,13 @@ class GameMultiBranchProperty
     /**
      * Called by Jenkins after the object has been created from his XML representation. Used for data migration.
      */
-    @Suppress("unused", "SENSELESS_COMPARISON")
+    @Suppress("unused")
     private fun readResolve(): Any {
         if (currentChallengesCount <= 0) currentChallengesCount = Constants.Default.CURRENT_CHALLENGES
         if (currentQuestsCount <= 0) currentQuestsCount = Constants.Default.CURRENT_QUESTS
         if (currentStoredChallengesCount < 0) currentStoredChallengesCount = Constants.Default.STORED_CHALLENGES
         if (searchCommitCount <= 0) searchCommitCount = Constants.Default.SEARCH_COMMIT_COUNT
+        if (pitConfiguration.isNullOrEmpty()) pitConfiguration = Constants.Default.PIT_CONFIGURATION
 
         return this
     }
@@ -117,20 +120,21 @@ class GameMultiBranchProperty
      *
      * @see [AbstractFolderProperty.reconfigure]
      */
-    override fun reconfigure(req: StaplerRequest, form: JSONObject?): AbstractFolderProperty<*> {
-        if (form != null) {
-            activated = form.getBoolean(Constants.FormKeys.ACTIVATED)
-            showStatistics = form.getBoolean(Constants.FormKeys.SHOW_STATISTICS)
-            showLeaderboard = form.getBoolean(Constants.FormKeys.SHOW_LEADERBOARD)
-            if (form.getValue(Constants.FormKeys.CHALLENGES_COUNT) is String)
-                currentChallengesCount = form.getInt(Constants.FormKeys.CHALLENGES_COUNT)
-            if (form.getValue(Constants.FormKeys.QUEST_COUNT) is String)
-                currentQuestsCount = form.getInt(Constants.FormKeys.QUEST_COUNT)
-            if (form.getValue(Constants.FormKeys.STORED_CHALLENGES_COUNT) is String)
-                currentStoredChallengesCount = form.getInt(Constants.FormKeys.STORED_CHALLENGES_COUNT)
-            canSendChallenge = form.getBoolean(Constants.FormKeys.CAN_SEND_CHALLENGE)
-            if (form.getValue(Constants.FormKeys.SEARCH_COMMIT_COUNT) is String)
-                searchCommitCount = form.getInt(Constants.FormKeys.SEARCH_COMMIT_COUNT)
+    override fun reconfigure(req: StaplerRequest, formData: JSONObject?): AbstractFolderProperty<*> {
+        if (formData != null) {
+            activated = formData.getBoolean(Constants.FormKeys.ACTIVATED)
+            showStatistics = formData.getBoolean(Constants.FormKeys.SHOW_STATISTICS)
+            showLeaderboard = formData.getBoolean(Constants.FormKeys.SHOW_LEADERBOARD)
+            if (formData.getValue(Constants.FormKeys.CHALLENGES_COUNT) is String)
+                currentChallengesCount = formData.getInt(Constants.FormKeys.CHALLENGES_COUNT)
+            if (formData.getValue(Constants.FormKeys.QUEST_COUNT) is String)
+                currentQuestsCount = formData.getInt(Constants.FormKeys.QUEST_COUNT)
+            if (formData.getValue(Constants.FormKeys.STORED_CHALLENGES_COUNT) is String)
+                currentStoredChallengesCount = formData.getInt(Constants.FormKeys.STORED_CHALLENGES_COUNT)
+            canSendChallenge = formData.getBoolean(Constants.FormKeys.CAN_SEND_CHALLENGE)
+            if (formData.getValue(Constants.FormKeys.SEARCH_COMMIT_COUNT) is String)
+                searchCommitCount = formData.getInt(Constants.FormKeys.SEARCH_COMMIT_COUNT)
+            pitConfiguration = formData.getString(Constants.FormKeys.PIT_CONFIGURATION)
         }
         
         PropertyUtil.reconfigure(owner!!, showLeaderboard, showStatistics)
@@ -281,7 +285,8 @@ class GameMultiBranchProperty
                         Constants.Default.STORED_CHALLENGES,
                 formData.getBoolean(Constants.FormKeys.CAN_SEND_CHALLENGE),
                 if (formData.getValue(Constants.FormKeys.SEARCH_COMMIT_COUNT) is Int)
-                    formData.getInt(Constants.FormKeys.SEARCH_COMMIT_COUNT) else Constants.Default.SEARCH_COMMIT_COUNT
+                    formData.getInt(Constants.FormKeys.SEARCH_COMMIT_COUNT) else Constants.Default.SEARCH_COMMIT_COUNT,
+                formData.getString(Constants.FormKeys.PIT_CONFIGURATION)
             )
         }
     }
