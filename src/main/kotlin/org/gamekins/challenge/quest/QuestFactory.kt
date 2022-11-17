@@ -129,7 +129,7 @@ object QuestFactory {
         classes: ArrayList<FileDetails>
     ): Quest? {
         val suitableClasses = ArrayList(classes.filterIsInstance<SourceFileDetails>()
-            .filter { it.coverage < 1.0 && it.filesExists() })
+            .filter { it.coverage < 0.9 && it.filesExists() })
         val rejectedClasses = property.getRejectedChallenges(parameters.projectName)
             .map { it.first }
             .filterIsInstance<ClassCoverageChallenge>()
@@ -157,7 +157,7 @@ object QuestFactory {
         classes: ArrayList<FileDetails>
     ): Quest? {
         val suitableClasses = classes.filterIsInstance<SourceFileDetails>()
-            .filter { it.coverage < 1.0  && it.filesExists() }
+            .filter { it.coverage < 0.9  && it.filesExists() }
         if (suitableClasses.isEmpty()) return null
         val selectedClass = suitableClasses.random()
 
@@ -183,7 +183,7 @@ object QuestFactory {
         classes: ArrayList<FileDetails>
     ): Quest? {
         val suitableClasses = classes.filterIsInstance<SourceFileDetails>()
-            .filter { it.coverage < 1.0  && it.filesExists() }
+            .filter { it.coverage < 0.9  && it.filesExists() }
         if (suitableClasses.isEmpty()) return null
         val selectedClass = suitableClasses.random()
 
@@ -208,7 +208,7 @@ object QuestFactory {
         classes: ArrayList<FileDetails>
     ): Quest? {
         val suitableClasses = classes.filterIsInstance<SourceFileDetails>()
-            .filter { it.coverage < 1.0  && it.filesExists() }
+            .filter { it.coverage < 0.9  && it.filesExists() }
         if (suitableClasses.isEmpty()) return null
         val selectedClass = suitableClasses.random()
 
@@ -228,6 +228,9 @@ object QuestFactory {
             if (property.getRejectedChallenges(parameters.projectName).any { it.first == challenge }) {
                 return null
             }
+            for (step in steps) {
+                if (challenge == step.challenge) return null
+            }
             steps.add(QuestStep("", challenge))
         }
 
@@ -243,7 +246,7 @@ object QuestFactory {
         classes: ArrayList<FileDetails>
     ): Quest? {
         val suitableClasses = classes.filterIsInstance<SourceFileDetails>()
-            .filter { it.coverage < 1.0  && it.filesExists() }
+            .filter { it.coverage < 0.9  && it.filesExists() }
         if (suitableClasses.isEmpty()) return null
         val selectedClass = suitableClasses.random()
 
@@ -259,6 +262,9 @@ object QuestFactory {
             val challenge = MethodCoverageChallenge(data)
             if (property.getRejectedChallenges(parameters.projectName).any { it.first == challenge }) {
                 return null
+            }
+            for (step in steps) {
+                if (challenge == step.challenge) return null
             }
             steps.add(QuestStep("", challenge))
         }
@@ -311,7 +317,7 @@ object QuestFactory {
         files: ArrayList<FileDetails>
     ): Quest? {
         val suitableClasses = files.filterIsInstance<SourceFileDetails>()
-            .filter { it.coverage < 1.0  && it.filesExists() }
+            .filter { it.coverage < 0.9  && it.filesExists() }
         if (suitableClasses.isEmpty()) return null
         var selectedClass = suitableClasses.random()
 
@@ -332,6 +338,9 @@ object QuestFactory {
         for (cla in selectedClasses) {
             val challenge = ChallengeFactory.generateChallenge(user, parameters, listener,
                 files, cla)
+            for (step in steps) {
+                if (challenge == step.challenge) return null
+            }
             steps.add(QuestStep("", challenge))
         }
 

@@ -10,10 +10,7 @@ import io.mockk.mockkClass
 import io.mockk.mockkObject
 import io.mockk.mockkStatic
 import org.gamekins.GameUserProperty
-import org.gamekins.challenge.ChallengeFactory
-import org.gamekins.challenge.ClassCoverageChallenge
-import org.gamekins.challenge.LineCoverageChallenge
-import org.gamekins.challenge.MutationTestChallenge
+import org.gamekins.challenge.*
 import org.gamekins.file.FileDetails
 import org.gamekins.file.SourceFileDetails
 import org.gamekins.util.Constants
@@ -136,7 +133,7 @@ class QuestFactoryTest : AnnotationSpec() {
         classes.add(sourceDetail)
         QuestFactory.generateClassQuest(user, property, parameters, listener, classes) shouldBe null
 
-        every { sourceDetail.coverage } returns 0.9
+        every { sourceDetail.coverage } returns 0.8
         val challenge = mockkClass(ClassCoverageChallenge::class)
         val classDetails = mockkClass(SourceFileDetails::class)
         every { sourceDetail == any() } returns true
@@ -163,7 +160,7 @@ class QuestFactoryTest : AnnotationSpec() {
         classes.add(sourceDetail)
         QuestFactory.generateDecreasingQuest(user, property, parameters, listener, classes) shouldBe null
 
-        every { sourceDetail.coverage } returns 0.9
+        every { sourceDetail.coverage } returns 0.8
         every { sourceDetail.jacocoSourceFile } returns File("")
         every { sourceDetail.parameters } returns Constants.Parameters()
         every { sourceDetail.fileName } returns "file"
@@ -190,7 +187,7 @@ class QuestFactoryTest : AnnotationSpec() {
         classes.add(sourceDetail)
         QuestFactory.generateExpandingQuest(user, property, parameters, listener, classes) shouldBe null
 
-        every { sourceDetail.coverage } returns 0.9
+        every { sourceDetail.coverage } returns 0.8
         every { sourceDetail.jacocoSourceFile } returns File("")
         every { sourceDetail.parameters } returns Constants.Parameters()
         every { sourceDetail.fileName } returns "file"
@@ -217,7 +214,7 @@ class QuestFactoryTest : AnnotationSpec() {
         classes.add(sourceDetail)
         QuestFactory.generateLinesQuest(user, property, parameters, listener, classes) shouldBe null
 
-        every { sourceDetail.coverage } returns 0.9
+        every { sourceDetail.coverage } returns 0.8
         every { JacocoUtil.calculateCurrentFilePath(any(), any(), any()) } returns mockkClass(FilePath::class)
         val elements = mockkClass(Elements::class)
         every { elements.size } returns 1
@@ -226,6 +223,8 @@ class QuestFactoryTest : AnnotationSpec() {
         every { sourceDetail.parameters } returns Constants.Parameters()
         QuestFactory.generateLinesQuest(user, property, parameters, listener, classes) shouldBe null
 
+        every { sourceDetail.packageName } returns "org.example"
+        every { sourceDetail.fileName } returns "TestClass"
         every { elements.size } returns 3
         val line1 = mockkClass(Element::class)
         val line2 = mockkClass(Element::class)
@@ -235,11 +234,11 @@ class QuestFactoryTest : AnnotationSpec() {
         every { line1.attr("title") } returns ""
         every { line1.text() } returns "content"
         every { line2.attr("class") } returns "fc"
-        every { line2.attr("id") } returns "L7"
+        every { line2.attr("id") } returns "L8"
         every { line2.attr("title") } returns ""
         every { line2.text() } returns "content"
         every { line3.attr("class") } returns "fc"
-        every { line3.attr("id") } returns "L7"
+        every { line3.attr("id") } returns "L9"
         every { line3.attr("title") } returns ""
         every { line3.text() } returns "content"
         every { JacocoUtil.generateDocument(any()) } returns mockkClass(Document::class)
@@ -286,7 +285,7 @@ class QuestFactoryTest : AnnotationSpec() {
         classes.add(sourceDetail)
         QuestFactory.generateMethodsQuest(user, property, parameters, listener, classes) shouldBe null
 
-        every { sourceDetail.coverage } returns 0.9
+        every { sourceDetail.coverage } returns 0.8
         every { sourceDetail.jacocoMethodFile } returns File("")
         every { JacocoUtil.getMethodEntries(any()) } returns arrayListOf()
         QuestFactory.generateMethodsQuest(user, property, parameters, listener, classes) shouldBe null
@@ -300,6 +299,8 @@ class QuestFactoryTest : AnnotationSpec() {
         every { JacocoUtil.calculateCoveredLines(any(), any()) } returns 1
         every { sourceDetail.jacocoSourceFile } returns File("")
         every { sourceDetail.parameters } returns parameters
+        every { sourceDetail.packageName } returns "org.example"
+        every { sourceDetail.fileName } returns "TestClass"
         every { property.getRejectedChallenges(any()) } returns CopyOnWriteArrayList()
         QuestFactory.generateMethodsQuest(user, property, parameters, listener, classes)!!.name shouldBe "More than methods - Solve three Method Coverage Challenge"
 
@@ -319,16 +320,16 @@ class QuestFactoryTest : AnnotationSpec() {
         classes.add(sourceDetail)
         QuestFactory.generatePackageQuest(user, property, parameters, listener, classes) shouldBe null
 
-        every { sourceDetail.coverage } returns 0.9
+        every { sourceDetail.coverage } returns 0.8
         every { sourceDetail.packageName } returns "package"
         QuestFactory.generatePackageQuest(user, property, parameters, listener, classes) shouldBe null
 
         val details1 = mockkClass(SourceFileDetails::class)
         val details2 = mockkClass(SourceFileDetails::class)
         val details3 = mockkClass(SourceFileDetails::class)
-        every { details1.coverage } returns 0.9
-        every { details2.coverage } returns 0.9
-        every { details3.coverage } returns 0.9
+        every { details1.coverage } returns 0.8
+        every { details2.coverage } returns 0.8
+        every { details3.coverage } returns 0.8
         every { details1.packageName } returns "package"
         every { details2.packageName } returns "package"
         every { details3.packageName } returns "other"
@@ -339,7 +340,9 @@ class QuestFactoryTest : AnnotationSpec() {
         classes.add(details2)
         classes.add(details3)
         every { ChallengeFactory.generateChallenge(any(), any(), any(), any(), any()) } returns mockkClass(LineCoverageChallenge::class)
-        //Fails (returns null) in rare circumstances, couldn't figure out why
+        QuestFactory.generatePackageQuest(user, property, parameters, listener, classes)?.name shouldBe null
+
+        every { ChallengeFactory.generateChallenge(any(), any(), any(), any(), any()) } returns mockkClass(LineCoverageChallenge::class) andThen mockkClass(MethodCoverageChallenge::class) andThen mockkClass(ClassCoverageChallenge::class)
         QuestFactory.generatePackageQuest(user, property, parameters, listener, classes)?.name shouldBe "Pack it together - Solve three Challenges in the same package"
     }
 
