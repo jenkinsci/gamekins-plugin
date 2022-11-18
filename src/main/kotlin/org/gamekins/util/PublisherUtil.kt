@@ -82,6 +82,7 @@ object PublisherUtil {
             }
             if (quest.isSolved()) {
                 property.completeQuest(parameters.projectName, quest)
+                property.addScore(parameters.projectName, quest.getScore())
                 EventHandler.addEvent(
                     QuestSolvedEvent(parameters.projectName, parameters.branch, property.getUser(), quest)
                 )
@@ -93,6 +94,10 @@ object PublisherUtil {
         for (quest in property.getCurrentQuests(parameters.projectName)) {
             if (!quest.isSolvable(parameters, run, listener)) {
                 property.rejectQuest(parameters.projectName, quest, "One or more challenges are not solvable anymore")
+                for (step in quest.steps) {
+                    if (step.challenge.getSolved() > 0)
+                        property.addScore(parameters.projectName, step.challenge.getScore())
+                }
                 EventHandler.addEvent(
                     QuestUnsolvableEvent(parameters.projectName, parameters.branch, property.getUser(), quest)
                 )
