@@ -141,7 +141,7 @@ object ChallengeFactory {
                         continue
                     }
                     selectClass(tempList, initializeRankSelection(tempList))
-                } else if (challengeClass == MutationTestChallenge::class.java) {
+                } else if (challengeClass == MutationChallenge::class.java) {
                     val tempList = workList.filterIsInstance<SourceFileDetails>()
                     selectClass(tempList, initializeRankSelection(tempList))
                 } else {
@@ -303,6 +303,8 @@ object ChallengeFactory {
     @JvmStatic
     fun generateMutationChallenge(fileDetails: SourceFileDetails, parameters: Parameters,
         listener: TaskListener, user: User) : MutationChallenge? {
+
+        if (!fileDetails.jacocoSourceFile.exists()) return null
 
         MutationUtil.executePIT(fileDetails, parameters, listener)
 

@@ -23,6 +23,7 @@ import org.gamekins.file.SourceFileDetails
 import org.gamekins.util.Constants
 import org.gamekins.util.JacocoUtil
 import org.gamekins.util.MutationUtil
+import org.gamekins.util.MutationUtil.MutationStatus
 
 /**
  * Specific [Challenge] to motivate the user to kill artificial mutants.
@@ -45,11 +46,25 @@ class MutationChallenge(val details: SourceFileDetails, var data: MutationUtil.M
             val snippetElements = JacocoUtil.getLinesInRange(javaHtmlPath, data.lineNumber, 2)
             if (snippetElements.first == "") return ""
 
-            //TODO: Mutant and Description
-            return "<pre class='prettyprint linenums:${data.lineNumber - 1} mt-2'><code class='language-java'>" +
-                    snippetElements.first +
-                    "</code></pre>"
+            var mutatedCode = MutationUtil.getMutatedCode(
+                JacocoUtil.getLinesInRange(javaHtmlPath, data.lineNumber, 0).first, data)
+            mutatedCode = if (mutatedCode.isEmpty()) {
+                "<br><em>No mutated line available</em><br>"
+            } else {
+                "<pre class='prettyprint linenums:${data.lineNumber} " +
+                        "mt-2'><code class='language-java'>$mutatedCode</code></pre>"
+            }
+            return "Write or update tests so that they fail on the mutant described below.\n" +
+                    "Original code snippet\n" +
+                    "<pre class='prettyprint linenums:${data.lineNumber - 1} mt-2'><code class='language-java'>" +
+                    "${snippetElements.first}</code></pre>" +
+                    "Mutated line of code \n" + mutatedCode +
+                    "The mutated line is built from information provided by PIT and could be syntactically " +
+                    "invalid or wrong. Please use along with the description in that case:<br>" +
+                    "<a href=\"https://pitest.org/quickstart/mutators/#${data.mutator.name}\"target=\"_blank\">" +
+                    "${data.description}</a> "
         }
+
         return ""
     }
 
@@ -61,20 +76,28 @@ class MutationChallenge(val details: SourceFileDetails, var data: MutationUtil.M
                 && other.data == this.data
     }
 
-    override fun getParameters(): Constants.Parameters {
-        return details.parameters
-    }
-
     override fun getCreated(): Long {
         return created
+    }
+
+    fun getKillingTest() : String {
+        return data.killingTest
     }
 
     override fun getName(): String {
         return "Mutation"
     }
 
+    override fun getParameters(): Constants.Parameters {
+        return details.parameters
+    }
+
     override fun getScore(): Int {
-        return if (data.status == MutationUtil.MutationStatus.SURVIVED) 5 else 4
+        return if (data.status == MutationStatus.SURVIVED) 5 else 4
+    }
+
+    override fun getSnippet(): String {
+        return codeSnippet
     }
 
     override fun getSolved(): Long {
@@ -90,22 +113,21 @@ class MutationChallenge(val details: SourceFileDetails, var data: MutationUtil.M
         return result
     }
 
-    //TODO: Improve
     override fun isSolvable(parameters: Constants.Parameters, run: Run<*, *>, listener: TaskListener): Boolean {
         if (details.parameters.branch != parameters.branch) return true
+        val mutationReport = FilePath(parameters.workspace.channel,
+            parameters.workspace.remote + "/target/pit-reports/mutations.xml")
+        if (!mutationReport.exists()) return true
 
-        return JacocoUtil.calculateCurrentFilePath(parameters.workspace, details.file).exists()
+        val mutant = MutationUtil.getMutant(this.data, parameters)
+        return (mutant != null && !mutant.detected)
     }
 
     override fun isSolved(parameters: Constants.Parameters, run: Run<*, *>, listener: TaskListener): Boolean {
         MutationUtil.executePIT(details, parameters, listener)
-        val mutationReport = FilePath(parameters.workspace.channel,
-            parameters.workspace.remote + "/target/pit-reports/mutations.xml")
-        if (!mutationReport.exists()) return false
-        val mutants = mutationReport.readToString().split("\n").filter { it.startsWith("<mutation ") }
-        if (mutants.isEmpty()) return false
-        val mutant = mutants.map { MutationUtil.MutationData(it) }.find { it == data }
-        if (mutant != null) {
+
+        val mutant = MutationUtil.getMutant(this.data, parameters)
+        if (mutant != null && mutant.detected && mutant.status == MutationStatus.KILLED) {
             data = mutant
             solved = System.currentTimeMillis()
             return true
@@ -115,13 +137,14 @@ class MutationChallenge(val details: SourceFileDetails, var data: MutationUtil.M
     }
 
     //TODO: Implement
-    override fun printToXML(reason: String, indentation: String): String? {
+    override fun printToXML(reason: String, indentation: String): String {
         return ""
     }
 
     override fun toString(): String {
+        val method = if (data.mutatedMethod == "&lt;init&gt;") data.mutatedClass.split(".").last() else data.mutatedMethod
         return ("Write a test to kill the mutant at line <b>${data.lineNumber}</b> of method " +
-                "<b>${data.mutatedMethod}()</b> in class <b>${details.fileName}</b> in package " +
+                "<b>$method()</b> in class <b>${details.fileName}</b> in package " +
                 "<b>${details.packageName}</b> (created for branch ${details.parameters.branch})")
     }
 }
