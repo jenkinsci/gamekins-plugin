@@ -81,7 +81,10 @@ class MutationChallenge(val details: SourceFileDetails, var data: MutationUtil.M
     }
 
     fun getKillingTest() : String {
-        return data.killingTest
+        if (data.killingTest.isEmpty()) return ""
+        val cla = "\\[class:(.*)]/".toRegex().find(data.killingTest)?.groupValues?.get(1)
+        val method = "\\[method:(.*)]".toRegex().find(data.killingTest)?.groupValues?.get(1)
+        return "$cla.$method"
     }
 
     override fun getName(): String {

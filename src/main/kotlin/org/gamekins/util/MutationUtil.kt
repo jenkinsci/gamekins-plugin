@@ -129,7 +129,7 @@ object MutationUtil {
                     ""
                 }
             }
-            //TODO: Complete
+            //TODO: Complete (Not used per default)
             RETURN_VALS -> {
                 if (snippet.contains("return true")) {
                     snippet.replace("return true", "return false")
@@ -142,13 +142,14 @@ object MutationUtil {
                 }
             }
             VOID_METHOD_CALLS -> ""
-            //TODO: Complete
             EMPTY_RETURNS -> {
                 if ("(Collections\\.\\S*)".toRegex().containsMatchIn(data.description)) {
                     snippet.replace("return .*[^;]".toRegex(),
                         "(Collections\\.\\S*)".toRegex().find(data.description)!!.groupValues[1] + "()")
+                } else if (data.description.contains("&quot;&quot;")) {
+                    snippet.replace("return .*[^;]".toRegex(), "return &quot;&quot;")
                 } else {
-                    ""
+                    snippet.replace("return .*[^;]".toRegex(), "return 0")
                 }
             }
             FALSE_RETURNS -> snippet.replace("return .*[^;]".toRegex(), "return false")
@@ -226,6 +227,21 @@ object MutationUtil {
                     && other.lineNumber == this.lineNumber
                     && other.mutator == this.mutator
                     && other.description == this .description
+        }
+
+        override fun hashCode(): Int {
+            var result = detected.hashCode()
+            result = 31 * result + status.hashCode()
+            result = 31 * result + numberOfTestsRun
+            result = 31 * result + sourceFile.hashCode()
+            result = 31 * result + mutatedClass.hashCode()
+            result = 31 * result + mutatedMethod.hashCode()
+            result = 31 * result + methodDescription.hashCode()
+            result = 31 * result + lineNumber
+            result = 31 * result + mutator.hashCode()
+            result = 31 * result + killingTest.hashCode()
+            result = 31 * result + description.hashCode()
+            return result
         }
     }
 }
