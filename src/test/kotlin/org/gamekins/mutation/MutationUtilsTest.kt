@@ -25,6 +25,7 @@ import org.gamekins.GameUserProperty
 import org.gamekins.challenge.Challenge
 import org.gamekins.challenge.MutationTestChallenge
 import org.gamekins.file.SourceFileDetails
+import org.gamekins.util.Pair
 import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.test.assertEquals
 

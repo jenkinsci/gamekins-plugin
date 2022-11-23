@@ -22,6 +22,7 @@ import io.mockk.every
 import io.mockk.mockkObject
 import io.mockk.unmockkAll
 import kotlin.test.assertEquals
+import org.gamekins.util.Pair
 
 class MutationPresentationTest : AnnotationSpec() {
 

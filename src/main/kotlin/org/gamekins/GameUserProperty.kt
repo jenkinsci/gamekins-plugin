@@ -26,6 +26,7 @@ import org.gamekins.achievement.Achievement
 import org.gamekins.challenge.CoverageChallenge
 import org.gamekins.challenge.quest.Quest
 import org.gamekins.util.Constants
+import org.gamekins.util.Pair
 import org.gamekins.util.PropertyUtil
 import org.kohsuke.stapler.*
 import java.util.*

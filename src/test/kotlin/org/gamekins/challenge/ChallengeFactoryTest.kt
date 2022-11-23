@@ -40,6 +40,7 @@ import org.gamekins.mutation.MutationResults
 import org.gamekins.mutation.MutationUtils
 import org.gamekins.util.JUnitUtil
 import org.gamekins.util.Constants.Parameters
+import org.gamekins.util.Pair
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import org.jsoup.select.Elements

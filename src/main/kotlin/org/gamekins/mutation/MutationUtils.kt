@@ -21,6 +21,7 @@ import hudson.model.User
 import org.gamekins.GameUserProperty
 import org.gamekins.challenge.MutationTestChallenge
 import org.gamekins.file.SourceFileDetails
+import org.gamekins.util.Pair
 
 
 /**

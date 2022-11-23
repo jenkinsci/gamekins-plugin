@@ -23,6 +23,7 @@ import jenkins.model.Jenkins
 import org.gamekins.challenge.quest.Quest
 import org.gamekins.property.GameJobProperty
 import org.gamekins.property.GameMultiBranchProperty
+import org.gamekins.util.Pair
 import org.jenkinsci.plugins.workflow.job.WorkflowJob
 import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject
 import org.kohsuke.stapler.StaplerProxy

@@ -20,6 +20,7 @@ import hudson.FilePath
 import hudson.model.Run
 import hudson.model.TaskListener
 import org.gamekins.util.GitUtil.GameUser
+import org.gamekins.util.Pair
 import jenkins.security.MasterToSlaveCallable
 import org.gamekins.file.SourceFileDetails
 import org.gamekins.util.Constants.Parameters

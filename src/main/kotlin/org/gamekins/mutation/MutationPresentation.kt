@@ -16,6 +16,8 @@
 
 package org.gamekins.mutation
 
+import org.gamekins.util.Pair
+
 /**
  * Contains all related functions to create mutated line of code from mutation information
  *

@@ -16,6 +16,7 @@ import org.gamekins.file.SourceFileDetails
 import org.gamekins.util.Constants
 import org.gamekins.util.GitUtil
 import org.gamekins.util.JacocoUtil
+import org.gamekins.util.Pair
 import org.gamekins.util.SmellUtil
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
