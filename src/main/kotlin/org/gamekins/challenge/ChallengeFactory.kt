@@ -144,6 +144,10 @@ object ChallengeFactory {
                     selectClass(tempList, initializeRankSelection(tempList))
                 } else if (challengeClass == MutationChallenge::class.java) {
                     val tempList = workList.filterIsInstance<SourceFileDetails>()
+                    if (tempList.isEmpty()) {
+                        challenge = null
+                        continue
+                    }
                     selectClass(tempList, initializeRankSelection(tempList))
                 } else {
                     selectClass(workList, initializeRankSelection(workList))
