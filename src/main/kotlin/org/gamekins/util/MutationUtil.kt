@@ -16,9 +16,9 @@ object MutationUtil {
     
     const val MUTATOR_PACKAGE = "org.pitest.mutationtest.engine.gregor.mutators"
 
-    fun executePIT(fileDetails: SourceFileDetails, parameters: Parameters, listener: TaskListener) {
+    fun executePIT(fileDetails: SourceFileDetails, parameters: Parameters, listener: TaskListener): Boolean {
         val pom = FilePath(parameters.workspace.channel, "${parameters.workspace.remote}/pom.xml")
-        if (!pom.exists()) return
+        if (!pom.exists()) return false
         val oldPomContent = pom.readToString()
         val newPomContent = oldPomContent
             .replace("</plugins>", "${parameters.pitConfiguration}</plugins>")
@@ -31,8 +31,10 @@ object MutationUtil {
             .redirectErrorStream(true)
             .start()
         val output = process.inputStream.bufferedReader().readText()
+        if (output.contains("BUILD FAILURE")) return false
         listener.logger.println(output)
         pom.write(oldPomContent, null)
+        return true
     }
 
     fun getMutant(data: MutationData, parameters: Parameters): MutationData? {
@@ -73,6 +75,7 @@ object MutationUtil {
         return mutationReport.readLines().filter { it.startsWith("<mutation ") }
     }
 
+    //TODO: Optimize for lambda expressions
     fun getMutatedCode(codeSnippet: String, data: MutationData): String {
         val snippet = codeSnippet.trimEnd()
 
@@ -145,7 +148,7 @@ object MutationUtil {
             EMPTY_RETURNS -> {
                 if ("(Collections\\.\\S*)".toRegex().containsMatchIn(data.description)) {
                     snippet.replace("return .*[^;]".toRegex(),
-                        "(Collections\\.\\S*)".toRegex().find(data.description)!!.groupValues[1] + "()")
+                        "return " + "(Collections\\.\\S*)".toRegex().find(data.description)!!.groupValues[1] + "()")
                 } else if (data.description.contains("&quot;&quot;")) {
                     snippet.replace("return .*[^;]".toRegex(), "return &quot;&quot;")
                 } else {
@@ -154,7 +157,14 @@ object MutationUtil {
             }
             FALSE_RETURNS -> snippet.replace("return .*[^;]".toRegex(), "return false")
             TRUE_RETURNS -> snippet.replace("return .*[^;]".toRegex(), "return true")
-            NULL_RETURNS -> snippet.replace("return .*[^;]".toRegex(), "return null")
+            NULL_RETURNS -> {
+                if (snippet.contains("return .*[^;]".toRegex())) {
+                    snippet.replace("return .*[^;]".toRegex(), "return null")
+                } else {
+                    val argument = "\\((.*)\\)\\s*->\\s*.*[^;]".toRegex().find(snippet)!!.groupValues[1]
+                    snippet.replace("\\(.*\\)\\s*->\\s*.*[^;]".toRegex(), "($argument) -> null")
+                }
+            }
             PRIMITIVE_RETURNS -> snippet.replace("return .*[^;]".toRegex(), "return 0")
             UNKNOWN -> ""
         }

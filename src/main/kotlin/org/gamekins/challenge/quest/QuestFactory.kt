@@ -273,7 +273,7 @@ object QuestFactory {
     }
 
     /**
-     * Generates a new MutationQuest with three different [MutationTestChallenge]s in the same class.
+     * Generates a new MutationQuest with three different [MutationChallenge]s in the same class.
      */
     @JvmStatic
     fun generateMutationQuest(
@@ -284,17 +284,10 @@ object QuestFactory {
         if (suitableClasses.isEmpty()) return null
         val selectedClass = suitableClasses.random()
 
-        val set = hashSetOf<MutationTestChallenge>()
+        val set = hashSetOf<MutationChallenge>()
         var count = 0
         while (set.size < 3 && count < 10) {
-            val challenge = ChallengeFactory.generateMutationTestChallenge(
-                selectedClass,
-                parameters.branch,
-                parameters.projectName,
-                listener,
-                parameters.workspace,
-                user
-            )
+            val challenge = ChallengeFactory.generateMutationChallenge(selectedClass, parameters, listener, user)
             if (challenge != null) set.add(challenge)
             count++
         }
@@ -305,7 +298,7 @@ object QuestFactory {
             steps.add(QuestStep("", ArrayList(set)[i]))
         }
 
-        return Quest("Coverage is not everything - Solve three Mutation Test Challenges", steps)
+        return Quest("Coverage is not everything - Solve three Mutation Challenges", steps)
     }
 
     /**

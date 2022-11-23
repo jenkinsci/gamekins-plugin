@@ -116,8 +116,10 @@ class MutationChallenge(val details: SourceFileDetails, var data: MutationUtil.M
         return result
     }
 
+    //TODO: Improve performance because of multiple mutation runs
     override fun isSolvable(parameters: Constants.Parameters, run: Run<*, *>, listener: TaskListener): Boolean {
         if (details.parameters.branch != parameters.branch) return true
+        if (!MutationUtil.executePIT(details, parameters, listener)) return false
         val mutationReport = FilePath(parameters.workspace.channel,
             parameters.workspace.remote + "/target/pit-reports/mutations.xml")
         if (!mutationReport.exists()) return true
@@ -127,7 +129,7 @@ class MutationChallenge(val details: SourceFileDetails, var data: MutationUtil.M
     }
 
     override fun isSolved(parameters: Constants.Parameters, run: Run<*, *>, listener: TaskListener): Boolean {
-        MutationUtil.executePIT(details, parameters, listener)
+        if (!MutationUtil.executePIT(details, parameters, listener)) return false
 
         val mutant = MutationUtil.getMutant(this.data, parameters)
         if (mutant != null && mutant.detected && mutant.status == MutationStatus.KILLED) {
@@ -139,9 +141,16 @@ class MutationChallenge(val details: SourceFileDetails, var data: MutationUtil.M
         return false
     }
 
-    //TODO: Implement
     override fun printToXML(reason: String, indentation: String): String {
-        return ""
+        var print = (indentation + "<" + this::class.simpleName + " created=\"" + created + "\" solved=\"" + solved
+                + "\" class=\"" + details.fileName + "\" detected=\"" + data.detected + "\" status=\"" + data.status
+                + "\" numberOfTestsRun=\"" + data.numberOfTestsRun + "\" mutator=\"" + data.mutator
+                + "\" killingTest=\"" + data.killingTest + "\" description=\"" + data.description)
+        if (reason.isNotEmpty()) {
+            print += "\" reason=\"$reason"
+        }
+        print += "\"/>"
+        return print
     }
 
     override fun toString(): String {

@@ -306,7 +306,7 @@ object ChallengeFactory {
 
         if (!fileDetails.jacocoSourceFile.exists()) return null
 
-        MutationUtil.executePIT(fileDetails, parameters, listener)
+         if (!MutationUtil.executePIT(fileDetails, parameters, listener)) return null
 
         val mutationReport = FilePath(parameters.workspace.channel,
             parameters.workspace.remote + "/target/pit-reports/mutations.xml")
