@@ -80,6 +80,10 @@ object ChallengeFactory {
             : Boolean {
         try {
             if (result != null && result != Result.SUCCESS) {
+                val lastBuildChallenges = property.getCompletedChallenges(parameters.projectName)
+                    .filterIsInstance(BuildChallenge::class.java)
+                if (lastBuildChallenges.isNotEmpty()
+                    && System.currentTimeMillis() - lastBuildChallenges.last().getSolved() <= 604800000) return false
                 val challenge = BuildChallenge(parameters)
                 val mapUser: User? = GitUtil.mapUser(
                     parameters.workspace.act(HeadCommitCallable(parameters.remote))

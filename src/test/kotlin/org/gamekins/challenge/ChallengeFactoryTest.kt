@@ -131,6 +131,7 @@ class ChallengeFactoryTest : AnnotationSpec() {
         every { property.getRejectedChallenges(any()) } returns CopyOnWriteArrayList()
         every { property.getStoredChallenges(any()) } returns CopyOnWriteArrayList()
         every { property.getGitNames() } returns CopyOnWriteArraySet(listOf("Philipp Straubinger"))
+        every { property.getCompletedChallenges(any()) } returns CopyOnWriteArrayList()
         every { JacocoUtil.calculateCurrentFilePath(any(), any()) } returns path
         every { JacocoUtil.getCoverageInPercentageFromJacoco(any(), any()) } returns coverage
         every { JacocoUtil.generateDocument(any()) } returns document
