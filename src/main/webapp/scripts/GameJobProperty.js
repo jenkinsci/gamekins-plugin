@@ -10,6 +10,7 @@ jQuery3("#addTeam").on('click', function () {
         onComplete: function (rsp) {
             if (!rsp.responseText.includes("class=error")) {
                 jQuery3("#teamName")[0].value = ""
+                buildTeamsList(descriptorFullUrl)
             }
             jQuery3("#error-add-team")[0].innerHTML = rsp.responseText
         }

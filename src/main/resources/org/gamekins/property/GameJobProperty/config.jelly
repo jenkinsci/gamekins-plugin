@@ -26,7 +26,7 @@
             </j:if>
         </j:if>
         <f:entry title="Add Team" field="teamName">
-            <f:textbox id="teamName" style="width: 85%"/>
+            <f:textbox id="teamName" style="float: left; width: 85%"/>
             <input id="addTeam" type="button" value="Add" style="float: right; width: 13%" data-descriptor-url="${descriptor.descriptorFullUrl}" />
             <div id="error-add-team" style="margin-top: 5px"/>
         </f:entry>
