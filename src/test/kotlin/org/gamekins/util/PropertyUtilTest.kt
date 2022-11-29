@@ -21,34 +21,33 @@ import hudson.model.User
 import hudson.security.HudsonPrivateSecurityRealm.Details
 import hudson.util.FormValidation
 import org.gamekins.GameUserPropertyDescriptor
-import io.kotest.core.spec.style.AnnotationSpec
+import io.kotest.core.spec.style.FeatureSpec
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockkClass
 import io.mockk.mockkStatic
 import io.mockk.unmockkAll
 
-class PropertyUtilTest : AnnotationSpec() {
+class PropertyUtilTest : FeatureSpec({
 
-    private val job1 = mockkClass(Job::class)
-    private val job2 = mockkClass(Job::class)
-    private val property1 = mockkClass(org.gamekins.property.GameJobProperty::class)
-    private val property2 = mockkClass(org.gamekins.property.GameJobProperty::class)
-    private val user1 = mockkClass(User::class)
-    private val user2 = mockkClass(User::class)
-    private val user3 = mockkClass(User::class)
-    private val userProperty1 = mockkClass(org.gamekins.GameUserProperty::class)
-    private val detailsProperty = mockkClass(Details::class)
-    private val team1 = "Team1"
-    private val team2 = "Team2"
-    private val userName1 = "User1"
-    private val userName2 = "User2"
-    private val userName3 = "User3"
-    private val projectName1 = "Project1"
-    private val projectName2 = "Project2"
+    val job1 = mockkClass(Job::class)
+    val job2 = mockkClass(Job::class)
+    val property1 = mockkClass(org.gamekins.property.GameJobProperty::class)
+    val property2 = mockkClass(org.gamekins.property.GameJobProperty::class)
+    val user1 = mockkClass(User::class)
+    val user2 = mockkClass(User::class)
+    val user3 = mockkClass(User::class)
+    val userProperty1 = mockkClass(org.gamekins.GameUserProperty::class)
+    val detailsProperty = mockkClass(Details::class)
+    val team1 = "Team1"
+    val team2 = "Team2"
+    val userName1 = "User1"
+    val userName2 = "User2"
+    val userName3 = "User3"
+    val projectName1 = "Project1"
+    val projectName2 = "Project2"
 
-    @BeforeAll
-    fun initAll() {
+    beforeSpec {
         every { job1.fullName } returns projectName1
         every { job2.fullName } returns projectName2
 
@@ -92,154 +91,204 @@ class PropertyUtilTest : AnnotationSpec() {
         every { User.getAll() } returns listOf(user1, user2, user3)
     }
 
-    @AfterAll
-    fun cleanUp() {
+    afterSpec {
         unmockkAll()
     }
 
-    @Test
-    fun doAddTeam() {
-        var formValidation : FormValidation
+    feature("Add Team") {
+        var formValidation: FormValidation
 
-        formValidation = PropertyUtil.doAddTeam(property2, " ")
-        formValidation.kind shouldBe FormValidation.Kind.ERROR
-        formValidation.message shouldBe Constants.Error.NO_TEAM
+        scenario("No Teamname given") {
+            formValidation = PropertyUtil.doAddTeam(property2, " ")
+            formValidation.kind shouldBe FormValidation.Kind.ERROR
+            formValidation.message shouldBe Constants.Error.NO_TEAM
+        }
 
-        formValidation = PropertyUtil.doAddTeam(null, team1)
-        formValidation.kind shouldBe FormValidation.Kind.ERROR
-        formValidation.message shouldBe Constants.Error.UNEXPECTED
+        scenario("No property given") {
+            formValidation = PropertyUtil.doAddTeam(null, team1)
+            formValidation.kind shouldBe FormValidation.Kind.ERROR
+            formValidation.message shouldBe Constants.Error.UNEXPECTED
+        }
 
-        formValidation = PropertyUtil.doAddTeam(property2, team1)
-        formValidation.kind shouldBe FormValidation.Kind.ERROR
-        formValidation.message shouldBe Constants.Error.TEAM_NAME_TAKEN
+        scenario("Teamname already in use") {
+            formValidation = PropertyUtil.doAddTeam(property2, team1)
+            formValidation.kind shouldBe FormValidation.Kind.ERROR
+            formValidation.message shouldBe Constants.Error.TEAM_NAME_TAKEN
+        }
 
-        PropertyUtil.doAddTeam(property2, team2).kind shouldBe FormValidation.Kind.OK
+        scenario("Successful Action") {
+            PropertyUtil.doAddTeam(property2, team2).kind shouldBe FormValidation.Kind.OK
+        }
     }
 
-    @Test
-    fun doAddUserToTeam() {
+    feature("Add User to Team") {
         var formValidation : FormValidation
 
-        formValidation = PropertyUtil.doAddUserToTeam(job2, " ", "")
-        formValidation.kind shouldBe FormValidation.Kind.ERROR
-        formValidation.message shouldBe Constants.Error.NO_TEAM
+        scenario("No Teamname specified") {
+            formValidation = PropertyUtil.doAddUserToTeam(job2, " ", "")
+            formValidation.kind shouldBe FormValidation.Kind.ERROR
+            formValidation.message shouldBe Constants.Error.NO_TEAM
+        }
 
-        formValidation = PropertyUtil.doAddUserToTeam(null, team1, "")
-        formValidation.kind shouldBe FormValidation.Kind.ERROR
-        formValidation.message shouldBe Constants.Error.PARENT
+        scenario("No parent job given") {
+            formValidation = PropertyUtil.doAddUserToTeam(null, team1, "")
+            formValidation.kind shouldBe FormValidation.Kind.ERROR
+            formValidation.message shouldBe Constants.Error.PARENT
+        }
 
-        formValidation = PropertyUtil.doAddUserToTeam(job2, team1, userName3)
-        formValidation.kind shouldBe FormValidation.Kind.ERROR
-        formValidation.message shouldBe Constants.Error.USER_ALREADY_IN_TEAM
+        scenario("User is already in a team") {
+            formValidation = PropertyUtil.doAddUserToTeam(job2, team1, userName3)
+            formValidation.kind shouldBe FormValidation.Kind.ERROR
+            formValidation.message shouldBe Constants.Error.USER_ALREADY_IN_TEAM
+        }
 
-        formValidation = PropertyUtil.doAddUserToTeam(job2, team1, userName2)
-        formValidation.kind shouldBe FormValidation.Kind.ERROR
-        formValidation.message shouldBe Constants.Error.USER_ALREADY_IN_TEAM
+        scenario("User is already in a team") {
+            formValidation = PropertyUtil.doAddUserToTeam(job2, team1, userName2)
+            formValidation.kind shouldBe FormValidation.Kind.ERROR
+            formValidation.message shouldBe Constants.Error.USER_ALREADY_IN_TEAM
+        }
 
-        formValidation = PropertyUtil.doAddUserToTeam(job2, team1, userName1)
-        formValidation.kind shouldBe FormValidation.Kind.ERROR
-        formValidation.message shouldBe Constants.Error.USER_ALREADY_IN_TEAM
+        scenario("User already in a team") {
+            formValidation = PropertyUtil.doAddUserToTeam(job2, team1, userName1)
+            formValidation.kind shouldBe FormValidation.Kind.ERROR
+            formValidation.message shouldBe Constants.Error.USER_ALREADY_IN_TEAM
+        }
 
-        formValidation = PropertyUtil.doAddUserToTeam(job2, team1, "")
-        formValidation.kind shouldBe FormValidation.Kind.ERROR
-        formValidation.message shouldBe Constants.Error.UNKNOWN_USER
+        scenario("Specified User does not exist") {
+            formValidation = PropertyUtil.doAddUserToTeam(job2, team1, "")
+            formValidation.kind shouldBe FormValidation.Kind.ERROR
+            formValidation.message shouldBe Constants.Error.UNKNOWN_USER
+        }
 
-        PropertyUtil.doAddUserToTeam(job1, team1, userName1).kind shouldBe FormValidation.Kind.OK
+        scenario("Successful Action") {
+            PropertyUtil.doAddUserToTeam(job1, team1, userName1).kind shouldBe FormValidation.Kind.OK
+        }
     }
 
-    @Test
-    fun doDeleteTeam() {
+    feature("delete Team") {
         var formValidation : FormValidation
 
-        formValidation = PropertyUtil.doDeleteTeam(projectName1, property2, " ")
-        formValidation.kind shouldBe FormValidation.Kind.ERROR
-        formValidation.message shouldBe Constants.Error.NO_TEAM
+        scenario("No Team specified") {
+            formValidation = PropertyUtil.doDeleteTeam(projectName1, property2, " ")
+            formValidation.kind shouldBe FormValidation.Kind.ERROR
+            formValidation.message shouldBe Constants.Error.NO_TEAM
+        }
 
-        formValidation = PropertyUtil.doDeleteTeam(projectName1, null, team1)
-        formValidation.kind shouldBe FormValidation.Kind.ERROR
-        formValidation.message shouldBe Constants.Error.UNEXPECTED
+        scenario("No Parent Property") {
+            formValidation = PropertyUtil.doDeleteTeam(projectName1, null, team1)
+            formValidation.kind shouldBe FormValidation.Kind.ERROR
+            formValidation.message shouldBe Constants.Error.UNEXPECTED
+        }
 
-        PropertyUtil.doDeleteTeam(projectName1, property2, team1).kind shouldBe FormValidation.Kind.OK
+        scenario("Successful Action") {
+            PropertyUtil.doDeleteTeam(projectName1, property2, team1).kind shouldBe FormValidation.Kind.OK
+        }
 
-        PropertyUtil.doDeleteTeam(projectName1, property1, team2).kind shouldBe FormValidation.Kind.OK
+        scenario("Successful Action") {
+            PropertyUtil.doDeleteTeam(projectName1, property1, team2).kind shouldBe FormValidation.Kind.OK
+        }
     }
 
-    @Test
-    fun doFillTeamsBoxItems() {
+    feature("doFillTeamsBoxItems") {
         PropertyUtil.doFillTeamsBoxItems(property1).size shouldBe 2
     }
 
-    @Test
-    fun doFillUsersBoxItems() {
+    feature("doFillUsersBoxItems") {
         PropertyUtil.doFillUsersBoxItems(projectName1).size shouldBe 1
 
         PropertyUtil.doFillUsersBoxItems(projectName2).size shouldBe 1
     }
 
-    @Test
-    fun doRemoveUserFromTeam() {
+    feature("Remove User from Team") {
         var formValidation : FormValidation
 
-        formValidation = PropertyUtil.doRemoveUserFromTeam(job2, " ", "")
-        formValidation.kind shouldBe FormValidation.Kind.ERROR
-        formValidation.message shouldBe Constants.Error.NO_TEAM
+        scenario("No Team specified") {
+            formValidation = PropertyUtil.doRemoveUserFromTeam(job2, " ", "")
+            formValidation.kind shouldBe FormValidation.Kind.ERROR
+            formValidation.message shouldBe Constants.Error.NO_TEAM
+        }
 
-        formValidation = PropertyUtil.doRemoveUserFromTeam(null, team1, "")
-        formValidation.kind shouldBe FormValidation.Kind.ERROR
-        formValidation.message shouldBe Constants.Error.PARENT
+        scenario("No parent job given") {
+            formValidation = PropertyUtil.doRemoveUserFromTeam(null, team1, "")
+            formValidation.kind shouldBe FormValidation.Kind.ERROR
+            formValidation.message shouldBe Constants.Error.PARENT
+        }
 
-        formValidation = PropertyUtil.doRemoveUserFromTeam(job2, team1, userName3)
-        formValidation.kind shouldBe FormValidation.Kind.ERROR
-        formValidation.message shouldBe Constants.Error.USER_NOT_IN_TEAM
+        scenario("User already not in Team") {
+            formValidation = PropertyUtil.doRemoveUserFromTeam(job2, team1, userName3)
+            formValidation.kind shouldBe FormValidation.Kind.ERROR
+            formValidation.message shouldBe Constants.Error.USER_NOT_IN_TEAM
+        }
 
-        formValidation = PropertyUtil.doRemoveUserFromTeam(job2, team1, userName2)
-        formValidation.kind shouldBe FormValidation.Kind.ERROR
-        formValidation.message shouldBe Constants.Error.USER_NOT_IN_TEAM
+        scenario("User already not in Team") {
+            formValidation = PropertyUtil.doRemoveUserFromTeam(job2, team1, userName2)
+            formValidation.kind shouldBe FormValidation.Kind.ERROR
+            formValidation.message shouldBe Constants.Error.USER_NOT_IN_TEAM
+        }
 
-        formValidation = PropertyUtil.doRemoveUserFromTeam(job2, team1, userName1)
-        formValidation.kind shouldBe FormValidation.Kind.ERROR
-        formValidation.message shouldBe Constants.Error.USER_NOT_IN_TEAM
+        scenario("User already not in Team") {
+            formValidation = PropertyUtil.doRemoveUserFromTeam(job2, team1, userName1)
+            formValidation.kind shouldBe FormValidation.Kind.ERROR
+            formValidation.message shouldBe Constants.Error.USER_NOT_IN_TEAM
+        }
 
-        formValidation = PropertyUtil.doRemoveUserFromTeam(job2, team1, "")
-        formValidation.kind shouldBe FormValidation.Kind.ERROR
-        formValidation.message shouldBe Constants.Error.UNKNOWN_USER
+        scenario("User does not exist") {
+            formValidation = PropertyUtil.doRemoveUserFromTeam(job2, team1, "")
+            formValidation.kind shouldBe FormValidation.Kind.ERROR
+            formValidation.message shouldBe Constants.Error.UNKNOWN_USER
+        }
 
-        PropertyUtil.doRemoveUserFromTeam(job1, team2, userName1).kind shouldBe FormValidation.Kind.OK
+        scenario("Successful Action") {
+            PropertyUtil.doRemoveUserFromTeam(job1, team2, userName1).kind shouldBe FormValidation.Kind.OK
+        }
     }
 
-    @Test
-    fun doReset() {
+    feature("reset") {
         var formValidation : FormValidation
 
-        formValidation = PropertyUtil.doReset(null, null)
-        formValidation.kind shouldBe FormValidation.Kind.ERROR
-        formValidation.message shouldBe Constants.Error.PARENT
+        scenario("No parent job given") {
+            formValidation = PropertyUtil.doReset(null, null)
+            formValidation.kind shouldBe FormValidation.Kind.ERROR
+            formValidation.message shouldBe Constants.Error.PARENT
+        }
 
-        formValidation = PropertyUtil.doReset(job1, null)
-        formValidation.kind shouldBe FormValidation.Kind.ERROR
-        formValidation.message shouldBe Constants.Error.PARENT_WITHOUT_PROPERTY
+        scenario("Parent job has no property") {
+            formValidation = PropertyUtil.doReset(job1, null)
+            formValidation.kind shouldBe FormValidation.Kind.ERROR
+            formValidation.message shouldBe Constants.Error.PARENT_WITHOUT_PROPERTY
+        }
 
-        PropertyUtil.doReset(job1, property1).kind shouldBe FormValidation.Kind.OK
+        scenario("Successful Action") {
+            PropertyUtil.doReset(job1, property1).kind shouldBe FormValidation.Kind.OK
+        }
 
-        PropertyUtil.doReset(job2, property2).kind shouldBe FormValidation.Kind.OK
+        scenario("Successful Action") {
+            PropertyUtil.doReset(job2, property2).kind shouldBe FormValidation.Kind.OK
+        }
     }
 
-    @Test
-    fun doShowTeamMemberships() {
-        PropertyUtil.doShowTeamMemberships(job1, property1) shouldBe "{\"Team2\":[],\"Team1\":[]}"
+    feature("Show Team Memberships") {
+        scenario("Test on Job1") {
+            PropertyUtil.doShowTeamMemberships(job1, property1) shouldBe "{\"Team2\":[],\"Team1\":[]}"
+        }
 
-        PropertyUtil.doShowTeamMemberships(job2, property2) shouldBe "{\"Team1\":[\"User1\"]}"
+        scenario("Test on Job2") {
+            PropertyUtil.doShowTeamMemberships(job2, property2) shouldBe "{\"Team1\":[\"User1\"]}"
+        }
     }
 
-    @Test
-    fun realUser() {
-        PropertyUtil.realUser(user1) shouldBe true
+    feature("realUser") {
+        scenario("Successful Action") {
+            PropertyUtil.realUser(user1) shouldBe true
+        }
 
+        scenario("User without Login information") {
         val user4 = mockkClass(User::class)
-        every { user4.properties } returns mapOf(mockkClass(GameUserPropertyDescriptor::class)
-                to mockkClass(org.gamekins.GameUserProperty::class))
-        PropertyUtil.realUser(user4) shouldBe false
+            every { user4.properties } returns mapOf(mockkClass(GameUserPropertyDescriptor::class)
+                    to mockkClass(org.gamekins.GameUserProperty::class))
+            PropertyUtil.realUser(user4) shouldBe false
+        }
     }
 
     //Does not make sense to test JacocoUtil.reconfigure(), since a real Jenkins would be needed for it.
-}
+})
