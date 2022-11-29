@@ -14,6 +14,7 @@ import org.gamekins.challenge.Challenge
 import org.gamekins.property.GameFolderProperty
 import org.gamekins.property.GameJobProperty
 import org.gamekins.property.GameMultiBranchProperty
+import org.jenkinsci.plugins.workflow.job.WorkflowJob
 import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject
 import java.util.*
 
@@ -46,7 +47,11 @@ object MailUtil {
      * Generates the leaderboard part of the mail text.
      */
     fun generateViewLeaderboardText(job: AbstractItem): String {
-        var text = "View the leaderboard on ${job.absoluteUrl}leaderboard/\n"
+        var text = if (job is WorkflowJob && job.parent is WorkflowMultiBranchProject) {
+            "View the leaderboard on ${(job.parent as WorkflowMultiBranchProject).absoluteUrl}leaderboard/\n"
+        } else {
+            "View the leaderboard on ${job.absoluteUrl}leaderboard/\n"
+        }
         val property = PropertyUtil.retrieveGameProperty(job)
         if (property is GameJobProperty || property is GameMultiBranchProperty) {
             if (job.parent is Folder
