@@ -324,10 +324,13 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
     }
 
     override fun getTarget(): Any? {
-        val match = "/job/(.+)/leaderboard".toRegex().find(Stapler.getCurrentRequest().getHeader("Referer"))
-        lastProject = match?.groupValues?.get(1) ?: lastProject
-        lastProject = lastProject.replace("job/", "")
-        lastProject = lastProject.replace("%20", " ")
+        if (Stapler.getCurrentRequest().getHeader("Referer") != null) {
+            val match = "/job/(.+)/leaderboard".toRegex().find(Stapler.getCurrentRequest().getHeader("Referer"))
+            lastProject = match?.groupValues?.get(1) ?: lastProject
+            lastProject = lastProject.replace("job/", "")
+            lastProject = lastProject.replace("%20", " ")
+        }
+
         return if (User.current() == this.user
             || Stapler.getCurrentRequest().requestURI.toString().contains("achievements")) this else null
     }
