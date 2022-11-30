@@ -23,6 +23,7 @@ import java.util.*
  * Util object for sending mails
  *
  * @author Matthias Rainer
+ * @since 0.6
  */
 object MailUtil {
 

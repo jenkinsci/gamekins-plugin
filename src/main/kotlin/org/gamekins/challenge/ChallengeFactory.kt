@@ -308,6 +308,10 @@ object ChallengeFactory {
         } else null
     }
 
+    /**
+     * Generates a new [MutationChallenge] for class [fileDetails]. Assumes that the PIT mutation report
+     * is stored in <project-root>/target/pit-reports/mutations.xml.
+     */
     @JvmStatic
     fun generateMutationChallenge(fileDetails: SourceFileDetails, parameters: Parameters,
         listener: TaskListener, user: User) : MutationChallenge? {

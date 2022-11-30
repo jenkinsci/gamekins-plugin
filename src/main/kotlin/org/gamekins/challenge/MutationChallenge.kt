@@ -37,6 +37,9 @@ class MutationChallenge(val details: SourceFileDetails, var data: MutationUtil.M
     private val created = System.currentTimeMillis()
     private var solved: Long = 0
 
+    /**
+     * Creates the code snippet to be displayed in the leaderboard for each [Challenge].
+     */
     private fun createCodeSnippet(): String {
         if (data.lineNumber <= 0) return ""
         if (details.jacocoSourceFile.exists()) {
@@ -80,6 +83,9 @@ class MutationChallenge(val details: SourceFileDetails, var data: MutationUtil.M
         return created
     }
 
+    /**
+     * Returns the name of the test who killed/solved this challenge in the format <package.test-class.test-method>
+     */
     fun getKillingTest() : String {
         if (data.killingTest.isEmpty()) return ""
         val cla = "\\[class:(.*)]/".toRegex().find(data.killingTest)?.groupValues?.get(1)

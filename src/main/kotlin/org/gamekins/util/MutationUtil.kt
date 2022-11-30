@@ -2,20 +2,26 @@ package org.gamekins.util
 
 import hudson.FilePath
 import hudson.model.TaskListener
-import jenkins.model.Jenkins
 import org.gamekins.file.SourceFileDetails
 import org.gamekins.util.Constants.Parameters
 import org.gamekins.util.MutationUtil.Mutator.*
-import org.pitest.mutationtest.config.PluginServices
-import org.pitest.mutationtest.config.ReportOptions
-import org.pitest.mutationtest.tooling.EntryPoint
-import org.pitest.testapi.TestGroupConfig
 import java.io.File
 
+/**
+ * Util object for mutation with PIT.
+ *
+ * @author Philipp Straubinger
+ * @since 0.6
+ */
 object MutationUtil {
     
     const val MUTATOR_PACKAGE = "org.pitest.mutationtest.engine.gregor.mutators"
 
+    /**
+     * Adds the configuration taken from [parameters] for PIT to the pom.xml file of the project. Executes PIT on the
+     * command line with Maven based on the configuration and the specified class. Returns true if the process
+     * finished without errors, false otherwise.
+     */
     @JvmStatic
     fun executePIT(fileDetails: SourceFileDetails, parameters: Parameters, listener: TaskListener): Boolean {
         val pom = FilePath(parameters.workspace.channel, "${parameters.workspace.remote}/pom.xml")
@@ -38,6 +44,10 @@ object MutationUtil {
         return true
     }
 
+    /**
+     * Returns a mutant based on previous [data] to check whether it is killed. Assumes that the PIT mutation report
+     * is stored in <project-root>/target/pit-reports/mutations.xml.
+     */
     @JvmStatic
     fun getMutant(data: MutationData, parameters: Parameters): MutationData? {
         val mutationReport = FilePath(parameters.workspace.channel,
@@ -48,35 +58,9 @@ object MutationUtil {
         return mutants.map { MutationData(it) }.find { it == data }
     }
 
-    fun getMutantsOfClass(details: SourceFileDetails): List<String> {
-        val entry = EntryPoint()
-        val plugins = PluginServices.makeForContextLoader()
-        val data = ReportOptions()
-        val workspace = File(details.parameters.workspace.toURI().path)
-        data.targetClasses = listOf("${details.packageName}.${details.fileName}*")
-        data.reportDir = "${workspace.absolutePath}/target/pit-reports"
-        data.setSourceDirs(listOf(
-            File("${workspace.absolutePath}/src/main/java").toPath(),
-            File("${workspace.absolutePath}/src/test/java").toPath()))
-        data.groupConfig = TestGroupConfig()
-        data.addOutputFormats(listOf("XML"))
-        val root = Jenkins.get().root.absolutePath
-        data.classPathElements = listOf(
-            "${workspace.absolutePath}/target/test-classes",
-            "${workspace.absolutePath}/target/classes",
-            "$root/.m2/repository/org/pitest/pitest-junit5-plugin/1.1.0/pitest-junit5-plugin-1.1.0.jar",
-            "$root/.m2/repository/org/pitest/pitest/1.9.10/pitest-1.9.10.jar",
-            "$root/.m2/repository/org/junit/jupiter/junit-jupiter-engine/5.7.0/junit-jupiter-engine-5.7.0.jar",
-            "$root/.m2/repository/org/junit/jupiter/junit-jupiter-api/5.7.0/junit-jupiter-api-5.7.0.jar",
-            "$root/.m2/repository/org/opentest4j/opentest4j/1.2.0/opentest4j-1.2.0.jar",
-            "$root/.m2/repository/com/google/guava/guava/29.0-jre/guava-29.0-jre.jar")
-        entry.execute(workspace, data, plugins, hashMapOf())
-
-        val dir = File(data.reportDir).listFiles()?.maxOf { it.name.toLong() }
-        val mutationReport = File("${data.reportDir}/$dir/mutations.xml")
-        return mutationReport.readLines().filter { it.startsWith("<mutation ") }
-    }
-
+    /**
+     * Returns the mutated line of code based on the mutation operator.
+     */
     //TODO: Optimize for lambda expressions
     @JvmStatic
     fun getMutatedCode(codeSnippet: String, data: MutationData): String {
@@ -173,15 +157,33 @@ object MutationUtil {
         }
     }
 
+    /**
+     * Enum class for the status of a PIT mutant.
+     *
+     * @author Philipp Straubinger
+     * @since 0.6
+     */
     enum class MutationStatus {
         NO_COVERAGE, SURVIVED, KILLED
     }
 
+    /**
+     * Enum class for the different PIT mutation operators.
+     *
+     * @author Philipp Straubinger
+     * @since 0.6
+     */
     enum class Mutator {
         CONDITIONALS_BOUNDARY, INCREMENTS, INVERT_NEGS, MATH, NEGATE_CONDITIONALS, RETURN_VALS, VOID_METHOD_CALLS,
         EMPTY_RETURNS, FALSE_RETURNS, TRUE_RETURNS, NULL_RETURNS, PRIMITIVE_RETURNS, UNKNOWN
     }
 
+    /**
+     * Representation of a PIT mutant. Created from one line of the PIT report.
+     *
+     * @author Philipp Straubinger
+     * @since 0.6
+     */
     class MutationData(line: String) {
 
         val detected: Boolean
@@ -233,7 +235,7 @@ object MutationUtil {
         override fun equals(other: Any?): Boolean {
             if (other == null) return false
             if (other !is MutationData) return false
-            return other.sourceFile ==this.sourceFile
+            return other.sourceFile == this.sourceFile
                     && other.mutatedClass == this.mutatedClass
                     && other.mutatedMethod == this.mutatedMethod
                     && other.methodDescription == this.methodDescription
