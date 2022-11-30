@@ -152,17 +152,17 @@ object PropertyUtil {
             val property = user.getProperty(GameUserProperty::class.java)
             if (property != null) {
                 if (property.isParticipating(projectName)) {
-                    participatingUser.add(user.fullName)
+                    participatingUser.add(user.id + " (" + user.fullName + ")")
                 } else {
-                    otherUsers.add(user.fullName)
+                    otherUsers.add(user.id + " (" + user.fullName + ")")
                 }
             }
         }
 
         participatingUser.addAll(otherUsers)
-        participatingUser.remove("unknown")
-        participatingUser.remove("root")
-        participatingUser.remove("SYSTEM")
+        participatingUser.removeIf { it.contains("unknown") }
+        participatingUser.removeIf { it.contains("root") }
+        participatingUser.removeIf { it.contains("SYSTEM") }
         val listBoxModel = ListBoxModel()
         participatingUser.forEach(Consumer { nameAndValue: String? ->
             if (nameAndValue != null) {

@@ -44,6 +44,9 @@ class PropertyUtilTest : AnnotationSpec() {
     private val userName1 = "User1"
     private val userName2 = "User2"
     private val userName3 = "User3"
+    private val id1 = "ID1"
+    private val id2 = "ID2"
+    private val id3 = "ID3"
     private val projectName1 = "Project1"
     private val projectName2 = "Project2"
 
@@ -64,6 +67,9 @@ class PropertyUtilTest : AnnotationSpec() {
         every { user1.fullName } returns userName1
         every { user2.fullName } returns userName2
         every { user3.fullName } returns userName3
+        every { user1.id } returns id1
+        every { user2.id } returns id2
+        every { user3.id } returns id3
         every { user1.getProperty(org.gamekins.GameUserProperty::class.java) } returns userProperty1
         every { user2.getProperty(org.gamekins.GameUserProperty::class.java) } returns null
         every { user3.getProperty(org.gamekins.GameUserProperty::class.java) } returns null
