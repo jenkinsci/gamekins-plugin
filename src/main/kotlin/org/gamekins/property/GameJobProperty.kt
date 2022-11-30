@@ -65,6 +65,7 @@ class GameJobProperty
     @Throws(IOException::class)
     override fun addTeam(teamName: String) {
         teams.add(teamName)
+        teams.sort()
         owner.save()
     }
 
