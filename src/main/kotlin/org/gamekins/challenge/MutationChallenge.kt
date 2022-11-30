@@ -38,7 +38,7 @@ class MutationChallenge(val details: SourceFileDetails, var data: MutationUtil.M
     private var solved: Long = 0
 
     private fun createCodeSnippet(): String {
-        if (data.lineNumber < 0) return ""
+        if (data.lineNumber <= 0) return ""
         if (details.jacocoSourceFile.exists()) {
             val javaHtmlPath = JacocoUtil.calculateCurrentFilePath(
                 details.parameters.workspace, details.jacocoSourceFile, details.parameters.remote

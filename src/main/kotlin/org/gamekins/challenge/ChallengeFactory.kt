@@ -36,7 +36,6 @@ import org.gamekins.mutation.MutationUtils.getSurvivedMutationList
 import org.gamekins.util.*
 import org.gamekins.util.Constants.Parameters
 import org.gamekins.util.GitUtil.HeadCommitCallable
-import org.gamekins.util.Pair
 import org.jsoup.nodes.Document
 import java.io.IOException
 import kotlin.collections.ArrayList
@@ -165,8 +164,8 @@ object ChallengeFactory {
             //Remove classes where a ClassCoverageChallenge has been rejected previously
             if (rejectedChallenges.any {
                     it.first is ClassCoverageChallenge
-                            && (it.first as ClassCoverageChallenge).details.fileName == selectedFile.fileName
-                            && (it.first as ClassCoverageChallenge)
+                            && (it.first).details.fileName == selectedFile.fileName
+                            && (it.first)
                         .details.packageName == selectedFile.packageName }) {
                 listener.logger.println(
                     "[Gamekins] Class ${selectedFile.fileName} in package " +
@@ -315,7 +314,7 @@ object ChallengeFactory {
 
         if (!fileDetails.jacocoSourceFile.exists()) return null
 
-         if (!MutationUtil.executePIT(fileDetails, parameters, listener)) return null
+        if (!MutationUtil.executePIT(fileDetails, parameters, listener)) return null
 
         val mutationReport = FilePath(parameters.workspace.channel,
             parameters.workspace.remote + "/target/pit-reports/mutations.xml")

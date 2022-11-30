@@ -16,6 +16,7 @@ object MutationUtil {
     
     const val MUTATOR_PACKAGE = "org.pitest.mutationtest.engine.gregor.mutators"
 
+    @JvmStatic
     fun executePIT(fileDetails: SourceFileDetails, parameters: Parameters, listener: TaskListener): Boolean {
         val pom = FilePath(parameters.workspace.channel, "${parameters.workspace.remote}/pom.xml")
         if (!pom.exists()) return false
@@ -37,13 +38,14 @@ object MutationUtil {
         return true
     }
 
+    @JvmStatic
     fun getMutant(data: MutationData, parameters: Parameters): MutationData? {
         val mutationReport = FilePath(parameters.workspace.channel,
             parameters.workspace.remote + "/target/pit-reports/mutations.xml")
         if (!mutationReport.exists()) return null
         val mutants = mutationReport.readToString().split("\n").filter { it.startsWith("<mutation ") }
         if (mutants.isEmpty()) return null
-        return mutants.map { MutationUtil.MutationData(it) }.find { it == data }
+        return mutants.map { MutationData(it) }.find { it == data }
     }
 
     fun getMutantsOfClass(details: SourceFileDetails): List<String> {
@@ -76,6 +78,7 @@ object MutationUtil {
     }
 
     //TODO: Optimize for lambda expressions
+    @JvmStatic
     fun getMutatedCode(codeSnippet: String, data: MutationData): String {
         val snippet = codeSnippet.trimEnd()
 
