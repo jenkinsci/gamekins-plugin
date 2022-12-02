@@ -134,6 +134,21 @@ object Constants {
         const val UNKNOWN_GAME_PROPERTY = "Unknown Game Property"
     }
 
+    object Mutation {
+
+        const val SHIFT_LEFT = "&lt;&lt;"
+
+        const val SHIFT_RIGHT = "&gt;&gt;"
+
+        const val RETURN_TRUE = "return true"
+
+        const val RETURN_FALSE = "return false"
+
+        const val RETURN_ZERO = "return 0"
+
+        val RETURN_REGEX = "return .*[^;]".toRegex()
+    }
+
     const val EXISTS = " exists "
 
     const val NO_QUEST = "No quest could be generated. This could mean that none of the prerequisites was met, " +

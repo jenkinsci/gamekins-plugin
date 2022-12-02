@@ -3,6 +3,12 @@ package org.gamekins.util
 import hudson.FilePath
 import hudson.model.TaskListener
 import org.gamekins.file.SourceFileDetails
+import org.gamekins.util.Constants.Mutation.RETURN_FALSE
+import org.gamekins.util.Constants.Mutation.RETURN_REGEX
+import org.gamekins.util.Constants.Mutation.RETURN_TRUE
+import org.gamekins.util.Constants.Mutation.RETURN_ZERO
+import org.gamekins.util.Constants.Mutation.SHIFT_LEFT
+import org.gamekins.util.Constants.Mutation.SHIFT_RIGHT
 import org.gamekins.util.Constants.Parameters
 import org.gamekins.util.MutationUtil.Mutator.*
 import java.io.File
@@ -23,12 +29,23 @@ object MutationUtil {
      * finished without errors, false otherwise.
      */
     @JvmStatic
-    fun executePIT(fileDetails: SourceFileDetails, parameters: Parameters, listener: TaskListener): Boolean {
+    fun executePIT(fileDetails: SourceFileDetails, parameters: Parameters, listener: TaskListener = TaskListener.NULL)
+    : Boolean {
         val pom = FilePath(parameters.workspace.channel, "${parameters.workspace.remote}/pom.xml")
         if (!pom.exists()) return false
         val oldPomContent = pom.readToString()
-        val newPomContent = oldPomContent
-            .replace("</plugins>", "${parameters.pitConfiguration}</plugins>")
+        val regexPIT = ("<plugin>\\s*<groupId>org.pitest</groupId>\\s*<artifactId>pitest-maven</artifactId>" +
+                "[\\s\\S]*?(?=</plugin>)").toRegex()
+        val regexPluginManagement = "</plugins>\\s*(?=</pluginManagement>)".toRegex()
+        val regexNoPluginManagement = "</plugins>\\s*(?!</pluginManagement>)".toRegex()
+        var newPomContent = if (oldPomContent.contains(regexPIT)) {
+            oldPomContent.replace(regexPIT, parameters.pitConfiguration.replace("</plugin>", ""))
+        } else if (oldPomContent.contains(regexPluginManagement)) {
+            oldPomContent.replace(regexNoPluginManagement, "${parameters.pitConfiguration}</plugins>")
+        } else {
+            oldPomContent.replace("</plugins>", "${parameters.pitConfiguration}</plugins>")
+        }
+        newPomContent = newPomContent
             .replace("{package}", fileDetails.packageName)
             .replace("{class}", fileDetails.fileName)
         pom.write(newPomContent, null)
@@ -68,91 +85,88 @@ object MutationUtil {
 
         return when (data.mutator) {
             CONDITIONALS_BOUNDARY -> {
-                if ("&lt;[^=]".toRegex().containsMatchIn(snippet)) {
-                    snippet.replace("&lt;", "&lt;=")
-                } else if ("&lt;=".toRegex().containsMatchIn(snippet)) {
-                    snippet.replace("&lt;=", "&lt;")
-                } else if ("&gt;[^=]".toRegex().containsMatchIn(snippet)) {
-                    snippet.replace("&gt;", "&gt;=")
-                } else if ("&gt;=".toRegex().containsMatchIn(snippet)) {
-                    snippet.replace("&gt;=", "&gt;")
-                } else {
-                    ""
+                when {
+                    "&lt;[^=]".toRegex().containsMatchIn(snippet) -> snippet.replace("&lt;", "&lt;=")
+                    "&lt;=".toRegex().containsMatchIn(snippet) -> snippet.replace("&lt;=", "&lt;")
+                    "&gt;[^=]".toRegex().containsMatchIn(snippet) -> snippet.replace("&gt;", "&gt;=")
+                    "&gt;=".toRegex().containsMatchIn(snippet) -> snippet.replace("&gt;=", "&gt;")
+                    else -> ""
                 }
             }
             INCREMENTS -> {
-                snippet
-                    .replace("++", "--")
-                    .replace("--", "++")
+                when {
+                    snippet.contains("++") -> snippet.replace("++", "--")
+                    snippet.contains("--") -> snippet.replace("--", "++")
+                    snippet.contains("+=") -> snippet.replace("+=", "-=")
+                    snippet.contains("-=") -> snippet.replace("-=", "+=")
+                    else -> ""
+                }
+
             }
             INVERT_NEGS -> {
                 snippet.replace("-", "")
             }
             MATH -> {
-                snippet
-                    .replace("+", "-")
-                    .replace("-", "+")
-                    .replace("*", "/")
-                    .replace("/", "*")
-                    .replace("%", "*")
-                    .replace("&amp;", "|")
-                    .replace("|", "&amp;")
-                    .replace("^", "&amp;")
-                    .replace("&lt;&lt;", "&gt;&gt;")
-                    .replace("&gt;&gt;", "&lt;&lt;")
-                    .replace("&gt;&gt;&gt;", "&lt;&lt;")
+                when {
+                    snippet.contains("+") -> snippet.replace("+", "-")
+                    snippet.contains("-") -> snippet.replace("-", "+")
+                    snippet.contains("*") -> snippet.replace("*", "/")
+                    snippet.contains("/") -> snippet.replace("/", "*")
+                    snippet.contains("%") -> snippet.replace("%", "*")
+                    snippet.contains("&amp;") -> snippet.replace("&amp;", "|")
+                    snippet.contains("|") -> snippet.replace("|", "&amp;")
+                    snippet.contains("^") -> snippet.replace("^", "&amp;")
+                    snippet.contains(SHIFT_LEFT) -> snippet.replace(SHIFT_LEFT, SHIFT_RIGHT)
+                    snippet.contains("&gt;&gt;&gt;") -> snippet.replace("&gt;&gt;&gt;", SHIFT_LEFT)
+                    snippet.contains(SHIFT_RIGHT) -> snippet.replace(SHIFT_RIGHT, SHIFT_LEFT)
+                    else -> ""
+                }
             }
             NEGATE_CONDITIONALS -> {
-                if ("&lt;[^=]".toRegex().containsMatchIn(snippet)) {
-                    snippet.replace("&lt;", "&gt;=")
-                } else if ("&lt;=".toRegex().containsMatchIn(snippet)) {
-                    snippet.replace("&lt;=", "&gt;")
-                } else if ("&gt;[^=]".toRegex().containsMatchIn(snippet)) {
-                    snippet.replace("&gt;", "&lt;=")
-                } else if ("&gt;=".toRegex().containsMatchIn(snippet)) {
-                    snippet.replace("&gt;=", "&lt;")
-                } else if ("==".toRegex().containsMatchIn(snippet)) {
-                    snippet.replace("==", "!=")
-                } else if ("!=".toRegex().containsMatchIn(snippet)) {
-                    snippet.replace("!=", "==")
-                } else {
-                    ""
+                when {
+                    "&lt;[^=]".toRegex().containsMatchIn(snippet) -> snippet.replace("&lt;", "&gt;=")
+                    "&lt;=".toRegex().containsMatchIn(snippet) -> snippet.replace("&lt;=", "&gt;")
+                    "&gt;[^=]".toRegex().containsMatchIn(snippet) -> snippet.replace("&gt;", "&lt;=")
+                    "&gt;=".toRegex().containsMatchIn(snippet) -> snippet.replace("&gt;=", "&lt;")
+                    "==".toRegex().containsMatchIn(snippet) -> snippet.replace("==", "!=")
+                    "!=".toRegex().containsMatchIn(snippet) -> snippet.replace("!=", "==")
+                    else -> ""
                 }
             }
             //TODO: Complete (Not used per default)
             RETURN_VALS -> {
-                if (snippet.contains("return true")) {
-                    snippet.replace("return true", "return false")
-                } else if (snippet.contains("return false")) {
-                    snippet.replace("return false", "return true")
-                } else if (snippet.contains("return 0")) {
-                    snippet.replace("return 0", "return 1")
-                } else {
-                    ""
+                when {
+                    snippet.contains(RETURN_TRUE) -> snippet.replace(RETURN_TRUE, RETURN_FALSE)
+                    snippet.contains(RETURN_FALSE) -> snippet.replace(RETURN_FALSE, RETURN_TRUE)
+                    snippet.contains(RETURN_ZERO) -> snippet.replace(RETURN_ZERO, "return 1")
+                    else -> ""
                 }
             }
             VOID_METHOD_CALLS -> ""
             EMPTY_RETURNS -> {
-                if ("(Collections\\.\\S*)".toRegex().containsMatchIn(data.description)) {
-                    snippet.replace("return .*[^;]".toRegex(),
-                        "return " + "(Collections\\.\\S*)".toRegex().find(data.description)!!.groupValues[1] + "()")
-                } else if (data.description.contains("&quot;&quot;")) {
-                    snippet.replace("return .*[^;]".toRegex(), "return &quot;&quot;")
-                } else {
-                    snippet.replace("return .*[^;]".toRegex(), "return 0")
+                when {
+                    "(Collections\\.\\S*)".toRegex().containsMatchIn(data.description) ->
+                        snippet.replace(RETURN_REGEX, "return " + "(Collections\\.\\S*)"
+                            .toRegex().find(data.description)!!.groupValues[1] + "()")
+                    "(Stream\\.\\S*)".toRegex().containsMatchIn(data.description) ->
+                        snippet.replace(RETURN_REGEX, "return " + "(Stream\\.\\S*)"
+                            .toRegex().find(data.description)!!.groupValues[1] + "()")
+                    data.description.contains("&quot;&quot;") ->
+                        snippet.replace(RETURN_REGEX, "return &quot;&quot;")
+                    else -> snippet.replace(RETURN_REGEX, RETURN_ZERO)
                 }
             }
-            FALSE_RETURNS -> snippet.replace("return .*[^;]".toRegex(), "return false")
-            TRUE_RETURNS -> snippet.replace("return .*[^;]".toRegex(), "return true")
+            FALSE_RETURNS -> snippet.replace(RETURN_REGEX, RETURN_FALSE)
+            TRUE_RETURNS -> snippet.replace(RETURN_REGEX, RETURN_TRUE)
             NULL_RETURNS -> {
-                if (snippet.contains("return .*[^;]".toRegex())) {
-                    snippet.replace("return .*[^;]".toRegex(), "return null")
+                if (snippet.contains(RETURN_REGEX)) {
+                    snippet.replace(RETURN_REGEX, "return null")
                 } else {
                     val argument = "\\((.*)\\)\\s*->\\s*.*[^;]".toRegex().find(snippet)!!.groupValues[1]
                     snippet.replace("\\(.*\\)\\s*->\\s*.*[^;]".toRegex(), "($argument) -> null")
                 }
             }
-            PRIMITIVE_RETURNS -> snippet.replace("return .*[^;]".toRegex(), "return 0")
+            PRIMITIVE_RETURNS -> snippet.replace(RETURN_REGEX, RETURN_ZERO)
             UNKNOWN -> ""
         }
     }
