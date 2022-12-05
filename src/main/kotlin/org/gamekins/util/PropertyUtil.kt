@@ -350,7 +350,7 @@ object PropertyUtil {
     private fun retrieveUser(fullName: String): User? {
         for (user in User.getAll()) {
             if (!realUser(user)) continue
-            if (user.fullName == fullName) {
+            if (fullName.contains(user.fullName) && fullName.contains(user.id)) {
                 return user
             }
         }

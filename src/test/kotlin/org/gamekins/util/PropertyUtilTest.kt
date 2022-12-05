@@ -120,13 +120,13 @@ class PropertyUtilTest : AnnotationSpec() {
 
         PropertyUtil.doAddUserToTeam(null, team1, "").kind shouldBe FormValidation.Kind.ERROR
 
-        PropertyUtil.doAddUserToTeam(job2, team1, userName3).kind shouldBe FormValidation.Kind.ERROR
+        PropertyUtil.doAddUserToTeam(job2, team1, "$id3 ($userName3)").kind shouldBe FormValidation.Kind.ERROR
 
-        PropertyUtil.doAddUserToTeam(job2, team1, userName2).kind shouldBe FormValidation.Kind.ERROR
+        PropertyUtil.doAddUserToTeam(job2, team1, "$id2 ($userName2)").kind shouldBe FormValidation.Kind.ERROR
 
-        PropertyUtil.doAddUserToTeam(job2, team1, userName1).kind shouldBe FormValidation.Kind.ERROR
+        PropertyUtil.doAddUserToTeam(job2, team1, "$id1 ($userName1)").kind shouldBe FormValidation.Kind.ERROR
 
-        PropertyUtil.doAddUserToTeam(job1, team1, userName1).kind shouldBe FormValidation.Kind.OK
+        PropertyUtil.doAddUserToTeam(job1, team1, "$id1 ($userName1)").kind shouldBe FormValidation.Kind.OK
     }
 
     @Test
@@ -158,13 +158,13 @@ class PropertyUtilTest : AnnotationSpec() {
 
         PropertyUtil.doRemoveUserFromTeam(null, team1, "").kind shouldBe FormValidation.Kind.ERROR
 
-        PropertyUtil.doRemoveUserFromTeam(job2, team1, userName3).kind shouldBe FormValidation.Kind.ERROR
+        PropertyUtil.doRemoveUserFromTeam(job2, team1, "$id3 ($userName3)").kind shouldBe FormValidation.Kind.ERROR
 
-        PropertyUtil.doRemoveUserFromTeam(job2, team1, userName2).kind shouldBe FormValidation.Kind.ERROR
+        PropertyUtil.doRemoveUserFromTeam(job2, team1, "$id2 ($userName2)").kind shouldBe FormValidation.Kind.ERROR
 
-        PropertyUtil.doRemoveUserFromTeam(job2, team1, userName1).kind shouldBe FormValidation.Kind.ERROR
+        PropertyUtil.doRemoveUserFromTeam(job2, team1, "$id1 ($userName1)").kind shouldBe FormValidation.Kind.ERROR
 
-        PropertyUtil.doRemoveUserFromTeam(job1, team2, userName1).kind shouldBe FormValidation.Kind.OK
+        PropertyUtil.doRemoveUserFromTeam(job1, team2, "$id1 ($userName1)").kind shouldBe FormValidation.Kind.OK
     }
 
     @Test
