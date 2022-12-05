@@ -22,7 +22,7 @@ import hudson.model.User
 import hudson.tasks.Mailer.UserProperty
 import org.gamekins.test.TestUtils
 import org.gamekins.util.Constants.Parameters
-import io.kotest.core.spec.style.AnnotationSpec
+import io.kotest.core.spec.style.FeatureSpec
 import io.kotest.matchers.collections.beEmpty
 import io.kotest.matchers.should
 import io.kotest.matchers.shouldBe
@@ -35,22 +35,21 @@ import java.io.*
 import java.util.concurrent.CopyOnWriteArraySet
 
 
-class GitUtilTest : AnnotationSpec() {
+class GitUtilTest : FeatureSpec({
 
-    private lateinit var root : String
-    private lateinit var path : FilePath
-    private val parameters = Parameters()
-    private val user = mockkClass(GitUtil.GameUser::class)
-    private val name = "Philipp Straubinger"
-    private val mail = "philipp.straubinger@uni-passau.de"
-    private val id = "philipp.straubinger"
-    private val headHash = "cf02809f4d3500d33c7bcb5120c1e9d11a95bd14"
+    lateinit var root : String
+    lateinit var path : FilePath
+    val parameters = Parameters()
+    val user = mockkClass(GitUtil.GameUser::class)
+    val name = "Philipp Straubinger"
+    val mail = "philipp.straubinger@uni-passau.de"
+    val id = "philipp.straubinger"
+    val headHash = "cf02809f4d3500d33c7bcb5120c1e9d11a95bd14"
 
-    @BeforeAll
-    fun initAll() {
+    beforeSpec {
         val rootDirectory = javaClass.classLoader.getResource("test-project.zip")
         rootDirectory shouldNotBe null
-        root = rootDirectory.file.removeSuffix(".zip")
+        root = rootDirectory!!.file.removeSuffix(".zip")
         root shouldEndWith "test-project"
         TestUtils.unzip("$root.zip", root)
         path = FilePath(null, root)
@@ -69,19 +68,16 @@ class GitUtilTest : AnnotationSpec() {
         mockkStatic(GitUtil::class)
     }
 
-    @AfterAll
-    fun cleanUp() {
+    afterSpec {
         unmockkAll()
         File(root).deleteRecursively()
     }
 
-    @Test
-    fun getBranch() {
+    feature("Get branch") {
         GitUtil.getBranch(path) shouldBe "master"
     }
 
-    @Test
-    fun getHead() {
+    feature("Get head") {
         val builder = FileRepositoryBuilder()
         val repo = builder.setGitDir(File(path.remote + "/.git")).setMustExist(true).build()
         val head = GitUtil.getHead(repo)
@@ -93,16 +89,14 @@ class GitUtilTest : AnnotationSpec() {
         GitUtil.HeadCommitCallable(path.remote).call() shouldBe head
     }
 
-    @Test
-    fun getLastChangedClasses() {
+    feature("Get last changed classes") {
         GitUtil.getLastChangedClasses("", parameters, TaskListener.NULL, arrayListOf(user)).size shouldBe 8
         parameters.searchCommitCount = 1
         GitUtil.getLastChangedClasses("", parameters, TaskListener.NULL, arrayListOf(user)) should beEmpty()
         parameters.searchCommitCount = 50
     }
 
-    @Test
-    fun getLastChangedFiles() {
+    feature("Get last changed files") {
         val user1 = mockkClass(hudson.model.User::class)
         every { user1.properties } returns mapOf(
             mockkClass(hudson.security.HudsonPrivateSecurityRealm.Details.DescriptorImpl::class) to
@@ -120,8 +114,7 @@ class GitUtilTest : AnnotationSpec() {
         GitUtil.getLastChangedFiles("", parameters, arrayListOf(GitUtil.GameUser(user1)), TaskListener.NULL).size shouldBe 14
     }
 
-    @Test
-    fun getLastChangedSourceFilesOfUser() {
+    feature("Get last changed SourceFiles of User") {
         val user1 = mockkClass(hudson.model.User::class)
         every { user1.properties } returns mapOf(
                 mockkClass(hudson.security.HudsonPrivateSecurityRealm.Details.DescriptorImpl::class) to
@@ -147,8 +140,7 @@ class GitUtilTest : AnnotationSpec() {
         GitUtil.getLastChangedClasses(commitHash, parameters, TaskListener.NULL, GitUtil.mapUsersToGameUsers(listOf(user1))).size shouldBe 3
     }
 
-    @Test
-    fun getLastChangedTestsOfUser() {
+    feature("Get last changed tests of User") {
         val user1 = mockkClass(hudson.model.User::class)
         every { user1.properties } returns mapOf(
                 mockkClass(hudson.security.HudsonPrivateSecurityRealm.Details.DescriptorImpl::class) to
@@ -172,8 +164,7 @@ class GitUtilTest : AnnotationSpec() {
         GitUtil.getLastChangedTestsOfUser(commitHash, parameters, TaskListener.NULL,  GitUtil.GameUser(user1), GitUtil.mapUsersToGameUsers(listOf(user1))).size shouldBe 3
     }
 
-    @Test
-    fun mapGameUser() {
+    feature("map GameUser") {
         val ident = mockkClass(PersonIdent::class)
         every { ident.name } returns name
         every { ident.emailAddress } returns mail
@@ -205,8 +196,7 @@ class GitUtilTest : AnnotationSpec() {
         GitUtil.mapUser(ident, arrayListOf(user1, user4)) shouldBe user4
     }
 
-    @Test
-    fun mapUser() {
+    feature("map User") {
         val ident = mockkClass(PersonIdent::class)
         every { ident.name } returns name
         every { ident.emailAddress } returns mail
@@ -286,8 +276,7 @@ class GitUtilTest : AnnotationSpec() {
         GitUtil.mapUser(ident, listOf(user1, user7)) shouldBe null
     }
 
-    @Test
-    fun mapUsersToGameUsers() {
+    feature("map Users to GameUsers") {
         val user1 = mockkClass(hudson.model.User::class)
         every { user1.properties } returns mapOf()
         GitUtil.mapUsersToGameUsers(listOf(user1)) should beEmpty()
@@ -312,8 +301,7 @@ class GitUtilTest : AnnotationSpec() {
         users[0].gitNames shouldBe hashSetOf(name, id)
     }
 
-    @Test
-    fun testGameUser() {
+    feature("test GameUser") {
         val user1 = mockkClass(hudson.model.User::class)
         every { user1.properties } returns mapOf(
                 mockkClass(hudson.security.HudsonPrivateSecurityRealm.Details.DescriptorImpl::class) to
@@ -347,8 +335,7 @@ class GitUtilTest : AnnotationSpec() {
         gameUser1.getUser() shouldBe null
     }
 
-    @Test
-    fun testDiffFromHeadCallable() {
+    feature("test DiffFromHeadCallable") {
         unmockkAll()
         mockkObject(GitUtil)
         val temp = GitUtil.DiffFromHeadCallable(path,
@@ -358,12 +345,11 @@ class GitUtilTest : AnnotationSpec() {
         temp.call() shouldBe listOf("abc")
     }
 
-    @Test
-    fun testGetChangedClsSinceLastStoredCommit() {
+    feature("test GetChangedClsSinceLastStoredCommit") {
         unmockkAll()
         GitUtil.getChangedClsSinceLastStoredCommit(path, "4a642f65855c8a6d28a1602258ebfde143df52e4",
             "org.example") shouldBe listOf()
         GitUtil.getChangedClsSinceLastStoredCommit(path, "123",
             "org.example") shouldBe null
     }
-}
+})
