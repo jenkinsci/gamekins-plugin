@@ -186,7 +186,7 @@ object AchievementUtil {
     /**
      * Solves the achievements with description: Improve the coverage of a class with a CoverageChallenge by X%.
      * Needs the key 'haveCoverage' in the map [additionalParameters] with a positive Double value.
-     * Optional parameter 'maxCoverage' with an positive and exclusive Int value.
+     * Optional parameter 'maxCoverage' with a positive and exclusive Int value.
      */
     fun improveClassCoverageByX(classes: ArrayList<FileDetails>, parameters: Parameters,
                                 run: Run<*, *>, property: GameUserProperty, listener: TaskListener,
@@ -204,7 +204,7 @@ object AchievementUtil {
     /**
      * Solves the achievements with description: Improve the coverage of the project by X%. Needs the
      * key 'haveCoverage' in the map [additionalParameters] with a positive Double value.
-     * Optional parameter 'maxCoverage' with an positive and exclusive Int value.
+     * Optional parameter 'maxCoverage' with a positive and exclusive Int value.
      */
     fun improveProjectCoverageByX(classes: ArrayList<FileDetails>, parameters: Parameters,
                                   run: Run<*, *>, property: GameUserProperty, listener: TaskListener,

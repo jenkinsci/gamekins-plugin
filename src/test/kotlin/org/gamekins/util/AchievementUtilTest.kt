@@ -21,8 +21,7 @@ import hudson.model.ItemGroup
 import hudson.model.Result
 import hudson.model.TaskListener
 import hudson.model.User
-import hudson.tasks.junit.TestResultAction
-import io.kotest.core.spec.style.AnnotationSpec
+import io.kotest.core.spec.style.FeatureSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.string.shouldEndWith
@@ -45,23 +44,22 @@ import org.jenkinsci.plugins.workflow.job.WorkflowJob
 import java.io.File
 import java.util.concurrent.CopyOnWriteArrayList
 
-class AchievementUtilTest: AnnotationSpec() {
+class AchievementUtilTest: FeatureSpec({
 
-    private lateinit var root : String
-    private val challenge = mockkClass(ClassCoverageChallenge::class)
-    private val files = arrayListOf<FileDetails>()
-    private val parameters = Parameters()
-    private val run = mockkClass(hudson.model.Run::class)
-    private val property = mockkClass(org.gamekins.GameUserProperty::class)
-    private val workspace = mockkClass(FilePath::class)
-    private val additionalParameters = hashMapOf<String, String>()
-    private lateinit var path: FilePath
+    lateinit var root : String
+    val challenge = mockkClass(ClassCoverageChallenge::class)
+    val files = arrayListOf<FileDetails>()
+    val parameters = Parameters()
+    val run = mockkClass(hudson.model.Run::class)
+    val property = mockkClass(org.gamekins.GameUserProperty::class)
+    val workspace = mockkClass(FilePath::class)
+    val additionalParameters = hashMapOf<String, String>()
+    lateinit var path: FilePath
 
-    @BeforeAll
-    fun init() {
+    beforeSpec {
         val rootDirectory = javaClass.classLoader.getResource("test-project.zip")
         rootDirectory shouldNotBe null
-        root = rootDirectory.file.removeSuffix(".zip")
+        root = rootDirectory!!.file.removeSuffix(".zip")
         root shouldEndWith "test-project"
         TestUtils.unzip("$root.zip", root)
         path = FilePath(null, root)
@@ -73,151 +71,233 @@ class AchievementUtilTest: AnnotationSpec() {
         every { property.getCompletedChallenges(any()) } returns CopyOnWriteArrayList(listOf(challenge))
     }
 
-    @AfterAll
-    fun cleanUp() {
+    afterSpec {
         unmockkAll()
         File(root).deleteRecursively()
     }
 
-    @Test
-    fun coverLineWithXBranches() {
+    feature("Cover line with X Branches") {
         additionalParameters.clear()
-        AchievementUtil.coverLineWithXBranches(files, parameters, run, property, TaskListener.NULL,
-            additionalParameters) shouldBe false
+        scenario("No Parameters")
+        {
+            AchievementUtil.coverLineWithXBranches(files, parameters, run, property, TaskListener.NULL,
+                additionalParameters) shouldBe false
+        }
 
         additionalParameters["branches"] = "2"
         val lineChallenge = mockkClass(LineCoverageChallenge::class)
         every { property.getCompletedChallenges(any()) } returns CopyOnWriteArrayList(listOf(lineChallenge))
         every { lineChallenge.getMaxCoveredBranchesIfFullyCovered() } returns 0
-        AchievementUtil.coverLineWithXBranches(files, parameters, run, property, TaskListener.NULL,
-            additionalParameters) shouldBe false
+        scenario("Lines do not have enough (0) branches")
+        {
+            AchievementUtil.coverLineWithXBranches(files, parameters, run, property, TaskListener.NULL,
+                additionalParameters) shouldBe false
+        }
 
         every { lineChallenge.getMaxCoveredBranchesIfFullyCovered() } returns 1
-        AchievementUtil.coverLineWithXBranches(files, parameters, run, property, TaskListener.NULL,
-            additionalParameters) shouldBe false
+        scenario("Lines do not have enough (1) branches")
+        {
+            AchievementUtil.coverLineWithXBranches(files, parameters, run, property, TaskListener.NULL,
+                additionalParameters) shouldBe false
+        }
 
         every { lineChallenge.getMaxCoveredBranchesIfFullyCovered() } returns 2
-        AchievementUtil.coverLineWithXBranches(files, parameters, run, property, TaskListener.NULL,
-            additionalParameters) shouldBe true
+        scenario("Lines have exactly enough branches")
+        {
+            AchievementUtil.coverLineWithXBranches(files, parameters, run, property, TaskListener.NULL,
+                additionalParameters) shouldBe true
+        }
 
         every { lineChallenge.getMaxCoveredBranchesIfFullyCovered() } returns 3
-        AchievementUtil.coverLineWithXBranches(files, parameters, run, property, TaskListener.NULL,
-            additionalParameters) shouldBe true
+        scenario("Lines have more than enough branches")
+        {
+            AchievementUtil.coverLineWithXBranches(files, parameters, run, property, TaskListener.NULL,
+                additionalParameters) shouldBe true
+        }
+
 
         additionalParameters["maxBranches"] = "3"
-        AchievementUtil.coverLineWithXBranches(files, parameters, run, property, TaskListener.NULL,
-            additionalParameters) shouldBe false
+        scenario("Lines have to many branches")
+        {
+            AchievementUtil.coverLineWithXBranches(files, parameters, run, property, TaskListener.NULL,
+                additionalParameters) shouldBe false
+        }
 
         additionalParameters["maxBranches"] = "4"
-        AchievementUtil.coverLineWithXBranches(files, parameters, run, property, TaskListener.NULL,
-            additionalParameters) shouldBe true
+        scenario("Lines have enough branches with upper limit")
+        {
+            AchievementUtil.coverLineWithXBranches(files, parameters, run, property, TaskListener.NULL,
+                additionalParameters) shouldBe true
+        }
 
         every { property.getCompletedChallenges(any()) } returns CopyOnWriteArrayList(listOf(challenge))
     }
 
-    @Test
-    fun getLinesOfCode() {
-        val path = FilePath(File("$root/src/main/java/com/example/Complex.java"))
-        AchievementUtil.getLinesOfCode(path) shouldBe 108
+    feature("Get lines of Code") {
+        var filePath : FilePath
+
+        scenario("Lines of Code of Complex.java")
+        {
+            filePath = FilePath(File("$root/src/main/java/com/example/Complex.java"))
+            AchievementUtil.getLinesOfCode(filePath) shouldBe 108
+        }
+
+        scenario("Lines of Code of Rational.java")
+        {
+            filePath = FilePath(File("$root/src/main/java/com/example/Rational.java"))
+            AchievementUtil.getLinesOfCode(filePath) shouldBe 206
+        }
     }
 
-    @Test
-    fun haveBuildWithXSeconds() {
+    feature("Have Build with X Seconds") {
         additionalParameters.clear()
-        every { run.duration } returns 100000000000
-        AchievementUtil.haveBuildWithXSeconds(files, parameters, run, property, TaskListener.NULL,
-            additionalParameters) shouldBe false
+        scenario("No Value for additionalParameters[\"more\"]")
+        {
+            AchievementUtil.haveBuildWithXSeconds(files, parameters, run, property, TaskListener.NULL,
+                additionalParameters) shouldBe false
+        }
 
+        every { run.duration } returns 100000000000
+        additionalParameters["more"] = "has to have a value for this test"
         every { run.result } returns Result.FAILURE
-        AchievementUtil.haveBuildWithXSeconds(files, parameters, run, property, TaskListener.NULL,
-            additionalParameters) shouldBe false
+        scenario("Build failed")
+        {
+            AchievementUtil.haveBuildWithXSeconds(files, parameters, run, property, TaskListener.NULL,
+                additionalParameters) shouldBe false
+        }
 
         additionalParameters["more"] = "false"
         every { run.result } returns Result.SUCCESS
-        AchievementUtil.haveBuildWithXSeconds(files, parameters, run, property, TaskListener.NULL,
-            additionalParameters) shouldBe false
+        scenario("Mode: more, no duration specified")
+        {
+            AchievementUtil.haveBuildWithXSeconds(files, parameters, run, property, TaskListener.NULL,
+                additionalParameters) shouldBe false
+        }
 
         additionalParameters["more"] = "true"
-        AchievementUtil.haveBuildWithXSeconds(files, parameters, run, property, TaskListener.NULL,
-            additionalParameters) shouldBe false
+        scenario("Mode: less, no duration specified")
+        {
+            AchievementUtil.haveBuildWithXSeconds(files, parameters, run, property, TaskListener.NULL,
+                additionalParameters) shouldBe false
+        }
 
         additionalParameters["duration"] = "100000000"
-        AchievementUtil.haveBuildWithXSeconds(files, parameters, run, property, TaskListener.NULL,
-            additionalParameters) shouldBe false
+        scenario("Mode : more, unsuccessful")
+        {
+            AchievementUtil.haveBuildWithXSeconds(files, parameters, run, property, TaskListener.NULL,
+                additionalParameters) shouldBe false
+        }
 
         every { run.duration } returns 100000000001
-        AchievementUtil.haveBuildWithXSeconds(files, parameters, run, property, TaskListener.NULL,
-            additionalParameters) shouldBe true
+        scenario("Mode : more, successful")
+        {
+            AchievementUtil.haveBuildWithXSeconds(files, parameters, run, property, TaskListener.NULL,
+                additionalParameters) shouldBe true
+        }
 
         every { run.duration } returns 100000000000
         additionalParameters["more"] = "false"
-        AchievementUtil.haveBuildWithXSeconds(files, parameters, run, property, TaskListener.NULL,
-            additionalParameters) shouldBe false
+        scenario("Mode: less, unsuccessful")
+        {
+            AchievementUtil.haveBuildWithXSeconds(files, parameters, run, property, TaskListener.NULL,
+                additionalParameters) shouldBe false
+        }
 
         every { run.duration } returns 99999999999
-        AchievementUtil.haveBuildWithXSeconds(files, parameters, run, property, TaskListener.NULL,
-            additionalParameters) shouldBe true
+        scenario("Mode: less, successful")
+        {
+            AchievementUtil.haveBuildWithXSeconds(files, parameters, run, property, TaskListener.NULL,
+                additionalParameters) shouldBe true
+        }
 
         every { run.duration } returns 99999999998
         additionalParameters["minDuration"] = "99999999999"
-        AchievementUtil.haveBuildWithXSeconds(files, parameters, run, property, TaskListener.NULL,
-            additionalParameters) shouldBe false
+        scenario("duration below minDuration")
+        {
+            AchievementUtil.haveBuildWithXSeconds(files, parameters, run, property, TaskListener.NULL,
+                additionalParameters) shouldBe false
+        }
 
         every { run.duration } returns 99999999998
         additionalParameters["minDuration"] = "99999999997"
-        AchievementUtil.haveBuildWithXSeconds(files, parameters, run, property, TaskListener.NULL,
-            additionalParameters) shouldBe true
+        scenario("duration above minDuration")
+        {
+            AchievementUtil.haveBuildWithXSeconds(files, parameters, run, property, TaskListener.NULL,
+                additionalParameters) shouldBe true
+        }
 
         every { run.duration } returns 100000000002
         additionalParameters["more"] = "true"
         additionalParameters["maxDuration"] = "100000000001"
-        AchievementUtil.haveBuildWithXSeconds(files, parameters, run, property, TaskListener.NULL,
-            additionalParameters) shouldBe false
+        scenario("duration above maxDuration")
+        {
+            AchievementUtil.haveBuildWithXSeconds(files, parameters, run, property, TaskListener.NULL,
+                additionalParameters) shouldBe false
+        }
 
         every { run.duration } returns 100000000002
         additionalParameters["maxDuration"] = "100000000003"
-        AchievementUtil.haveBuildWithXSeconds(files, parameters, run, property, TaskListener.NULL,
-            additionalParameters) shouldBe true
+        scenario("duration below maxDuration")
+        {
+            AchievementUtil.haveBuildWithXSeconds(files, parameters, run, property, TaskListener.NULL,
+                additionalParameters) shouldBe true
+        }
     }
 
-    @Test
-    fun haveClassWithXCoverage() {
+    feature("have Class with X Coverage") {
         additionalParameters.clear()
         every { challenge.solvedCoverage } returns 0.9
-        AchievementUtil.haveClassWithXCoverage(files, parameters, run, property, TaskListener.NULL,
-            additionalParameters) shouldBe false
+        scenario("No Coverage specified")
+        {
+            AchievementUtil.haveClassWithXCoverage(files, parameters, run, property, TaskListener.NULL,
+                additionalParameters) shouldBe false
+        }
 
         additionalParameters["haveCoverage"] = "0.8"
-        AchievementUtil.haveClassWithXCoverage(files, parameters, run, property, TaskListener.NULL,
-            additionalParameters) shouldBe true
+        scenario("Coverage above Requirement")
+        {
+            AchievementUtil.haveClassWithXCoverage(files, parameters, run, property, TaskListener.NULL,
+                additionalParameters) shouldBe true
+        }
 
         every { challenge.solvedCoverage } returns 0.7
-        AchievementUtil.haveClassWithXCoverage(files, parameters, run, property, TaskListener.NULL,
-            additionalParameters) shouldBe false
+        scenario("Coverage below Requirement")
+        {
+            AchievementUtil.haveClassWithXCoverage(files, parameters, run, property, TaskListener.NULL,
+                additionalParameters) shouldBe false
+        }
     }
 
-    @Test
-    fun haveXClassesWithYCoverage() {
+    feature("have X Classes with Y Coverage") {
         additionalParameters.clear()
         every { challenge.solvedCoverage } returns 0.9
-        AchievementUtil.haveXClassesWithYCoverage(files, parameters, run, property, TaskListener.NULL,
-            additionalParameters) shouldBe false
 
+        scenario("No Coverage specified")
+        {
+            AchievementUtil.haveXClassesWithYCoverage(files, parameters, run, property, TaskListener.NULL,
+                additionalParameters) shouldBe false
+        }
         additionalParameters["haveCoverage"] = "0.8"
-        AchievementUtil.haveXClassesWithYCoverage(files, parameters, run, property, TaskListener.NULL,
-            additionalParameters) shouldBe false
-
+        scenario("No ClassCount specified")
+        {
+            AchievementUtil.haveXClassesWithYCoverage(files, parameters, run, property, TaskListener.NULL,
+                additionalParameters) shouldBe false
+        }
         additionalParameters["classesCount"] = "1"
-        AchievementUtil.haveXClassesWithYCoverage(files, parameters, run, property, TaskListener.NULL,
-            additionalParameters) shouldBe true
-
+        scenario("1 Class above Coverage needed")
+        {
+            AchievementUtil.haveXClassesWithYCoverage(files, parameters, run, property, TaskListener.NULL,
+                additionalParameters) shouldBe true
+        }
         every { challenge.solvedCoverage } returns 0.7
-        AchievementUtil.haveXClassesWithYCoverage(files, parameters, run, property, TaskListener.NULL,
-            additionalParameters) shouldBe false
+        scenario("All Classes below required Coverage")
+        {
+            AchievementUtil.haveXClassesWithYCoverage(files, parameters, run, property, TaskListener.NULL,
+                additionalParameters) shouldBe false
+        }
     }
 
-    @Test
-    fun haveXClassesWithYCoverageAndZLines() {
+    feature("have X Classes with Y Coverage and Z Lines") {
         additionalParameters.clear()
         val details = mockkClass(SourceFileDetails::class)
         every { details.filePath } returns "/src/main/java/com/example/Complex.java"
@@ -226,130 +306,201 @@ class AchievementUtilTest: AnnotationSpec() {
         every { challenge.details } returns details
         every { challenge.solvedCoverage } returns 0.9
         parameters.workspace = workspace
-        AchievementUtil.haveXClassesWithYCoverageAndZLines(files, parameters, run, property, TaskListener.NULL,
-            additionalParameters) shouldBe false
+
+        scenario("No Coverage specified")
+        {
+            AchievementUtil.haveXClassesWithYCoverageAndZLines(files, parameters, run, property, TaskListener.NULL,
+                additionalParameters) shouldBe false
+        }
 
         additionalParameters["haveCoverage"] = "0.8"
-        AchievementUtil.haveXClassesWithYCoverageAndZLines(files, parameters, run, property, TaskListener.NULL,
-            additionalParameters) shouldBe false
+        scenario("No line count specified")
+        {
+            AchievementUtil.haveXClassesWithYCoverageAndZLines(files, parameters, run, property, TaskListener.NULL,
+                additionalParameters) shouldBe false
+        }
 
         additionalParameters["linesCount"] = "100"
-        AchievementUtil.haveXClassesWithYCoverageAndZLines(files, parameters, run, property, TaskListener.NULL,
-            additionalParameters) shouldBe false
+        scenario("No class count specified")
+        {
+            AchievementUtil.haveXClassesWithYCoverageAndZLines(files, parameters, run, property, TaskListener.NULL,
+                additionalParameters) shouldBe false
+        }
 
         additionalParameters["classesCount"] = "1"
-        AchievementUtil.haveXClassesWithYCoverageAndZLines(files, parameters, run, property, TaskListener.NULL,
-            additionalParameters) shouldBe true
+        scenario("Classes covered")
+        {
+            AchievementUtil.haveXClassesWithYCoverageAndZLines(files, parameters, run, property, TaskListener.NULL,
+                additionalParameters) shouldBe true
+        }
 
         every { challenge.solvedCoverage } returns 0.7
-        AchievementUtil.haveXClassesWithYCoverageAndZLines(files, parameters, run, property, TaskListener.NULL,
-            additionalParameters) shouldBe false
+        scenario("Classes not covered enough")
+        {
+            AchievementUtil.haveXClassesWithYCoverageAndZLines(files, parameters, run, property, TaskListener.NULL,
+                additionalParameters) shouldBe false
+        }
     }
 
-    @Test
-    fun haveXFailedTests() {
+    feature("have X failed Tests") {
         additionalParameters.clear()
         every { run.result } returns Result.SUCCESS
-        every { run.getAction(TestResultAction::class.java) } returns null
-        AchievementUtil.haveXFailedTests(files, parameters, run, property, TaskListener.NULL,
-            additionalParameters) shouldBe false
-
         mockkStatic(JUnitUtil::class)
+        every { JUnitUtil.getTestCount(any(), any()) } returns 0
+        scenario("No Amount of failed tests specified, successful run")
+        {
+            AchievementUtil.haveXFailedTests(files, parameters, run, property, TaskListener.NULL,
+                additionalParameters) shouldBe false
+        }
+
         every { run.result } returns Result.FAILURE
         every { JUnitUtil.getTestFailCount(any(), any()) } returns 0
-        AchievementUtil.haveXFailedTests(files, parameters, run, property, TaskListener.NULL,
-            additionalParameters) shouldBe false
+        scenario("No Amount of failed tests specified, unsuccessful run")
+        {
+            AchievementUtil.haveXFailedTests(files, parameters, run, property, TaskListener.NULL,
+                additionalParameters) shouldBe false
+        }
 
         additionalParameters["failedTests"] = "1"
-        AchievementUtil.haveXFailedTests(files, parameters, run, property, TaskListener.NULL,
-            additionalParameters) shouldBe false
+        scenario("Not enough failed tests")
+        {
+            AchievementUtil.haveXFailedTests(files, parameters, run, property, TaskListener.NULL,
+                additionalParameters) shouldBe false
+        }
 
         every { JUnitUtil.getTestFailCount(any(), any()) } returns 1
-        AchievementUtil.haveXFailedTests(files, parameters, run, property, TaskListener.NULL,
-            additionalParameters) shouldBe true
+        scenario("Enough failed tests")
+        {
+            AchievementUtil.haveXFailedTests(files, parameters, run, property, TaskListener.NULL,
+                additionalParameters) shouldBe true
+        }
 
         additionalParameters["failedTests"] = "0"
         every { JUnitUtil.getTestCount(any(), any()) } returns 2
-        AchievementUtil.haveXFailedTests(files, parameters, run, property, TaskListener.NULL,
-            additionalParameters) shouldBe false
+        scenario("Not all tests failed")
+        {
+            AchievementUtil.haveXFailedTests(files, parameters, run, property, TaskListener.NULL,
+                additionalParameters) shouldBe false
+        }
 
         every { JUnitUtil.getTestCount(any(), any()) } returns 1
-        AchievementUtil.haveXFailedTests(files, parameters, run, property, TaskListener.NULL,
-            additionalParameters) shouldBe true
+        scenario("All tests failed")
+        {
+            AchievementUtil.haveXFailedTests(files, parameters, run, property, TaskListener.NULL,
+                additionalParameters) shouldBe true
+        }
 
-        every { JUnitUtil.getTestCount(any(), any()) } returns 0
-        AchievementUtil.haveXFailedTests(files, parameters, run, property, TaskListener.NULL,
-            additionalParameters) shouldBe false
+        every{ JUnitUtil.getTestCount(any(), any()) } returns 0
+        scenario("No tests exist")
+        {
+            AchievementUtil.haveXFailedTests(files, parameters, run, property, TaskListener.NULL,
+                additionalParameters) shouldBe false
+        }
     }
 
-    @Test
-    fun haveXProjectCoverage() {
+    feature("have X Project-Coverage") {
         additionalParameters.clear()
         parameters.projectCoverage = 0.81
-        AchievementUtil.haveXProjectCoverage(files, parameters, run, property, TaskListener.NULL,
-            additionalParameters) shouldBe false
+        scenario("No coverage specified")
+        {
+            AchievementUtil.haveXProjectCoverage(files, parameters, run, property, TaskListener.NULL,
+                additionalParameters) shouldBe false
+        }
 
         additionalParameters["haveCoverage"] = "0.8"
-        AchievementUtil.haveXProjectCoverage(files, parameters, run, property, TaskListener.NULL,
-            additionalParameters) shouldBe true
+        scenario("Enough coverage")
+        {
+            AchievementUtil.haveXProjectCoverage(files, parameters, run, property, TaskListener.NULL,
+                additionalParameters) shouldBe true
+        }
 
         parameters.projectCoverage = 0.79
-        AchievementUtil.haveXProjectCoverage(files, parameters, run, property, TaskListener.NULL,
-            additionalParameters) shouldBe false
+        scenario("Not enough coverage")
+        {
+            AchievementUtil.haveXProjectCoverage(files, parameters, run, property, TaskListener.NULL,
+                additionalParameters) shouldBe false
+        }
     }
 
-    @Test
-    fun haveXProjectTests() {
+    feature("have X Project-Tests") {
         additionalParameters.clear()
         parameters.projectTests = 101
-        AchievementUtil.haveXProjectTests(files, parameters, run, property, TaskListener.NULL,
-            additionalParameters) shouldBe false
+        scenario("No required amount of tests specified")
+        {
+            AchievementUtil.haveXProjectTests(files, parameters, run, property, TaskListener.NULL,
+                additionalParameters) shouldBe false
+        }
 
         additionalParameters["haveTests"] = "100"
-        AchievementUtil.haveXProjectTests(files, parameters, run, property, TaskListener.NULL,
-            additionalParameters) shouldBe true
+        scenario("Project has enough tests")
+        {
+            AchievementUtil.haveXProjectTests(files, parameters, run, property, TaskListener.NULL,
+                additionalParameters) shouldBe true
+        }
 
         parameters.projectTests = 99
-        AchievementUtil.haveXProjectTests(files, parameters, run, property, TaskListener.NULL,
-            additionalParameters) shouldBe false
+        scenario("Project does not have enough tests")
+        {
+            AchievementUtil.haveXProjectTests(files, parameters, run, property, TaskListener.NULL,
+                additionalParameters) shouldBe false
+        }
     }
 
-    @Test
-    fun improveClassCoverageByX() {
+    feature("improve Class-Coverage By X") {
         additionalParameters.clear()
         every { challenge.coverage } returns 0.0
         every { challenge.solvedCoverage } returns 0.0
-        AchievementUtil.improveClassCoverageByX(files, parameters, run, property, TaskListener.NULL,
-            additionalParameters) shouldBe false
+        scenario("No required amount specified")
+        {
+            AchievementUtil.improveClassCoverageByX(files, parameters, run, property, TaskListener.NULL,
+                additionalParameters) shouldBe false
+        }
 
         additionalParameters["haveCoverage"] = "0.1"
-        AchievementUtil.improveClassCoverageByX(files, parameters, run, property, TaskListener.NULL,
-            additionalParameters) shouldBe false
+        scenario("No increased coverage")
+        {
+            AchievementUtil.improveClassCoverageByX(files, parameters, run, property, TaskListener.NULL,
+                additionalParameters) shouldBe false
+        }
 
         every { challenge.coverage } returns 0.7
         every { challenge.solvedCoverage } returns 0.75
-        AchievementUtil.improveClassCoverageByX(files, parameters, run, property, TaskListener.NULL,
-            additionalParameters) shouldBe false
+        scenario("Not enough increase")
+        {
+            AchievementUtil.improveClassCoverageByX(files, parameters, run, property, TaskListener.NULL,
+                additionalParameters) shouldBe false
+        }
 
         every { challenge.solvedCoverage } returns 0.8
-        AchievementUtil.improveClassCoverageByX(files, parameters, run, property, TaskListener.NULL,
-            additionalParameters) shouldBe true
+        scenario("Exactly enough coverage")
+        {
+            AchievementUtil.improveClassCoverageByX(files, parameters, run, property, TaskListener.NULL,
+                additionalParameters) shouldBe true
+        }
 
         every { challenge.solvedCoverage } returns 0.85
-        AchievementUtil.improveClassCoverageByX(files, parameters, run, property, TaskListener.NULL,
-            additionalParameters) shouldBe true
+        scenario("More than enough coverage")
+        {
+            AchievementUtil.improveClassCoverageByX(files, parameters, run, property, TaskListener.NULL,
+                additionalParameters) shouldBe true
+        }
 
         additionalParameters["maxCoverage"] = "0.15"
-        AchievementUtil.improveClassCoverageByX(files, parameters, run, property, TaskListener.NULL,
-            additionalParameters) shouldBe false
+        scenario("Upper boundary added, too much coverage increase")
+        {
+            AchievementUtil.improveClassCoverageByX(files, parameters, run, property, TaskListener.NULL,
+                additionalParameters) shouldBe false
+        }
 
         additionalParameters["maxCoverage"] = "0.2"
-        AchievementUtil.improveClassCoverageByX(files, parameters, run, property, TaskListener.NULL,
-            additionalParameters) shouldBe true
+        scenario("Upper boundary added, coverage increase in boundaries")
+        {
+            AchievementUtil.improveClassCoverageByX(files, parameters, run, property, TaskListener.NULL,
+                additionalParameters) shouldBe true
+        }
     }
 
-    @Test
-    fun improveProjectCoverageByX() {
+    feature("improve Project-Coverage By X") {
         additionalParameters.clear()
         mockkStatic(GitUtil::class)
         mockkStatic(User::class)
@@ -363,8 +514,11 @@ class AchievementUtilTest: AnnotationSpec() {
         every { GitUtil.mapUser(any(), userList) } returns user
         every { property.getUser() } returns user2
         parameters.workspace = path
-        AchievementUtil.improveProjectCoverageByX(files, parameters, run, property, TaskListener.NULL,
-            additionalParameters) shouldBe false
+        scenario("Wrong user")
+        {
+            AchievementUtil.improveProjectCoverageByX(files, parameters, run, property, TaskListener.NULL,
+                additionalParameters) shouldBe false
+        }
 
         every { property.getUser() } returns user
         val job = mockkClass(WorkflowJob::class)
@@ -376,107 +530,166 @@ class AchievementUtilTest: AnnotationSpec() {
         every { job.getProperty(any()) } returns jobProperty
         every { jobProperty.getStatistics() } returns statistics
         every { statistics.getLastRun("master") } returns null
-        AchievementUtil.improveProjectCoverageByX(files, parameters, run, property, TaskListener.NULL,
-            additionalParameters) shouldBe false
+        scenario("Last run is null")
+        {
+            AchievementUtil.improveProjectCoverageByX(files, parameters, run, property, TaskListener.NULL,
+                additionalParameters) shouldBe false
+        }
 
         val runEntry = mockkClass(Statistics.RunEntry::class)
         parameters.projectCoverage = 0.7
         every { runEntry.coverage } returns 0.6
         every { statistics.getLastRun("master") } returns runEntry
-        AchievementUtil.improveProjectCoverageByX(files, parameters, run, property, TaskListener.NULL,
-            additionalParameters) shouldBe false
+        scenario("No required amount specified")
+        {
+            AchievementUtil.improveProjectCoverageByX(files, parameters, run, property, TaskListener.NULL,
+                additionalParameters) shouldBe false
+        }
 
         additionalParameters["haveCoverage"] = "0.2"
-        AchievementUtil.improveProjectCoverageByX(files, parameters, run, property, TaskListener.NULL,
-            additionalParameters) shouldBe false
+        scenario("Not enough coverage increase")
+        {
+            AchievementUtil.improveProjectCoverageByX(files, parameters, run, property, TaskListener.NULL,
+                additionalParameters) shouldBe false
+        }
 
         additionalParameters["haveCoverage"] = "0.1"
-        AchievementUtil.improveProjectCoverageByX(files, parameters, run, property, TaskListener.NULL,
-            additionalParameters) shouldBe true
+        scenario("Exactly enough coverage increase")
+        {
+            AchievementUtil.improveProjectCoverageByX(files, parameters, run, property, TaskListener.NULL,
+                additionalParameters) shouldBe true
+        }
 
         additionalParameters["haveCoverage"] = "0.05"
-        AchievementUtil.improveProjectCoverageByX(files, parameters, run, property, TaskListener.NULL,
-            additionalParameters) shouldBe true
+        scenario("More than enough coverage increase")
+        {
+            AchievementUtil.improveProjectCoverageByX(files, parameters, run, property, TaskListener.NULL,
+                additionalParameters) shouldBe true
+        }
 
         additionalParameters["maxCoverage"] = "0.09"
-        AchievementUtil.improveProjectCoverageByX(files, parameters, run, property, TaskListener.NULL,
-            additionalParameters) shouldBe false
+        scenario("Upper boundary added, too much coverage increase")
+        {
+            AchievementUtil.improveProjectCoverageByX(files, parameters, run, property, TaskListener.NULL,
+                additionalParameters) shouldBe false
+        }
 
         additionalParameters["maxCoverage"] = "0.2"
-        AchievementUtil.improveProjectCoverageByX(files, parameters, run, property, TaskListener.NULL,
-            additionalParameters) shouldBe true
+        scenario("Upper boundary added, coverage increase in boundaries")
+        {
+            AchievementUtil.improveProjectCoverageByX(files, parameters, run, property, TaskListener.NULL,
+                additionalParameters) shouldBe true
+        }
     }
 
-    @Test
-    fun solveChallengeInXSeconds() {
+    feature("solve Challenge in X Seconds") {
         additionalParameters.clear()
         every { challenge.getSolved() } returns 100000000
         every { challenge.getCreated() } returns 10000000
-        AchievementUtil.solveChallengeInXSeconds(files, parameters, run, property, TaskListener.NULL,
-            additionalParameters) shouldBe false
+        scenario("No timeDifference specified")
+        {
+            AchievementUtil.solveChallengeInXSeconds(files, parameters, run, property, TaskListener.NULL,
+                additionalParameters) shouldBe false
+        }
 
         additionalParameters["timeDifference"] = "3600"
-        AchievementUtil.solveChallengeInXSeconds(files, parameters, run, property, TaskListener.NULL,
-            additionalParameters) shouldBe false
+        scenario("No minTimeDifference specified")
+        {
+            AchievementUtil.solveChallengeInXSeconds(files, parameters, run, property, TaskListener.NULL,
+                additionalParameters) shouldBe false
+        }
 
         additionalParameters["minTimeDifference"] = "3000"
-        AchievementUtil.solveChallengeInXSeconds(files, parameters, run, property, TaskListener.NULL,
-            additionalParameters) shouldBe false
+        scenario("Time difference to large")
+        {
+            AchievementUtil.solveChallengeInXSeconds(files, parameters, run, property, TaskListener.NULL,
+                additionalParameters) shouldBe false
+        }
 
         every { challenge.getCreated() } returns 99996400
-        AchievementUtil.solveChallengeInXSeconds(files, parameters, run, property, TaskListener.NULL,
-            additionalParameters) shouldBe false
+        scenario("Time difference to small")
+        {
+            AchievementUtil.solveChallengeInXSeconds(files, parameters, run, property, TaskListener.NULL,
+                additionalParameters) shouldBe false
+        }
 
         every { challenge.getCreated() } returns 96990000
-        AchievementUtil.solveChallengeInXSeconds(files, parameters, run, property, TaskListener.NULL,
-            additionalParameters) shouldBe true
+        scenario("Time difference in boundaries")
+        {
+            AchievementUtil.solveChallengeInXSeconds(files, parameters, run, property, TaskListener.NULL,
+                additionalParameters) shouldBe true
+        }
     }
 
-    @Test
-    fun solveFirstBuildFail() {
+    feature("solveFirstBuildFail") {
         additionalParameters.clear()
         val buildProperty = mockkClass(org.gamekins.GameUserProperty::class)
         every { buildProperty.getCompletedChallenges(any()) } returns CopyOnWriteArrayList(listOf())
-        AchievementUtil.solveFirstBuildFail(files, parameters, run, buildProperty, TaskListener.NULL,
-            additionalParameters) shouldBe false
+        scenario("No Build Challenge solved yet")
+        {
+            AchievementUtil.solveFirstBuildFail(files, parameters, run, buildProperty, TaskListener.NULL,
+                additionalParameters) shouldBe false
+        }
 
         val build = mockkClass(BuildChallenge::class)
         every { buildProperty.getCompletedChallenges(any()) } returns CopyOnWriteArrayList(listOf(build))
-        AchievementUtil.solveFirstBuildFail(files, parameters, run, buildProperty, TaskListener.NULL,
-            additionalParameters) shouldBe true
+        scenario("Build challenge solved before")
+        {
+            AchievementUtil.solveFirstBuildFail(files, parameters, run, buildProperty, TaskListener.NULL,
+                additionalParameters) shouldBe true
+        }
     }
 
-    @Test
-    fun solveXChallenges() {
+    feature("solve X Challenges") {
         additionalParameters.clear()
-        AchievementUtil.solveXChallenges(files, parameters, run, property, TaskListener.NULL,
-            additionalParameters) shouldBe false
+        scenario("No amount specified")
+        {
+            AchievementUtil.solveXChallenges(files, parameters, run, property, TaskListener.NULL,
+                additionalParameters) shouldBe false
+        }
 
         additionalParameters["solveNumber"] = "1"
-        AchievementUtil.solveXChallenges(files, parameters, run, property, TaskListener.NULL,
-            additionalParameters) shouldBe true
+        scenario("Enough solved challenges")
+        {
+            AchievementUtil.solveXChallenges(files, parameters, run, property, TaskListener.NULL,
+                additionalParameters) shouldBe true
+        }
 
         additionalParameters["solveNumber"] = "2"
-        AchievementUtil.solveXChallenges(files, parameters, run, property, TaskListener.NULL,
-            additionalParameters) shouldBe false
+        scenario("Not enough solved challenges")
+        {
+            AchievementUtil.solveXChallenges(files, parameters, run, property, TaskListener.NULL,
+                additionalParameters) shouldBe false
+        }
     }
 
-    @Test
-    fun solveXAtOnce() {
+    feature("solve X At Once") {
         additionalParameters.clear()
-        AchievementUtil.solveXAtOnce(files, parameters, run, property, TaskListener.NULL,
-            additionalParameters) shouldBe false
+        scenario("No amount specified")
+        {
+            AchievementUtil.solveXAtOnce(files, parameters, run, property, TaskListener.NULL,
+                additionalParameters) shouldBe false
+        }
 
         parameters.solved = 1
-        AchievementUtil.solveXAtOnce(files, parameters, run, property, TaskListener.NULL,
-            additionalParameters) shouldBe false
+        scenario("No amount specified, one challenge solved")
+        {
+            AchievementUtil.solveXAtOnce(files, parameters, run, property, TaskListener.NULL,
+                additionalParameters) shouldBe false
+        }
 
         additionalParameters["solveNumber"] = "1"
-        AchievementUtil.solveXAtOnce(files, parameters, run, property, TaskListener.NULL,
-            additionalParameters) shouldBe true
+        scenario("Exactly enough challenges solved")
+        {
+            AchievementUtil.solveXAtOnce(files, parameters, run, property, TaskListener.NULL,
+                additionalParameters) shouldBe true
+        }
 
         additionalParameters["solveNumber"] = "2"
-        AchievementUtil.solveXAtOnce(files, parameters, run, property, TaskListener.NULL,
-            additionalParameters) shouldBe false
+        scenario("Not enough challenges solved")
+        {
+            AchievementUtil.solveXAtOnce(files, parameters, run, property, TaskListener.NULL,
+                additionalParameters) shouldBe false
+        }
     }
-}
+})
