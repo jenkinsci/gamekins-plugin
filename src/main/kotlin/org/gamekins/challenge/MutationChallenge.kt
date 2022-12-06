@@ -125,6 +125,7 @@ class MutationChallenge(val details: SourceFileDetails, var data: MutationUtil.M
     //TODO: Improve performance because of multiple mutation runs
     override fun isSolvable(parameters: Constants.Parameters, run: Run<*, *>, listener: TaskListener): Boolean {
         if (details.parameters.branch != parameters.branch) return true
+        if (!details.update(parameters).filesExists()) return false
         if (!MutationUtil.executePIT(details, parameters, listener)) return false
         val mutationReport = FilePath(parameters.workspace.channel,
             parameters.workspace.remote + "/target/pit-reports/mutations.xml")

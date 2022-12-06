@@ -24,6 +24,7 @@ import io.kotest.core.spec.style.AnnotationSpec
 import io.kotest.matchers.shouldBe
 import io.mockk.*
 import org.gamekins.file.SourceFileDetails
+import org.gamekins.util.Constants
 import org.gamekins.util.Constants.Parameters
 import org.jsoup.nodes.Document
 
@@ -77,29 +78,55 @@ class MethodCoverageChallengeTest : AnnotationSpec() {
     @Test
     fun getScore() {
         challenge.getScore() shouldBe 2
+
         method = JacocoUtil.CoverageMethod(methodName, 10, 1, "")
         every { JacocoUtil.getNotFullyCoveredMethodEntries(any()) } returns arrayListOf(method)
         every { data.method } returns method
         challenge = MethodCoverageChallenge(data)
         challenge.getScore() shouldBe 3
-        challenge.toEscapedString()
+
+        challenge.toEscapedString() shouldBe "Write a test to cover more lines of method toString in class Challenge in package org.gamekins.challenge (created for branch master)"
+
         challenge.getName() shouldBe "Method Coverage"
     }
 
     @Test
     fun isSolvable() {
-        challenge.isSolvable(parameters, run, listener) shouldBe true
+        val solvableDetails = mockkClass(SourceFileDetails::class)
+        every { solvableDetails.jacocoSourceFile } returns details.jacocoSourceFile
+        every { solvableDetails.jacocoMethodFile } returns details.jacocoMethodFile
+        every { solvableDetails.parameters } returns parameters
+        every { solvableDetails.coverage } returns details.coverage
+        every { solvableDetails.fileName } returns details.fileName
+        every { solvableDetails.update(any()) } returns solvableDetails
+        every { solvableDetails.filesExists() } returns false
+        val solvableData = mockkClass(Challenge.ChallengeGenerationData::class)
+        every { solvableData.selectedFile } returns solvableDetails
+        every { solvableData.parameters } returns parameters
+        every { solvableData.method } returns data.method
+        val solvableChallenge = MethodCoverageChallenge(solvableData)
+        val newParameters = Parameters(branch = "stale")
+        solvableChallenge.isSolvable(newParameters, run, listener) shouldBe true
+
+        solvableChallenge.isSolvable(parameters, run, listener) shouldBe false
+
+        every { solvableDetails.filesExists() } returns true
+        solvableChallenge.isSolvable(parameters, run, listener) shouldBe true
+
         parameters.branch = branch
-        challenge.isSolvable(parameters, run, listener) shouldBe true
+        solvableChallenge.isSolvable(parameters, run, listener) shouldBe true
+
         val pathMock = mockkClass(FilePath::class)
         every { pathMock.exists() } returns true
         every { JacocoUtil.calculateCurrentFilePath(any(), any(), any()) } returns pathMock
-        challenge.isSolvable(parameters, run, listener) shouldBe false
+        solvableChallenge.isSolvable(parameters, run, listener) shouldBe false
+
         every { JacocoUtil.getMethodEntries(any()) } returns arrayListOf(method)
-        challenge.isSolvable(parameters, run, listener) shouldBe true
+        solvableChallenge.isSolvable(parameters, run, listener) shouldBe true
+
         method = JacocoUtil.CoverageMethod(methodName, 10, 0, "")
         every { JacocoUtil.getMethodEntries(any()) } returns arrayListOf(method)
-        challenge.isSolvable(parameters, run, listener) shouldBe false
+        solvableChallenge.isSolvable(parameters, run, listener) shouldBe false
     }
 
     @Test

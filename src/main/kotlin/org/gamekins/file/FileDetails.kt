@@ -80,6 +80,7 @@ abstract class FileDetails(var parameters: Parameters, val filePath: String)
         return true
     }
 
+    //TODO: Does not work on remote workers
     /**
      * Check whether the file exists.
      */

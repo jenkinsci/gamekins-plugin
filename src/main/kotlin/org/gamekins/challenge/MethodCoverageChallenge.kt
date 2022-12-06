@@ -77,6 +77,7 @@ class MethodCoverageChallenge(data: ChallengeGenerationData)
      */
     override fun isSolvable(parameters: Constants.Parameters, run: Run<*, *>, listener: TaskListener): Boolean {
         if (details.parameters.branch != parameters.branch) return true
+        if (!details.update(parameters).filesExists()) return false
 
         val jacocoMethodFile = JacocoUtil.calculateCurrentFilePath(parameters.workspace,
                 details.jacocoMethodFile, details.parameters.remote)

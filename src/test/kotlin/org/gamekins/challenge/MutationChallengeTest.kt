@@ -13,7 +13,7 @@ import io.mockk.mockkStatic
 import io.mockk.unmockkAll
 import org.gamekins.file.SourceFileDetails
 import org.gamekins.test.TestUtils
-import org.gamekins.util.Constants
+import org.gamekins.util.Constants.Parameters
 import org.gamekins.util.JacocoUtil
 import org.gamekins.util.MutationUtil
 import org.gamekins.util.MutationUtil.MutationData
@@ -38,7 +38,7 @@ class MutationChallengeTest : AnnotationSpec() {
             "<indexes><index>7</index></indexes><blocks><block>0</block></blocks><killingTest/>" +
             "<description>Replaced double multiplication with division</description></mutation>"
     private val listener = TaskListener.NULL
-    private val parameters = Constants.Parameters()
+    private val parameters = Parameters()
     private val branch = "master"
     private val coverage = 0.0
     private val run = mockkClass(Run::class)
@@ -192,25 +192,35 @@ class MutationChallengeTest : AnnotationSpec() {
 
     @Test
     fun isSolvable() {
-        val newParameters = Constants.Parameters(branch = "stale")
-        challenge.isSolvable(newParameters, run, listener) shouldBe true
+        val solvableDetails = mockkClass(SourceFileDetails::class)
+        every { solvableDetails.jacocoSourceFile } returns details.jacocoSourceFile
+        every { solvableDetails.parameters } returns parameters
+        every { solvableDetails.coverage } returns details.coverage
+        every { solvableDetails.fileName } returns details.fileName
+        every { solvableDetails.update(any()) } returns solvableDetails
+        every { solvableDetails.filesExists() } returns false
+        val solvableChallenge = MutationChallenge(solvableDetails, challenge.data)
+        val newParameters = Parameters(branch = "stale")
+        solvableChallenge.isSolvable(newParameters, run, listener) shouldBe true
 
-        newParameters.branch = branch
+        solvableChallenge.isSolvable(parameters, run, listener) shouldBe false
+
+        every { solvableDetails.filesExists() } returns true
         every { MutationUtil.executePIT(any(), any(), any()) } returns false
-        challenge.isSolvable(newParameters, run, listener) shouldBe false
+        solvableChallenge.isSolvable(parameters, run, listener) shouldBe false
 
         every { MutationUtil.executePIT(any(), any(), any()) } returns true
-        challenge.isSolvable(newParameters, run, listener) shouldBe true
+        solvableChallenge.isSolvable(parameters, run, listener) shouldBe true
 
-        newParameters.workspace = testProjectPath
-        challenge.isSolvable(newParameters, run, listener) shouldBe true
+        parameters.workspace = testProjectPath
+        solvableChallenge.isSolvable(parameters, run, listener) shouldBe true
 
         every { MutationUtil.getMutant(any(), any()) } returns null
-        challenge.isSolvable(newParameters, run, listener) shouldBe false
+        solvableChallenge.isSolvable(parameters, run, listener) shouldBe false
 
         val mutant = MutationData(line.replace("detected='false'", "detected='true'"))
         every { MutationUtil.getMutant(any(), any()) } returns mutant
-        challenge.isSolvable(newParameters, run, listener) shouldBe false
+        solvableChallenge.isSolvable(parameters, run, listener) shouldBe false
     }
 
     @Test
