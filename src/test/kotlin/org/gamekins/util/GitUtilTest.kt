@@ -90,9 +90,17 @@ class GitUtilTest : FeatureSpec({
     }
 
     feature("Get last changed classes") {
-        GitUtil.getLastChangedClasses("", parameters, TaskListener.NULL, arrayListOf(user)).size shouldBe 8
+        scenario("Search last commits")
+        {
+            GitUtil.getLastChangedClasses("", parameters, TaskListener.NULL, arrayListOf(user)).size shouldBe 8
+        }
+
         parameters.searchCommitCount = 1
-        GitUtil.getLastChangedClasses("", parameters, TaskListener.NULL, arrayListOf(user)) should beEmpty()
+        scenario("Search one commit")
+        {
+            GitUtil.getLastChangedClasses("", parameters, TaskListener.NULL, arrayListOf(user)) should beEmpty()
+        }
+
         parameters.searchCommitCount = 50
     }
 
@@ -129,15 +137,29 @@ class GitUtilTest : FeatureSpec({
         every { mailProperty1.address } returns mail
         every { user1.getProperty(UserProperty::class.java) } returns mailProperty1
 
-        GitUtil.getLastChangedClasses("", parameters, TaskListener.NULL, GitUtil.mapUsersToGameUsers(listOf(user1))).size shouldBe 8
-        GitUtil.getLastChangedClasses(headHash, parameters, TaskListener.NULL, GitUtil.mapUsersToGameUsers(listOf(user1))).size shouldBe 0
+        scenario("No Commit to search to specified")
+        {
+            GitUtil.getLastChangedClasses("", parameters, TaskListener.NULL, GitUtil.mapUsersToGameUsers(listOf(user1))).size shouldBe 8
+        }
+
+        scenario("Commit to search to is head")
+        {
+            GitUtil.getLastChangedClasses(headHash, parameters, TaskListener.NULL, GitUtil.mapUsersToGameUsers(listOf(user1))).size shouldBe 0
+        }
 
         val firstCommit = "d3f574e28542876d4cd243c2ac730a6b9eed8b2c"
-        //TODO: Should be 8, but see GitUtil.getDiffOfCommit()
-        GitUtil.getLastChangedClasses(firstCommit, parameters, TaskListener.NULL, GitUtil.mapUsersToGameUsers(listOf(user1))).size shouldBe 7
+        scenario("Search to first commit")
+        {
+            //TODO: Should be 8, but see GitUtil.getDiffOfCommit()
+            GitUtil.getLastChangedClasses(firstCommit, parameters, TaskListener.NULL, GitUtil.mapUsersToGameUsers(listOf(user1))).size shouldBe 7
+        }
 
         val commitHash = "02c7398664cc9a15508a2d96c2b10f341f1fa4de"
-        GitUtil.getLastChangedClasses(commitHash, parameters, TaskListener.NULL, GitUtil.mapUsersToGameUsers(listOf(user1))).size shouldBe 3
+
+        scenario("Search to specified commit")
+        {
+            GitUtil.getLastChangedClasses(commitHash, parameters, TaskListener.NULL, GitUtil.mapUsersToGameUsers(listOf(user1))).size shouldBe 3
+        }
     }
 
     feature("Get last changed tests of User") {
@@ -154,58 +176,92 @@ class GitUtilTest : FeatureSpec({
         every { mailProperty1.address } returns mail
         every { user1.getProperty(UserProperty::class.java) } returns mailProperty1
 
-        GitUtil.getLastChangedTestsOfUser("", parameters, TaskListener.NULL,  GitUtil.GameUser(user1), GitUtil.mapUsersToGameUsers(listOf(user1))).size shouldBe 4
-        GitUtil.getLastChangedTestsOfUser(headHash, parameters, TaskListener.NULL,  GitUtil.GameUser(user1), GitUtil.mapUsersToGameUsers(listOf(user1))).size shouldBe 0
+        scenario("No commit to search to specified")
+        {
+            GitUtil.getLastChangedTestsOfUser("", parameters, TaskListener.NULL,  GitUtil.GameUser(user1), GitUtil.mapUsersToGameUsers(listOf(user1))).size shouldBe 4
+        }
+
+        scenario("Commit to search to is head")
+        {
+            GitUtil.getLastChangedTestsOfUser(headHash, parameters, TaskListener.NULL,  GitUtil.GameUser(user1), GitUtil.mapUsersToGameUsers(listOf(user1))).size shouldBe 0
+        }
 
         val firstCommit = "d3f574e28542876d4cd243c2ac730a6b9eed8b2c"
-        GitUtil.getLastChangedTestsOfUser(firstCommit, parameters, TaskListener.NULL,  GitUtil.GameUser(user1), GitUtil.mapUsersToGameUsers(listOf(user1))).size shouldBe 4
+        scenario("Search to first commit")
+        {
+            GitUtil.getLastChangedTestsOfUser(firstCommit, parameters, TaskListener.NULL,  GitUtil.GameUser(user1), GitUtil.mapUsersToGameUsers(listOf(user1))).size shouldBe 4
+        }
 
         val commitHash = "da1e195773389f37ff5898b10e1708707e7208ac"
-        GitUtil.getLastChangedTestsOfUser(commitHash, parameters, TaskListener.NULL,  GitUtil.GameUser(user1), GitUtil.mapUsersToGameUsers(listOf(user1))).size shouldBe 3
+        scenario("Search to specified commit")
+        {
+            GitUtil.getLastChangedTestsOfUser(commitHash, parameters, TaskListener.NULL,  GitUtil.GameUser(user1), GitUtil.mapUsersToGameUsers(listOf(user1))).size shouldBe 3
+        }
     }
 
-    feature("map GameUser") {
+    feature("map to GameUser") {
         val ident = mockkClass(PersonIdent::class)
         every { ident.name } returns name
         every { ident.emailAddress } returns mail
 
-        GitUtil.mapUser(ident, arrayListOf<GitUtil.GameUser>()) shouldBe null
+        scenario("No GameUsers to map to")
+        {
+            GitUtil.mapUser(ident, arrayListOf<GitUtil.GameUser>()) shouldBe null
+        }
 
         val user1 = mockkClass(GitUtil.GameUser::class)
         every { user1.gitNames } returns hashSetOf()
         every { user1.fullName } returns ""
         every { user1.mail } returns ""
-        GitUtil.mapUser(ident, arrayListOf(user1)) shouldBe null
+        scenario("Only GameUser in List is empty")
+        {
+            GitUtil.mapUser(ident, arrayListOf(user1)) shouldBe null
+        }
 
         val user2 = mockkClass(GitUtil.GameUser::class)
         every { user2.gitNames } returns hashSetOf(name)
         every { user2.fullName } returns ""
         every { user2.mail } returns ""
-        GitUtil.mapUser(ident, arrayListOf(user1, user2)) shouldBe user2
+        scenario("Searched GameUser has git name")
+        {
+            GitUtil.mapUser(ident, arrayListOf(user1, user2)) shouldBe user2
+        }
 
         val user3 = mockkClass(GitUtil.GameUser::class)
         every { user3.gitNames } returns hashSetOf()
         every { user3.fullName } returns name
         every { user3.mail } returns ""
-        GitUtil.mapUser(ident, arrayListOf(user1, user3)) shouldBe user3
+        scenario("Searched GameUser has full name")
+        {
+            GitUtil.mapUser(ident, arrayListOf(user1, user3)) shouldBe user3
+        }
 
         val user4 = mockkClass(GitUtil.GameUser::class)
         every { user4.gitNames } returns hashSetOf()
         every { user4.fullName } returns ""
         every { user4.mail } returns mail
-        GitUtil.mapUser(ident, arrayListOf(user1, user4)) shouldBe user4
+        scenario("Searched GameUser has mail address")
+        {
+            GitUtil.mapUser(ident, arrayListOf(user1, user4)) shouldBe user4
+        }
     }
 
-    feature("map User") {
+    feature("map to User") {
         val ident = mockkClass(PersonIdent::class)
         every { ident.name } returns name
         every { ident.emailAddress } returns mail
 
-        GitUtil.mapUser(ident, listOf()) shouldBe null
+        scenario("No Users to map to")
+        {
+            GitUtil.mapUser(ident, listOf()) shouldBe null
+        }
 
         val user1 = mockkClass(hudson.model.User::class)
         every { user1.properties } returns mapOf()
-        GitUtil.mapUser(ident, listOf(user1)) shouldBe null
+        scenario("Only User has no properties")
+        {
+            GitUtil.mapUser(ident, listOf(user1)) shouldBe null
+        }
 
         val user2 = mockkClass(hudson.model.User::class)
         every { user2.properties } returns mapOf(
@@ -214,7 +270,10 @@ class GitUtilTest : FeatureSpec({
         every { user2.getProperty(org.gamekins.GameUserProperty::class.java) } returns null
         every { user2.fullName } returns ""
         every { user2.getProperty(UserProperty::class.java) } returns null
-        GitUtil.mapUser(ident, listOf(user1, user2)) shouldBe null
+        scenario("User is real User, but has no GameUserProperty")
+        {
+            GitUtil.mapUser(ident, listOf(user1, user2)) shouldBe null
+        }
 
         val user3 = mockkClass(hudson.model.User::class)
         every { user3.properties } returns mapOf(
@@ -225,7 +284,10 @@ class GitUtilTest : FeatureSpec({
         every { user3.getProperty(org.gamekins.GameUserProperty::class.java) } returns property3
         every { user3.fullName } returns ""
         every { user3.getProperty(UserProperty::class.java) } returns null
-        GitUtil.mapUser(ident, listOf(user1, user3)) shouldBe user3
+        scenario("Searched user has git name")
+        {
+            GitUtil.mapUser(ident, listOf(user1, user3)) shouldBe user3
+        }
 
         val user4 = mockkClass(hudson.model.User::class)
         every { user4.properties } returns mapOf(
@@ -236,7 +298,10 @@ class GitUtilTest : FeatureSpec({
         every { user4.getProperty(org.gamekins.GameUserProperty::class.java) } returns property4
         every { user4.fullName } returns name
         every { user4.getProperty(UserProperty::class.java) } returns null
-        GitUtil.mapUser(ident, listOf(user1, user4)) shouldBe user4
+        scenario("Searched user has full name")
+        {
+            GitUtil.mapUser(ident, listOf(user1, user4)) shouldBe user4
+        }
 
         val user5 = mockkClass(hudson.model.User::class)
         every { user5.properties } returns mapOf(
@@ -247,7 +312,10 @@ class GitUtilTest : FeatureSpec({
         every { user5.getProperty(org.gamekins.GameUserProperty::class.java) } returns property5
         every { user5.fullName } returns ""
         every { user5.getProperty(UserProperty::class.java) } returns null
-        GitUtil.mapUser(ident, listOf(user1, user5)) shouldBe null
+        scenario("No User fits Ident")
+        {
+            GitUtil.mapUser(ident, listOf(user1, user5)) shouldBe null
+        }
 
         val user6 = mockkClass(hudson.model.User::class)
         every { user6.properties } returns mapOf(
@@ -260,7 +328,10 @@ class GitUtilTest : FeatureSpec({
         val mailProperty6 = mockkClass(UserProperty::class)
         every { mailProperty6.address } returns mail
         every { user6.getProperty(UserProperty::class.java) } returns mailProperty6
-        GitUtil.mapUser(ident, listOf(user1, user6)) shouldBe user6
+        scenario("Searched user has mail address")
+        {
+            GitUtil.mapUser(ident, listOf(user1, user6)) shouldBe user6
+        }
 
         val user7 = mockkClass(hudson.model.User::class)
         every { user7.properties } returns mapOf(
@@ -273,7 +344,10 @@ class GitUtilTest : FeatureSpec({
         val mailProperty7 = mockkClass(UserProperty::class)
         every { mailProperty7.address } returns ""
         every { user7.getProperty(UserProperty::class.java) } returns mailProperty7
-        GitUtil.mapUser(ident, listOf(user1, user7)) shouldBe null
+        scenario("User has UserProperty, but it is empty")
+        {
+            GitUtil.mapUser(ident, listOf(user1, user7)) shouldBe null
+        }
     }
 
     feature("map Users to GameUsers") {
@@ -316,23 +390,44 @@ class GitUtilTest : FeatureSpec({
         every { user1.getProperty(UserProperty::class.java) } returns mailProperty1
         val gameUser1 = GitUtil.mapUsersToGameUsers(listOf(user1, user1))[0]
 
-        (gameUser1 == gameUser1) shouldBe true
-        gameUser1.equals(null) shouldBe false
-        gameUser1.equals(user1) shouldBe false
-        (gameUser1 == user) shouldBe true
+        scenario("Should be equal self")
+        {
+            (gameUser1 == gameUser1) shouldBe true
+        }
+        scenario("Should not be equal to null")
+        {
+            gameUser1.equals(null) shouldBe false
+        }
+        scenario("Should not be equal to object of other class")
+        {
+            gameUser1.equals(user1) shouldBe false
+        }
+        scenario("Should be equal to object with identical values")
+        {
+            (gameUser1 == user) shouldBe true
+        }
 
         mockkStatic(User::class)
         every { User.getAll() } returns listOf(user1)
-        gameUser1.getUser() shouldBe user1
+        scenario("Find affiliated User")
+        {
+            gameUser1.getUser() shouldBe user1
+        }
 
         every { user1.properties } returns mapOf()
-        gameUser1.getUser() shouldBe null
+        scenario("Affiliated User not real User")
+        {
+            gameUser1.getUser() shouldBe null
+        }
 
         every { user1.properties } returns mapOf(
                 mockkClass(hudson.security.HudsonPrivateSecurityRealm.Details.DescriptorImpl::class) to
                         mockkClass(hudson.security.HudsonPrivateSecurityRealm.Details::class))
         every { user1.id } returns "sample"
-        gameUser1.getUser() shouldBe null
+        scenario("No affiliated user found")
+        {
+            gameUser1.getUser() shouldBe null
+        }
     }
 
     feature("test DiffFromHeadCallable") {
@@ -347,9 +442,16 @@ class GitUtilTest : FeatureSpec({
 
     feature("test GetChangedClsSinceLastStoredCommit") {
         unmockkAll()
-        GitUtil.getChangedClsSinceLastStoredCommit(path, "4a642f65855c8a6d28a1602258ebfde143df52e4",
-            "org.example") shouldBe listOf()
-        GitUtil.getChangedClsSinceLastStoredCommit(path, "123",
-            "org.example") shouldBe null
+        scenario("Commit with specified ID exists")
+        {
+            GitUtil.getChangedClsSinceLastStoredCommit(path, "4a642f65855c8a6d28a1602258ebfde143df52e4",
+                "org.example") shouldBe listOf()
+        }
+
+        scenario("No commit with specified ID exists")
+        {
+            GitUtil.getChangedClsSinceLastStoredCommit(path, "123",
+                "org.example") shouldBe null
+        }
     }
 })
