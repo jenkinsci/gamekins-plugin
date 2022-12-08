@@ -132,7 +132,7 @@ class Quest(val name: String, val steps: ArrayList<QuestStep>) {
             print += "\n"
         }
         print += "$indentation    </QuestSteps>\n"
-        print += "</Quest>"
+        print += "$indentation</Quest>"
         return print
     }
 
