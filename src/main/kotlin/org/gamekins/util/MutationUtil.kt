@@ -56,7 +56,7 @@ object MutationUtil {
             .start()
         val output = process.inputStream.bufferedReader().readText()
         if (output.contains("BUILD FAILURE")) return false
-        listener.logger.println(output)
+        if (parameters.showPitOutput) listener.logger.println(output)
         pom.write(oldPomContent, null)
         return true
     }

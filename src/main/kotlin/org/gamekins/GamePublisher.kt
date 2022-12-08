@@ -212,6 +212,8 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
                 .searchCommitCount
             parameters.pitConfiguration = project.properties.get(GameMultiBranchProperty::class.java)
                 .pitConfiguration
+            parameters.showPitOutput = project.properties.get(GameMultiBranchProperty::class.java)
+                .showPitOutput
         } else {
             if (run.parent.getProperty(GameJobProperty::class.java) == null
                 || !run.parent.getProperty(GameJobProperty::class.java).activated
@@ -230,6 +232,8 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
                 .searchCommitCount
             parameters.pitConfiguration = run.parent.getProperty(GameJobProperty::class.java)
                 .pitConfiguration
+            parameters.showPitOutput = run.parent.getProperty(GameJobProperty::class.java)
+                .showPitOutput
         }
 
         executePublisher(run, parameters, run.result, listener)

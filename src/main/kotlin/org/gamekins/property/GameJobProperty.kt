@@ -47,7 +47,8 @@ class GameJobProperty
                                   @set:DataBoundSetter var currentStoredChallengesCount: Int,
                                   @set:DataBoundSetter var canSendChallenge: Boolean,
                                   @set:DataBoundSetter var searchCommitCount: Int,
-                                  @set:DataBoundSetter var pitConfiguration: String)
+                                  @set:DataBoundSetter var pitConfiguration: String,
+                                  @set:DataBoundSetter var showPitOutput: Boolean)
     : JobProperty<Job<*, *>>(), GameProperty, StaplerProxy {
 
     private var statistics: Statistics
@@ -119,6 +120,7 @@ class GameJobProperty
         if (currentStoredChallengesCount < 0) currentStoredChallengesCount = Constants.Default.STORED_CHALLENGES
         if (searchCommitCount <= 0) searchCommitCount = Constants.Default.SEARCH_COMMIT_COUNT
         if (pitConfiguration.isNullOrEmpty()) pitConfiguration = Constants.Default.PIT_CONFIGURATION
+        if (showPitOutput == null) showPitOutput = Constants.Default.SHOW_PIT_OUTPUT
 
         return this
     }
@@ -145,6 +147,7 @@ class GameJobProperty
             if (formData.getValue(Constants.FormKeys.SEARCH_COMMIT_COUNT) is String)
                 searchCommitCount = formData.getInt(Constants.FormKeys.SEARCH_COMMIT_COUNT)
             pitConfiguration = formData.getString(Constants.FormKeys.PIT_CONFIGURATION)
+            showPitOutput = formData.getBoolean(Constants.FormKeys.SHOW_PIT_OUTPUT)
         }
 
         PropertyUtil.reconfigure(owner, showLeaderboard, showStatistics)

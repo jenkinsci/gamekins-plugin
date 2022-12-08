@@ -58,6 +58,8 @@ object Constants {
         const val SEARCH_COMMIT_COUNT = "searchCommitCount"
 
         const val PIT_CONFIGURATION = "pitConfiguration"
+
+        const val SHOW_PIT_OUTPUT = "showPitOutput"
     }
 
     /**
@@ -96,6 +98,8 @@ object Constants {
                         "       </targetClasses>\n" +
                         "   </configuration>\n" +
                         "</plugin>"
+
+        const val SHOW_PIT_OUTPUT = false
     }
 
     /**
@@ -215,6 +219,7 @@ object Constants {
         var storedChallengesCount: Int = Default.STORED_CHALLENGES,
         var searchCommitCount: Int = Default.SEARCH_COMMIT_COUNT,
         var pitConfiguration: String = Default.PIT_CONFIGURATION,
+        var showPitOutput: Boolean = Default.SHOW_PIT_OUTPUT,
         var generated: Int = 0,
         var jacocoCSVPath: String = "",
         var jacocoResultsPath: String = "",
@@ -242,6 +247,8 @@ object Constants {
             if (remote == null) remote = ""
             if (workspace == null) workspace = FilePath(null, remote)
             if (currentQuestsCount == null) currentQuestsCount = Default.CURRENT_QUESTS
+            if (pitConfiguration == null) pitConfiguration = Default.PIT_CONFIGURATION
+            if (showPitOutput ==null) showPitOutput = Default.SHOW_PIT_OUTPUT
             return this
         }
     }

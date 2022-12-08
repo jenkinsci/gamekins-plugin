@@ -54,7 +54,8 @@ class GameMultiBranchProperty
                                   @set:DataBoundSetter var currentStoredChallengesCount: Int,
                                   @set:DataBoundSetter var canSendChallenge: Boolean,
                                   @set:DataBoundSetter var searchCommitCount: Int,
-                                  @set:DataBoundSetter var pitConfiguration: String)
+                                  @set:DataBoundSetter var pitConfiguration: String,
+                                  @set:DataBoundSetter var showPitOutput: Boolean)
     : AbstractFolderProperty<AbstractFolder<*>?>(), GameProperty, StaplerProxy {
 
     private var statistics: Statistics
@@ -110,6 +111,7 @@ class GameMultiBranchProperty
         if (currentStoredChallengesCount < 0) currentStoredChallengesCount = Constants.Default.STORED_CHALLENGES
         if (searchCommitCount <= 0) searchCommitCount = Constants.Default.SEARCH_COMMIT_COUNT
         if (pitConfiguration.isNullOrEmpty()) pitConfiguration = Constants.Default.PIT_CONFIGURATION
+        if (showPitOutput == null) showPitOutput = Constants.Default.SHOW_PIT_OUTPUT
 
         return this
     }
@@ -136,6 +138,7 @@ class GameMultiBranchProperty
             if (formData.getValue(Constants.FormKeys.SEARCH_COMMIT_COUNT) is String)
                 searchCommitCount = formData.getInt(Constants.FormKeys.SEARCH_COMMIT_COUNT)
             pitConfiguration = formData.getString(Constants.FormKeys.PIT_CONFIGURATION)
+            showPitOutput = formData.getBoolean(Constants.FormKeys.SHOW_PIT_OUTPUT)
         }
         
         PropertyUtil.reconfigure(owner!!, showLeaderboard, showStatistics)
@@ -287,7 +290,8 @@ class GameMultiBranchProperty
                 formData.getBoolean(Constants.FormKeys.CAN_SEND_CHALLENGE),
                 if (formData.getValue(Constants.FormKeys.SEARCH_COMMIT_COUNT) is Int)
                     formData.getInt(Constants.FormKeys.SEARCH_COMMIT_COUNT) else Constants.Default.SEARCH_COMMIT_COUNT,
-                formData.getString(Constants.FormKeys.PIT_CONFIGURATION)
+                formData.getString(Constants.FormKeys.PIT_CONFIGURATION),
+                formData.getBoolean(Constants.FormKeys.SHOW_PIT_OUTPUT)
             )
         }
     }

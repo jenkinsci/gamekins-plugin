@@ -71,6 +71,9 @@
             <f:entry title="Configuration for PIT" field="pitConfiguration">
                 <f:textarea />
             </f:entry>
+            <f:entry title="Show PIT output in console output" field="showPitOutput">
+                <f:checkbox />
+            </f:entry>
         </f:advanced>
     </f:section>
 
