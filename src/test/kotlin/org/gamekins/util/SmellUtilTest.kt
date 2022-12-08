@@ -1,7 +1,7 @@
 package org.gamekins.util
 
 import hudson.FilePath
-import io.kotest.core.spec.style.AnnotationSpec
+import io.kotest.core.spec.style.FeatureSpec
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -12,34 +12,31 @@ import org.gamekins.file.SourceFileDetails
 import org.gamekins.test.TestUtils
 import java.io.File
 
-class SmellUtilTest : AnnotationSpec() {
+class SmellUtilTest : FeatureSpec({
 
-    private lateinit var root : String
-    private lateinit var path : FilePath
-    private val shortJacocoPath = "**/target/site/jacoco/"
-    private val shortJacocoCSVPath = "**/target/site/jacoco/jacoco.csv"
-    private val mocoJSONPath = "**/target/site/moco/mutation/"
+    lateinit var root : String
+    lateinit var path : FilePath
+    val shortJacocoPath = "**/target/site/jacoco/"
+    val shortJacocoCSVPath = "**/target/site/jacoco/jacoco.csv"
+    val mocoJSONPath = "**/target/site/moco/mutation/"
 
-    @BeforeAll
-    fun initAll() {
+    beforeSpec {
         //Needed because of bug in mockk library which does not release mocked objects
         mockkStatic(SmellUtil::class)
         val rootDirectory = javaClass.classLoader.getResource("test-project.zip")
         rootDirectory shouldNotBe null
-        root = rootDirectory.file.removeSuffix(".zip")
+        root = rootDirectory!!.file.removeSuffix(".zip")
         root shouldEndWith "test-project"
         TestUtils.unzip("$root.zip", root)
         path = FilePath(null, root)
     }
 
-    @AfterAll
-    fun cleanUp() {
+    afterSpec {
         unmockkAll()
         File(root).deleteRecursively()
     }
 
-    @Test
-    fun getSmellsOfFile() {
+    feature("getSmellsOfFile") {
         val parameters = Constants.Parameters()
         parameters.jacocoResultsPath = shortJacocoPath
         parameters.jacocoCSVPath = shortJacocoCSVPath
@@ -47,14 +44,19 @@ class SmellUtilTest : AnnotationSpec() {
         parameters.workspace = path
         var file = SourceFileDetails(parameters, "/src/main/java/com/example/Calculator.java")
 
-        SmellUtil.getSmellsOfFile(file) shouldHaveSize 0
+        scenario("Smells of Calculator.java")
+        {
+            SmellUtil.getSmellsOfFile(file) shouldHaveSize 0
+        }
 
         file = SourceFileDetails(parameters, "/src/main/java/com/example/Complex.java")
-        SmellUtil.getSmellsOfFile(file) shouldHaveSize 9
+        scenario("Smells of Complex.java")
+        {
+            SmellUtil.getSmellsOfFile(file) shouldHaveSize 9
+        }
     }
 
-    @Test
-    fun getLineContent() {
+    feature("getLineContent") {
         val parameters = Constants.Parameters()
         parameters.jacocoResultsPath = shortJacocoPath
         parameters.jacocoCSVPath = shortJacocoCSVPath
@@ -74,18 +76,39 @@ class SmellUtilTest : AnnotationSpec() {
                 "  }\n" +
                 "}\n"
 
-        SmellUtil.getLineContent(file, null, null) shouldBe content
+        scenario("No startLine and endLine given")
+        {
+            SmellUtil.getLineContent(file, null, null) shouldBe content
+        }
 
-        SmellUtil.getLineContent(file, 1, null) shouldBe content
+        scenario("No endLine given")
+        {
+            SmellUtil.getLineContent(file, 1, null) shouldBe content
+        }
 
-        SmellUtil.getLineContent(file, null, 2) shouldBe content
+        scenario("No startLine given")
+        {
+            SmellUtil.getLineContent(file, null, 2) shouldBe content
+        }
 
-        SmellUtil.getLineContent(file, 1, 1) shouldBe "package com.example;"
+        scenario("Get first line")
+        {
+            SmellUtil.getLineContent(file, 1, 1) shouldBe "package com.example;"
+        }
 
-        SmellUtil.getLineContent(file, 1, 2) shouldBe "package com.example;\n"
+        scenario("get first and second line")
+        {
+            SmellUtil.getLineContent(file, 1, 2) shouldBe "package com.example;\n"
+        }
 
-        SmellUtil.getLineContent(file, 0, 1) shouldBe "package com.example;"
+        scenario("Get first line by starting from line 0, but lines are indexed from 1")
+        {
+            SmellUtil.getLineContent(file, 0, 1) shouldBe "package com.example;"
+        }
 
-        SmellUtil.getLineContent(file, 2, 3) shouldBe "\npublic class Calculator {"
+        scenario("Get second and third line")
+        {
+            SmellUtil.getLineContent(file, 2, 3) shouldBe "\npublic class Calculator {"
+        }
     }
-}
+})
