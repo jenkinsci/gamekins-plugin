@@ -53,6 +53,16 @@
             <groupId>org.jetbrains.kotlin</groupId>
             <artifactId>kotlin-stdlib</artifactId>
             <version>${kotlin.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.jetbrains.kotlin</groupId>
+                    <artifactId>kotlin-stdlib-common</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.jetbrains</groupId>
+                    <artifactId>annotations</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <!-- https://mvnrepository.com/artifact/io.kotest/kotest-runner-junit5-jvm -->
         <dependency>
@@ -67,6 +77,14 @@
             <version>${kotlin.version}</version>
             <scope>test</scope>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.jetbrains.kotlin/kotlin-reflect -->
+        <dependency>
+            <groupId>org.jetbrains.kotlin</groupId>
+            <artifactId>kotlin-reflect</artifactId>
+            <version>${kotlin.version}</version>
+            <scope>compile</scope>
+        </dependency>
+
 
         <!-- Jenkins dependencies -->
         <dependency>
@@ -184,12 +202,36 @@
             <groupId>org.eclipse.jgit</groupId>
             <artifactId>org.eclipse.jgit</artifactId>
             <version>6.3.0.202209071007-r</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.googlecode.javaewah</groupId>
+                    <artifactId>JavaEWAH</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <!-- Mutation Test dependencies -->
         <dependency>
             <groupId>com.fasterxml.jackson.module</groupId>
             <artifactId>jackson-module-kotlin</artifactId>
             <version>2.14.0</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.fasterxml.jackson.core</groupId>
+                    <artifactId>jackson-annotations</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.fasterxml.jackson.core</groupId>
+                    <artifactId>jackson-core</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.fasterxml.jackson.core</groupId>
+                    <artifactId>jackson-databind</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.sonarsource.sonarlint.core/sonarlint-core -->
         <dependency>
@@ -215,6 +257,98 @@
                     <groupId>org.osgi.service</groupId>
                     <artifactId>org.osgi.service.prefs</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>com.fasterxml.staxmat</groupId>
+                    <artifactId>staxmate</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.tomcat.embed</groupId>
+                    <artifactId>tomcat-embed-core</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.tomcat.embed</groupId>
+                    <artifactId>tomcat-embed-el</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.tomcat.embed</groupId>
+                    <artifactId>tomcat-embed-jasper</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.tomcat</groupId>
+                    <artifactId>tomcat-annotations-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.codehaus.woodstox</groupId>
+                    <artifactId>stax2-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.eclipse.jdt</groupId>
+                    <artifactId>org.eclipse.jdt.core</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.fasterxml.staxmate</groupId>
+                    <artifactId>staxmate</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.sonarsource.analyzer-commons</groupId>
+                    <artifactId>sonar-analyzer-commons</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.sonarsource.analyzer-commons</groupId>
+                    <artifactId>sonar-analyzer-recognizers</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.sonarsource.analyzer-commons</groupId>
+                    <artifactId>sonar-performance-measure</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.sonarsource.analyzer-commons</groupId>
+                    <artifactId>sonar-regex-parsing</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.sonarsource.analyzer-commons</groupId>
+                    <artifactId>sonar-xml-parsing</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.sonarsource.java</groupId>
+                    <artifactId>external-reports</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.sonarsource.java</groupId>
+                    <artifactId>java-checks</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.sonarsource.java</groupId>
+                    <artifactId>java-frontend</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.sonarsource.java</groupId>
+                    <artifactId>java-jsp</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.sonarsource.java</groupId>
+                    <artifactId>java-surefire</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.sonarsource.java</groupId>
+                    <artifactId>java-symbolic-execution</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.sonarsource.java</groupId>
+                    <artifactId>jdt</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.sonarsource.sslr</groupId>
+                    <artifactId>sslr-core</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>xerces</groupId>
+                    <artifactId>xercesImpl</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>xml-apis</groupId>
+                    <artifactId>xml-apis</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <!-- https://mvnrepository.com/artifact/jakarta.mail/jakarta.mail-api -->
@@ -222,6 +356,12 @@
             <groupId>jakarta.mail</groupId>
             <artifactId>jakarta.mail-api</artifactId>
             <version>2.1.0</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>jakarta.activation</groupId>
+                    <artifactId>jakarta.activation-api</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
     </dependencies>
