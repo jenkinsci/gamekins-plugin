@@ -57,7 +57,6 @@ class PublisherUtilTest : AnnotationSpec() {
     private lateinit var path : FilePath
     private val jacocoResultsPath = "**/target/site/jacoco/"
     private val jacocoCSVPath = "**/target/site/jacoco/jacoco.csv"
-    private val mocoJSONPath = "**/target/moco/mutation/moco.json"
     private val run = mockkClass(hudson.model.Run::class)
     private val parameters = Parameters()
     private val job = mockkClass(Job::class)
@@ -211,34 +210,6 @@ class PublisherUtilTest : AnnotationSpec() {
 
         PublisherUtil.doCheckJacocoCSVPath(pathLinux, jacocoCSVPath) shouldBe true
         PublisherUtil.doCheckJacocoCSVPath(pathWin, jacocoCSVPath) shouldBe true
-    }
-
-    @Test
-    fun doCheckMocoJSONPath() {
-        PublisherUtil.doCheckMocoJSONPath(path, mocoJSONPath) shouldBe false
-        PublisherUtil.doCheckMocoJSONPath(FilePath(null, path.remote + "/src"), mocoJSONPath) shouldBe false
-    }
-
-    @Test
-    fun doCheckMocoJSONPathOSCompatibility() {
-        val filepathWin = mockkClass(FilePath::class)
-        val pathWin = mockkClass(FilePath::class)
-        val listWin = ArrayList<FilePath>()
-        listWin.add(filepathWin)
-
-        val filepathLinux = mockkClass(FilePath::class)
-        val pathLinux = mockkClass(FilePath::class)
-        val listLinux = ArrayList<FilePath>()
-        listLinux.add(filepathLinux)
-
-        every { pathWin.act(any<JacocoUtil.FilesOfAllSubDirectoriesCallable>()) } returns listWin
-        every { filepathWin.remote } returns mocoJSONPath.replace('/', '\\')
-
-        every { pathLinux.act(any<JacocoUtil.FilesOfAllSubDirectoriesCallable>()) } returns listLinux
-        every { filepathLinux.remote } returns mocoJSONPath
-
-        PublisherUtil.doCheckMocoJSONPath(pathLinux, mocoJSONPath) shouldBe true
-        PublisherUtil.doCheckMocoJSONPath(pathWin, mocoJSONPath) shouldBe true
     }
 
     @Test

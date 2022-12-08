@@ -115,18 +115,6 @@ class ClassCoverageChallenge(data: Challenge.ChallengeGenerationData)
         return false
     }
 
-    /**
-     * Called by Jenkins after the object has been created from his XML representation. Used for data migration.
-     */
-    @Suppress("unused", "SENSELESS_COMPARISON")
-    private fun readResolve(): Any {
-        if (details == null && classDetails != null) {
-            details = SourceFileDetails.classDetailsToSourceFileDetails(classDetails)
-        }
-
-        return this
-    }
-
     override fun toString(): String {
         return ("Write a test to cover more lines in class <b>" + details.fileName
                 + "</b> in package <b>" + details.packageName + "</b> (created for branch "

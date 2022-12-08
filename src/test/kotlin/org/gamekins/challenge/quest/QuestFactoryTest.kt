@@ -268,13 +268,9 @@ class QuestFactoryTest : AnnotationSpec() {
         val sourceDetail = mockkClass(SourceFileDetails::class)
         every { sourceDetail.filesExists() } returns true
         classes.add(sourceDetail)
-        every { ChallengeFactory.generateMutationTestChallenge(any(), any(), any(), any(), any(), any()) } returns null
+
         QuestFactory.generateMutationQuest(user, property, parameters, listener, classes) shouldBe null
 
-        val mutationChallenge1 = mockkClass(MutationTestChallenge::class)
-        val mutationChallenge2 = mockkClass(MutationTestChallenge::class)
-        val mutationChallenge3 = mockkClass(MutationTestChallenge::class)
-        every { ChallengeFactory.generateMutationTestChallenge(any(), any(), any(), any(), any(), any()) } returns mutationChallenge1 andThen mutationChallenge2 andThen mutationChallenge3
         QuestFactory.generateMutationQuest(user, property, parameters, listener, classes)!!.name shouldBe "Coverage is not everything - Solve three Mutation Test Challenges"
     }
 

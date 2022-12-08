@@ -41,7 +41,7 @@ import javax.annotation.Nonnull
  * Class that is called after the build of a job in Jenkins is finished. This one executes the main functionality of
  * Gamekins by creating and solving [Challenge]s.
  *
- * [jacocoResultsPath], [jacocoCSVPath], and [mocoJSONPath] must be of type String?, as Jenkins wants to instantiate the
+ * [jacocoResultsPath] and [jacocoCSVPath] must be of type String?, as Jenkins wants to instantiate the
  * [GamePublisher] with null when Gamekins is not activated.
  *
  * @author Philipp Straubinger
@@ -49,12 +49,8 @@ import javax.annotation.Nonnull
  */
 
 class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var jacocoResultsPath: String?,
-                                                      @set:DataBoundSetter var jacocoCSVPath: String?,
-                                                      mocoJSONPath: String?)
+                                                      @set:DataBoundSetter var jacocoCSVPath: String?)
     : Notifier(), SimpleBuildStep, StaplerProxy {
-
-    @set:DataBoundSetter
-    var mocoJSONPath: String = mocoJSONPath ?: ""
 
     override fun getTarget(): Any {
         return this
@@ -78,13 +74,6 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
         if (!PublisherUtil.doCheckJacocoCSVPath(parameters.workspace, parameters.jacocoCSVPath)) {
             listener.logger.println("[Gamekins] JaCoCo csv file could not be found")
             return
-        }
-        if (!PublisherUtil.doCheckMocoJSONPath(parameters.workspace, parameters.mocoJSONPath)) {
-            parameters.mocoJSONPath = ""
-            listener.logger.println("[Gamekins] MoCo JSON file could not be found, mutation test challenge will " +
-                    "not be generated")
-            listener.logger.println("[Gamekins] Please check moco.json file path configuration to enable mutation " +
-                    "test challenge feature")
         }
 
         //Extracts the branch
@@ -164,7 +153,7 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
         }
 
         val parameters = Parameters(jacocoCSVPath = jacocoCSVPath!!, jacocoResultsPath = jacocoResultsPath!!,
-            mocoJSONPath = mocoJSONPath, workspace = build.workspace!!)
+            workspace = build.workspace!!)
         parameters.projectName = build.project.fullName
         parameters.currentChallengesCount = build.project.getProperty(GameJobProperty::class.java)
             .currentChallengesCount
@@ -192,7 +181,7 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
     ) {
 
         val parameters = Parameters(jacocoCSVPath = jacocoCSVPath!!,
-            jacocoResultsPath = jacocoResultsPath!!, mocoJSONPath = mocoJSONPath, workspace = workspace)
+            jacocoResultsPath = jacocoResultsPath!!, workspace = workspace)
         if (run.parent.parent is WorkflowMultiBranchProject) {
             val project = run.parent.parent as WorkflowMultiBranchProject
             if (project.properties.get(GameMultiBranchProperty::class.java) == null

@@ -24,7 +24,6 @@ import io.kotest.core.spec.style.AnnotationSpec
 import io.kotest.matchers.shouldBe
 import io.mockk.*
 import org.gamekins.file.SourceFileDetails
-import org.gamekins.util.Constants
 import org.gamekins.util.Constants.Parameters
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
@@ -37,7 +36,6 @@ class LineCoverageChallengeTest : AnnotationSpec() {
     private val shortFilePath = "src/main/java/org/gamekins/challenge/$className.kt"
     private val shortJacocoPath = "**/target/site/jacoco/"
     private val shortJacocoCSVPath = "**/target/site/jacoco/csv"
-    private val mocoJSONPath = "**/target/site/moco/mutation/"
     private lateinit var details : SourceFileDetails
     private lateinit var challenge : LineCoverageChallenge
     private val document = mockkClass(Document::class)
@@ -56,7 +54,6 @@ class LineCoverageChallengeTest : AnnotationSpec() {
         parameters.workspace = path
         parameters.jacocoResultsPath = shortJacocoPath
         parameters.jacocoCSVPath = shortJacocoCSVPath
-        parameters.mocoJSONPath = mocoJSONPath
         mockkStatic(JacocoUtil::class)
         every { JacocoUtil.calculateCurrentFilePath(any(), any()) } returns path
         every { JacocoUtil.getCoverageInPercentageFromJacoco(any(), any()) } returns coverage

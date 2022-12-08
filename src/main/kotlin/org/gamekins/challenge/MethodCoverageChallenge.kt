@@ -149,9 +149,6 @@ class MethodCoverageChallenge(data: ChallengeGenerationData)
     @Suppress("unused", "SENSELESS_COMPARISON")
     private fun readResolve(): Any {
         if (codeSnippet == null) codeSnippet = ""
-        if (details == null && classDetails != null) {
-            details = SourceFileDetails.classDetailsToSourceFileDetails(classDetails)
-        }
 
         return this
     }

@@ -34,7 +34,6 @@ class CoverageChallengeTest : AnnotationSpec() {
     private val shortFilePath = "src/main/java/io/jenkins/plugins/gamekins/challenge/$className.kt"
     private val shortJacocoPath = "**/target/site/jacoco/"
     private val shortJacocoCSVPath = "**/target/site/jacoco/csv"
-    private val mocoJSONPath = "**/target/site/moco/mutation/"
     private lateinit var details : SourceFileDetails
     private lateinit var challenge : ClassCoverageChallenge
     private val coverage = 0.0
@@ -57,7 +56,6 @@ class CoverageChallengeTest : AnnotationSpec() {
         parameters.workspace = path
         parameters.jacocoResultsPath = shortJacocoPath
         parameters.jacocoCSVPath = shortJacocoCSVPath
-        parameters.mocoJSONPath = mocoJSONPath
         details = SourceFileDetails(parameters, shortFilePath, TaskListener.NULL)
         val data = mockkClass(Challenge.ChallengeGenerationData::class)
         every { data.selectedFile } returns details

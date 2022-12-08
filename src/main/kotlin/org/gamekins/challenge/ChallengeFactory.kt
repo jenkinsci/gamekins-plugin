@@ -27,12 +27,6 @@ import org.gamekins.event.EventHandler
 import org.gamekins.event.user.ChallengeGeneratedEvent
 import org.gamekins.file.FileDetails
 import org.gamekins.file.SourceFileDetails
-import org.gamekins.mutation.MutationInfo
-import org.gamekins.mutation.MutationResults
-import org.gamekins.mutation.MutationUtils
-import org.gamekins.mutation.MutationUtils.findMutationHasCodeSnippets
-import org.gamekins.mutation.MutationUtils.getCurrentLinesOperatorMapping
-import org.gamekins.mutation.MutationUtils.getSurvivedMutationList
 import org.gamekins.util.*
 import org.gamekins.util.Constants.Parameters
 import org.gamekins.util.GitUtil.HeadCommitCallable
@@ -53,13 +47,9 @@ object ChallengeFactory {
     /**
      * Chooses the type of [Challenge] to be generated.
      */
-    private fun chooseChallengeType(mocoJSONPath: String?): Class<out Challenge> {
+    private fun chooseChallengeType(): Class<out Challenge> {
         val weightList = arrayListOf<Class<out Challenge>>()
-        var challengeTypes = GamePublisherDescriptor.challenges
-        if (mocoJSONPath.isNullOrEmpty()) {
-            challengeTypes = challengeTypes.filter { it.key != MutationTestChallenge::class.java }
-                    as HashMap<Class<out Challenge>, Int>
-        }
+        val challengeTypes = GamePublisherDescriptor.challenges
         challengeTypes.forEach { (clazz, weight) ->
             (0 until weight).forEach { _ ->
                 weightList.add(clazz)
@@ -134,7 +124,7 @@ object ChallengeFactory {
             }
             count++
 
-            val challengeClass = chooseChallengeType(parameters.mocoJSONPath)
+            val challengeClass = chooseChallengeType()
             val selectedFile = cla
                 ?: if (challengeClass.superclass == CoverageChallenge::class.java) {
                     val tempList = ArrayList(workList.filterIsInstance<SourceFileDetails>())
@@ -208,14 +198,6 @@ object ChallengeFactory {
                                 + challengeClass
                     )
                     challenge = generateCoverageChallenge(data, challengeClass)
-                }
-                challengeClass == MutationTestChallenge::class.java -> {
-                    listener.logger.println(
-                        "[Gamekins] Try class " + selectedFile.fileName + " and type "
-                                + challengeClass
-                    )
-                    challenge = generateMutationTestChallenge(selectedFile as SourceFileDetails, parameters.branch,
-                        parameters.projectName, listener, parameters.workspace, user)
                 }
                 challengeClass == MutationChallenge::class.java -> {
                     listener.logger.println(
@@ -313,6 +295,7 @@ object ChallengeFactory {
      * is stored in <project-root>/target/pit-reports/mutations.xml.
      */
     @JvmStatic
+    @Suppress("UNUSED_PARAMETER", "unused")
     fun generateMutationChallenge(fileDetails: SourceFileDetails, parameters: Parameters,
         listener: TaskListener, user: User) : MutationChallenge? {
 
@@ -429,78 +412,6 @@ object ChallengeFactory {
         }
 
         return generated
-    }
-
-    /**
-     * Generates a new [MutationTestChallenge] of type [Challenge] for the current class with details [classDetails]
-     * and the current [branch]. The [workspace] is the folder with the code and execution rights, and the [listener]
-     * reports the events to the console output of Jenkins.
-     *
-     * This function parses JSON file of mutation test results and filter to take only SURVIVED
-     * mutations which belong to the given class
-     */
-    @JvmStatic
-    @Throws(IOException::class, InterruptedException::class)
-    fun generateMutationTestChallenge(
-        classDetails: SourceFileDetails, branch: String?, projectName: String?,
-        listener: TaskListener, workspace: FilePath, user: User
-    ): MutationTestChallenge? {
-        MutationUtils.mutationBlackList.clear()
-        val jsonFilePath = JacocoUtil.calculateCurrentFilePath(
-            workspace, classDetails.mocoJSONFile!!, classDetails.parameters.remote
-        )
-        val commitID = workspace.act(HeadCommitCallable(workspace.remote)).name
-        val fullClassName = "${classDetails.packageName}.${classDetails.fileName}"
-        val relevantMutationResultsByClass: Map<String, Set<MutationInfo>>? =
-            MutationResults.retrievedMutationsFromJson(jsonFilePath, listener)?.entries?.filter {
-                it.key == fullClassName
-                        && it.value.any { it1 -> it1.result == "survived" }
-            }
-        if (relevantMutationResultsByClass.isNullOrEmpty() ||
-            relevantMutationResultsByClass[fullClassName].isNullOrEmpty()) {
-            listener.logger.println("[Gamekins] Mutation test - no mutation information for class $fullClassName")
-            return null
-        }
-
-        val currentChallenges = user.getProperty(GameUserProperty::class.java).getCurrentChallenges(projectName!!).
-                                        filterIsInstance<MutationTestChallenge>()
-
-        val survivedList = getSurvivedMutationList(relevantMutationResultsByClass[fullClassName],
-                commitID, currentChallenges, user, projectName)
-
-        if (survivedList.isNullOrEmpty()) {
-            listener.logger.println("[Gamekins] Mutation test - no survived mutation for class $fullClassName")
-            return null
-        }
-
-        // Mapping from line of code to operator names of current challenges
-        val currentLinesOperatorMap: MutableMap<Int, MutableSet<String>> = mutableMapOf()
-        getCurrentLinesOperatorMapping(currentChallenges, fullClassName, currentLinesOperatorMap)
-        val currentChallengeMethods: MutableSet<String> = mutableSetOf()
-        currentChallenges.map { it.methodName?.let { it1 -> currentChallengeMethods.add(it1) } }
-
-        // Prioritize mutation with available code snippet and mutated code snippet
-        val foundMutationInfoPair =
-            findMutationHasCodeSnippets(survivedList, classDetails, workspace,
-                                        currentLinesOperatorMap, currentChallengeMethods)
-        var chosenMutation: MutationInfo? = foundMutationInfoPair.first
-        var codeSnippet: String = foundMutationInfoPair.second["codeSnippet"]!!
-        val mutatedLine: String = foundMutationInfoPair.second["mutatedSnippet"]!!
-
-        if (chosenMutation == null) {
-            // Choose a survived mutation randomly if no mutation with completed code snippet info can be found
-            val temp = survivedList.minus(MutationUtils.mutationBlackList)
-            if (temp.isEmpty()) return null
-            val randomMutation = temp.random() ?: return null
-            codeSnippet = MutationTestChallenge.createCodeSnippet(
-                classDetails, randomMutation.mutationDetails.loc, workspace
-            ).first
-            chosenMutation = randomMutation
-        }
-        // Commit id is persisted with mutation info to later determine the solvability of a mutation challenge
-        return MutationTestChallenge(
-            chosenMutation, classDetails, branch, commitID, codeSnippet, mutatedLine
-        )
     }
 
     /**

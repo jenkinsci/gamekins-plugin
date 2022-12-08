@@ -198,9 +198,6 @@ class LineCoverageChallenge(data: Challenge.ChallengeGenerationData)
     private fun readResolve(): Any {
         if (solvedCoveredBranches == null) solvedCoveredBranches = 0
         if (codeSnippet == null) codeSnippet = ""
-        if (details == null && classDetails != null) {
-            details = SourceFileDetails.classDetailsToSourceFileDetails(classDetails)
-        }
 
         return this
     }

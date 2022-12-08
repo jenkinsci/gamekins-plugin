@@ -185,7 +185,6 @@ object Constants {
         if (constants["generated"] != null) parameters.generated = constants["generated"]!!.toInt()
         if (constants["jacocoCSVPath"] != null) parameters.jacocoCSVPath = constants["jacocoCSVPath"]!!
         if (constants["jacocoResultsPath"] != null) parameters.jacocoResultsPath = constants["jacocoResultsPath"]!!
-        if (constants["mocoJSONPath"] != null) parameters.mocoJSONPath = constants["mocoJSONPath"]!!
         if (constants["projectCoverage"] != null) parameters.projectCoverage = constants["projectCoverage"]!!.toDouble()
         if (constants["projectName"] != null) parameters.projectName = constants["projectName"]!!
         if (constants["projectTests"] != null) parameters.projectTests = constants["projectTests"]!!.toInt()
@@ -223,7 +222,6 @@ object Constants {
         var generated: Int = 0,
         var jacocoCSVPath: String = "",
         var jacocoResultsPath: String = "",
-        var mocoJSONPath: String = "",
         var projectCoverage: Double = 0.0,
         var projectName: String = "",
         var projectTests: Int = 0,

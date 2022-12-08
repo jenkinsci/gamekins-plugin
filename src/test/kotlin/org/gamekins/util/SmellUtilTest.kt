@@ -18,7 +18,6 @@ class SmellUtilTest : AnnotationSpec() {
     private lateinit var path : FilePath
     private val shortJacocoPath = "**/target/site/jacoco/"
     private val shortJacocoCSVPath = "**/target/site/jacoco/jacoco.csv"
-    private val mocoJSONPath = "**/target/site/moco/mutation/"
 
     @BeforeAll
     fun initAll() {
@@ -43,7 +42,6 @@ class SmellUtilTest : AnnotationSpec() {
         val parameters = Constants.Parameters()
         parameters.jacocoResultsPath = shortJacocoPath
         parameters.jacocoCSVPath = shortJacocoCSVPath
-        parameters.mocoJSONPath = mocoJSONPath
         parameters.workspace = path
         var file = SourceFileDetails(parameters, "/src/main/java/com/example/Calculator.java")
 
@@ -58,7 +56,6 @@ class SmellUtilTest : AnnotationSpec() {
         val parameters = Constants.Parameters()
         parameters.jacocoResultsPath = shortJacocoPath
         parameters.jacocoCSVPath = shortJacocoCSVPath
-        parameters.mocoJSONPath = mocoJSONPath
         parameters.workspace = path
         val file = SourceFileDetails(parameters, "/src/main/java/com/example/Calculator.java")
         val content = "package com.example;\n" +

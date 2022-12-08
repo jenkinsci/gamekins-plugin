@@ -58,7 +58,6 @@ class GitUtilTest : AnnotationSpec() {
         parameters.projectName = "test-project"
         parameters.jacocoResultsPath = "**/target/site/jacoco/"
         parameters.jacocoCSVPath = "**/target/site/jacoco/jacoco.csv"
-        parameters.mocoJSONPath = "**/target/site/moco/mutation/"
         parameters.workspace = path
 
         every { user.id } returns id

@@ -104,7 +104,7 @@ class GameMultiBranchProperty
     /**
      * Called by Jenkins after the object has been created from his XML representation. Used for data migration.
      */
-    @Suppress("unused")
+    @Suppress("unused", "SENSELESS_COMPARISON")
     private fun readResolve(): Any {
         if (currentChallengesCount <= 0) currentChallengesCount = Constants.Default.CURRENT_CHALLENGES
         if (currentQuestsCount <= 0) currentQuestsCount = Constants.Default.CURRENT_QUESTS

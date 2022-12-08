@@ -152,6 +152,7 @@ object QuestFactory {
      * [LineCoverageChallenge] in the same class.
      */
     @JvmStatic
+    @Suppress("UNUSED_PARAMETER", "unused")
     fun generateDecreasingQuest(
         user: User, property: GameUserProperty, parameters: Constants.Parameters, listener: TaskListener,
         classes: ArrayList<FileDetails>
@@ -178,6 +179,7 @@ object QuestFactory {
      * [ClassCoverageChallenge] in the same class.
      */
     @JvmStatic
+    @Suppress("UNUSED_PARAMETER", "unused")
     fun generateExpandingQuest(
         user: User, property: GameUserProperty, parameters: Constants.Parameters, listener: TaskListener,
         classes: ArrayList<FileDetails>
@@ -276,6 +278,7 @@ object QuestFactory {
      * Generates a new MutationQuest with three different [MutationChallenge]s in the same class.
      */
     @JvmStatic
+    @Suppress("UNUSED_PARAMETER", "unused")
     fun generateMutationQuest(
         user: User, property: GameUserProperty, parameters: Constants.Parameters, listener: TaskListener,
         classes: ArrayList<FileDetails>
@@ -305,6 +308,7 @@ object QuestFactory {
      * Generates a new PackageQuest with three different [Challenge]s in the same package.
      */
     @JvmStatic
+    @Suppress("UNUSED_PARAMETER", "unused")
     fun generatePackageQuest(
         user: User, property: GameUserProperty, parameters: Constants.Parameters, listener: TaskListener,
         files: ArrayList<FileDetails>
@@ -344,6 +348,7 @@ object QuestFactory {
      * Generates a new SmellQuest with [SmellChallenge]s.
      */
     @JvmStatic
+    @Suppress("UNUSED_PARAMETER", "unused")
     fun generateSmellQuest(
         user: User, property: GameUserProperty, parameters: Constants.Parameters, listener: TaskListener,
         classes: ArrayList<FileDetails>
@@ -372,6 +377,7 @@ object QuestFactory {
      * Generates a new TestQuest with three [TestChallenge]s.
      */
     @JvmStatic
+    @Suppress("UNUSED_PARAMETER", "unused")
     fun generateTestQuest(
         user: User, property: GameUserProperty, parameters: Constants.Parameters, listener: TaskListener,
         classes: ArrayList<FileDetails>
