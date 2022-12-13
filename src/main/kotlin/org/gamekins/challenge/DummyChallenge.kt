@@ -102,16 +102,6 @@ class DummyChallenge(private var parameters: Parameters, private var reason: Str
     }
 
     /**
-     * Called by Jenkins after the object has been created from his XML representation. Used for data migration.
-     */
-    @Suppress("unused", "SENSELESS_COMPARISON")
-    private fun readResolve(): Any {
-        if (parameters == null) parameters = Parameters()
-        if (reason == null) reason = Constants.Error.GENERATION
-        return this
-    }
-
-    /**
      * Only for dummy purposes, no need for further information.
      *
      * @see Challenge

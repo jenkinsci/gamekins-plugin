@@ -27,6 +27,7 @@ import org.gamekins.file.FileDetails
 import org.gamekins.file.SourceFileDetails
 import org.gamekins.file.TestFileDetails
 import org.gamekins.util.*
+import org.gamekins.util.Constants.Parameters
 import org.jsoup.nodes.Element
 import kotlin.random.Random
 
@@ -43,7 +44,7 @@ object QuestFactory {
      */
     @JvmStatic
     fun generateNewQuests(
-        user: User, property: GameUserProperty, parameters: Constants.Parameters, listener: TaskListener,
+        user: User, property: GameUserProperty, parameters: Parameters, listener: TaskListener,
         files: ArrayList<FileDetails>, maxQuests: Int = Constants.Default.CURRENT_QUESTS
     ): Int {
 
@@ -92,7 +93,7 @@ object QuestFactory {
      */
     @JvmStatic
     fun generateQuest(
-        user: User, property: GameUserProperty, parameters: Constants.Parameters, listener: TaskListener,
+        user: User, property: GameUserProperty, parameters: Parameters, listener: TaskListener,
         classes: ArrayList<FileDetails>
     ): Quest {
 
@@ -125,7 +126,7 @@ object QuestFactory {
      */
     @JvmStatic
     fun generateClassQuest(
-        user: User, property: GameUserProperty, parameters: Constants.Parameters, listener: TaskListener,
+        user: User, property: GameUserProperty, parameters: Parameters, listener: TaskListener,
         classes: ArrayList<FileDetails>
     ): Quest? {
         val suitableClasses = ArrayList(classes.filterIsInstance<SourceFileDetails>()
@@ -154,7 +155,7 @@ object QuestFactory {
     @JvmStatic
     @Suppress("UNUSED_PARAMETER", "unused")
     fun generateDecreasingQuest(
-        user: User, property: GameUserProperty, parameters: Constants.Parameters, listener: TaskListener,
+        user: User, property: GameUserProperty, parameters: Parameters, listener: TaskListener,
         classes: ArrayList<FileDetails>
     ): Quest? {
         val suitableClasses = classes.filterIsInstance<SourceFileDetails>()
@@ -181,7 +182,7 @@ object QuestFactory {
     @JvmStatic
     @Suppress("UNUSED_PARAMETER", "unused")
     fun generateExpandingQuest(
-        user: User, property: GameUserProperty, parameters: Constants.Parameters, listener: TaskListener,
+        user: User, property: GameUserProperty, parameters: Parameters, listener: TaskListener,
         classes: ArrayList<FileDetails>
     ): Quest? {
         val suitableClasses = classes.filterIsInstance<SourceFileDetails>()
@@ -206,7 +207,7 @@ object QuestFactory {
      */
     @JvmStatic
     fun generateLinesQuest(
-        user: User, property: GameUserProperty, parameters: Constants.Parameters, listener: TaskListener,
+        user: User, property: GameUserProperty, parameters: Parameters, listener: TaskListener,
         classes: ArrayList<FileDetails>
     ): Quest? {
         val suitableClasses = classes.filterIsInstance<SourceFileDetails>()
@@ -244,7 +245,7 @@ object QuestFactory {
      */
     @JvmStatic
     fun generateMethodsQuest(
-        user: User, property: GameUserProperty, parameters: Constants.Parameters, listener: TaskListener,
+        user: User, property: GameUserProperty, parameters: Parameters, listener: TaskListener,
         classes: ArrayList<FileDetails>
     ): Quest? {
         val suitableClasses = classes.filterIsInstance<SourceFileDetails>()
@@ -280,7 +281,7 @@ object QuestFactory {
     @JvmStatic
     @Suppress("UNUSED_PARAMETER", "unused")
     fun generateMutationQuest(
-        user: User, property: GameUserProperty, parameters: Constants.Parameters, listener: TaskListener,
+        user: User, property: GameUserProperty, parameters: Parameters, listener: TaskListener,
         classes: ArrayList<FileDetails>
     ): Quest? {
         val suitableClasses = classes.filterIsInstance<SourceFileDetails>().filter { it.filesExists() }
@@ -310,7 +311,7 @@ object QuestFactory {
     @JvmStatic
     @Suppress("UNUSED_PARAMETER", "unused")
     fun generatePackageQuest(
-        user: User, property: GameUserProperty, parameters: Constants.Parameters, listener: TaskListener,
+        user: User, property: GameUserProperty, parameters: Parameters, listener: TaskListener,
         files: ArrayList<FileDetails>
     ): Quest? {
         val suitableClasses = files.filterIsInstance<SourceFileDetails>()
@@ -350,7 +351,7 @@ object QuestFactory {
     @JvmStatic
     @Suppress("UNUSED_PARAMETER", "unused")
     fun generateSmellQuest(
-        user: User, property: GameUserProperty, parameters: Constants.Parameters, listener: TaskListener,
+        user: User, property: GameUserProperty, parameters: Parameters, listener: TaskListener,
         classes: ArrayList<FileDetails>
     ): Quest? {
         val suitableFiles = classes.filter { it is SourceFileDetails || it is TestFileDetails }.shuffled()
@@ -379,7 +380,7 @@ object QuestFactory {
     @JvmStatic
     @Suppress("UNUSED_PARAMETER", "unused")
     fun generateTestQuest(
-        user: User, property: GameUserProperty, parameters: Constants.Parameters, listener: TaskListener,
+        user: User, property: GameUserProperty, parameters: Parameters, listener: TaskListener,
         classes: ArrayList<FileDetails>
     ): Quest {
         val steps = arrayListOf<QuestStep>()

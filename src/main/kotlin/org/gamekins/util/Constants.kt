@@ -109,7 +109,7 @@ object Constants {
      */
     object Error
     {
-        const val UNEXPECTED = "Unexpected Error"
+        private const val UNEXPECTED = "Unexpected Error"
 
         const val GENERATION = "There was an error with generating a new challenge"
 
@@ -153,6 +153,8 @@ object Constants {
         val RETURN_REGEX = "return .*[^;]".toRegex()
     }
 
+    const val AND_TYPE = " and type "
+
     const val EXISTS = " exists "
 
     const val NO_QUEST = "No quest could be generated. This could mean that none of the prerequisites was met, " +
@@ -174,24 +176,7 @@ object Constants {
 
     const val TYPE_PLAIN = "text/plain"
 
-    /**
-     * Migrates a [HashMap] of constants to the class [Parameters].
-     */
-    fun constantsToParameters(constants: HashMap<String, String>): Parameters {
-        val parameters = Parameters()
-        if (constants["branch"] != null) parameters.branch = constants["branch"]!!
-        if (constants["currentChallengesCount"] != null) parameters.currentChallengesCount =
-            constants["currentChallengesCount"]!!.toInt()
-        if (constants["generated"] != null) parameters.generated = constants["generated"]!!.toInt()
-        if (constants["jacocoCSVPath"] != null) parameters.jacocoCSVPath = constants["jacocoCSVPath"]!!
-        if (constants["jacocoResultsPath"] != null) parameters.jacocoResultsPath = constants["jacocoResultsPath"]!!
-        if (constants["projectCoverage"] != null) parameters.projectCoverage = constants["projectCoverage"]!!.toDouble()
-        if (constants["projectName"] != null) parameters.projectName = constants["projectName"]!!
-        if (constants["projectTests"] != null) parameters.projectTests = constants["projectTests"]!!.toInt()
-        if (constants["solved"] != null) parameters.solved = constants["solved"]!!.toInt()
-        if (constants["workspace"] != null) parameters.workspace = FilePath(null, constants["workspace"]!!)
-        return parameters
-    }
+    const val TRY_CLASS = "[Gamekins] Try class "
 
     /**
      * Returns the path to the most recent jar file of the Sonar-Java-Plugin for SonarLint.
@@ -242,9 +227,6 @@ object Constants {
          */
         @Suppress("unused", "SENSELESS_COMPARISON")
         private fun readResolve(): Any {
-            if (remote == null) remote = ""
-            if (workspace == null) workspace = FilePath(null, remote)
-            if (currentQuestsCount == null) currentQuestsCount = Default.CURRENT_QUESTS
             if (pitConfiguration == null) pitConfiguration = Default.PIT_CONFIGURATION
             if (showPitOutput ==null) showPitOutput = Default.SHOW_PIT_OUTPUT
             return this

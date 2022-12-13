@@ -36,7 +36,7 @@ class AchievementInitializerTest: AnnotationSpec() {
 
     @Test
     fun initializeAchievement() {
-        val achievement = AchievementInitializer.initializeAchievement("solve_challenge.json")
+        val achievement = AchievementInitializer.initializeAchievements("solve_x_challenges.json").first()
         achievement.badgePath shouldBe "/plugin/gamekins/icons/trophy.png"
         achievement.description shouldBe "Solve your first Challenge"
         achievement.title shouldBe "I took the first Challenge"

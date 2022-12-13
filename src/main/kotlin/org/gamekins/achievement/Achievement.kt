@@ -146,10 +146,9 @@ class Achievement(var badgePath: String, var unsolvedBadgePath: String, val full
     /**
      * Called by Jenkins after the object has been created from his XML representation. Used for data migration.
      */
-    @Suppress("unused", "SENSELESS_COMPARISON")
+    @Suppress("unused")
     private fun readResolve(): Any {
         initCalls()
-        if (unsolvedBadgePath.isNullOrEmpty()) unsolvedBadgePath = badgePath
         return this
     }
 

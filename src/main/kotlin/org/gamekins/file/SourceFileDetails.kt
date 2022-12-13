@@ -82,13 +82,4 @@ class SourceFileDetails(parameters: Parameters,
     override fun isTest(): Boolean {
         return false
     }
-
-    /**
-     * Called by Jenkins after the object has been created from his XML representation. Used for data migration.
-     */
-    @Suppress("unused", "SENSELESS_COMPARISON")
-    private fun readResolve(): Any {
-        if (parameters == null) parameters = Parameters()
-        return this
-    }
 }

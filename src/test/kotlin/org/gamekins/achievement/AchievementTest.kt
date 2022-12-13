@@ -43,7 +43,7 @@ class AchievementTest: AnnotationSpec() {
         mockkStatic(AchievementInitializer::class)
         mockkStatic(AchievementUtil::class)
 
-        achievement = AchievementInitializer.initializeAchievement("solve_challenge.json")
+        achievement = AchievementInitializer.initializeAchievements("solve_x_challenges.json").first()
     }
 
     @AfterAll

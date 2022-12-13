@@ -28,7 +28,9 @@ import org.gamekins.event.user.ChallengeGeneratedEvent
 import org.gamekins.file.FileDetails
 import org.gamekins.file.SourceFileDetails
 import org.gamekins.util.*
+import org.gamekins.util.Constants.AND_TYPE
 import org.gamekins.util.Constants.Parameters
+import org.gamekins.util.Constants.TRY_CLASS
 import org.gamekins.util.GitUtil.HeadCommitCallable
 import org.jsoup.nodes.Document
 import java.io.IOException
@@ -194,14 +196,14 @@ object ChallengeFactory {
                 }
                 challengeClass.superclass == CoverageChallenge::class.java -> {
                     listener.logger.println(
-                        "[Gamekins] Try class " + selectedFile.fileName + " and type "
+                        TRY_CLASS + selectedFile.fileName + AND_TYPE
                                 + challengeClass
                     )
                     challenge = generateCoverageChallenge(data, challengeClass)
                 }
                 challengeClass == MutationChallenge::class.java -> {
                     listener.logger.println(
-                        "[Gamekins] Try class " + selectedFile.fileName + " and type "
+                        TRY_CLASS + selectedFile.fileName + AND_TYPE
                                 + challengeClass
                     )
                     challenge = generateMutationChallenge(selectedFile as SourceFileDetails, parameters,
@@ -209,7 +211,7 @@ object ChallengeFactory {
                 }
                 challengeClass == SmellChallenge::class.java -> {
                     listener.logger.println(
-                        "[Gamekins] Try class " + selectedFile.fileName + " and type "
+                        TRY_CLASS + selectedFile.fileName + AND_TYPE
                                 + challengeClass
                     )
                     challenge = generateSmellChallenge(data, listener)

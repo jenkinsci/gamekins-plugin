@@ -80,10 +80,10 @@ class Statistics(job: AbstractItem) {
                 addPreviousEntriesWorkflowMultiBranchProject(job, branch, number)
             }
             is WorkflowJob -> {
-                addPreviousEntriesWorkflowJob(job, number)
+                addPreviousEntriesSingleProject(job, number)
             }
             is AbstractProject<*, *> -> {
-                addPreviousEntriesAbstractProject(job, number)
+                addPreviousEntriesSingleProject(job, number)
             }
         }
     }
@@ -91,7 +91,7 @@ class Statistics(job: AbstractItem) {
     /**
      * Adds the build with [number] of the [job] to the [runEntries].
      */
-    private fun addPreviousEntriesAbstractProject(job: AbstractProject<*, *>, number: Int) {
+    private fun addPreviousEntriesSingleProject(job: Job<*, *>, number: Int) {
 
         for (abstractBuild in job.builds) {
             if (abstractBuild.getNumber() == number) {
@@ -107,31 +107,6 @@ class Statistics(job: AbstractItem) {
                     0,
                     0,
                     JUnitUtil.getTestCount(null, abstractBuild),
-                    0.0))
-                return
-            }
-        }
-    }
-
-    /**
-     * Adds the build with [number] of the [job] to the [runEntries].
-     */
-    private fun addPreviousEntriesWorkflowJob(job: WorkflowJob, number: Int) {
-
-        for (workflowRun in job.builds) {
-            if (workflowRun.getNumber() == number) {
-                runEntries?.add(RunEntry(
-                    workflowRun.getNumber(),
-                    "",
-                    workflowRun.result,
-                    workflowRun.startTimeInMillis,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    JUnitUtil.getTestCount(null, workflowRun),
                     0.0))
                 return
             }
@@ -373,17 +348,6 @@ class Statistics(job: AbstractItem) {
         override fun compareTo(other: RunEntry): Int {
             val result = Collator.getInstance().compare(branch, other.branch)
             return if (result == 0) runNumber.compareTo(other.runNumber) else result
-        }
-
-        /**
-         * Called by Jenkins after the object has been created from his XML representation. Used for data migration.
-         */
-        @Suppress("unused", "SENSELESS_COMPARISON")
-        private fun readResolve(): Any {
-            if (solvedAchievements == null) solvedAchievements = 0
-            if (solvedQuests == null) solvedAchievements = 0
-            if (generatedQuests == null) solvedAchievements = 0
-            return this
         }
     }
 }

@@ -161,7 +161,8 @@ class MutationChallenge(val details: SourceFileDetails, var data: MutationUtil.M
     }
 
     override fun toString(): String {
-        val method = if (data.mutatedMethod == "&lt;init&gt;") data.mutatedClass.split(".").last() else data.mutatedMethod
+        val method = if (data.mutatedMethod == "&lt;init&gt;") data.mutatedClass.split(".").last()
+                        else data.mutatedMethod
         return ("Write a test to kill the mutant at line <b>${data.lineNumber}</b> of method " +
                 "<b>$method()</b> in class <b>${details.fileName}</b> in package " +
                 "<b>${details.packageName}</b> (created for branch ${details.parameters.branch})")

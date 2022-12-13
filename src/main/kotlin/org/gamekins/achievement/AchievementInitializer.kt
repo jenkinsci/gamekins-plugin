@@ -24,25 +24,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
  * @author Philipp Straubinger
  * @since 0.2
  */
-@Suppress("RECEIVER_NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
 object AchievementInitializer {
-
-    /**
-     * Initializes the [Achievement] specified by the json file given via [fileName]. [fileName] has the path to the
-     * resources folder as root folder, which means that it has to start with / followed by the folders and ending by
-     * the json filename.
-     *
-     * Only for one [Achievement] per file.
-     */
-    @Deprecated("Better use a json file with a list of achievements",
-        ReplaceWith("AchievementInitializer.initializeAchievements()")
-    )
-    fun initializeAchievement(fileName: String): Achievement {
-        val jsonContent = javaClass.classLoader.getResource(fileName).readText()
-        val data = jacksonObjectMapper().readValue(jsonContent, AchievementData::class.java)
-        return Achievement(data.badgePath, data.unsolvedBadgePath, data.fullyQualifiedFunctionName, data.description,
-            data.title, data.secret, data.additionalParameters)
-    }
 
     /**
      * Initializes the [Achievement] specified by the json file given via [fileName]. [fileName] has the path to the

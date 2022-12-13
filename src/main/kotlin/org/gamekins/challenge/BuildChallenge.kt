@@ -92,15 +92,6 @@ class BuildChallenge(private var parameters: Parameters) : Challenge {
         return print
     }
 
-    /**
-     * Called by Jenkins after the object has been created from his XML representation. Used for data migration.
-     */
-    @Suppress("unused", "SENSELESS_COMPARISON")
-    private fun readResolve(): Any {
-        if (parameters == null) parameters = Parameters()
-        return this
-    }
-
     override fun toString(): String {
         return "Let the Build run successfully"
     }

@@ -192,17 +192,6 @@ class LineCoverageChallenge(data: Challenge.ChallengeGenerationData)
     }
 
     /**
-     * Called by Jenkins after the object has been created from his XML representation. Used for data migration.
-     */
-    @Suppress("unused", "SENSELESS_COMPARISON")
-    private fun readResolve(): Any {
-        if (solvedCoveredBranches == null) solvedCoveredBranches = 0
-        if (codeSnippet == null) codeSnippet = ""
-
-        return this
-    }
-
-    /**
      * Checks whether the line [element] has more covered branches than during creation and sets the time and
      * coverage if solved.
      */

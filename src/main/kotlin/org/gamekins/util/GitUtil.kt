@@ -141,20 +141,6 @@ object GitUtil {
     }
 
     /**
-     * Returns a list of last changed files of a [user]. It searches the last [count] of commits in the history
-     * (or until a certain [commitHash]) and assigns the files changed in these commits to the
-     * according [users]. [parameters] are needed for information about the JaCoCo paths and the [listener] reports
-     * the events to the console output of Jenkins.
-     */
-    @JvmStatic
-    fun getLastChangedClassesOfUser(commitHash: String, parameters: Parameters,
-                                    listener: TaskListener, user: GameUser, users: ArrayList<GameUser>,
-    ): List<SourceFileDetails> {
-        return getLastChangedClasses(commitHash, parameters, listener, users)
-            .filter { it.changedByUsers.contains(user) }
-    }
-
-    /**
      * Returns a list of last changed files. It searches the last [count] of commits in the history
      * (or until a certain [commitHash]) and assigns the files changed in these commits to the
      * according [users]. [parameters] are needed for information about the JaCoCo paths and the [listener] reports

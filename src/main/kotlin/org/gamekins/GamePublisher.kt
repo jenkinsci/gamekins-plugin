@@ -16,6 +16,7 @@
 
 package org.gamekins
 
+import hudson.EnvVars
 import hudson.FilePath
 import hudson.Launcher
 import hudson.model.*
@@ -51,10 +52,6 @@ import javax.annotation.Nonnull
 class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var jacocoResultsPath: String?,
                                                       @set:DataBoundSetter var jacocoCSVPath: String?)
     : Notifier(), SimpleBuildStep, StaplerProxy {
-
-    override fun getTarget(): Any {
-        return this
-    }
 
     /**
      * Starts the execution of Gamekins for a specific [run] with its [result]. The [parameters] contain needed data
@@ -134,6 +131,9 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
         return BuildStepMonitor.STEP
     }
 
+    override fun getTarget(): Any {
+        return this
+    }
 
     override fun needsToRunAfterFinalized(): Boolean {
         return true
@@ -176,7 +176,7 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
      * @see SimpleBuildStep.perform
      */
     override fun perform(
-        @Nonnull run: Run<*, *>, @Nonnull workspace: FilePath,
+        @Nonnull run: Run<*, *>, @Nonnull workspace: FilePath, @Nonnull env: EnvVars,
         @Nonnull launcher: Launcher, @Nonnull listener: TaskListener
     ) {
 

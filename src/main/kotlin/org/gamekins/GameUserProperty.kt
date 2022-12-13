@@ -229,10 +229,6 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
      * Returns the filename of the current avatar.
      */
     fun getCurrentAvatar(): String {
-        if (currentAvatar.isNullOrEmpty()) {
-            currentAvatar = "001-actress.png"
-        }
-
         return currentAvatar
     }
 
@@ -485,61 +481,12 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
      */
     @Suppress("unused", "SENSELESS_COMPARISON")
     private fun readResolve(): Any {
-        if (completedAchievements == null) completedAchievements = hashMapOf()
-        if (unsolvedAchievements == null) unsolvedAchievements = hashMapOf()
-        if (lastProject == null) lastProject = ""
-        if (currentQuests == null) currentQuests = HashMap()
-        if (completedQuests == null) completedQuests = HashMap()
-        if (rejectedQuests == null) rejectedQuests = HashMap()
-        if (storedChallenges == null) storedChallenges = HashMap()
-
-        //Add achievements if newly introduced
-        if (participation.size != 0) {
-            if (completedAchievements.size == 0) {
-                participation.keys.forEach { project ->
-                    completedAchievements[project] = CopyOnWriteArrayList()
-                }
-            }
-            if (unsolvedAchievements.size == 0) {
-                for (project in participation.keys) {
-                    val list = CopyOnWriteArrayList<Achievement>()
-                    GamePublisherDescriptor.achievements.forEach { list.add(it.clone()) }
-                    unsolvedAchievements[project] = list
-                }
-            }
-        }
-
-        //Add quests if newly introduced
-        if (participation.size != 0) {
-            if (currentQuests.size == 0) {
-                participation.keys.forEach { project ->
-                    currentQuests[project] = CopyOnWriteArrayList()
-                }
-            }
-            if (completedQuests.size == 0) {
-                participation.keys.forEach { project ->
-                    completedQuests[project] = CopyOnWriteArrayList()
-                }
-            }
-            if (rejectedQuests.size == 0) {
-                participation.keys.forEach { project ->
-                    rejectedQuests[project] = CopyOnWriteArrayList()
-                }
-            }
-        }
 
         //Add stored challenges if newly introduced
         if (participation.size != 0 && storedChallenges.size == 0) {
             participation.keys.forEach { project ->
                 storedChallenges[project] = CopyOnWriteArrayList()
             }
-        }
-
-        //Remove falsely solved achievements
-        for (project in participation.keys) {
-            val list = unsolvedAchievements[project]!!
-            list.removeIf { it.solvedTimeString !=  Constants.NOT_SOLVED }
-            unsolvedAchievements[project] = list
         }
 
         //Add new achievements

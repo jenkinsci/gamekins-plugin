@@ -17,7 +17,7 @@
 package org.gamekins.event
 
 /**
- * Abstract event for event handling. Can be directly assigned to a project (and branch for multi branch projects).
+ * Abstract event for event handling. Can be directly assigned to a project (and branch for multi-branch projects).
  *
  * @author Philipp Straubinger
  * @since 0.3

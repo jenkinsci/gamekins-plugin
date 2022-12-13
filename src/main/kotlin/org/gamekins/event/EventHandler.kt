@@ -44,7 +44,7 @@ object EventHandler {
     /**
      * Generates the text for all [Event]s based on Challenges.
      */
-    fun generateChallengesText(list: ArrayList<UserEvent>): String {
+    private fun generateChallengesText(list: ArrayList<UserEvent>): String {
         var text = ""
         if (list.find { it is ChallengeSolvedEvent } != null) {
             text += "Challenge(s) solved:\n"

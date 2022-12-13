@@ -135,6 +135,10 @@
                     <groupId>org.jenkins-ci.plugins</groupId>
                     <artifactId>jsch</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>org.jenkins-ci.plugins</groupId>
+                    <artifactId>git-client</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.jenkins-ci.main/maven-plugin -->
