@@ -308,7 +308,8 @@ object ChallengeFactory {
         val mutationReport = FilePath(parameters.workspace.channel,
             parameters.workspace.remote + "/target/pit-reports/mutations.xml")
         if (!mutationReport.exists()) return null
-        val mutants = mutationReport.readToString().split("\n").filter { it.startsWith("<mutation ") }
+        val mutants = mutationReport.readToString().split("\n")
+            .filter { it.startsWith("<mutation ") }.filter { !it.contains("status='KILLED'") }
         if (mutants.isEmpty()) return null
         
         return MutationChallenge(fileDetails, MutationUtil.MutationData(mutants[Random.nextInt(mutants.size)]))
