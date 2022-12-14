@@ -47,7 +47,7 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
     private var completedAchievements: HashMap<String, CopyOnWriteArrayList<Achievement>> = HashMap()
     private val completedChallenges: HashMap<String, CopyOnWriteArrayList<Challenge>> = HashMap()
     private var completedQuests: HashMap<String, CopyOnWriteArrayList<Quest>> = HashMap()
-    private var currentAvatar: String = ""
+    private var currentAvatar: String = Constants.Default.AVATAR
     private val currentChallenges: HashMap<String, CopyOnWriteArrayList<Challenge>> = HashMap()
     private var currentQuests: HashMap<String, CopyOnWriteArrayList<Quest>> = HashMap()
     private var gitNames: CopyOnWriteArraySet<String>? = null
@@ -534,6 +534,9 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
             finalChallenges.addAll(coverageChallenges)
             storedChallenges[p] = CopyOnWriteArrayList(finalChallenges)
         }
+
+        //Default avatar
+        if (currentAvatar.isEmpty()) currentAvatar = Constants.Default.AVATAR
 
         return this
     }

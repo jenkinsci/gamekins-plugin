@@ -100,6 +100,8 @@ object Constants {
                         "</plugin>"
 
         const val SHOW_PIT_OUTPUT = false
+
+        const val AVATAR = "001-actress.png"
     }
 
     /**
