@@ -171,7 +171,7 @@ class LeaderboardAction(val job: AbstractItem) : ProminentProjectAction, Describ
     /**
      * Returns the details of all users participating in the current project.
      */
-    private fun getUserDetails(): List<UserDetails> {
+    fun getUserDetails(): List<UserDetails> {
         val details = ArrayList<UserDetails>()
         for (user in User.getAll()) {
             if (!PropertyUtil.realUser(user)) continue
