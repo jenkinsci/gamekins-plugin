@@ -17,13 +17,10 @@
 package org.gamekins.util
 
 import hudson.FilePath
-import hudson.model.Job
 import hudson.model.Run
-import hudson.model.TaskListener
 import hudson.tasks.junit.TestResultAction
 import org.gamekins.test.TestUtils
-import io.kotest.core.spec.style.AnnotationSpec
-import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.core.spec.style.FeatureSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.string.shouldEndWith
@@ -31,74 +28,97 @@ import io.mockk.every
 import io.mockk.mockkClass
 import io.mockk.mockkStatic
 import io.mockk.unmockkAll
-import org.eclipse.jgit.revwalk.RevCommit
-import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject
-import org.jsoup.nodes.Document
-import org.jsoup.select.Elements
 import java.io.File
 
-class JUnitUtilTest : AnnotationSpec() {
+class JUnitUtilTest : FeatureSpec({
 
-    private lateinit var root : String
-    private lateinit var path : FilePath
+    lateinit var root : String
+    lateinit var path : FilePath
 
-    @BeforeAll
-    fun initAll() {
+    beforeSpec {
         //Needed because of bug in mockk library which does not release mocked objects
         mockkStatic(JUnitUtil::class)
         val rootDirectory = javaClass.classLoader.getResource("test-project.zip")
         rootDirectory shouldNotBe null
-        root = rootDirectory.file.removeSuffix(".zip")
+        root = rootDirectory!!.file.removeSuffix(".zip")
         root shouldEndWith "test-project"
         TestUtils.unzip("$root.zip", root)
         path = FilePath(null, root)
     }
 
-    @AfterAll
-    fun cleanUp() {
+    afterSpec {
         unmockkAll()
         File(root).deleteRecursively()
     }
 
-    @Test
-    fun getTestCount() {
-        JUnitUtil.getTestCount(path) shouldBe 5
+    feature("getTestCount") {
 
-        JUnitUtil.getTestCount(null, null) shouldBe 0
+        scenario("test-project, path only")
+        {
+            JUnitUtil.getTestCount(path) shouldBe 5
+        }
+
+        scenario("run is null")
+        {
+            JUnitUtil.getTestCount(null, null) shouldBe 0
+        }
 
         val run = mockkClass(Run::class)
         every { run.getAction(TestResultAction::class.java) } returns null
-        JUnitUtil.getTestCount(null, run) shouldBe 0
+        scenario("run has not TestResultAction")
+        {
+            JUnitUtil.getTestCount(null, run) shouldBe 0
+        }
 
         val action = mockkClass(TestResultAction::class)
         every { action.totalCount } returns 5
         every { run.getAction(TestResultAction::class.java) } returns action
-        JUnitUtil.getTestCount(null, run) shouldBe 5
+        scenario("run with TestResultAction")
+        {
+            JUnitUtil.getTestCount(null, run) shouldBe 5
+        }
 
-        JUnitUtil.getTestCount(path, null) shouldBe 5
+        scenario("test-project")
+        {
+            JUnitUtil.getTestCount(path, null) shouldBe 5
+        }
     }
 
-    @Test
-    fun getTestFailCount() {
-        JUnitUtil.getTestFailCount(path) shouldBe 0
+    feature("getTestFailCount") {
 
-        JUnitUtil.getTestFailCount(null, null) shouldBe 0
+        scenario("test-project, path only")
+        {
+            JUnitUtil.getTestFailCount(path) shouldBe 0
+        }
+
+        scenario("run is null")
+        {
+            JUnitUtil.getTestFailCount(null, null) shouldBe 0
+        }
 
         val run = mockkClass(Run::class)
         every { run.getAction(TestResultAction::class.java) } returns null
-        JUnitUtil.getTestFailCount(null, run) shouldBe 0
+        scenario("run has not TestResultAction")
+        {
+            JUnitUtil.getTestFailCount(null, run) shouldBe 0
+        }
 
         val action = mockkClass(TestResultAction::class)
         every { action.failCount } returns 1
         every { run.getAction(TestResultAction::class.java) } returns action
-        JUnitUtil.getTestFailCount(null, run) shouldBe 1
+        scenario("run with TestResultAction")
+        {
+            JUnitUtil.getTestFailCount(null, run) shouldBe 1
+        }
 
-        JUnitUtil.getTestFailCount(path, null) shouldBe 0
+        scenario("test-project")
+        {
+            JUnitUtil.getTestFailCount(path, null) shouldBe 0
+        }
     }
 
-    @Test
-    fun getTestNames() {
+    feature("getTestNames") {
         val set = hashSetOf("nestedWhileForLoops", "nestedForLoops")
         JUnitUtil.getTestNames(FilePath(File("$root/target/surefire-reports/TEST-com.example.NestedLoopTest.xml"))) shouldBe set
     }
-}
+})
