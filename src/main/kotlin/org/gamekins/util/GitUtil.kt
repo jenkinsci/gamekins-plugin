@@ -231,7 +231,7 @@ object GitUtil {
                         //Map the author of the commit to the Jenkins user
                         var user = authorMapping[commit.authorIdent]
                         if (user == null) {
-                            user = mapUser(commit.authorIdent, users)
+                            user = mapGameUser(commit.authorIdent, users)
                             if (user != null) authorMapping[commit.authorIdent] = user
                         }
 
@@ -362,7 +362,7 @@ object GitUtil {
      * Uses the full name, the git names and the mail address for identification.
      */
     @JvmStatic
-    fun mapUser(ident: PersonIdent, users: ArrayList<GameUser>): GameUser? {
+    fun mapGameUser(ident: PersonIdent, users: Collection<GameUser>): GameUser? {
         val split = ident.name.split(" ".toRegex())
         for (user in users) {
             if (user.gitNames.contains(ident.name)

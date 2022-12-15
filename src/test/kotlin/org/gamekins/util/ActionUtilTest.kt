@@ -77,7 +77,7 @@ class ActionUtilTest: FeatureSpec({
         File(root).deleteRecursively()
     }
 
-    feature("Test Rejecting Challenges") {
+    feature("doRejectChallenge") {
         var formValidation : FormValidation
 
         scenario("No Reason given") {
@@ -117,7 +117,7 @@ class ActionUtilTest: FeatureSpec({
         }
     }
 
-    feature("Store Challenges") {
+    feature("doStoreChallenge") {
         var formValidation : FormValidation
 
         scenario("No User signed in") {
@@ -165,7 +165,7 @@ class ActionUtilTest: FeatureSpec({
         }
     }
 
-    feature("Undo Store Challenges") {
+    feature("doUndoStoreChallenge") {
         var formValidation : FormValidation
 
         scenario("No User signed in") {
@@ -197,50 +197,51 @@ class ActionUtilTest: FeatureSpec({
         }
     }
 
-    feature("Generate Challenges after Rejection") {//TODO describe scenarios
+    feature("generateChallengeAfterRejection") {
         mockkStatic(ActionUtil::class)
         mockkStatic(User::class)
         every { User.getAll() } returns listOf()
         every { challenge.getParameters() } returns parameters
+        every { userProperty.getCurrentChallenges(any()) } returns CopyOnWriteArrayList()
 
-        scenario("1") {
-            parameters.workspace = FilePath(null, "/home/1241352356/branch1")
+        parameters.workspace = FilePath(null, "/home/1241352356/branch1")
+        scenario("Workspace does not exist") {
             ActionUtil.generateChallengeAfterRejection(challenge, user, userProperty, job) shouldBe
                     ": No additional Challenge generated (Workspace deleted or on remote machine)"
         }
 
-        scenario("2") {
-            parameters.branch = "branch1"
+        parameters.branch = "branch1"
+        scenario("Workspace does not exist, branch specified") {
             ActionUtil.generateChallengeAfterRejection(challenge, user, userProperty, job) shouldBe
                     ": No additional Challenge generated (Workspace deleted or on remote machine)"
         }
 
-        scenario("3") {
-            mockkStatic(PublisherUtil::class)
-            every { PublisherUtil.retrieveLastChangedClasses(any(), any()) } returns arrayListOf()
-            parameters.workspace = FilePath(null, root)
-            parameters.projectName = "test-project"
+        mockkStatic(PublisherUtil::class)
+        every { PublisherUtil.retrieveLastChangedClasses(any(), any()) } returns arrayListOf()
+        parameters.workspace = FilePath(null, root)
+        parameters.projectName = "test-project"
+        scenario("Successful Action, no last changed source files") {
             ActionUtil.generateChallengeAfterRejection(challenge, user, userProperty, job) shouldBe
                     ": New Challenge generated"
         }
 
-        scenario("4") {
-            mockkStatic(ChallengeFactory::class)
-            every { ChallengeFactory.generateNewChallenges(any(), any(), any(), any(), any()) } returns 1
-            val job1 = mockkClass(Job::class)
-            val jobProperty1 = mockkClass(GameJobProperty::class)
-            val statistics = mockkClass(Statistics::class)
-            every { job1.getProperty(any()) } returns jobProperty1
-            every { jobProperty1.getStatistics() } returns statistics
-            every { statistics.addGeneratedAfterRejection(any(), any()) } returns Unit
-            every { PublisherUtil.retrieveLastChangedClasses(any(), any()) } returns
-                    arrayListOf(mockkClass(SourceFileDetails::class))
+        mockkStatic(ChallengeFactory::class)
+        every { ChallengeFactory.generateNewChallenges(any(), any(), any(), any(), any()) } returns 1
+        val job1 = mockkClass(Job::class)
+        val jobProperty1 = mockkClass(GameJobProperty::class)
+        val statistics = mockkClass(Statistics::class)
+        every { job1.getProperty(any()) } returns jobProperty1
+        every { jobProperty1.getStatistics() } returns statistics
+        every { statistics.addGeneratedAfterRejection(any(), any()) } returns Unit
+        every { PublisherUtil.retrieveLastChangedClasses(any(), any()) } returns
+                arrayListOf(mockkClass(SourceFileDetails::class))
+        scenario("Successful Action") {
             ActionUtil.generateChallengeAfterRejection(challenge, user, userProperty, job1) shouldBe
                     ": New Challenge generated"
         }
     }
 
-    feature("Send Challenges") {
+    feature("doSendChallenge") {
         var formValidation : FormValidation
 
 

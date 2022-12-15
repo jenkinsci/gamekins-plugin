@@ -73,23 +73,30 @@ class GitUtilTest : FeatureSpec({
         File(root).deleteRecursively()
     }
 
-    feature("Get branch") {
+    feature("getBranch") {
         GitUtil.getBranch(path) shouldBe "master"
     }
 
-    feature("Get head") {
+    feature("getHead / HeadCommitCallable.call") {
         val builder = FileRepositoryBuilder()
         val repo = builder.setGitDir(File(path.remote + "/.git")).setMustExist(true).build()
         val head = GitUtil.getHead(repo)
-        head shouldNotBe null
-        head.fullMessage shouldBe "UPDATE: Test for Complex\n"
-        head.authorIdent.name shouldBe name
-        head.name shouldBe headHash
 
-        GitUtil.HeadCommitCallable(path.remote).call() shouldBe head
+        scenario("getHead")
+        {
+            head shouldNotBe null
+            head.fullMessage shouldBe "UPDATE: Test for Complex\n"
+            head.authorIdent.name shouldBe name
+            head.name shouldBe headHash
+        }
+
+        scenario("HeadCommitCallable.call")
+        {
+            GitUtil.HeadCommitCallable(path.remote).call() shouldBe head
+        }
     }
 
-    feature("Get last changed classes") {
+    feature("getLastChangedClasses") {
         scenario("Search last commits")
         {
             GitUtil.getLastChangedClasses("", parameters, TaskListener.NULL, arrayListOf(user)).size shouldBe 8
@@ -102,31 +109,11 @@ class GitUtilTest : FeatureSpec({
         }
 
         parameters.searchCommitCount = 50
-    }
 
-    feature("Get last changed files") {
         val user1 = mockkClass(hudson.model.User::class)
         every { user1.properties } returns mapOf(
             mockkClass(hudson.security.HudsonPrivateSecurityRealm.Details.DescriptorImpl::class) to
                     mockkClass(hudson.security.HudsonPrivateSecurityRealm.Details::class))
-
-        val property1 = mockkClass(org.gamekins.GameUserProperty::class)
-        every { property1.getGitNames() } returns CopyOnWriteArraySet(listOf(name, id))
-        every { user1.getProperty(org.gamekins.GameUserProperty::class.java) } returns property1
-        every { user1.fullName } returns name
-        every { user1.id } returns id
-        val mailProperty1 = mockkClass(UserProperty::class)
-        every { mailProperty1.address } returns mail
-        every { user1.getProperty(UserProperty::class.java) } returns mailProperty1
-
-        GitUtil.getLastChangedFiles("", parameters, arrayListOf(GitUtil.GameUser(user1)), TaskListener.NULL).size shouldBe 14
-    }
-
-    feature("Get last changed SourceFiles of User") {
-        val user1 = mockkClass(hudson.model.User::class)
-        every { user1.properties } returns mapOf(
-                mockkClass(hudson.security.HudsonPrivateSecurityRealm.Details.DescriptorImpl::class) to
-                        mockkClass(hudson.security.HudsonPrivateSecurityRealm.Details::class))
 
         val property1 = mockkClass(org.gamekins.GameUserProperty::class)
         every { property1.getGitNames() } returns CopyOnWriteArraySet(listOf(name, id))
@@ -162,7 +149,26 @@ class GitUtilTest : FeatureSpec({
         }
     }
 
-    feature("Get last changed tests of User") {
+    feature("getLastChangedFiles") {
+        val user1 = mockkClass(hudson.model.User::class)
+        every { user1.properties } returns mapOf(
+            mockkClass(hudson.security.HudsonPrivateSecurityRealm.Details.DescriptorImpl::class) to
+                    mockkClass(hudson.security.HudsonPrivateSecurityRealm.Details::class))
+
+        val property1 = mockkClass(org.gamekins.GameUserProperty::class)
+        every { property1.getGitNames() } returns CopyOnWriteArraySet(listOf(name, id))
+        every { user1.getProperty(org.gamekins.GameUserProperty::class.java) } returns property1
+        every { user1.fullName } returns name
+        every { user1.id } returns id
+        val mailProperty1 = mockkClass(UserProperty::class)
+        every { mailProperty1.address } returns mail
+        every { user1.getProperty(UserProperty::class.java) } returns mailProperty1
+
+        GitUtil.getLastChangedFiles("", parameters, arrayListOf(GitUtil.GameUser(user1)), TaskListener.NULL).size shouldBe 14
+    }
+
+
+    feature("getLastChangedTestsOfUser") {
         val user1 = mockkClass(hudson.model.User::class)
         every { user1.properties } returns mapOf(
                 mockkClass(hudson.security.HudsonPrivateSecurityRealm.Details.DescriptorImpl::class) to
@@ -199,14 +205,14 @@ class GitUtilTest : FeatureSpec({
         }
     }
 
-    feature("map to GameUser") {
+    feature("mapGameUser") {
         val ident = mockkClass(PersonIdent::class)
         every { ident.name } returns name
         every { ident.emailAddress } returns mail
 
         scenario("No GameUsers to map to")
         {
-            GitUtil.mapUser(ident, arrayListOf<GitUtil.GameUser>()) shouldBe null
+            GitUtil.mapGameUser(ident, arrayListOf()) shouldBe null
         }
 
         val user1 = mockkClass(GitUtil.GameUser::class)
@@ -215,7 +221,7 @@ class GitUtilTest : FeatureSpec({
         every { user1.mail } returns ""
         scenario("Only GameUser in List is empty")
         {
-            GitUtil.mapUser(ident, arrayListOf(user1)) shouldBe null
+            GitUtil.mapGameUser(ident, arrayListOf(user1)) shouldBe null
         }
 
         val user2 = mockkClass(GitUtil.GameUser::class)
@@ -224,7 +230,7 @@ class GitUtilTest : FeatureSpec({
         every { user2.mail } returns ""
         scenario("Searched GameUser has git name")
         {
-            GitUtil.mapUser(ident, arrayListOf(user1, user2)) shouldBe user2
+            GitUtil.mapGameUser(ident, arrayListOf(user1, user2)) shouldBe user2
         }
 
         val user3 = mockkClass(GitUtil.GameUser::class)
@@ -233,7 +239,7 @@ class GitUtilTest : FeatureSpec({
         every { user3.mail } returns ""
         scenario("Searched GameUser has full name")
         {
-            GitUtil.mapUser(ident, arrayListOf(user1, user3)) shouldBe user3
+            GitUtil.mapGameUser(ident, arrayListOf(user1, user3)) shouldBe user3
         }
 
         val user4 = mockkClass(GitUtil.GameUser::class)
@@ -242,11 +248,11 @@ class GitUtilTest : FeatureSpec({
         every { user4.mail } returns mail
         scenario("Searched GameUser has mail address")
         {
-            GitUtil.mapUser(ident, arrayListOf(user1, user4)) shouldBe user4
+            GitUtil.mapGameUser(ident, arrayListOf(user1, user4)) shouldBe user4
         }
     }
 
-    feature("map to User") {
+    feature("mapUser") {
         val ident = mockkClass(PersonIdent::class)
         every { ident.name } returns name
         every { ident.emailAddress } returns mail
@@ -350,7 +356,7 @@ class GitUtilTest : FeatureSpec({
         }
     }
 
-    feature("map Users to GameUsers") {
+    feature("mapUsersToGameUsers") {
         val user1 = mockkClass(hudson.model.User::class)
         every { user1.properties } returns mapOf()
         GitUtil.mapUsersToGameUsers(listOf(user1)) should beEmpty()
@@ -375,7 +381,7 @@ class GitUtilTest : FeatureSpec({
         users[0].gitNames shouldBe hashSetOf(name, id)
     }
 
-    feature("test GameUser") {
+    feature("GameUser") {
         val user1 = mockkClass(hudson.model.User::class)
         every { user1.properties } returns mapOf(
                 mockkClass(hudson.security.HudsonPrivateSecurityRealm.Details.DescriptorImpl::class) to
@@ -430,7 +436,7 @@ class GitUtilTest : FeatureSpec({
         }
     }
 
-    feature("test DiffFromHeadCallable") {
+    feature("DiffFromHeadCallable") {
         unmockkAll()
         mockkObject(GitUtil)
         val temp = GitUtil.DiffFromHeadCallable(path,
@@ -440,7 +446,7 @@ class GitUtilTest : FeatureSpec({
         temp.call() shouldBe listOf("abc")
     }
 
-    feature("test GetChangedClsSinceLastStoredCommit") {
+    feature("GetChangedClsSinceLastStoredCommit") {
         unmockkAll()
         scenario("Commit with specified ID exists")
         {

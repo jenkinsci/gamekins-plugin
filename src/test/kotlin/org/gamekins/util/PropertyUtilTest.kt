@@ -95,7 +95,7 @@ class PropertyUtilTest : FeatureSpec({
         unmockkAll()
     }
 
-    feature("Add Team") {
+    feature("doAddTeam") {
         var formValidation: FormValidation
 
         scenario("No Teamname given") {
@@ -121,7 +121,7 @@ class PropertyUtilTest : FeatureSpec({
         }
     }
 
-    feature("Add User to Team") {
+    feature("doAddUserToTeam") {
         var formValidation : FormValidation
 
         scenario("No Teamname specified") {
@@ -165,7 +165,7 @@ class PropertyUtilTest : FeatureSpec({
         }
     }
 
-    feature("delete Team") {
+    feature("doDeleteTeam") {
         var formValidation : FormValidation
 
         scenario("No Team specified") {
@@ -194,12 +194,18 @@ class PropertyUtilTest : FeatureSpec({
     }
 
     feature("doFillUsersBoxItems") {
-        PropertyUtil.doFillUsersBoxItems(projectName1).size shouldBe 1
+        scenario("Project1")
+        {
+            PropertyUtil.doFillUsersBoxItems(projectName1).size shouldBe 1
+        }
 
-        PropertyUtil.doFillUsersBoxItems(projectName2).size shouldBe 1
+        scenario("Project2")
+        {
+            PropertyUtil.doFillUsersBoxItems(projectName2).size shouldBe 1
+        }
     }
 
-    feature("Remove User from Team") {
+    feature("doRemoveUserFromTeam") {
         var formValidation : FormValidation
 
         scenario("No Team specified") {
@@ -243,7 +249,7 @@ class PropertyUtilTest : FeatureSpec({
         }
     }
 
-    feature("reset") {
+    feature("doReset") {
         var formValidation : FormValidation
 
         scenario("No parent job given") {
@@ -267,7 +273,7 @@ class PropertyUtilTest : FeatureSpec({
         }
     }
 
-    feature("Show Team Memberships") {
+    feature("doShowTeamMemberships") {
         scenario("Test on Job1") {
             PropertyUtil.doShowTeamMemberships(job1, property1) shouldBe "{\"Team2\":[],\"Team1\":[]}"
         }

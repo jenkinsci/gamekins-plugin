@@ -76,7 +76,7 @@ class AchievementUtilTest: FeatureSpec({
         File(root).deleteRecursively()
     }
 
-    feature("Cover line with X Branches") {
+    feature("coverLineWithXBranches") {
         additionalParameters.clear()
         scenario("No Parameters")
         {
@@ -133,7 +133,7 @@ class AchievementUtilTest: FeatureSpec({
         every { property.getCompletedChallenges(any()) } returns CopyOnWriteArrayList(listOf(challenge))
     }
 
-    feature("Get lines of Code") {
+    feature("getLinesOfCode") {
         var filePath : FilePath
 
         scenario("Lines of Code of Complex.java")
@@ -149,7 +149,7 @@ class AchievementUtilTest: FeatureSpec({
         }
     }
 
-    feature("Have Build with X Seconds") {
+    feature("haveBuildWithXSeconds") {
         additionalParameters.clear()
         scenario("No Value for additionalParameters[\"more\"]")
         {
@@ -244,7 +244,7 @@ class AchievementUtilTest: FeatureSpec({
         }
     }
 
-    feature("have Class with X Coverage") {
+    feature("haveClassWithXCoverage") {
         additionalParameters.clear()
         every { challenge.solvedCoverage } returns 0.9
         scenario("No Coverage specified")
@@ -268,7 +268,7 @@ class AchievementUtilTest: FeatureSpec({
         }
     }
 
-    feature("have X Classes with Y Coverage") {
+    feature("haveXClassesWithYCoverage") {
         additionalParameters.clear()
         every { challenge.solvedCoverage } returns 0.9
 
@@ -297,7 +297,7 @@ class AchievementUtilTest: FeatureSpec({
         }
     }
 
-    feature("have X Classes with Y Coverage and Z Lines") {
+    feature("haveXClassesWithYCoverageAndZLines") {
         additionalParameters.clear()
         val details = mockkClass(SourceFileDetails::class)
         every { details.filePath } returns "/src/main/java/com/example/Complex.java"
@@ -342,7 +342,7 @@ class AchievementUtilTest: FeatureSpec({
         }
     }
 
-    feature("have X failed Tests") {
+    feature("haveXFailedTests") {
         additionalParameters.clear()
         every { run.result } returns Result.SUCCESS
         mockkStatic(JUnitUtil::class)
@@ -398,7 +398,7 @@ class AchievementUtilTest: FeatureSpec({
         }
     }
 
-    feature("have X Project-Coverage") {
+    feature("haveXProjectCoverage") {
         additionalParameters.clear()
         parameters.projectCoverage = 0.81
         scenario("No coverage specified")
@@ -422,7 +422,7 @@ class AchievementUtilTest: FeatureSpec({
         }
     }
 
-    feature("have X Project-Tests") {
+    feature("haveXProjectTests") {
         additionalParameters.clear()
         parameters.projectTests = 101
         scenario("No required amount of tests specified")
@@ -446,7 +446,7 @@ class AchievementUtilTest: FeatureSpec({
         }
     }
 
-    feature("improve Class-Coverage By X") {
+    feature("improveClassCoverageByX") {
         additionalParameters.clear()
         every { challenge.coverage } returns 0.0
         every { challenge.solvedCoverage } returns 0.0
@@ -500,7 +500,7 @@ class AchievementUtilTest: FeatureSpec({
         }
     }
 
-    feature("improve Project-Coverage By X") {
+    feature("improveProjectCoverageByX") {
         additionalParameters.clear()
         mockkStatic(GitUtil::class)
         mockkStatic(User::class)
@@ -582,7 +582,7 @@ class AchievementUtilTest: FeatureSpec({
         }
     }
 
-    feature("solve Challenge in X Seconds") {
+    feature("solveChallengeInXSeconds") {
         additionalParameters.clear()
         every { challenge.getSolved() } returns 100000000
         every { challenge.getCreated() } returns 10000000
@@ -640,7 +640,7 @@ class AchievementUtilTest: FeatureSpec({
         }
     }
 
-    feature("solve X Challenges") {
+    feature("solveXChallenges") {
         additionalParameters.clear()
         scenario("No amount specified")
         {
@@ -663,7 +663,7 @@ class AchievementUtilTest: FeatureSpec({
         }
     }
 
-    feature("solve X At Once") {
+    feature("solveXAtOnce") {
         additionalParameters.clear()
         scenario("No amount specified")
         {
