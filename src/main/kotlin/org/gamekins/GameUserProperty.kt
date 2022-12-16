@@ -59,6 +59,7 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
     private val score: HashMap<String, Int> = HashMap()
     private var sendNotifications: Boolean = true
     private var storedChallenges: HashMap<String, CopyOnWriteArrayList<Challenge>> = HashMap()
+    private var unfinishedQuests: HashMap<String, CopyOnWriteArrayList<Quest>> = HashMap()
     private var unsolvedAchievements: HashMap<String, CopyOnWriteArrayList<Achievement>> = HashMap()
 
     /**
@@ -341,6 +342,13 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
     }
 
     /**
+     * Returns the list of unfinished Quests by [projectName].
+     */
+    fun getUnfinishedQuests(projectName: String): CopyOnWriteArrayList<Quest> {
+        return unfinishedQuests[projectName]!!
+    }
+
+    /**
      * Returns the list of unsolved achievements.
      */
     fun getUnsolvedAchievements(projectName: String): CopyOnWriteArrayList<Achievement> {
@@ -465,6 +473,13 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
         }
         print.append(indentation).append("    </RejectedQuests>\n")
 
+        print.append(indentation).append("    <UnfinishedQuests count=\"")
+            .append(getCompletedQuests(projectName).size).append("\">\n")
+        for (quest in getCompletedQuests(projectName)) {
+            print.append(quest.printToXML("", "$indentation        ")).append("\n")
+        }
+        print.append(indentation).append("    </UnfinishedQuests>\n")
+
         print.append(indentation).append("    <Achievements count=\"")
             .append(getCompletedAchievements(projectName).size).append("\">\n")
         for (achievement in completedAchievements[projectName]!!) {
@@ -538,6 +553,22 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
         //Default avatar
         if (currentAvatar.isEmpty()) currentAvatar = Constants.Default.AVATAR
 
+        //Unfinished Quests
+        if (unfinishedQuests == null) unfinishedQuests = HashMap()
+        if (participation.size != 0 && unfinishedQuests.size == 0) {
+            participation.keys.forEach {
+                unfinishedQuests[it] = CopyOnWriteArrayList()
+            }
+        }
+        for (project in rejectedQuests) {
+            for ((quest, reason) in project.value) {
+                if (quest.getCurrentStepNumber() > 0) {
+                    unfinishedQuests[project.key]?.add(quest)
+                    project.value.remove(Pair(quest, reason))
+                }
+            }
+        }
+
         return this
     }
 
@@ -579,11 +610,19 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
     }
 
     /**
-     * Rejects a given [quest] of project [projectName] with a [reason].
+     * Rejects a given [quest] of project [projectName] with a [reason]. Also handles unfinished quests.
      */
     fun rejectQuest(projectName: String, quest: Quest, reason: String) {
         if (quest.steps.size == 0) {
             completeQuest(projectName, quest)
+        } else if (quest.getCurrentStepNumber() > 0){
+            unfinishedQuests.computeIfAbsent(projectName) { CopyOnWriteArrayList() }
+            val quests = unfinishedQuests[projectName]!!
+            quests.add(quest)
+            unfinishedQuests[projectName] = quests
+            val currentQuests = currentQuests[projectName]!!
+            currentQuests.remove(quest)
+            this.currentQuests[projectName] = currentQuests
         } else {
             rejectedQuests.computeIfAbsent(projectName) { CopyOnWriteArrayList() }
             val quests = rejectedQuests[projectName]!!
@@ -658,6 +697,7 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
         completedQuests.putIfAbsent(projectName, CopyOnWriteArrayList())
         currentQuests.putIfAbsent(projectName, CopyOnWriteArrayList())
         rejectedQuests.putIfAbsent(projectName, CopyOnWriteArrayList())
+        unfinishedQuests.putIfAbsent(projectName, CopyOnWriteArrayList())
     }
 
     /**

@@ -311,8 +311,10 @@ object ChallengeFactory {
         val mutants = mutationReport.readToString().split("\n")
             .filter { it.startsWith("<mutation ") }.filter { !it.contains("status='KILLED'") }
         if (mutants.isEmpty()) return null
-        
-        return MutationChallenge(fileDetails, MutationUtil.MutationData(mutants[Random.nextInt(mutants.size)]))
+
+        val mutant = MutationUtil.MutationData(mutants[Random.nextInt(mutants.size)])
+        if (mutant.status == MutationUtil.MutationStatus.KILLED) return null
+        return MutationChallenge(fileDetails, mutant)
     }
 
     /**

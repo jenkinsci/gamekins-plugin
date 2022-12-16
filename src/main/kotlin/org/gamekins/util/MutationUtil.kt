@@ -142,7 +142,7 @@ object MutationUtil {
                     else -> ""
                 }
             }
-            VOID_METHOD_CALLS -> ""
+            VOID_METHOD_CALLS -> "Line removed"
             EMPTY_RETURNS -> {
                 when {
                     "(Collections\\.\\S*)".toRegex().containsMatchIn(data.description) ->

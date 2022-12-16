@@ -185,7 +185,7 @@ class MutationUtilTest : AnnotationSpec() {
                 "<mutator>org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator</mutator>" +
                 "<indexes><index>5</index></indexes><blocks><block>0</block></blocks><killingTest/>" +
                 "<description>removed call to java/io/PrintStream::println</description></mutation>"
-        MutationUtil.getMutatedCode("y.getClass()", MutationData(mutationLine)) shouldBe ""
+        MutationUtil.getMutatedCode("y.getClass()", MutationData(mutationLine)) shouldBe "Line removed"
 
         //EMPTY_RETURNS
         mutationLine = "<mutation detected='false' status='NO_COVERAGE' numberOfTestsRun='0'>" +

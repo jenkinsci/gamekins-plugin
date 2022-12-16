@@ -216,7 +216,7 @@ class MutationChallengeTest : AnnotationSpec() {
         solvableChallenge.isSolvable(parameters, run, listener) shouldBe true
 
         every { MutationUtil.getMutant(any(), any()) } returns null
-        solvableChallenge.isSolvable(parameters, run, listener) shouldBe false
+        solvableChallenge.isSolvable(parameters, run, listener) shouldBe true
 
         val mutant = MutationData(line.replace("detected='false'", "detected='true'"))
         every { MutationUtil.getMutant(any(), any()) } returns mutant

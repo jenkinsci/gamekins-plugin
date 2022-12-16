@@ -95,7 +95,7 @@ object PublisherUtil {
                 property.rejectQuest(parameters.projectName, quest, "One or more challenges are not solvable anymore")
                 for (step in quest.steps) {
                     if (step.challenge.getSolved() > 0)
-                        property.addScore(parameters.projectName, step.challenge.getScore())
+                        property.addScore(parameters.projectName, step.challenge.getScore() + 1)
                 }
                 EventHandler.addEvent(
                     QuestUnsolvableEvent(parameters.projectName, parameters.branch, property.getUser(), quest)
