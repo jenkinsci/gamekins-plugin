@@ -72,7 +72,7 @@ class LeaderboardAction(val job: AbstractItem) : ProminentProjectAction, Describ
     /**
      * Returns the list of stored Challenges of the current project and user.
      */
-    private fun getStoredChallenges(): CopyOnWriteArrayList<Challenge> {
+    fun getStoredChallenges(): CopyOnWriteArrayList<Challenge> {
         val user: User = User.current() ?: return CopyOnWriteArrayList()
         val property = user.getProperty(GameUserProperty::class.java)
             ?: return CopyOnWriteArrayList()

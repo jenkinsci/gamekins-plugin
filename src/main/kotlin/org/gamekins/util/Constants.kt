@@ -229,6 +229,7 @@ object Constants {
          */
         @Suppress("unused", "SENSELESS_COMPARISON")
         private fun readResolve(): Any {
+            if (workspace == null) workspace = FilePath(null, remote)
             if (pitConfiguration == null) pitConfiguration = Default.PIT_CONFIGURATION
             if (showPitOutput ==null) showPitOutput = Default.SHOW_PIT_OUTPUT
             return this

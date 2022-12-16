@@ -238,7 +238,6 @@
 
                                         <j:if test='${currentChallenge.highlightedFileContent != ""}'>
                                             <br/>
-                                            <br/>
                                             <button type="button" class="btn btn-secondary"
                                                     style="font-size: 14px;"
                                                     data-toggle="modal" data-target="#contentModal"
