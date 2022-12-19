@@ -10,6 +10,7 @@
                 <select id="projects" style="display: block; margin-left: auto; margin-right: auto"/>
                 <br/>
                 <a id="projectLink" style="display: block; text-align: center"/>
+                <a id="leaderboardLink" style="display: block; text-align: center"/>
             </div>
             <br/>
             <div id="completedAchievements">

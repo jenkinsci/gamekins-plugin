@@ -51,6 +51,7 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
     private val currentChallenges: HashMap<String, CopyOnWriteArrayList<Challenge>> = HashMap()
     private var currentQuests: HashMap<String, CopyOnWriteArrayList<Quest>> = HashMap()
     private var gitNames: CopyOnWriteArraySet<String>? = null
+    private var lastLeaderboard: String = ""
     private var lastProject: String = ""
     private val participation: HashMap<String, String> = HashMap()
     private val pseudonym: UUID = UUID.randomUUID()
@@ -156,6 +157,13 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
         printer.flush()
     }
 
+    fun doGetLastLeaderboard(rsp: StaplerResponse) {
+        rsp.contentType = Constants.TYPE_PLAIN
+        val printer = rsp.writer
+        printer.print(lastLeaderboard)
+        printer.flush()
+    }
+
     /**
      * Returns the list of projects the user is currently participating.
      */
@@ -196,7 +204,7 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
     }
 
     /**
-     * Returns true if the this user asks for his [Achievement]s. False if another user wants to see it.
+     * Returns true if this user asks for his [Achievement]s. False if another user wants to see it.
      */
     fun doIsCurrentUser(rsp: StaplerResponse) {
         rsp.contentType = Constants.TYPE_PLAIN
@@ -321,11 +329,14 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
     }
 
     override fun getTarget(): Any? {
-        if (Stapler.getCurrentRequest().getHeader("Referer") != null) {
-            val match = "/job/(.+)/leaderboard".toRegex().find(Stapler.getCurrentRequest().getHeader("Referer"))
+        val referer = Stapler.getCurrentRequest().getHeader("Referer")
+        if (referer != null && (referer.endsWith("leaderboard") || referer.endsWith("leaderboard/"))) {
+            val match = "/job/(.+)/leaderboard".toRegex().find(referer)
             lastProject = match?.groupValues?.get(1) ?: lastProject
             lastProject = lastProject.replace("job/", "")
             lastProject = lastProject.replace("%20", " ")
+
+            lastLeaderboard = referer
         }
 
         return if (User.current() == this.user
@@ -552,6 +563,9 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
 
         //Default avatar
         if (currentAvatar.isEmpty()) currentAvatar = Constants.Default.AVATAR
+
+        //Last leaderboard
+        if (lastLeaderboard == null) lastLeaderboard = ""
 
         //Unfinished Quests
         if (unfinishedQuests == null) unfinishedQuests = HashMap()
