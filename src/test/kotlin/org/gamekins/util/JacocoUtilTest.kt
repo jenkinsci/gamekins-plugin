@@ -21,7 +21,7 @@ import hudson.model.Job
 import hudson.model.Run
 import hudson.model.TaskListener
 import org.gamekins.test.TestUtils
-import io.kotest.core.spec.style.AnnotationSpec
+import io.kotest.core.spec.style.FeatureSpec
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -38,24 +38,23 @@ import org.jsoup.nodes.Document
 import org.jsoup.select.Elements
 import java.io.File
 
-class JacocoUtilTest : AnnotationSpec() {
+class JacocoUtilTest : FeatureSpec({
 
-    private lateinit var root : String
-    private lateinit var path : FilePath
-    private lateinit var jacocoSourceFile : FilePath
-    private lateinit var jacocoCSVFile : FilePath
-    private lateinit var jacocoMethodFile : FilePath
-    private lateinit var sourceFile : FilePath
-    private lateinit var parameters : Parameters
+    lateinit var root : String
+    lateinit var path : FilePath
+    lateinit var jacocoSourceFile : FilePath
+    lateinit var jacocoCSVFile : FilePath
+    lateinit var jacocoMethodFile : FilePath
+    lateinit var sourceFile : FilePath
+    lateinit var parameters : Parameters
 
-    @BeforeAll
-    fun initAll() {
+    beforeSpec {
         //Needed because of bug in mockk library which does not release mocked objects
         mockkStatic(JacocoUtil::class)
         mockkStatic(JUnitUtil::class)
         val rootDirectory = javaClass.classLoader.getResource("test-project.zip")
         rootDirectory shouldNotBe null
-        root = rootDirectory.file.removeSuffix(".zip")
+        root = rootDirectory!!.file.removeSuffix(".zip")
         root shouldEndWith "test-project"
         TestUtils.unzip("$root.zip", root)
         path = FilePath(null, root)
@@ -68,77 +67,120 @@ class JacocoUtilTest : AnnotationSpec() {
 
     }
 
-    @AfterAll
-    fun cleanUp() {
+    afterSpec {
         unmockkAll()
         File(root).deleteRecursively()
     }
 
-    @Test
-    fun calculateCoveredLines() {
-        JacocoUtil.calculateCoveredLines(JacocoUtil.generateDocument(jacocoSourceFile), "fc") shouldBe 5
-        JacocoUtil.calculateCoveredLines(JacocoUtil.generateDocument(jacocoSourceFile), "pc") shouldBe 1
-        JacocoUtil.calculateCoveredLines(JacocoUtil.generateDocument(jacocoSourceFile), "nc") shouldBe 54
+    feature("calculateCoveredLines") {
+        scenario("Fully covered")
+        {
+            JacocoUtil.calculateCoveredLines(JacocoUtil.generateDocument(jacocoSourceFile), "fc") shouldBe 5
+        }
+
+        scenario("Partially covered")
+        {
+            JacocoUtil.calculateCoveredLines(JacocoUtil.generateDocument(jacocoSourceFile), "pc") shouldBe 1
+        }
+
+        scenario("Not covered")
+        {
+            JacocoUtil.calculateCoveredLines(JacocoUtil.generateDocument(jacocoSourceFile), "nc") shouldBe 54
+        }
     }
 
-    @Test
-    fun calculateCurrentFilePath() {
+    feature("calculateCurrentFilePath") {
         JacocoUtil.calculateCurrentFilePath(path, File(path.remote)).toURI().path shouldBe path.toURI().path
 
         JacocoUtil.calculateCurrentFilePath(path, File(jacocoSourceFile.remote), path.remote).toURI().path shouldBe jacocoSourceFile.toURI().path
     }
 
-    @Test
-    fun chooseRandomLine() {
+    feature("chooseRandomLine") {
         val classDetails = mockkClass(SourceFileDetails::class)
         every { classDetails.jacocoSourceFile } returns File(jacocoSourceFile.remote)
         every { classDetails.parameters } returns parameters
-        JacocoUtil.chooseRandomLine(classDetails, path) shouldNotBe null
+        scenario("Successful Action")
+        {
+            JacocoUtil.chooseRandomLine(classDetails, path) shouldNotBe null
+        }
 
         every { JacocoUtil.getLines(any()) } returns Elements()
-        JacocoUtil.chooseRandomLine(classDetails, path) shouldBe null
+        scenario("File is empty")
+        {
+            JacocoUtil.chooseRandomLine(classDetails, path) shouldBe null
+        }
     }
 
-    @Test
-    fun chooseRandomMethod() {
+    feature("chooseRandomMethod") {
         mockkStatic(JacocoUtil::class)
         val classDetails = mockkClass(SourceFileDetails::class)
         every { classDetails.jacocoMethodFile } returns File(jacocoMethodFile.remote)
         every { classDetails.parameters } returns parameters
-        JacocoUtil.chooseRandomMethod(classDetails, path) shouldNotBe null
+        scenario("Successful Action")
+        {
+            JacocoUtil.chooseRandomMethod(classDetails, path) shouldNotBe null
+        }
 
         every { JacocoUtil.getNotFullyCoveredMethodEntries(any()) } returns arrayListOf()
-        JacocoUtil.chooseRandomMethod(classDetails, path) shouldBe null
+        scenario("All Methods fully covered")
+        {
+            JacocoUtil.chooseRandomMethod(classDetails, path) shouldBe null
+        }
     }
 
-    @Test
-    fun computePackageName() {
+    feature("computePackageName") {
         JacocoUtil.computePackageName(sourceFile.remote.removePrefix(path.remote)) shouldBe "com.example"
     }
 
-    @Test
-    fun generateDocument() {
+    feature("generateDocument") {
         JacocoUtil.generateDocument(FilePath(null, path.remote + "/target/site/jacoco/index.html")) shouldNotBe null
     }
 
-    @Test
-    fun getCoverageInPercentageFromJacoco() {
-        JacocoUtil.getCoverageInPercentageFromJacoco("Complex", jacocoCSVFile) shouldBe 0.04177545691906005
-        JacocoUtil.getCoverageInPercentageFromJacoco("NotExisting", jacocoCSVFile) shouldBe 0.0
-        JacocoUtil.getCoverageInPercentageFromJacoco("NestedLoop", jacocoCSVFile) shouldBe 0.6923076923076923
-        JacocoUtil.getCoverageInPercentageFromJacoco("Calculator", jacocoCSVFile) shouldBe 1.0
-        JacocoUtil.getCoverageInPercentageFromJacoco("Rational", jacocoCSVFile) shouldBe 0.0
+    feature("getCoverageInPercentageFromJacoco") {
+        scenario("Example class Complex")
+        {
+            JacocoUtil.getCoverageInPercentageFromJacoco("Complex", jacocoCSVFile) shouldBe 0.04177545691906005
+        }
+
+        scenario("Non existing class")
+        {
+            JacocoUtil.getCoverageInPercentageFromJacoco("NotExisting", jacocoCSVFile) shouldBe 0.0
+        }
+
+        scenario("Example class NestedLoop")
+        {
+            JacocoUtil.getCoverageInPercentageFromJacoco("NestedLoop", jacocoCSVFile) shouldBe 0.6923076923076923
+        }
+
+        scenario("Example class Calculator")
+        {
+            JacocoUtil.getCoverageInPercentageFromJacoco("Calculator", jacocoCSVFile) shouldBe 1.0
+        }
+
+        scenario("Example class Rational")
+        {
+            JacocoUtil.getCoverageInPercentageFromJacoco("Rational", jacocoCSVFile) shouldBe 0.0
+        }
     }
 
-    @Test
-    fun getFilesInAllSubdirectories() {
-        JacocoUtil.getFilesInAllSubDirectories(path, "TEST-.+\\.xml") shouldHaveSize 4
-        JacocoUtil.getFilesInAllSubDirectories(path, "jacoco.csv") shouldHaveSize  1
-        JacocoUtil.getFilesInAllSubDirectories(path, "index.html") shouldHaveSize 2
+    feature("getFilesInAllSubdirectories") {
+        scenario("Search for xml-files starting with TEST-")
+        {
+            JacocoUtil.getFilesInAllSubDirectories(path, "TEST-.+\\.xml") shouldHaveSize 4
+        }
+
+        scenario("Search for jacoco.csv")
+        {
+            JacocoUtil.getFilesInAllSubDirectories(path, "jacoco.csv") shouldHaveSize  1
+        }
+
+        scenario("Search for index.html")
+        {
+            JacocoUtil.getFilesInAllSubDirectories(path, "index.html") shouldHaveSize 2
+        }
     }
 
-    @Test
-    fun getJacocoFileInMultiBranchProject() {
+    feature("getJacocoFileInMultiBranchProject") {
         val run = mockkClass(Run::class)
         val job = mockkClass(Job::class)
         val project = mockkClass(WorkflowMultiBranchProject::class)
@@ -149,37 +191,43 @@ class JacocoUtilTest : AnnotationSpec() {
         val jacocoFile = FilePath(null, "/home/test/test-project_testing/file.html")
         val jacocoFileMaster = FilePath(null, "/home/test/test-project_master/file.html")
 
-        JacocoUtil.getJacocoFileInMultiBranchProject(run, parameters, jacocoFile, "testing") shouldBe jacocoFile
-        JacocoUtil.getJacocoFileInMultiBranchProject(run, parameters, jacocoFileMaster, "master") shouldBe jacocoFile
+        scenario("Scenario")
+        {
+            JacocoUtil.getJacocoFileInMultiBranchProject(run, parameters, jacocoFile, "testing") shouldBe jacocoFile
+        }
+
+        scenario("Scenario")
+        {
+            JacocoUtil.getJacocoFileInMultiBranchProject(run, parameters, jacocoFileMaster, "master") shouldBe jacocoFile
+        }
+
         every { job.parent } returns mockkClass(jenkins.branch.MultiBranchProject::class)
-        JacocoUtil.getJacocoFileInMultiBranchProject(run, parameters, jacocoFile, "testing") shouldBe jacocoFile
+        scenario("Scenario")
+        {
+            JacocoUtil.getJacocoFileInMultiBranchProject(run, parameters, jacocoFile, "testing") shouldBe jacocoFile
+        }
     }
 
-    @Test
-    fun getLines() {
+    feature("getLines") {
         mockkStatic(JacocoUtil::class)
         JacocoUtil.getLines(jacocoSourceFile) shouldHaveSize 55
         val rationalPath = FilePath(null, path.remote + "/target/site/jacoco/com.example/Rational.java.html")
         JacocoUtil.getLines(rationalPath) shouldHaveSize 91
     }
 
-    @Test
-    fun getMethodEntries() {
+    feature("getMethodEntries") {
         JacocoUtil.getMethodEntries(jacocoMethodFile) shouldHaveSize 23
     }
 
-    @Test
-    fun getNotFullyCoveredMethodEntries() {
+    feature("getNotFullyCoveredMethodEntries") {
         JacocoUtil.getNotFullyCoveredMethodEntries(jacocoMethodFile) shouldHaveSize 21
     }
 
-    @Test
-    fun getProjectCoverage() {
+    feature("getProjectCoverage") {
         JacocoUtil.getProjectCoverage(path, "jacoco.csv") shouldBe 0.12087912087912088
     }
 
-    @Test
-    fun isGetterOrSetter() {
+    feature("isGetterOrSetter") {
         val rationalPath = FilePath(null, path.remote + "/target/site/jacoco/com.example/Rational.java.html")
         JacocoUtil.isGetterOrSetter(rationalPath.readToString().split("\n"), "    return num;") shouldBe true
         JacocoUtil.isGetterOrSetter(rationalPath.readToString().split("\n"),
@@ -190,8 +238,7 @@ class JacocoUtilTest : AnnotationSpec() {
                 "not found") shouldBe false
     }
 
-    @Test
-    fun testClassDetails() {
+    feature("testClassDetails") {
         val className = "Complex"
         val path = mockkClass(FilePath::class)
         val shortFilePath = "src/main/java/com/example/$className.java"
@@ -212,7 +259,7 @@ class JacocoUtilTest : AnnotationSpec() {
         every { commit.name } returns "ef97erb"
         every { path.act(ofType(GitUtil.HeadCommitCallable::class)) } returns commit
         every { path.act(ofType(JacocoUtil.FilesOfAllSubDirectoriesCallable::class)) } returns arrayListOf()
-        every { path.remote } returns this.path.remote
+        every { path.remote } returns path.remote
         every { path.channel } returns null
         val details = JacocoUtil.ClassDetails(path, shortFilePath, shortJacocoPath, shortJacocoCSVPath, mocoJSONPath, hashMapOf(),
                 TaskListener.NULL)
@@ -230,8 +277,7 @@ class JacocoUtilTest : AnnotationSpec() {
                 "changedByUsers=Philipp Straubinger}"
     }
 
-    @Test
-    fun isGetLinesInRange() {
+    feature("isGetLinesInRange") {
         JacocoUtil.getLinesInRange(jacocoSourceFile, 41, 4) shouldBe Pair("    double ns = a * a + b * b;" + System.lineSeparator() +
                 "    double dArg = d / 2;" + System.lineSeparator() +
                 "    double cArg = c * arg();" + System.lineSeparator() +
@@ -247,4 +293,4 @@ class JacocoUtilTest : AnnotationSpec() {
 
         JacocoUtil.getLinesInRange(jacocoSourceFile, 5.0, 4) shouldBe Pair("", "")
     }
-}
+})
