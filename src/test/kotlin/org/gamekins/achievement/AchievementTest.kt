@@ -21,6 +21,7 @@ import hudson.model.TaskListener
 import io.kotest.core.spec.style.FeatureSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import io.kotest.matchers.string.shouldMatch
 import io.mockk.every
 import io.mockk.mockkClass
 import io.mockk.mockkStatic
@@ -38,7 +39,7 @@ class AchievementTest: FeatureSpec({
     val run = mockkClass(Run::class)
     val property = mockkClass(GameUserProperty::class)
 
-    beforeAny {
+    beforeSpec {
         mockkStatic(AchievementInitializer::class)
         mockkStatic(AchievementUtil::class)
 
@@ -60,9 +61,9 @@ class AchievementTest: FeatureSpec({
         }
 
         every { AchievementUtil.solveXChallenges(any(), any(), any(), any(), any(), any()) } returns true
-        achievement.isSolved(files, parameters, run, property, TaskListener.NULL) shouldBe true
         scenario("Achievement solved")
         {
+            achievement.isSolved(files, parameters, run, property, TaskListener.NULL) shouldBe true
             achievement.solvedTimeString shouldNotBe "Not solved"
         }
     }
@@ -121,8 +122,8 @@ class AchievementTest: FeatureSpec({
     }
 
     feature("printToXML") {
-        achievement.printToXML("") shouldBe "<Achievement title=\"I took the first Challenge\" " +
-                "description=\"Solve your first Challenge\" secret=\"false\" solved=\"0\"/>"
+        achievement.printToXML("") shouldMatch  "<Achievement title=\"I took the first Challenge\" " +
+                "description=\"Solve your first Challenge\" secret=\"false\" solved=\"[0-9]*\"/>"
     }
 
     feature("testToString") {
