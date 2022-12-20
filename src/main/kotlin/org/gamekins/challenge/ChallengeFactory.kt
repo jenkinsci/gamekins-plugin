@@ -187,12 +187,7 @@ object ChallengeFactory {
 
             when {
                 challengeClass == TestChallenge::class.java -> {
-                    data.testCount = JUnitUtil.getTestCount(parameters.workspace)
-                    data.headCommitHash = parameters.workspace.act(HeadCommitCallable(parameters.remote)).name
-                    listener.logger.println("[Gamekins] Generated new TestChallenge")
-                    challenge = challengeClass
-                        .getConstructor(ChallengeGenerationData::class.java)
-                        .newInstance(data)
+                    challenge = generateTestChallenge(data, parameters, listener)
                 }
                 challengeClass.superclass == CoverageChallenge::class.java -> {
                     listener.logger.println(
@@ -354,6 +349,15 @@ object ChallengeFactory {
         return generated
     }
 
+    fun generateTestChallenge(data: ChallengeGenerationData, parameters: Parameters, listener: TaskListener)
+    : TestChallenge {
+
+        data.testCount = JUnitUtil.getTestCount(parameters.workspace)
+        data.headCommitHash = parameters.workspace.act(HeadCommitCallable(parameters.remote)).name
+        listener.logger.println("[Gamekins] Generated new TestChallenge")
+        return TestChallenge(data)
+    }
+
     /**
      * Generates a new third party [Challenge]. The values listed below in the method may be null and have to be checked
      * in the initialisation of the [Challenge].
@@ -424,7 +428,7 @@ object ChallengeFactory {
      * them randomly for generation.
      */
     private fun generateSmellChallenge(data: ChallengeGenerationData, listener: TaskListener): SmellChallenge? {
-        val issues = SmellUtil.getSmellsOfFile(data.selectedFile, listener)
+        val issues = SmellUtil.getSmellsOfFile(data.selectedFile!!, listener)
 
         if (issues.isEmpty()) return null
 

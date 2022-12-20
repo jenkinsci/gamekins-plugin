@@ -63,16 +63,6 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
         listener: TaskListener
     ) {
 
-        //Checks whether the paths of the JaCoCo files are correct
-        if (!PublisherUtil.doCheckJacocoResultsPath(parameters.workspace, parameters.jacocoResultsPath)) {
-            listener.logger.println("[Gamekins] JaCoCo folder is not correct")
-            return
-        }
-        if (!PublisherUtil.doCheckJacocoCSVPath(parameters.workspace, parameters.jacocoCSVPath)) {
-            listener.logger.println("[Gamekins] JaCoCo csv file could not be found")
-            return
-        }
-
         //Extracts the branch
         when (run.parent.parent) {
             is WorkflowMultiBranchProject -> {
@@ -81,6 +71,18 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
             else -> {
                 parameters.branch = GitUtil.getBranch(parameters.workspace)
             }
+        }
+
+        //Checks whether the paths of the JaCoCo files are correct
+        if (!PublisherUtil.doCheckJacocoResultsPath(parameters.workspace, parameters.jacocoResultsPath)) {
+            listener.logger.println("[Gamekins] JaCoCo folder is not correct")
+            PublisherUtil.generateBuildAndTestChallenges(parameters, result, listener)
+            return
+        }
+        if (!PublisherUtil.doCheckJacocoCSVPath(parameters.workspace, parameters.jacocoCSVPath)) {
+            listener.logger.println("[Gamekins] JaCoCo csv file could not be found")
+            PublisherUtil.generateBuildAndTestChallenges(parameters, result, listener)
+            return
         }
 
         EventHandler.addEvent(BuildStartedEvent(parameters.projectName, parameters.branch, run))

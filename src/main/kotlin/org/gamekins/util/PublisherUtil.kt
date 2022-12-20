@@ -19,6 +19,7 @@ package org.gamekins.util
 import hudson.FilePath
 import hudson.model.*
 import org.gamekins.GameUserProperty
+import org.gamekins.challenge.Challenge
 import org.gamekins.challenge.ChallengeFactory
 import org.gamekins.challenge.DummyChallenge
 import org.gamekins.challenge.quest.QuestFactory
@@ -304,6 +305,23 @@ object PublisherUtil {
             }
         }
         return false
+    }
+
+    fun generateBuildAndTestChallenges(parameters: Parameters, result: Result?, listener: TaskListener) {
+        for (user in User.getAll()) {
+            val property = user.getProperty(GameUserProperty::class.java)
+            if (property.isParticipating(parameters.projectName)) {
+                val generated = ChallengeFactory.generateBuildChallenge(result, user, property, parameters, listener)
+                if (!generated && result != Result.FAILURE) {
+                    val data = Challenge.ChallengeGenerationData(parameters, user, null, listener)
+                    val challenge = ChallengeFactory.generateTestChallenge(data, parameters, listener)
+                    if (!property.getCurrentChallenges(parameters.projectName).contains(challenge))
+                        property.newChallenge(parameters.projectName, challenge)
+                }
+
+                user.save()
+            }
+        }
     }
 
     /**

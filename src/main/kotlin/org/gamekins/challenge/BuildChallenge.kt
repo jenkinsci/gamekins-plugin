@@ -84,7 +84,7 @@ class BuildChallenge(private var parameters: Parameters) : Challenge {
     }
 
     override fun printToXML(reason: String, indentation: String): String {
-        var print = "$indentation<BuildChallenge created=\"$created\" solved=\"$solved"
+        var print = "$indentation<BuildChallenge created=\"$created\" solved=\"$solved\" branch=\"${parameters.branch}"
         if (reason.isNotEmpty()) {
             print += "\" reason=\"$reason"
         }
@@ -93,6 +93,6 @@ class BuildChallenge(private var parameters: Parameters) : Challenge {
     }
 
     override fun toString(): String {
-        return "Let the Build run successfully"
+        return "Let the Build run successfully in branch ${parameters.branch}"
     }
 }

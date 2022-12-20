@@ -34,7 +34,7 @@ class BuildChallengeTest : AnnotationSpec() {
 
     @BeforeEach
     fun init() {
-        challenge = BuildChallenge(Parameters())
+        challenge = BuildChallenge(Parameters(branch = "main"))
     }
 
     @AfterAll
@@ -60,10 +60,10 @@ class BuildChallengeTest : AnnotationSpec() {
     @Test
     fun printToXML() {
         challenge.printToXML("", "") shouldBe
-                "<BuildChallenge created=\"${challenge.getCreated()}\" solved=\"${challenge.getSolved()}\"/>"
+                "<BuildChallenge created=\"${challenge.getCreated()}\" solved=\"${challenge.getSolved()}\" branch=\"main\"/>"
         challenge.printToXML("", "    ") shouldStartWith "    <"
         challenge.printToXML("test", "") shouldBe
-                "<BuildChallenge created=\"${challenge.getCreated()}\" solved=\"0\" reason=\"test\"/>"
-        challenge.toString() shouldBe "Let the Build run successfully"
+                "<BuildChallenge created=\"${challenge.getCreated()}\" solved=\"0\" branch=\"main\" reason=\"test\"/>"
+        challenge.toString() shouldBe "Let the Build run successfully in branch main"
     }
 }
