@@ -18,23 +18,20 @@ package org.gamekins.statistics
 
 import hudson.model.Result
 import hudson.tasks.junit.TestResultAction
-import io.kotest.core.spec.style.AnnotationSpec
+import io.kotest.core.spec.style.FeatureSpec
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockkClass
 import io.mockk.unmockkAll
 
-class StatisticsTest : AnnotationSpec() {
+class StatisticsTest : FeatureSpec({
 
-    @AfterAll
-    fun cleanUp() {
+    afterSpec {
         unmockkAll()
     }
 
     //Difficult to test since RunList cannot be instantiated and mocking would need different iterators
-    @Ignore
-    @Test
-    fun addRunEntry() {
+    xfeature("addRunEntry") {
         val testing = mockkClass(org.jenkinsci.plugins.workflow.job.WorkflowJob::class)
         every { testing.name } returns "testing"
         val run = mockkClass(org.jenkinsci.plugins.workflow.job.WorkflowRun::class)
@@ -48,8 +45,7 @@ class StatisticsTest : AnnotationSpec() {
         every { job.fullName } returns "test-project"
     }
 
-    @Test
-    fun isNotFullyInitialized() {
+    feature("isNotFullyInitialized") {
         val job = mockkClass(org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject::class)
         every { job.items } returns listOf()
         every { job.fullName } returns "test-project"
@@ -57,8 +53,6 @@ class StatisticsTest : AnnotationSpec() {
         Statistics(job).isNotFullyInitialized() shouldBe false
     }
 
-    @Ignore
-    @Test
-    fun printToXML() {
+    xfeature("printToXML") {
     }
-}
+})
