@@ -383,7 +383,7 @@ object JacocoUtil {
 
     /**
      * Checks whether the given [line] is a getter or setter. The ordered list of [lines] must be JaCoCo *.java.html
-     * file splitted by \n. It searches in the list of [lines] for the correct [line] and then goes back in the ordered
+     * file split by \n. It searches in the list of [lines] for the correct [line] and then goes back in the ordered
      * list one time (or multiple times if the previous line only contains white spaces or a {). If the line is a
      * method declaration, it contains get/set/is and the name is equal to the call in the [line], it is a getter
      * or setter.

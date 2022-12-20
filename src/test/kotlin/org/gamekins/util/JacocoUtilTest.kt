@@ -191,18 +191,18 @@ class JacocoUtilTest : FeatureSpec({
         val jacocoFile = FilePath(null, "/home/test/test-project_testing/file.html")
         val jacocoFileMaster = FilePath(null, "/home/test/test-project_master/file.html")
 
-        scenario("Scenario")
+        scenario("Same Branch")
         {
             JacocoUtil.getJacocoFileInMultiBranchProject(run, parameters, jacocoFile, "testing") shouldBe jacocoFile
         }
 
-        scenario("Scenario")
+        scenario("Different Branch")
         {
             JacocoUtil.getJacocoFileInMultiBranchProject(run, parameters, jacocoFileMaster, "master") shouldBe jacocoFile
         }
 
         every { job.parent } returns mockkClass(jenkins.branch.MultiBranchProject::class)
-        scenario("Scenario")
+        scenario("MultiBranchProject")
         {
             JacocoUtil.getJacocoFileInMultiBranchProject(run, parameters, jacocoFile, "testing") shouldBe jacocoFile
         }
@@ -210,9 +210,16 @@ class JacocoUtilTest : FeatureSpec({
 
     feature("getLines") {
         mockkStatic(JacocoUtil::class)
-        JacocoUtil.getLines(jacocoSourceFile) shouldHaveSize 55
+        scenario("jacocoSourceFile")
+        {
+            JacocoUtil.getLines(jacocoSourceFile) shouldHaveSize 55
+        }
+
         val rationalPath = FilePath(null, path.remote + "/target/site/jacoco/com.example/Rational.java.html")
-        JacocoUtil.getLines(rationalPath) shouldHaveSize 91
+        scenario("Rational.java.html")
+        {
+            JacocoUtil.getLines(rationalPath) shouldHaveSize 91
+        }
     }
 
     feature("getMethodEntries") {
@@ -229,18 +236,35 @@ class JacocoUtilTest : FeatureSpec({
 
     feature("isGetterOrSetter") {
         val rationalPath = FilePath(null, path.remote + "/target/site/jacoco/com.example/Rational.java.html")
-        JacocoUtil.isGetterOrSetter(rationalPath.readToString().split("\n"), "    return num;") shouldBe true
-        JacocoUtil.isGetterOrSetter(rationalPath.readToString().split("\n"),
+
+        scenario("\"    return num;\" in Rational.java.html, is Getter")
+        {
+            JacocoUtil.isGetterOrSetter(rationalPath.readToString().split("\n"),
+                "    return num;") shouldBe true
+        }
+
+        scenario("\"    return den.equals(B_ONE);\" in Rational.java.html, is neither Getter nor Setter")
+        {
+            JacocoUtil.isGetterOrSetter(rationalPath.readToString().split("\n"),
                 "    return den.equals(B_ONE);") shouldBe false
-        JacocoUtil.isGetterOrSetter(rationalPath.readToString().split("\n"),
+        }
+
+        scenario("\"      BigInteger num = decimal.toBigInteger();\" in Rational.java.html, is neither Getter nor Setter")
+        {
+            JacocoUtil.isGetterOrSetter(rationalPath.readToString().split("\n"),
                 "      BigInteger num = decimal.toBigInteger();") shouldBe false
-        JacocoUtil.isGetterOrSetter(rationalPath.readToString().split("\n"),
+        }
+
+        scenario("Line does not exist")
+        {
+            JacocoUtil.isGetterOrSetter(rationalPath.readToString().split("\n"),
                 "not found") shouldBe false
+        }
     }
 
-    feature("testClassDetails") {
+    feature("ClassDetails") {
         val className = "Complex"
-        val path = mockkClass(FilePath::class)
+        val filePath = mockkClass(FilePath::class)
         val shortFilePath = "src/main/java/com/example/$className.java"
         val shortJacocoPath = "**/target/site/jacoco/"
         val shortJacocoCSVPath = "**/target/site/jacoco/jacoco.csv"
@@ -250,18 +274,18 @@ class JacocoUtilTest : FeatureSpec({
         val testCount = 10
         mockkStatic(JacocoUtil::class)
         val document = mockkClass(Document::class)
-        every { JacocoUtil.calculateCurrentFilePath(any(), any()) } returns path
+        every { JacocoUtil.calculateCurrentFilePath(any(), any()) } returns filePath
         every { JacocoUtil.getCoverageInPercentageFromJacoco(any(), any()) } returns coverage
         every { JacocoUtil.generateDocument(any()) } returns document
         every { JacocoUtil.calculateCoveredLines(any(), any()) } returns 0
         every { JUnitUtil.getTestCount(any(), any()) } returns testCount
         val commit = mockkClass(RevCommit::class)
         every { commit.name } returns "ef97erb"
-        every { path.act(ofType(GitUtil.HeadCommitCallable::class)) } returns commit
-        every { path.act(ofType(JacocoUtil.FilesOfAllSubDirectoriesCallable::class)) } returns arrayListOf()
-        every { path.remote } returns path.remote
-        every { path.channel } returns null
-        val details = JacocoUtil.ClassDetails(path, shortFilePath, shortJacocoPath, shortJacocoCSVPath, mocoJSONPath, hashMapOf(),
+        every { filePath.act(ofType(GitUtil.HeadCommitCallable::class)) } returns commit
+        every { filePath.act(ofType(JacocoUtil.FilesOfAllSubDirectoriesCallable::class)) } returns arrayListOf()
+        every { filePath.remote } returns path.remote
+        every { filePath.channel } returns null
+        val details = JacocoUtil.ClassDetails(filePath, shortFilePath, shortJacocoPath, shortJacocoCSVPath, mocoJSONPath, hashMapOf(),
                 TaskListener.NULL)
 
         details.filesExists() shouldBe true
@@ -277,20 +301,30 @@ class JacocoUtilTest : FeatureSpec({
                 "changedByUsers=Philipp Straubinger}"
     }
 
-    feature("isGetLinesInRange") {
-        JacocoUtil.getLinesInRange(jacocoSourceFile, 41, 4) shouldBe Pair("    double ns = a * a + b * b;" + System.lineSeparator() +
-                "    double dArg = d / 2;" + System.lineSeparator() +
-                "    double cArg = c * arg();" + System.lineSeparator() +
-                "    double dDenom = Math.pow(Math.E, d * arg());" + System.lineSeparator() +
-                System.lineSeparator(), "    double cArg = c * arg();")
+    feature("getLinesInRange") {
+        scenario("4 Lines around Line 41")
+        {
+            JacocoUtil.getLinesInRange(jacocoSourceFile, 41, 4) shouldBe Pair(
+                    "    double ns = a * a + b * b;" + System.lineSeparator() +
+                    "    double dArg = d / 2;" + System.lineSeparator() +
+                    "    double cArg = c * arg();" + System.lineSeparator() +
+                    "    double dDenom = Math.pow(Math.E, d * arg());" + System.lineSeparator() +
+                    System.lineSeparator(), "    double cArg = c * arg();")
+        }
 
+        scenario("4 Lines around first occurrence of \"dDenom\"")
+        {
+            JacocoUtil.getLinesInRange(jacocoSourceFile, "dDenom", 4) shouldBe Pair(
+                    "    double dArg = d / 2;" + System.lineSeparator() +
+                    "    double cArg = c * arg();" + System.lineSeparator() +
+                    "    double dDenom = Math.pow(Math.E, d * arg());" + System.lineSeparator() +
+                    System.lineSeparator() +
+                    "    double newReal =" + System.lineSeparator(), "")
+        }
 
-        JacocoUtil.getLinesInRange(jacocoSourceFile, "dDenom", 4) shouldBe Pair("    double dArg = d / 2;" + System.lineSeparator() +
-                "    double cArg = c * arg();" + System.lineSeparator() +
-                "    double dDenom = Math.pow(Math.E, d * arg());" + System.lineSeparator() +
-                System.lineSeparator() +
-                "    double newReal =" + System.lineSeparator(), "")
-
-        JacocoUtil.getLinesInRange(jacocoSourceFile, 5.0, 4) shouldBe Pair("", "")
+        scenario("Invalid target")
+        {
+            JacocoUtil.getLinesInRange(jacocoSourceFile, 5.0, 4) shouldBe Pair("", "")
+        }
     }
 })
