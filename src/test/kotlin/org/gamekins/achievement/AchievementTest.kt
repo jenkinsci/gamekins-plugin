@@ -18,7 +18,7 @@ package org.gamekins.achievement
 
 import hudson.model.Run
 import hudson.model.TaskListener
-import io.kotest.core.spec.style.AnnotationSpec
+import io.kotest.core.spec.style.FeatureSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.mockk.every
@@ -30,80 +30,102 @@ import org.gamekins.file.FileDetails
 import org.gamekins.util.AchievementUtil
 import org.gamekins.util.Constants.Parameters
 
-class AchievementTest: AnnotationSpec() {
+class AchievementTest: FeatureSpec({
 
-    private lateinit var achievement: Achievement
-    private val files = arrayListOf<FileDetails>()
-    private val parameters = Parameters()
-    private val run = mockkClass(Run::class)
-    private val property = mockkClass(GameUserProperty::class)
+    lateinit var achievement: Achievement
+    val files = arrayListOf<FileDetails>()
+    val parameters = Parameters()
+    val run = mockkClass(Run::class)
+    val property = mockkClass(GameUserProperty::class)
 
-    @BeforeEach
-    fun init() {
+    beforeAny {
         mockkStatic(AchievementInitializer::class)
         mockkStatic(AchievementUtil::class)
 
         achievement = AchievementInitializer.initializeAchievement("solve_challenge.json")
     }
 
-    @AfterAll
-    fun cleanUp() {
+    afterSpec {
         unmockkAll()
     }
 
-    @Test
-    fun clone() {
+    feature("clone") {
         achievement.clone() shouldBe achievement
     }
 
-    @Test
-    fun getSolvedTimeString() {
-        achievement.solvedTimeString shouldBe "Not solved"
+    feature("getSolvedTimeString") {
+        scenario("Achievement after Initialization (not solved)")
+        {
+            achievement.solvedTimeString shouldBe "Not solved"
+        }
 
         every { AchievementUtil.solveXChallenges(any(), any(), any(), any(), any(), any()) } returns true
         achievement.isSolved(files, parameters, run, property, TaskListener.NULL) shouldBe true
-        achievement.solvedTimeString shouldNotBe "Not solved"
+        scenario("Achievement solved")
+        {
+            achievement.solvedTimeString shouldNotBe "Not solved"
+        }
     }
 
-    @Test
-    fun testEquals() {
-        achievement.equals(null) shouldBe false
+    feature("testEquals") {
+        scenario("Null")
+        {
+            achievement.equals(null) shouldBe false
+        }
 
-        achievement.equals(files) shouldBe false
+        scenario("Different class")
+        {
+            achievement.equals(files) shouldBe false
+        }
 
         val achievement2 = mockkClass(Achievement::class)
         every { achievement2.description } returns ""
         every { achievement2.title } returns ""
-        (achievement == achievement2) shouldBe false
+        scenario("No title, no description")
+        {
+            (achievement == achievement2) shouldBe false
+        }
 
         every { achievement2.description } returns "Solve your first Challenge"
-        (achievement == achievement2) shouldBe false
+        scenario("No title")
+        {
+            (achievement == achievement2) shouldBe false
+        }
 
         every { achievement2.description } returns ""
         every { achievement2.title } returns "I took the first Challenge"
-        (achievement == achievement2) shouldBe false
+        scenario("No description, same title")
+        {
+            (achievement == achievement2) shouldBe false
+        }
 
         every { achievement2.description } returns "Solve your first Challenge"
-        (achievement == achievement2) shouldBe true
+        scenario("Same title, same description")
+        {
+            (achievement == achievement2) shouldBe true
+        }
     }
 
-    @Test
-    fun isSolved() {
+    feature("isSolved") {
         every { AchievementUtil.solveXChallenges(any(), any(), any(), any(), any(), any()) } returns false
-        achievement.isSolved(files, parameters, run, property, TaskListener.NULL) shouldBe false
+        scenario("Requirements not met")
+        {
+            achievement.isSolved(files, parameters, run, property, TaskListener.NULL) shouldBe false
+        }
 
         every { AchievementUtil.solveXChallenges(any(), any(), any(), any(), any(), any()) } returns true
-        achievement.isSolved(files, parameters, run, property, TaskListener.NULL) shouldBe true
+        scenario("Requirements met")
+        {
+            achievement.isSolved(files, parameters, run, property, TaskListener.NULL) shouldBe true
+        }
     }
 
-    @Test
-    fun printToXML() {
+    feature("printToXML") {
         achievement.printToXML("") shouldBe "<Achievement title=\"I took the first Challenge\" " +
                 "description=\"Solve your first Challenge\" secret=\"false\" solved=\"0\"/>"
     }
 
-    @Test
-    fun testToString() {
+    feature("testToString") {
         achievement.toString() shouldBe "I took the first Challenge: Solve your first Challenge"
     }
-}
+})

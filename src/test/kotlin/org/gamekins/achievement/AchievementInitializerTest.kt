@@ -16,26 +16,23 @@
 
 package org.gamekins.achievement
 
-import io.kotest.core.spec.style.AnnotationSpec
+import io.kotest.core.spec.style.FeatureSpec
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.mockk.mockkStatic
 import io.mockk.unmockkAll
 
-class AchievementInitializerTest: AnnotationSpec() {
+class AchievementInitializerTest: FeatureSpec({
 
-    @BeforeAll
-    fun init() {
+    beforeSpec {
         mockkStatic(AchievementInitializer::class)
     }
 
-    @AfterAll
-    fun cleanUp() {
+    afterSpec {
         unmockkAll()
     }
 
-    @Test
-    fun initializeAchievement() {
+    feature("initializeAchievement") {
         val achievement = AchievementInitializer.initializeAchievement("solve_challenge.json")
         achievement.badgePath shouldBe "/plugin/gamekins/icons/trophy.png"
         achievement.description shouldBe "Solve your first Challenge"
@@ -45,8 +42,7 @@ class AchievementInitializerTest: AnnotationSpec() {
         achievement.additionalParameters["solveNumber"] shouldBe "1"
     }
 
-    @Test
-    fun initializeAchievements() {
+    feature("initializeAchievements") {
         AchievementInitializer.initializeAchievements("solve_x_challenges.json") shouldHaveSize 8
     }
-}
+})
