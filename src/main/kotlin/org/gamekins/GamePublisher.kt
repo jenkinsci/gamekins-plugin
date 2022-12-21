@@ -73,19 +73,21 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
             }
         }
 
+        EventHandler.addEvent(BuildStartedEvent(parameters.projectName, parameters.branch, run))
+
         //Checks whether the paths of the JaCoCo files are correct
         if (!PublisherUtil.doCheckJacocoResultsPath(parameters.workspace, parameters.jacocoResultsPath)) {
             listener.logger.println("[Gamekins] JaCoCo folder is not correct")
             PublisherUtil.generateBuildAndTestChallenges(parameters, result, listener)
+            EventHandler.addEvent(BuildFinishedEvent(parameters.projectName, parameters.branch, run))
             return
         }
         if (!PublisherUtil.doCheckJacocoCSVPath(parameters.workspace, parameters.jacocoCSVPath)) {
             listener.logger.println("[Gamekins] JaCoCo csv file could not be found")
             PublisherUtil.generateBuildAndTestChallenges(parameters, result, listener)
+            EventHandler.addEvent(BuildFinishedEvent(parameters.projectName, parameters.branch, run))
             return
         }
-
-        EventHandler.addEvent(BuildStartedEvent(parameters.projectName, parameters.branch, run))
 
         listener.logger.println("[Gamekins] Start")
         listener.logger.println("[Gamekins] Solve Challenges and generate new Challenges")

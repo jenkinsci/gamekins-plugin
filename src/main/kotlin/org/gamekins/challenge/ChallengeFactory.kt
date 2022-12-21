@@ -349,6 +349,9 @@ object ChallengeFactory {
         return generated
     }
 
+    /**
+     * Generates a [TestChallenge].
+     */
     fun generateTestChallenge(data: ChallengeGenerationData, parameters: Parameters, listener: TaskListener)
     : TestChallenge {
 
