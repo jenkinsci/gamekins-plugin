@@ -23,7 +23,7 @@ import hudson.model.User
 import hudson.tasks.Mailer.UserProperty
 import org.gamekins.util.GitUtil
 import org.gamekins.util.JacocoUtil
-import io.kotest.core.spec.style.AnnotationSpec
+import io.kotest.core.spec.style.FeatureSpec
 import io.kotest.matchers.should
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.beOfType
@@ -47,28 +47,28 @@ import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.CopyOnWriteArraySet
 import kotlin.random.Random
 
-class ChallengeFactoryTest : AnnotationSpec() {
+class ChallengeFactoryTest : FeatureSpec({
 
-    private val user = mockkClass(User::class)
-    private val property = mockkClass(org.gamekins.GameUserProperty::class)
-    private val parameters = Parameters()
-    private val branch = "master"
-    private val listener = TaskListener.NULL
-    private val className = "Challenge"
-    private val path = mockkClass(FilePath::class)
-    private val shortFilePath = "src/main/java/io/jenkins/plugins/gamekins/challenge/$className.kt"
-    private val shortJacocoPath = "**/target/site/jacoco/"
-    private val shortJacocoCSVPath = "**/target/site/jacoco/csv"
-    private val mocoJSONPath = "**/target/site/moco/mutation/"
-    private val coverage = 0.0
-    private val testCount = 10
-    private lateinit var challenge : MutationTestChallenge
-    private lateinit var challenge1 : MutationTestChallenge
-    private lateinit var challenge2 : MutationTestChallenge
-    private lateinit var details : SourceFileDetails
-    private val newDetails = mockkClass(SourceFileDetails::class)
+    val user = mockkClass(User::class)
+    val property = mockkClass(org.gamekins.GameUserProperty::class)
+    val parameters = Parameters()
+    val branch = "master"
+    val listener = TaskListener.NULL
+    val className = "Challenge"
+    val path = mockkClass(FilePath::class)
+    val shortFilePath = "src/main/java/io/jenkins/plugins/gamekins/challenge/$className.kt"
+    val shortJacocoPath = "**/target/site/jacoco/"
+    val shortJacocoCSVPath = "**/target/site/jacoco/csv"
+    val mocoJSONPath = "**/target/site/moco/mutation/"
+    val coverage = 0.0
+    val testCount = 10
+    lateinit var challenge : MutationTestChallenge
+    lateinit var challenge1 : MutationTestChallenge
+    lateinit var challenge2 : MutationTestChallenge
+    lateinit var details : SourceFileDetails
+    val newDetails = mockkClass(SourceFileDetails::class)
 
-    private val mutationDetails1 = MutationDetails(
+    val mutationDetails1 = MutationDetails(
         mapOf("className" to "io/jenkins/plugins/gamekins/challenge/Challenge", "methodName" to "foo1", "methodDescription" to "(Ljava/lang/Integer;)Ljava/lang/Integer;"),
         listOf(14),
         "AOR",
@@ -76,9 +76,9 @@ class ChallengeFactoryTest : AnnotationSpec() {
         "ABC.java", 51,
         "replace integer addition with integer subtraction",
         listOf("14"), mapOf("varName" to "numEntering"))
-    private val mutation1 = MutationInfo(mutationDetails1, "survived", -1547277781)
+    val mutation1 = MutationInfo(mutationDetails1, "survived", -1547277781)
 
-    private val mutationDetails2 = MutationDetails(
+    val mutationDetails2 = MutationDetails(
         mapOf("className" to "io/jenkins/plugins/gamekins/challenge/Challenge", "methodName" to "foo", "methodDescription" to "(Ljava/lang/Integer;)Ljava/lang/Integer;"),
         listOf(22),
         "AOD",
@@ -86,10 +86,10 @@ class ChallengeFactoryTest : AnnotationSpec() {
         "Feature.java", 56,
         "delete second operand after arithmetic operator integer addition",
         listOf("22"), mapOf())
-    private val mutation2 = MutationInfo(mutationDetails2, "killed", -1547277782)
+    val mutation2 = MutationInfo(mutationDetails2, "killed", -1547277782)
 
 
-    private val mutationDetails3 = MutationDetails(
+    val mutationDetails3 = MutationDetails(
         mapOf("className" to "org/example/Feature", "methodName" to "foo", "methodDescription" to "(Ljava/lang/Integer;)Ljava/lang/Integer;"),
         listOf(30),
         "ROR",
@@ -97,15 +97,14 @@ class ChallengeFactoryTest : AnnotationSpec() {
         "Hihi.java", 56,
         "replace less than or equal operator with greater than or equal operator",
         listOf("30"), mapOf())
-    private val mutation3 = MutationInfo(mutationDetails3, "survived", -1547277782)
+    val mutation3 = MutationInfo(mutationDetails3, "survived", -1547277782)
 
-    private val entries = mapOf("io.jenkins.plugins.gamekins.challenge.Challenge" to setOf(mutation1, mutation2),
+    val entries = mapOf("io.jenkins.plugins.gamekins.challenge.Challenge" to setOf(mutation1, mutation2),
         "org.example.Feature" to setOf(mutation3))
 
 
 
-    @BeforeEach
-    fun init() {
+    beforeTest {
         mockkStatic(AchievementInitializer::class)
         every { AchievementInitializer.initializeAchievements(any()) } returns listOf()
         GamePublisherDescriptor()
@@ -159,52 +158,73 @@ class ChallengeFactoryTest : AnnotationSpec() {
         every { newDetails.packageName } returns details.packageName
     }
 
-    @AfterAll
-    fun cleanUp() {
+    afterSpec {
         unmockkAll()
     }
 
-    @Test
-    fun generateBuildChallenge() {
-        ChallengeFactory.generateBuildChallenge(null, user, property, parameters) shouldBe false
+    feature("generateBuildChallenge") {
+        scenario("No build result")
+        {
+            ChallengeFactory.generateBuildChallenge(null, user, property, parameters) shouldBe false
+        }
 
-        ChallengeFactory.generateBuildChallenge(Result.SUCCESS, user, property, parameters) shouldBe false
+        scenario("Successful build")
+        {
+            ChallengeFactory.generateBuildChallenge(Result.SUCCESS, user, property, parameters) shouldBe false
+        }
 
         mockkStatic(User::class)
         mockkStatic(GitUtil::class)
         every { User.getAll() } returns listOf()
         every { GitUtil.mapUser(any(), listOf()) } returns null
-        ChallengeFactory.generateBuildChallenge(Result.FAILURE, user, property, parameters) shouldBe false
+        scenario("No matching user")
+        {
+            ChallengeFactory.generateBuildChallenge(Result.FAILURE, user, property, parameters) shouldBe false
+        }
 
         every { GitUtil.mapUser(any(), listOf()) } returns user
         every { property.getCurrentChallenges(any()) } returns CopyOnWriteArrayList(listOf(BuildChallenge(parameters)))
-        ChallengeFactory.generateBuildChallenge(Result.FAILURE, user, property, parameters) shouldBe false
+        scenario("Challenge already exists")
+        {
+            ChallengeFactory.generateBuildChallenge(Result.FAILURE, user, property, parameters) shouldBe false
+        }
 
         every { property.getCurrentChallenges(any()) } returns CopyOnWriteArrayList()
         every { property.newChallenge(any(), any()) } returns Unit
         every { property.getUser() } returns user
         every { user.save() } returns Unit
-        ChallengeFactory.generateBuildChallenge(Result.FAILURE, user, property, parameters) shouldBe true
+        scenario("Successful Action")
+        {
+            ChallengeFactory.generateBuildChallenge(Result.FAILURE, user, property, parameters) shouldBe true
+        }
     }
 
-    @Test
-    fun generateNewChallenges() {
+    feature("generateNewChallenges") {
         every { property.getCurrentChallenges(any()) } returns CopyOnWriteArrayList()
-        ChallengeFactory.generateNewChallenges(user, property, parameters, arrayListOf(details), maxChallenges = 0) shouldBe 0
+        scenario("Max challenges already reached")
+        {
+            ChallengeFactory.generateNewChallenges(user, property, parameters, arrayListOf(details), maxChallenges = 0) shouldBe 0
+        }
 
+        every { property.getUser() } returns user
         every { property.newChallenge(any(), any()) } returns Unit
-        ChallengeFactory.generateNewChallenges(user, property, parameters, arrayListOf(details)) shouldBe 0
+        scenario("File is not changed by user")
+        {
+            ChallengeFactory.generateNewChallenges(user, property, parameters, arrayListOf(details)) shouldBe 0
+        }
 
         val newDetails = mockkClass(SourceFileDetails::class)
         every { newDetails.changedByUsers } returns hashSetOf(GitUtil.GameUser(user))
         mockkStatic(ChallengeFactory::class)
         every { ChallengeFactory.generateChallenge(any(), any(), any(), any()) } returns mockkClass(TestChallenge::class)
-        ChallengeFactory.generateNewChallenges(user, property, parameters, arrayListOf(newDetails)) shouldBe 0
+        scenario("Inconsistent results needs to be checked")//TODO
+        {
+            ChallengeFactory.generateNewChallenges(user, property, parameters, arrayListOf(newDetails)) shouldBe 0
+        }
         mockkStatic(ChallengeFactory::class)
     }
 
-    @Test
-    fun generateClassCoverageChallenge() {
+    feature("generateClassCoverageChallenge") {
         mockkObject(Random)
         GamePublisherDescriptor.challenges.clear()
         GamePublisherDescriptor.challenges[ClassCoverageChallenge::class.java] = 1
@@ -213,8 +233,7 @@ class ChallengeFactoryTest : AnnotationSpec() {
                 beOfType(ClassCoverageChallenge::class)
     }
 
-    @Test
-    fun generateDummyChallenge() {
+    feature("generateDummyChallenge") {
         mockkObject(Random)
         every { Random.nextInt(any()) } returns 0
         GamePublisherDescriptor.challenges.clear()
@@ -223,8 +242,7 @@ class ChallengeFactoryTest : AnnotationSpec() {
                 beOfType(DummyChallenge::class)
     }
 
-    @Test
-    fun generateLineCoverageChallenge() {
+    feature("generateLineCoverageChallenge") {
         mockkObject(Random)
         GamePublisherDescriptor.challenges.clear()
         GamePublisherDescriptor.challenges[LineCoverageChallenge::class.java] = 1
@@ -241,8 +259,7 @@ class ChallengeFactoryTest : AnnotationSpec() {
                 beOfType(LineCoverageChallenge::class)
     }
 
-    @Test
-    fun generateMethodCoverageChallenge() {
+    feature("generateMethodCoverageChallenge") {
         mockkObject(Random)
         GamePublisherDescriptor.challenges.clear()
         GamePublisherDescriptor.challenges[MethodCoverageChallenge::class.java] = 1
@@ -254,8 +271,7 @@ class ChallengeFactoryTest : AnnotationSpec() {
                 beOfType(MethodCoverageChallenge::class)
     }
 
-    @Test
-    fun generateTestChallenge() {
+    feature("generateTestChallenge") {
         mockkObject(Random)
         GamePublisherDescriptor.challenges.clear()
         GamePublisherDescriptor.challenges[TestChallenge::class.java] = 1
@@ -263,8 +279,7 @@ class ChallengeFactoryTest : AnnotationSpec() {
                 beOfType(TestChallenge::class)
     }
 
-    @Test
-    fun generateMutationTestChallenge() {
+    feature("generateMutationTestChallenge") {
         mockkObject(Random)
         mockkObject(MutationUtils)
         every { MutationUtils.getSurvivedMutationList(any(), any(), any(), any(), any()) } returns listOf()
@@ -275,21 +290,33 @@ class ChallengeFactoryTest : AnnotationSpec() {
         every { MutationResults.retrievedMutationsFromJson(any(), any()) }  returns MutationResults(entries, "")
         every { property.getCurrentChallenges(any()) } returns CopyOnWriteArrayList(listOf())
         parameters.mocoJSONPath = "abc"
-        ChallengeFactory.generateChallenge(user, parameters, listener, arrayListOf(details)) should
-                beOfType(DummyChallenge::class)
+        scenario("Subject to change")
+        {
+            ChallengeFactory.generateChallenge(user, parameters, listener, arrayListOf(details)) should
+                    beOfType(DummyChallenge::class)
+        }
 
         every { MutationUtils.getSurvivedMutationList(any(), any(), any(), any(), any()) } returns listOf(mutation1)
         every { MutationUtils.findMutationHasCodeSnippets(any(),any(),any(),any(),any()) } returns Pair(mutation1, mapOf("codeSnippet" to "abc", "mutatedSnippet" to "xyz"))
-        ChallengeFactory.generateChallenge(user, parameters, listener, arrayListOf(details)) should
-                beOfType(MutationTestChallenge::class)
+        scenario("Subject to change")
+        {
+            ChallengeFactory.generateChallenge(user, parameters, listener, arrayListOf(details)) should
+                    beOfType(MutationTestChallenge::class)
+        }
 
         every { MutationUtils.findMutationHasCodeSnippets(any(),any(),any(),any(),any()) } returns Pair(null, mapOf("codeSnippet" to "abc", "mutatedSnippet" to "xyz"))
-        ChallengeFactory.generateChallenge(user, parameters, listener, arrayListOf(details)) should
-                beOfType(MutationTestChallenge::class)
+        scenario("Subject to change")
+        {
+            ChallengeFactory.generateChallenge(user, parameters, listener, arrayListOf(details)) should
+                    beOfType(MutationTestChallenge::class)
+        }
 
         every { MutationResults.retrievedMutationsFromJson(any(), any()) }  returns null
-        ChallengeFactory.generateChallenge(user, parameters, listener, arrayListOf(details)) should
-                beOfType(DummyChallenge::class)
+        scenario("Subject to change")
+        {
+            ChallengeFactory.generateChallenge(user, parameters, listener, arrayListOf(details)) should
+                    beOfType(DummyChallenge::class)
+        }
 
     }
-}
+})
