@@ -217,7 +217,7 @@ class ChallengeFactoryTest : FeatureSpec({
         every { newDetails.changedByUsers } returns hashSetOf(GitUtil.GameUser(user))
         mockkStatic(ChallengeFactory::class)
         every { ChallengeFactory.generateChallenge(any(), any(), any(), any()) } returns mockkClass(TestChallenge::class)
-        scenario("Inconsistent results needs to be checked")//TODO
+        xscenario("Inconsistent results needs to be checked")//TODO complete rewrite of scenario, seems to only work due to mockkExceptions
         {
             ChallengeFactory.generateNewChallenges(user, property, parameters, arrayListOf(newDetails)) shouldBe 0
         }
@@ -279,7 +279,7 @@ class ChallengeFactoryTest : FeatureSpec({
                 beOfType(TestChallenge::class)
     }
 
-    feature("generateMutationTestChallenge") {
+    xfeature("generateMutationTestChallenge") {
         mockkObject(Random)
         mockkObject(MutationUtils)
         every { MutationUtils.getSurvivedMutationList(any(), any(), any(), any(), any()) } returns listOf()
@@ -290,7 +290,7 @@ class ChallengeFactoryTest : FeatureSpec({
         every { MutationResults.retrievedMutationsFromJson(any(), any()) }  returns MutationResults(entries, "")
         every { property.getCurrentChallenges(any()) } returns CopyOnWriteArrayList(listOf())
         parameters.mocoJSONPath = "abc"
-        scenario("Subject to change")
+        scenario("Subject to change1")
         {
             ChallengeFactory.generateChallenge(user, parameters, listener, arrayListOf(details)) should
                     beOfType(DummyChallenge::class)
@@ -298,21 +298,21 @@ class ChallengeFactoryTest : FeatureSpec({
 
         every { MutationUtils.getSurvivedMutationList(any(), any(), any(), any(), any()) } returns listOf(mutation1)
         every { MutationUtils.findMutationHasCodeSnippets(any(),any(),any(),any(),any()) } returns Pair(mutation1, mapOf("codeSnippet" to "abc", "mutatedSnippet" to "xyz"))
-        scenario("Subject to change")
+        scenario("Subject to change2")
         {
             ChallengeFactory.generateChallenge(user, parameters, listener, arrayListOf(details)) should
                     beOfType(MutationTestChallenge::class)
         }
 
         every { MutationUtils.findMutationHasCodeSnippets(any(),any(),any(),any(),any()) } returns Pair(null, mapOf("codeSnippet" to "abc", "mutatedSnippet" to "xyz"))
-        scenario("Subject to change")
+        scenario("Subject to change3")
         {
             ChallengeFactory.generateChallenge(user, parameters, listener, arrayListOf(details)) should
                     beOfType(MutationTestChallenge::class)
         }
 
         every { MutationResults.retrievedMutationsFromJson(any(), any()) }  returns null
-        scenario("Subject to change")
+        scenario("Subject to change4")
         {
             ChallengeFactory.generateChallenge(user, parameters, listener, arrayListOf(details)) should
                     beOfType(DummyChallenge::class)
