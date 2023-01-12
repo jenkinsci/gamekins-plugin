@@ -67,7 +67,7 @@ class ClassCoverageChallengeTest : FeatureSpec({
     }
 
     feature("getScore") {
-        scenario("Scenario")
+        scenario("Coverage below 0.8")
         {
             challenge.getScore() shouldBe 1
         }
@@ -76,10 +76,14 @@ class ClassCoverageChallengeTest : FeatureSpec({
         every { data.selectedFile } returns details
         challenge = ClassCoverageChallenge(data)
 
-        scenario("Scenario")
+        scenario("Coverage above 0.8")
         {
             challenge.getScore() shouldBe 2
         }
+    }
+
+    feature("toEscapedString")
+    {
         challenge.toEscapedString() shouldBe "Write a test to cover more lines in class $className in package " +
                 "org.gamekins.challenge (created for branch $branch)"
     }
