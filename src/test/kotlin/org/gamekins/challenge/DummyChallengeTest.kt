@@ -16,10 +16,9 @@
 
 package org.gamekins.challenge
 
-import hudson.FilePath
 import hudson.model.Run
 import hudson.model.TaskListener
-import io.kotest.core.spec.style.AnnotationSpec
+import io.kotest.core.spec.style.FeatureSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldStartWith
 import io.mockk.mockkClass
@@ -27,34 +26,78 @@ import io.mockk.unmockkAll
 import org.gamekins.util.Constants
 import org.gamekins.util.Constants.Parameters
 
-class DummyChallengeTest : AnnotationSpec() {
+class DummyChallengeTest : FeatureSpec({
 
-    private val challenge = DummyChallenge(Parameters(), Constants.NOTHING_DEVELOPED)
+    val challenge = DummyChallenge(Parameters(), Constants.NOTHING_DEVELOPED)
 
-    @AfterAll
-    fun cleanUp() {
+    afterSpec {
         unmockkAll()
     }
 
-    @Test
-    fun isSolved() {
+    feature("Dummy Values") {
         val run = mockkClass(Run::class)
         val parameters = Parameters()
         val listener = TaskListener.NULL
-        val path = FilePath(null, "")
 
-        challenge.isSolvable(parameters, run, listener) shouldBe true
-        challenge.isSolved(parameters, run, listener) shouldBe true
-        challenge.getScore() shouldBe 0
-        challenge.getCreated() shouldBe 0
-        challenge.getSolved() shouldBe 0
+        scenario("isSolvable")
+        {
+            challenge.isSolvable(parameters, run, listener) shouldBe true
+        }
+
+        scenario("isSolved")
+        {
+            challenge.isSolved(parameters, run, listener) shouldBe true
+        }
+
+        scenario("getScore")
+        {
+            challenge.getScore() shouldBe 0
+        }
+
+        scenario("getCreated")
+        {
+            challenge.getCreated() shouldBe 0
+        }
+
+        scenario("getSolved")
+        {
+            challenge.getSolved() shouldBe 0
+        }
+
+        scenario("getName")
+        {
+            challenge.getName()  shouldBe "Dummy"
+        }
     }
 
-    @Test
-    fun printToXML() {
-        challenge.printToXML("", "") shouldBe "<DummyChallenge>"
-        challenge.printToXML("", "    ") shouldStartWith "    <"
-        challenge.printToXML("test", "") shouldBe "<DummyChallenge>"
-        challenge.toString() shouldBe "You haven't developed anything lately"
+    feature("printToXML") {
+        scenario("No Reason, no Indentation")
+        {
+            challenge.printToXML("", "") shouldBe "<DummyChallenge>"
+        }
+
+        scenario("No Reason, with Indentation")
+        {
+            challenge.printToXML("", "    ") shouldStartWith "    <"
+        }
+
+        scenario("With Reason, no Indentation")
+        {
+            challenge.printToXML("test", "") shouldBe "<DummyChallenge>"
+        }
     }
-}
+
+    feature("toString")
+    {
+        scenario("Nothing developed")
+        {
+            challenge.toString() shouldBe Constants.NOTHING_DEVELOPED
+        }
+
+        val challenge1 = DummyChallenge(Parameters(), "Other reason")
+        scenario("Other reason")
+        {
+            challenge1.toString() shouldBe "Other reason"
+        }
+    }
+})
