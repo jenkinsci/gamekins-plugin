@@ -19,7 +19,7 @@ package org.gamekins.challenge
 import hudson.FilePath
 import hudson.model.TaskListener
 import org.gamekins.util.JacocoUtil
-import io.kotest.core.spec.style.AnnotationSpec
+import io.kotest.core.spec.style.FeatureSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldStartWith
 import io.mockk.*
@@ -27,25 +27,23 @@ import org.gamekins.file.SourceFileDetails
 import org.gamekins.util.Constants.Parameters
 import org.jsoup.nodes.Document
 
-class CoverageChallengeTest : AnnotationSpec() {
+class CoverageChallengeTest : FeatureSpec({
 
-    private val className = "Challenge"
-    private val path = FilePath(null, "/home/test/workspace")
-    private val shortFilePath = "src/main/java/io/jenkins/plugins/gamekins/challenge/$className.kt"
-    private val shortJacocoPath = "**/target/site/jacoco/"
-    private val shortJacocoCSVPath = "**/target/site/jacoco/csv"
-    private val mocoJSONPath = "**/target/site/moco/mutation/"
-    private lateinit var details : SourceFileDetails
-    private lateinit var challenge : ClassCoverageChallenge
-    private val coverage = 0.0
+    val className = "Challenge"
+    val path = FilePath(null, "/home/test/workspace")
+    val shortFilePath = "src/main/java/io/jenkins/plugins/gamekins/challenge/$className.kt"
+    val shortJacocoPath = "**/target/site/jacoco/"
+    val shortJacocoCSVPath = "**/target/site/jacoco/csv"
+    val mocoJSONPath = "**/target/site/moco/mutation/"
+    lateinit var details : SourceFileDetails
+    lateinit var challenge : ClassCoverageChallenge
+    val coverage = 0.0
 
-    @AfterAll
-    fun cleanUp() {
+    afterSpec {
         unmockkAll()
     }
 
-    @Test
-    fun printToXML() {
+    feature("printToXML") {
         mockkStatic(JacocoUtil::class)
         val document = mockkClass(Document::class)
         every { JacocoUtil.calculateCurrentFilePath(any(), any()) } returns path
@@ -64,12 +62,23 @@ class CoverageChallengeTest : AnnotationSpec() {
         every { data.parameters } returns parameters
         challenge = ClassCoverageChallenge(data)
 
-        challenge.printToXML("", "") shouldBe
-                "<ClassCoverageChallenge created=\"${challenge.getCreated()}\" solved=\"${challenge.getSolved()}\" " +
-                "class=\"$className\" coverage=\"$coverage\" coverageAtSolved=\"0.0\"/>"
-        challenge.printToXML("", "    ") shouldStartWith "    <"
-        challenge.printToXML("test", "") shouldBe
-                "<ClassCoverageChallenge created=\"${challenge.getCreated()}\" solved=\"0\" class=\"$className\" " +
-                "coverage=\"$coverage\" coverageAtSolved=\"0.0\" reason=\"test\"/>"
+        scenario("No Reason, no Indentation")
+        {
+            challenge.printToXML("", "") shouldBe
+                    "<ClassCoverageChallenge created=\"${challenge.getCreated()}\" solved=\"${challenge.getSolved()}\" " +
+                    "class=\"$className\" coverage=\"$coverage\" coverageAtSolved=\"0.0\"/>"
+        }
+
+        scenario("No Reason, with Indentation")
+        {
+            challenge.printToXML("", "    ") shouldStartWith "    <"
+        }
+
+        scenario("With Reason, no Indentation")
+        {
+            challenge.printToXML("test", "") shouldBe
+                    "<ClassCoverageChallenge created=\"${challenge.getCreated()}\" solved=\"0\" class=\"$className\" " +
+                    "coverage=\"$coverage\" coverageAtSolved=\"0.0\" reason=\"test\"/>"
+        }
     }
-}
+})
