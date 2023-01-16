@@ -179,7 +179,7 @@ class LineCoverageChallengeTest : FeatureSpec({
         every { pathMock.exists() } returns false
         every { pathMock.remote } returns path.remote
         every { JacocoUtil.getJacocoFileInMultiBranchProject(any(), any(), any(), any()) } returns pathMock
-        scenario("Scenario1")
+        scenario("Cannot generate JacocoSourceFile")
         {
             challenge.isSolved(parameters, run, listener) shouldBe false
         }
@@ -188,21 +188,13 @@ class LineCoverageChallengeTest : FeatureSpec({
         every { document.select("span.pc") } returns Elements()
         every { document.select("span.fc") } returns Elements()
         every { document.select("span.nc") } returns Elements()
-        scenario("Scenario2")
+        scenario("No lines exist")
         {
             challenge.isSolved(parameters, run, listener) shouldBe false
         }
 
         every { document.select("span.fc") } returns elements
-        scenario("Scenario3")
-        {
-            challenge.isSolved(parameters, run, listener) shouldBe true
-        }
-
-        every { element.attr("class") } returns "pc"
-        every { data.line } returns element
-        challenge = LineCoverageChallenge(data)
-        scenario("Scenario4")
+        scenario("Fully covered lines exists")
         {
             challenge.isSolved(parameters, run, listener) shouldBe true
         }
@@ -210,7 +202,7 @@ class LineCoverageChallengeTest : FeatureSpec({
         every { element.attr("class") } returns "nc"
         every { document.select("span.fc") } returns Elements()
         every { document.select("span.nc") } returns elements
-        scenario("Scenario5")
+        scenario("No lines covered")
         {
             challenge.isSolved(parameters, run, listener) shouldBe false
         }
@@ -219,14 +211,13 @@ class LineCoverageChallengeTest : FeatureSpec({
         every { element.attr("id") } returns "L6"
         every { document.select("span.fc") } returns elements
         every { document.select("span.nc") } returns Elements()
-        scenario("Scenario6")
+        scenario("Line 6 is fully covered")
         {
             challenge.isSolved(parameters, run, listener) shouldBe true
         }
 
         every { data.line } returns element
-
-        scenario("Scenario7")
+        scenario("2 of 3 branches missed")
         {
             every { element.attr("title") } returns "2 of 3 branches missed."
             every { element.attr("class") } returns "pc"
@@ -237,7 +228,7 @@ class LineCoverageChallengeTest : FeatureSpec({
         every { data.line } returns element
         challenge = LineCoverageChallenge(data)
 
-        scenario("Scenario8")
+        scenario("All 3 branches missed")
         {
             every { element.attr("title") } returns "All 3 branches missed."
             every { element.attr("class") } returns "nc"
@@ -245,7 +236,7 @@ class LineCoverageChallengeTest : FeatureSpec({
         }
 
         every { element.attr("title") } returns "1 of 3 branches missed."
-        scenario("Scenario9")
+        scenario("1 of 3 branches missed")
         {
             challenge.isSolved(parameters, run, listener) shouldBe true
         }
