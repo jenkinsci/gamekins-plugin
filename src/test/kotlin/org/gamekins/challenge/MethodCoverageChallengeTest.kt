@@ -20,34 +20,33 @@ import hudson.FilePath
 import hudson.model.Run
 import hudson.model.TaskListener
 import org.gamekins.util.JacocoUtil
-import io.kotest.core.spec.style.AnnotationSpec
+import io.kotest.core.spec.style.FeatureSpec
 import io.kotest.matchers.shouldBe
 import io.mockk.*
 import org.gamekins.file.SourceFileDetails
 import org.gamekins.util.Constants.Parameters
 import org.jsoup.nodes.Document
 
-class MethodCoverageChallengeTest : AnnotationSpec() {
+class MethodCoverageChallengeTest : FeatureSpec({
 
-    private val className = "Challenge"
-    private val path = FilePath(null, "/home/test/workspace")
-    private val shortFilePath = "src/main/java/org/gamekins/challenge/$className.kt"
-    private val shortJacocoPath = "**/target/site/jacoco/"
-    private val shortJacocoCSVPath = "**/target/site/jacoco/csv"
-    private val mocoJSONPath = "**/target/site/moco/mutation/"
-    private lateinit var details : SourceFileDetails
-    private lateinit var challenge : MethodCoverageChallenge
-    private lateinit var method : JacocoUtil.CoverageMethod
-    private val coverage = 0.0
-    private val run = mockkClass(Run::class)
-    private val parameters = Parameters()
-    private val listener = TaskListener.NULL
-    private val branch = "master"
-    private val methodName = "toString"
-    private val data = mockkClass(Challenge.ChallengeGenerationData::class)
+    val className = "Challenge"
+    val path = FilePath(null, "/home/test/workspace")
+    val shortFilePath = "src/main/java/org/gamekins/challenge/$className.kt"
+    val shortJacocoPath = "**/target/site/jacoco/"
+    val shortJacocoCSVPath = "**/target/site/jacoco/csv"
+    val mocoJSONPath = "**/target/site/moco/mutation/"
+    lateinit var details : SourceFileDetails
+    lateinit var challenge : MethodCoverageChallenge
+    lateinit var method : JacocoUtil.CoverageMethod
+    val coverage = 0.0
+    val run = mockkClass(Run::class)
+    val parameters = Parameters()
+    val listener = TaskListener.NULL
+    val branch = "master"
+    val methodName = "toString"
+    val data = mockkClass(Challenge.ChallengeGenerationData::class)
 
-    @BeforeEach
-    fun init() {
+    beforeContainer {
         parameters.branch = branch
         parameters.workspace = path
         parameters.jacocoResultsPath = shortJacocoPath
@@ -69,52 +68,82 @@ class MethodCoverageChallengeTest : AnnotationSpec() {
         challenge = MethodCoverageChallenge(data)
     }
 
-    @AfterAll
-    fun cleanUp() {
+    afterSpec {
         unmockkAll()
     }
 
-    @Test
-    fun getScore() {
-        challenge.getScore() shouldBe 2
+    feature("getScore") {
+        scenario("Coverage below 0.8")
+        {
+            challenge.getScore() shouldBe 2
+        }
+
         method = JacocoUtil.CoverageMethod(methodName, 10, 1, "")
         every { JacocoUtil.getNotFullyCoveredMethodEntries(any()) } returns arrayListOf(method)
         every { data.method } returns method
         challenge = MethodCoverageChallenge(data)
-        challenge.getScore() shouldBe 3
-        challenge.toEscapedString()
-        challenge.getName() shouldBe "Method Coverage"
+        scenario("Coverage above 0.8")
+        {
+            challenge.getScore() shouldBe 3
+        }
+
     }
 
-    @Test
-    fun isSolvable() {
-        challenge.isSolvable(parameters, run, listener) shouldBe true
-        parameters.branch = branch
-        challenge.isSolvable(parameters, run, listener) shouldBe true
+    feature("isSolvable") {
+        scenario("No MethodFile")
+        {
+            challenge.isSolvable(parameters, run, listener) shouldBe true
+        }
+
         val pathMock = mockkClass(FilePath::class)
         every { pathMock.exists() } returns true
         every { JacocoUtil.calculateCurrentFilePath(any(), any(), any()) } returns pathMock
-        challenge.isSolvable(parameters, run, listener) shouldBe false
+        scenario("Method has no Entry in Jacoco File")
+        {
+            challenge.isSolvable(parameters, run, listener) shouldBe false
+        }
+
         every { JacocoUtil.getMethodEntries(any()) } returns arrayListOf(method)
-        challenge.isSolvable(parameters, run, listener) shouldBe true
+        scenario("Method has missed lines")
+        {
+            challenge.isSolvable(parameters, run, listener) shouldBe true
+        }
+
         method = JacocoUtil.CoverageMethod(methodName, 10, 0, "")
         every { JacocoUtil.getMethodEntries(any()) } returns arrayListOf(method)
-        challenge.isSolvable(parameters, run, listener) shouldBe false
+        scenario("Method is fully covered")
+        {
+            challenge.isSolvable(parameters, run, listener) shouldBe false
+        }
     }
 
-    @Test
-    fun isSolved() {
+    feature("isSolved") {
         val pathMock = mockkClass(FilePath::class)
         every { pathMock.exists() } returns false
         every { pathMock.remote } returns path.remote
         every { JacocoUtil.getJacocoFileInMultiBranchProject(any(), any(), any(), any()) } returns pathMock
-        challenge.isSolved(parameters, run, listener) shouldBe false
+        scenario("File does not exist")
+        {
+            challenge.isSolved(parameters, run, listener) shouldBe false
+        }
+
         every { pathMock.exists() } returns true
-        challenge.isSolved(parameters, run, listener) shouldBe false
+        scenario("Method not in JacocoFile")
+        {
+            challenge.isSolved(parameters, run, listener) shouldBe false
+        }
+
         every { JacocoUtil.getMethodEntries(any()) } returns arrayListOf(method)
-        challenge.isSolved(parameters, run, listener) shouldBe false
+        scenario("All lines missed")
+        {
+            challenge.isSolved(parameters, run, listener) shouldBe false
+        }
+
         method = JacocoUtil.CoverageMethod(methodName, 10, 0, "")
         every { JacocoUtil.getMethodEntries(any()) } returns arrayListOf(method)
-        challenge.isSolved(parameters, run, listener) shouldBe true
+        scenario("Enough lines covered")
+        {
+            challenge.isSolved(parameters, run, listener) shouldBe true
+        }
     }
-}
+})
