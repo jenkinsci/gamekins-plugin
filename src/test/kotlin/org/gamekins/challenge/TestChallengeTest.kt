@@ -21,11 +21,11 @@ import hudson.model.Job
 import hudson.model.Run
 import hudson.model.TaskListener
 import hudson.model.User
+import io.kotest.core.spec.style.FeatureSpec
 import org.gamekins.util.GitUtil
 import org.gamekins.util.JacocoUtil
 import org.jenkinsci.plugins.workflow.job.WorkflowJob
 import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject
-import io.kotest.core.spec.style.AnnotationSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.string.shouldStartWith
@@ -35,18 +35,17 @@ import org.gamekins.file.TestFileDetails
 import org.gamekins.util.Constants.Parameters
 import org.gamekins.util.JUnitUtil
 
-class TestChallengeTest : AnnotationSpec() {
+class TestChallengeTest : FeatureSpec({
 
-    private lateinit var challenge : TestChallenge
-    private val user = mockkClass(hudson.model.User::class)
-    private val run = mockkClass(Run::class)
-    private val parameters = Parameters()
-    private val listener = TaskListener.NULL
-    private val path = FilePath(null, "")
-    private val testCount = 10
+    lateinit var challenge : TestChallenge
+    val user = mockkClass(hudson.model.User::class)
+    val run = mockkClass(Run::class)
+    val parameters = Parameters()
+    val listener = TaskListener.NULL
+    val path = FilePath(null, "")
+    val testCount = 10
 
-    @BeforeEach
-    fun init() {
+    beforeContainer {
         parameters.branch = "master"
         every { user.id } returns ""
         every { user.fullName } returns ""
@@ -60,13 +59,11 @@ class TestChallengeTest : AnnotationSpec() {
         challenge = TestChallenge(data)
     }
 
-    @AfterAll
-    fun cleanUp() {
+    afterSpec {
         unmockkAll()
     }
 
-    @Test
-    fun isSolvable() {
+    feature("isSolvable") {
         val job = mockkClass(Job::class)
         val project = mockkClass(WorkflowMultiBranchProject::class)
         val workJob = mockkClass(WorkflowJob::class)
@@ -77,17 +74,25 @@ class TestChallengeTest : AnnotationSpec() {
         every { job.parent } returns project
         every { project.items } returns listOf(workJob)
         every { workJob.name } returns "master"
-        challenge.isSolvable(parameters, run, listener) shouldBe true
+        scenario("Branch still exists")
+        {
+            challenge.isSolvable(parameters, run, listener) shouldBe true
+        }
 
         every { workJob.name } returns "branch"
-        challenge.isSolvable(parameters, run, listener) shouldBe false
+        scenario("Branch does not exist")
+        {
+            challenge.isSolvable(parameters, run, listener) shouldBe false
+        }
 
         every { job.parent } returns multiProject
-        challenge.isSolvable(parameters, run, listener) shouldBe true
+        scenario("Project is not WorkflowMultiBranchProject")
+        {
+            challenge.isSolvable(parameters, run, listener) shouldBe true
+        }
     }
 
-    @Test
-    fun isSolved() {
+    feature("isSolved") {
         mockkStatic(JacocoUtil::class)
         mockkStatic(JUnitUtil::class)
         mockkStatic(GitUtil::class)
@@ -95,29 +100,53 @@ class TestChallengeTest : AnnotationSpec() {
         parameters.branch = "master"
 
         every { JUnitUtil.getTestCount(path, run) } returns testCount
-        challenge.isSolved(parameters, run, listener) shouldBe false
+        scenario("No new tests")
+        {
+            challenge.isSolved(parameters, run, listener) shouldBe false
+        }
 
         every { JUnitUtil.getTestCount(path, run) } returns (testCount + 1)
         every { GitUtil.getLastChangedTestsOfUser(any(), any(), any(), any(), any()) } returns listOf()
         every { User.getAll() } returns listOf()
-        challenge.isSolved(parameters, run, listener) shouldBe false
+        scenario("User has not changed/added any tests")
+        {
+            challenge.isSolved(parameters, run, listener) shouldBe false
+        }
 
         every { GitUtil.getLastChangedTestsOfUser(any(), any(), any(), any(), any()) } returns listOf(
             mockkClass(TestFileDetails::class))
-        challenge.isSolved(parameters, run, listener) shouldBe  true
-        challenge.getSolved() shouldNotBe 0
-        challenge.getScore() shouldBe 1
+        scenario("Challenge solved")
+        {
+            challenge.isSolved(parameters, run, listener) shouldBe  true
+            challenge.getSolved() shouldNotBe 0
+            challenge.getScore() shouldBe 1
+        }
     }
 
-    @Test
-    fun printToXML() {
-        challenge.printToXML("", "") shouldBe
-                "<TestChallenge created=\"${challenge.getCreated()}\" solved=\"${challenge.getSolved()}\" " +
-                "tests=\"$testCount\" testsAtSolved=\"0\"/>"
-        challenge.printToXML("", "    ") shouldStartWith "    <"
-        challenge.printToXML("test", "") shouldBe
-                "<TestChallenge created=\"${challenge.getCreated()}\" solved=\"0\" tests=\"$testCount\" " +
-                "testsAtSolved=\"0\" reason=\"test\"/>"
+    feature("printToXML") {
+
+        scenario("No Reason, no Indentation")
+        {
+            challenge.printToXML("", "") shouldBe
+                    "<TestChallenge created=\"${challenge.getCreated()}\" solved=\"${challenge.getSolved()}\" " +
+                    "tests=\"$testCount\" testsAtSolved=\"0\"/>"
+        }
+
+        scenario("No Reason, with Indentation")
+        {
+            challenge.printToXML("", "    ") shouldStartWith "    <"
+        }
+
+        scenario("With Reason, no Indentation")
+        {
+            challenge.printToXML("test", "") shouldBe
+                    "<TestChallenge created=\"${challenge.getCreated()}\" solved=\"0\" tests=\"$testCount\" " +
+                    "testsAtSolved=\"0\" reason=\"test\"/>"
+        }
+    }
+
+    feature("toString")
+    {
         challenge.toString() shouldBe "Write a new test in branch master"
     }
-}
+})
