@@ -27,14 +27,10 @@ import org.gamekins.event.EventHandler
 import org.gamekins.event.user.ChallengeGeneratedEvent
 import org.gamekins.file.FileDetails
 import org.gamekins.file.SourceFileDetails
-import org.gamekins.mutation.MutationInfo
-import org.gamekins.mutation.MutationResults
-import org.gamekins.mutation.MutationUtils
-import org.gamekins.mutation.MutationUtils.findMutationHasCodeSnippets
-import org.gamekins.mutation.MutationUtils.getCurrentLinesOperatorMapping
-import org.gamekins.mutation.MutationUtils.getSurvivedMutationList
 import org.gamekins.util.*
+import org.gamekins.util.Constants.AND_TYPE
 import org.gamekins.util.Constants.Parameters
+import org.gamekins.util.Constants.TRY_CLASS
 import org.gamekins.util.GitUtil.HeadCommitCallable
 import org.jsoup.nodes.Document
 import java.io.IOException
@@ -53,13 +49,9 @@ object ChallengeFactory {
     /**
      * Chooses the type of [Challenge] to be generated.
      */
-    private fun chooseChallengeType(mocoJSONPath: String?): Class<out Challenge> {
+    private fun chooseChallengeType(): Class<out Challenge> {
         val weightList = arrayListOf<Class<out Challenge>>()
-        var challengeTypes = GamePublisherDescriptor.challenges
-        if (mocoJSONPath.isNullOrEmpty()) {
-            challengeTypes = challengeTypes.filter { it.key != MutationTestChallenge::class.java }
-                    as HashMap<Class<out Challenge>, Int>
-        }
+        val challengeTypes = GamePublisherDescriptor.challenges
         challengeTypes.forEach { (clazz, weight) ->
             (0 until weight).forEach { _ ->
                 weightList.add(clazz)
@@ -79,6 +71,10 @@ object ChallengeFactory {
             : Boolean {
         try {
             if (result != null && result != Result.SUCCESS) {
+                val lastBuildChallenges = property.getCompletedChallenges(parameters.projectName)
+                    .filterIsInstance(BuildChallenge::class.java)
+                if (lastBuildChallenges.isNotEmpty()
+                    && System.currentTimeMillis() - lastBuildChallenges.last().getSolved() <= 604800000) return false
                 val challenge = BuildChallenge(parameters)
                 val mapUser: User? = GitUtil.mapUser(
                     parameters.workspace.act(HeadCommitCallable(parameters.remote))
@@ -130,7 +126,7 @@ object ChallengeFactory {
             }
             count++
 
-            val challengeClass = chooseChallengeType(parameters.mocoJSONPath)
+            val challengeClass = chooseChallengeType()
             val selectedFile = cla
                 ?: if (challengeClass.superclass == CoverageChallenge::class.java) {
                     val tempList = ArrayList(workList.filterIsInstance<SourceFileDetails>())
@@ -141,8 +137,12 @@ object ChallengeFactory {
                         continue
                     }
                     selectClass(tempList, initializeRankSelection(tempList))
-                } else if (challengeClass == MutationTestChallenge::class.java) {
+                } else if (challengeClass == MutationChallenge::class.java) {
                     val tempList = workList.filterIsInstance<SourceFileDetails>()
+                    if (tempList.isEmpty()) {
+                        challenge = null
+                        continue
+                    }
                     selectClass(tempList, initializeRankSelection(tempList))
                 } else {
                     selectClass(workList, initializeRankSelection(workList))
@@ -156,8 +156,8 @@ object ChallengeFactory {
             //Remove classes where a ClassCoverageChallenge has been rejected previously
             if (rejectedChallenges.any {
                     it.first is ClassCoverageChallenge
-                            && (it.first as ClassCoverageChallenge).details.fileName == selectedFile.fileName
-                            && (it.first as ClassCoverageChallenge)
+                            && (it.first).details.fileName == selectedFile.fileName
+                            && (it.first)
                         .details.packageName == selectedFile.packageName }) {
                 listener.logger.println(
                     "[Gamekins] Class ${selectedFile.fileName} in package " +
@@ -187,31 +187,26 @@ object ChallengeFactory {
 
             when {
                 challengeClass == TestChallenge::class.java -> {
-                    data.testCount = JUnitUtil.getTestCount(parameters.workspace)
-                    data.headCommitHash = parameters.workspace.act(HeadCommitCallable(parameters.remote)).name
-                    listener.logger.println("[Gamekins] Generated new TestChallenge")
-                    challenge = challengeClass
-                        .getConstructor(ChallengeGenerationData::class.java)
-                        .newInstance(data)
+                    challenge = generateTestChallenge(data, parameters, listener)
                 }
                 challengeClass.superclass == CoverageChallenge::class.java -> {
                     listener.logger.println(
-                        "[Gamekins] Try class " + selectedFile.fileName + " and type "
+                        TRY_CLASS + selectedFile.fileName + AND_TYPE
                                 + challengeClass
                     )
                     challenge = generateCoverageChallenge(data, challengeClass)
                 }
-                challengeClass == MutationTestChallenge::class.java -> {
+                challengeClass == MutationChallenge::class.java -> {
                     listener.logger.println(
-                        "[Gamekins] Try class " + selectedFile.fileName + " and type "
+                        TRY_CLASS + selectedFile.fileName + AND_TYPE
                                 + challengeClass
                     )
-                    challenge = generateMutationTestChallenge(selectedFile as SourceFileDetails, parameters.branch,
-                        parameters.projectName, listener, parameters.workspace, user)
+                    challenge = generateMutationChallenge(selectedFile as SourceFileDetails, parameters,
+                        listener, user)
                 }
                 challengeClass == SmellChallenge::class.java -> {
                     listener.logger.println(
-                        "[Gamekins] Try class " + selectedFile.fileName + " and type "
+                        TRY_CLASS + selectedFile.fileName + AND_TYPE
                                 + challengeClass
                     )
                     challenge = generateSmellChallenge(data, listener)
@@ -293,6 +288,31 @@ object ChallengeFactory {
     }
 
     /**
+     * Generates a new [MutationChallenge] for class [fileDetails]. Assumes that the PIT mutation report
+     * is stored in <project-root>/target/pit-reports/mutations.xml.
+     */
+    @JvmStatic
+    @Suppress("UNUSED_PARAMETER", "unused")
+    fun generateMutationChallenge(fileDetails: SourceFileDetails, parameters: Parameters,
+        listener: TaskListener, user: User) : MutationChallenge? {
+
+        if (!fileDetails.jacocoSourceFile.exists()) return null
+
+        if (!MutationUtil.executePIT(fileDetails, parameters, listener)) return null
+
+        val mutationReport = FilePath(parameters.workspace.channel,
+            parameters.workspace.remote + "/target/pit-reports/mutations.xml")
+        if (!mutationReport.exists()) return null
+        val mutants = mutationReport.readToString().split("\n")
+            .filter { it.startsWith("<mutation ") }.filter { !it.contains("status='KILLED'") }
+        if (mutants.isEmpty()) return null
+
+        val mutant = MutationUtil.MutationData(mutants[Random.nextInt(mutants.size)])
+        if (mutant.status == MutationUtil.MutationStatus.KILLED) return null
+        return MutationChallenge(fileDetails, mutant)
+    }
+
+    /**
      * Generates new Challenges for a [user] if he has less than [maxChallenges] Challenges after checking the solved
      * and solvable state of his Challenges. Returns the number of generated Challenges for debug output.
      */
@@ -327,6 +347,18 @@ object ChallengeFactory {
         }
 
         return generated
+    }
+
+    /**
+     * Generates a [TestChallenge].
+     */
+    fun generateTestChallenge(data: ChallengeGenerationData, parameters: Parameters, listener: TaskListener)
+    : TestChallenge {
+
+        data.testCount = JUnitUtil.getTestCount(parameters.workspace)
+        data.headCommitHash = parameters.workspace.act(HeadCommitCallable(parameters.remote)).name
+        listener.logger.println("[Gamekins] Generated new TestChallenge")
+        return TestChallenge(data)
     }
 
     /**
@@ -395,83 +427,11 @@ object ChallengeFactory {
     }
 
     /**
-     * Generates a new [MutationTestChallenge] of type [Challenge] for the current class with details [classDetails]
-     * and the current [branch]. The [workspace] is the folder with the code and execution rights, and the [listener]
-     * reports the events to the console output of Jenkins.
-     *
-     * This function parses JSON file of mutation test results and filter to take only SURVIVED
-     * mutations which belong to the given class
-     */
-    @JvmStatic
-    @Throws(IOException::class, InterruptedException::class)
-    fun generateMutationTestChallenge(
-        classDetails: SourceFileDetails, branch: String?, projectName: String?,
-        listener: TaskListener, workspace: FilePath, user: User
-    ): MutationTestChallenge? {
-        MutationUtils.mutationBlackList.clear()
-        val jsonFilePath = JacocoUtil.calculateCurrentFilePath(
-            workspace, classDetails.mocoJSONFile!!, classDetails.parameters.remote
-        )
-        val commitID = workspace.act(HeadCommitCallable(workspace.remote)).name
-        val fullClassName = "${classDetails.packageName}.${classDetails.fileName}"
-        val relevantMutationResultsByClass: Map<String, Set<MutationInfo>>? =
-            MutationResults.retrievedMutationsFromJson(jsonFilePath, listener)?.entries?.filter {
-                it.key == fullClassName
-                        && it.value.any { it1 -> it1.result == "survived" }
-            }
-        if (relevantMutationResultsByClass.isNullOrEmpty() ||
-            relevantMutationResultsByClass[fullClassName].isNullOrEmpty()) {
-            listener.logger.println("[Gamekins] Mutation test - no mutation information for class $fullClassName")
-            return null
-        }
-
-        val currentChallenges = user.getProperty(GameUserProperty::class.java).getCurrentChallenges(projectName!!).
-                                        filterIsInstance<MutationTestChallenge>()
-
-        val survivedList = getSurvivedMutationList(relevantMutationResultsByClass[fullClassName],
-                commitID, currentChallenges, user, projectName)
-
-        if (survivedList.isNullOrEmpty()) {
-            listener.logger.println("[Gamekins] Mutation test - no survived mutation for class $fullClassName")
-            return null
-        }
-
-        // Mapping from line of code to operator names of current challenges
-        val currentLinesOperatorMap: MutableMap<Int, MutableSet<String>> = mutableMapOf()
-        getCurrentLinesOperatorMapping(currentChallenges, fullClassName, currentLinesOperatorMap)
-        val currentChallengeMethods: MutableSet<String> = mutableSetOf()
-        currentChallenges.map { it.methodName?.let { it1 -> currentChallengeMethods.add(it1) } }
-
-        // Prioritize mutation with available code snippet and mutated code snippet
-        val foundMutationInfoPair =
-            findMutationHasCodeSnippets(survivedList, classDetails, workspace,
-                                        currentLinesOperatorMap, currentChallengeMethods)
-        var chosenMutation: MutationInfo? = foundMutationInfoPair.first
-        var codeSnippet: String = foundMutationInfoPair.second["codeSnippet"]!!
-        val mutatedLine: String = foundMutationInfoPair.second["mutatedSnippet"]!!
-
-        if (chosenMutation == null) {
-            // Choose a survived mutation randomly if no mutation with completed code snippet info can be found
-            val temp = survivedList.minus(MutationUtils.mutationBlackList)
-            if (temp.isEmpty()) return null
-            val randomMutation = temp.random() ?: return null
-            codeSnippet = MutationTestChallenge.createCodeSnippet(
-                classDetails, randomMutation.mutationDetails.loc, workspace
-            ).first
-            chosenMutation = randomMutation
-        }
-        // Commit id is persisted with mutation info to later determine the solvability of a mutation challenge
-        return MutationTestChallenge(
-            chosenMutation, classDetails, branch, commitID, codeSnippet, mutatedLine
-        )
-    }
-
-    /**
      * Generates a new [SmellChallenge] according the current [data]. Gets all smells of a file and chooses one of
      * them randomly for generation.
      */
     private fun generateSmellChallenge(data: ChallengeGenerationData, listener: TaskListener): SmellChallenge? {
-        val issues = SmellUtil.getSmellsOfFile(data.selectedFile, listener)
+        val issues = SmellUtil.getSmellsOfFile(data.selectedFile!!, listener)
 
         if (issues.isEmpty()) return null
 

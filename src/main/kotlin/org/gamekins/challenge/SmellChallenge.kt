@@ -24,6 +24,7 @@ import org.gamekins.file.TestFileDetails
 import org.gamekins.util.Constants
 import org.gamekins.util.SmellUtil
 import org.sonarsource.sonarlint.core.client.api.common.analysis.Issue
+import org.sonarsource.sonarlint.core.commons.IssueSeverity
 
 /**
  * Specific [Challenge] to motivate the user to remove code and test smells in their code.
@@ -45,7 +46,8 @@ class SmellChallenge(val details: FileDetails, val issue: Issue): Challenge {
         return "<pre class='prettyprint mt-2 linenums:${issue.startLine?.minus(2)}'><code class='language-java'>" +
                 SmellUtil.getLineContent(details, issue.startLine?.minus(2), issue.endLine?.plus(2)) +
                 "</code></pre><br><em>" + issue.message +
-                " <a href=\"https://rules.sonarsource.com/java/RSPEC-${issue.ruleKey.takeLast(4)}\" " +
+                " <a href=\"https://rules.sonarsource.com/java/RSPEC-" +
+                "${issue.ruleKey.takeLastWhile { it.isDigit() }}\" " +
                 "target=\"_blank\">More Information</a> " + "</em>"
     }
 
@@ -83,14 +85,14 @@ class SmellChallenge(val details: FileDetails, val issue: Issue): Challenge {
 
     override fun getScore(): Int {
         return when (issue.severity) {
-            "BLOCKER" -> 4
-            "CRITICAL" -> 3
-            "MAJOR" -> 2
+            IssueSeverity.BLOCKER -> 4
+            IssueSeverity.CRITICAL -> 3
+            IssueSeverity.MAJOR -> 2
             else -> 1
         }
     }
 
-    override fun getSnippet():String {
+    override fun getSnippet(): String {
         return codeSnippet
     }
 

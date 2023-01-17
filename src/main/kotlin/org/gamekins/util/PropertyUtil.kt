@@ -126,7 +126,11 @@ object PropertyUtil {
     @JvmStatic
     fun doFillTeamsBoxItems(property: GameProperty?): ListBoxModel {
         val listBoxModel = ListBoxModel()
-        property?.getTeams()?.forEach(Consumer { nameAndValue: String? -> listBoxModel.add(nameAndValue) })
+        property?.getTeams()?.forEach(Consumer { nameAndValue: String? ->
+            if (nameAndValue != null) {
+                listBoxModel.add(nameAndValue)
+            }
+        })
         return listBoxModel
     }
 
@@ -143,19 +147,23 @@ object PropertyUtil {
             val property = user.getProperty(GameUserProperty::class.java)
             if (property != null) {
                 if (property.isParticipating(projectName)) {
-                    participatingUser.add(user.fullName)
+                    participatingUser.add(user.id + " (" + user.fullName + ")")
                 } else {
-                    otherUsers.add(user.fullName)
+                    otherUsers.add(user.id + " (" + user.fullName + ")")
                 }
             }
         }
 
         participatingUser.addAll(otherUsers)
-        participatingUser.remove("unknown")
-        participatingUser.remove("root")
-        participatingUser.remove("SYSTEM")
+        participatingUser.removeIf { it.contains("unknown") }
+        participatingUser.removeIf { it.contains("root") }
+        participatingUser.removeIf { it.contains("SYSTEM") }
         val listBoxModel = ListBoxModel()
-        participatingUser.forEach(Consumer { nameAndValue: String? -> listBoxModel.add(nameAndValue) })
+        participatingUser.forEach(Consumer { nameAndValue: String? ->
+            if (nameAndValue != null) {
+                listBoxModel.add(nameAndValue)
+            }
+        })
         return listBoxModel
     }
 
@@ -337,7 +345,7 @@ object PropertyUtil {
     private fun retrieveUser(fullName: String): User? {
         for (user in User.getAll()) {
             if (!realUser(user)) continue
-            if (user.fullName == fullName) {
+            if (fullName.contains(user.fullName) && fullName.contains(user.id)) {
                 return user
             }
         }

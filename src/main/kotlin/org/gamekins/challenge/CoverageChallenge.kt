@@ -31,8 +31,6 @@ import java.io.File
 abstract class CoverageChallenge(var details: SourceFileDetails, workspace: FilePath?)
     : Challenge {
 
-    @Deprecated("Use implementation of new file structure", replaceWith = ReplaceWith("details"))
-    val classDetails: JacocoUtil.ClassDetails? = null
     var coverage: Double
     protected var fullyCoveredLines: Int
     private var notCoveredLines: Int
@@ -108,18 +106,6 @@ abstract class CoverageChallenge(var details: SourceFileDetails, workspace: File
         }
         print += "\"/>"
         return print
-    }
-
-    /**
-     * Called by Jenkins after the object has been created from his XML representation. Used for data migration.
-     */
-    @Suppress("unused", "SENSELESS_COMPARISON")
-    private fun readResolve(): Any {
-        if (details == null && classDetails != null) {
-            details = SourceFileDetails.classDetailsToSourceFileDetails(classDetails)
-        }
-
-        return this
     }
 
     /**

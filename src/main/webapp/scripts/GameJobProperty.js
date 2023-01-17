@@ -10,8 +10,9 @@ jQuery3("#addTeam").on('click', function () {
         onComplete: function (rsp) {
             if (!rsp.responseText.includes("class=error")) {
                 jQuery3("#teamName")[0].value = ""
+                buildTeamsList(descriptorFullUrl)
             }
-            jQuery3("#error-add-team")[0].innerHTML = rsp.responseText
+            jQuery3("#error-user-team")[0].innerHTML = rsp.responseText
         }
     })
 })
@@ -89,7 +90,10 @@ function buildTeamsList(descriptorFullUrl) {
                 teamsBox.appendChild(el);
             }
 
-            buildTeamsTable(descriptorFullUrl, true)
+            let table = jQuery3("#team-table")[0]
+            if (!table.innerHTML.empty()) {
+                buildTeamsTable(descriptorFullUrl, true)
+            }
         }
     })
 }

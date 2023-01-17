@@ -84,7 +84,7 @@ class BuildChallenge(private var parameters: Parameters) : Challenge {
     }
 
     override fun printToXML(reason: String, indentation: String): String {
-        var print = "$indentation<BuildChallenge created=\"$created\" solved=\"$solved"
+        var print = "$indentation<BuildChallenge created=\"$created\" solved=\"$solved\" branch=\"${parameters.branch}"
         if (reason.isNotEmpty()) {
             print += "\" reason=\"$reason"
         }
@@ -92,16 +92,7 @@ class BuildChallenge(private var parameters: Parameters) : Challenge {
         return print
     }
 
-    /**
-     * Called by Jenkins after the object has been created from his XML representation. Used for data migration.
-     */
-    @Suppress("unused", "SENSELESS_COMPARISON")
-    private fun readResolve(): Any {
-        if (parameters == null) parameters = Parameters()
-        return this
-    }
-
     override fun toString(): String {
-        return "Let the Build run successfully"
+        return "Let the Build run successfully in branch ${parameters.branch}"
     }
 }

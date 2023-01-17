@@ -80,6 +80,7 @@ abstract class FileDetails(var parameters: Parameters, val filePath: String)
         return true
     }
 
+    //TODO: Does not work on remote workers
     /**
      * Check whether the file exists.
      */
@@ -118,15 +119,6 @@ abstract class FileDetails(var parameters: Parameters, val filePath: String)
 
     override fun inputStream(): InputStream {
         return file.inputStream()
-    }
-
-    /**
-     * Called by Jenkins after the object has been created from his XML representation. Used for data migration.
-     */
-    @Suppress("unused", "SENSELESS_COMPARISON")
-    private fun readResolve(): Any {
-        if (parameters == null) parameters = Parameters()
-        return this
     }
 
     override fun relativePath(): String {

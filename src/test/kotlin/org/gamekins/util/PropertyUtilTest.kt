@@ -44,6 +44,9 @@ class PropertyUtilTest : FeatureSpec({
     val userName1 = "User1"
     val userName2 = "User2"
     val userName3 = "User3"
+    val id1 = "ID1"
+    val id2 = "ID2"
+    val id3 = "ID3"
     val projectName1 = "Project1"
     val projectName2 = "Project2"
 
@@ -63,6 +66,9 @@ class PropertyUtilTest : FeatureSpec({
         every { user1.fullName } returns userName1
         every { user2.fullName } returns userName2
         every { user3.fullName } returns userName3
+        every { user1.id } returns id1
+        every { user2.id } returns id2
+        every { user3.id } returns id3
         every { user1.getProperty(org.gamekins.GameUserProperty::class.java) } returns userProperty1
         every { user2.getProperty(org.gamekins.GameUserProperty::class.java) } returns null
         every { user3.getProperty(org.gamekins.GameUserProperty::class.java) } returns null
@@ -137,19 +143,19 @@ class PropertyUtilTest : FeatureSpec({
         }
 
         scenario("User is already in a team") {
-            formValidation = PropertyUtil.doAddUserToTeam(job2, team1, userName3)
+            formValidation = PropertyUtil.doAddUserToTeam(job2, team1, "$id3 ($userName3)")
             formValidation.kind shouldBe FormValidation.Kind.ERROR
             formValidation.message shouldBe Constants.Error.USER_ALREADY_IN_TEAM
         }
 
         scenario("User is already in a team") {
-            formValidation = PropertyUtil.doAddUserToTeam(job2, team1, userName2)
+            formValidation = PropertyUtil.doAddUserToTeam(job2, team1, "$id2 ($userName2)")
             formValidation.kind shouldBe FormValidation.Kind.ERROR
             formValidation.message shouldBe Constants.Error.USER_ALREADY_IN_TEAM
         }
 
         scenario("User already in a team") {
-            formValidation = PropertyUtil.doAddUserToTeam(job2, team1, userName1)
+            formValidation = PropertyUtil.doAddUserToTeam(job2, team1, "$id1 ($userName1)")
             formValidation.kind shouldBe FormValidation.Kind.ERROR
             formValidation.message shouldBe Constants.Error.USER_ALREADY_IN_TEAM
         }
@@ -161,7 +167,7 @@ class PropertyUtilTest : FeatureSpec({
         }
 
         scenario("Successful Action") {
-            PropertyUtil.doAddUserToTeam(job1, team1, userName1).kind shouldBe FormValidation.Kind.OK
+            PropertyUtil.doAddUserToTeam(job1, team1, "$id1 ($userName1)").kind shouldBe FormValidation.Kind.OK
         }
     }
 
@@ -221,19 +227,19 @@ class PropertyUtilTest : FeatureSpec({
         }
 
         scenario("User already not in Team") {
-            formValidation = PropertyUtil.doRemoveUserFromTeam(job2, team1, userName3)
+            formValidation = PropertyUtil.doRemoveUserFromTeam(job2, team1, "$id3 ($userName3)")
             formValidation.kind shouldBe FormValidation.Kind.ERROR
             formValidation.message shouldBe Constants.Error.USER_NOT_IN_TEAM
         }
 
         scenario("User already not in Team") {
-            formValidation = PropertyUtil.doRemoveUserFromTeam(job2, team1, userName2)
+            formValidation = PropertyUtil.doRemoveUserFromTeam(job2, team1, "$id2 ($userName2)")
             formValidation.kind shouldBe FormValidation.Kind.ERROR
             formValidation.message shouldBe Constants.Error.USER_NOT_IN_TEAM
         }
 
         scenario("User already not in Team") {
-            formValidation = PropertyUtil.doRemoveUserFromTeam(job2, team1, userName1)
+            formValidation = PropertyUtil.doRemoveUserFromTeam(job2, team1, "$id1 ($userName1)")
             formValidation.kind shouldBe FormValidation.Kind.ERROR
             formValidation.message shouldBe Constants.Error.USER_NOT_IN_TEAM
         }
@@ -245,7 +251,7 @@ class PropertyUtilTest : FeatureSpec({
         }
 
         scenario("Successful Action") {
-            PropertyUtil.doRemoveUserFromTeam(job1, team2, userName1).kind shouldBe FormValidation.Kind.OK
+            PropertyUtil.doRemoveUserFromTeam(job1, team2, "$id1 ($userName1)").kind shouldBe FormValidation.Kind.OK
         }
     }
 

@@ -31,6 +31,7 @@ import org.gamekins.property.GameJobProperty
 import org.gamekins.statistics.Statistics
 import org.gamekins.util.Constants.Parameters
 import org.gamekins.test.TestUtils
+import io.kotest.core.spec.style.AnnotationSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.string.shouldEndWith
@@ -322,6 +323,12 @@ class ActionUtilTest: FeatureSpec({
 
             every { userProperty1.getNotifications() } returns false
 
+        every { challenge.getParameters() } returns parameters
+        parameters.workspace = FilePath(null, root)
+        parameters.branch = "branch1"
+
+        val gameProperty = mockkClass(GameJobProperty::class)
+        every { gameProperty.getStatistics().incrementSentChallenges(any()) } returns Unit
 
             ActionUtil.doSendChallenge(job, stringChallenge, "User1").kind shouldBe FormValidation.Kind.OK
         }

@@ -53,9 +53,13 @@ object Constants {
 
         const val STORED_CHALLENGES_COUNT = "currentStoredChallengesCount"
 
-        const val  CAN_SEND_CHALLENGE = "canSendChallenge"
+        const val CAN_SEND_CHALLENGE = "canSendChallenge"
 
         const val SEARCH_COMMIT_COUNT = "searchCommitCount"
+
+        const val PIT_CONFIGURATION = "pitConfiguration"
+
+        const val SHOW_PIT_OUTPUT = "showPitOutput"
     }
 
     /**
@@ -72,6 +76,32 @@ object Constants {
         const val STORED_CHALLENGES = 2
 
         const val SEARCH_COMMIT_COUNT = 50
+
+        const val PIT_CONFIGURATION =
+                        "<plugin>\n" +
+                        "   <groupId>org.pitest</groupId>\n" +
+                        "   <artifactId>pitest-maven</artifactId>\n" +
+                        "   <version>1.9.10</version>\n" +
+                        "   <dependencies>\n" +
+                        "       <dependency>\n" +
+                        "           <groupId>org.pitest</groupId>\n" +
+                        "           <artifactId>pitest-junit5-plugin</artifactId>\n" +
+                        "           <version>1.1.0</version>\n" +
+                        "       </dependency>\n" +
+                        "   </dependencies>\n" +
+                        "   <configuration>\n" +
+                        "       <outputFormats>\n" +
+                        "           <outputFormat>XML</outputFormat>\n" +
+                        "       </outputFormats>\n" +
+                        "       <targetClasses>\n" +
+                        "            <param>{package}.{class}*</param>\n" +
+                        "       </targetClasses>\n" +
+                        "   </configuration>\n" +
+                        "</plugin>"
+
+        const val SHOW_PIT_OUTPUT = false
+
+        const val AVATAR = "001-actress.png"
     }
 
     /**
@@ -81,7 +111,7 @@ object Constants {
      */
     object Error
     {
-        const val UNEXPECTED = "Unexpected Error"
+        private const val UNEXPECTED = "Unexpected Error"
 
         const val GENERATION = "There was an error with generating a new challenge"
 
@@ -126,6 +156,23 @@ object Constants {
         const val TEAM_NAME_TAKEN = "The team already exists - please use another name for your team"
     }
 
+    object Mutation {
+
+        const val SHIFT_LEFT = "&lt;&lt;"
+
+        const val SHIFT_RIGHT = "&gt;&gt;"
+
+        const val RETURN_TRUE = "return true"
+
+        const val RETURN_FALSE = "return false"
+
+        const val RETURN_ZERO = "return 0"
+
+        val RETURN_REGEX = "return .*[^;]".toRegex()
+    }
+
+    const val AND_TYPE = " and type "
+
     const val EXISTS = " exists "
 
     const val NO_QUEST = "No quest could be generated. This could mean that none of the prerequisites was met, " +
@@ -147,25 +194,7 @@ object Constants {
 
     const val TYPE_PLAIN = "text/plain"
 
-    /**
-     * Migrates a [HashMap] of constants to the class [Parameters].
-     */
-    fun constantsToParameters(constants: HashMap<String, String>): Parameters {
-        val parameters = Parameters()
-        if (constants["branch"] != null) parameters.branch = constants["branch"]!!
-        if (constants["currentChallengesCount"] != null) parameters.currentChallengesCount =
-            constants["currentChallengesCount"]!!.toInt()
-        if (constants["generated"] != null) parameters.generated = constants["generated"]!!.toInt()
-        if (constants["jacocoCSVPath"] != null) parameters.jacocoCSVPath = constants["jacocoCSVPath"]!!
-        if (constants["jacocoResultsPath"] != null) parameters.jacocoResultsPath = constants["jacocoResultsPath"]!!
-        if (constants["mocoJSONPath"] != null) parameters.mocoJSONPath = constants["mocoJSONPath"]!!
-        if (constants["projectCoverage"] != null) parameters.projectCoverage = constants["projectCoverage"]!!.toDouble()
-        if (constants["projectName"] != null) parameters.projectName = constants["projectName"]!!
-        if (constants["projectTests"] != null) parameters.projectTests = constants["projectTests"]!!.toInt()
-        if (constants["solved"] != null) parameters.solved = constants["solved"]!!.toInt()
-        if (constants["workspace"] != null) parameters.workspace = FilePath(null, constants["workspace"]!!)
-        return parameters
-    }
+    const val TRY_CLASS = "[Gamekins] Try class "
 
     /**
      * Returns the path to the most recent jar file of the Sonar-Java-Plugin for SonarLint.
@@ -191,10 +220,11 @@ object Constants {
         var currentQuestsCount: Int = Default.CURRENT_QUESTS,
         var storedChallengesCount: Int = Default.STORED_CHALLENGES,
         var searchCommitCount: Int = Default.SEARCH_COMMIT_COUNT,
+        var pitConfiguration: String = Default.PIT_CONFIGURATION,
+        var showPitOutput: Boolean = Default.SHOW_PIT_OUTPUT,
         var generated: Int = 0,
         var jacocoCSVPath: String = "",
         var jacocoResultsPath: String = "",
-        var mocoJSONPath: String = "",
         var projectCoverage: Double = 0.0,
         var projectName: String = "",
         var projectTests: Int = 0,
@@ -215,9 +245,9 @@ object Constants {
          */
         @Suppress("unused", "SENSELESS_COMPARISON")
         private fun readResolve(): Any {
-            if (remote == null) remote = ""
             if (workspace == null) workspace = FilePath(null, remote)
-            if (currentQuestsCount == null) currentQuestsCount = Default.CURRENT_QUESTS
+            if (pitConfiguration == null) pitConfiguration = Default.PIT_CONFIGURATION
+            if (showPitOutput ==null) showPitOutput = Default.SHOW_PIT_OUTPUT
             return this
         }
     }

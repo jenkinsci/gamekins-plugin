@@ -36,7 +36,6 @@ class LineCoverageChallengeTest : FeatureSpec({
     val shortFilePath = "src/main/java/org/gamekins/challenge/$className.kt"
     val shortJacocoPath = "**/target/site/jacoco/"
     val shortJacocoCSVPath = "**/target/site/jacoco/csv"
-    val mocoJSONPath = "**/target/site/moco/mutation/"
     lateinit var details : SourceFileDetails
     lateinit var challenge : LineCoverageChallenge
     val document = mockkClass(Document::class)
@@ -58,7 +57,7 @@ class LineCoverageChallengeTest : FeatureSpec({
         parameters.workspace = path
         parameters.jacocoResultsPath = shortJacocoPath
         parameters.jacocoCSVPath = shortJacocoCSVPath
-        parameters.mocoJSONPath = mocoJSONPath
+        mockkStatic(JacocoUtil::class)
         every { JacocoUtil.calculateCurrentFilePath(any(), any()) } returns path
         every { JacocoUtil.getCoverageInPercentageFromJacoco(any(), any()) } returns coverage
         every { JacocoUtil.generateDocument(any()) } returns document
@@ -183,7 +182,6 @@ class LineCoverageChallengeTest : FeatureSpec({
         {
             challenge.isSolved(parameters, run, listener) shouldBe false
         }
-
         every { pathMock.exists() } returns true
         every { document.select("span.pc") } returns Elements()
         every { document.select("span.fc") } returns Elements()
@@ -192,13 +190,11 @@ class LineCoverageChallengeTest : FeatureSpec({
         {
             challenge.isSolved(parameters, run, listener) shouldBe false
         }
-
         every { document.select("span.fc") } returns elements
         scenario("Fully covered lines exists")
         {
             challenge.isSolved(parameters, run, listener) shouldBe true
         }
-
         every { element.attr("class") } returns "nc"
         every { document.select("span.fc") } returns Elements()
         every { document.select("span.nc") } returns elements
@@ -206,7 +202,6 @@ class LineCoverageChallengeTest : FeatureSpec({
         {
             challenge.isSolved(parameters, run, listener) shouldBe false
         }
-
         every { element.attr("class") } returns "fc"
         every { element.attr("id") } returns "L6"
         every { document.select("span.fc") } returns elements
@@ -224,7 +219,6 @@ class LineCoverageChallengeTest : FeatureSpec({
             challenge = LineCoverageChallenge(data)
             challenge.isSolved(parameters, run, listener) shouldBe false
         }
-
         every { data.line } returns element
         challenge = LineCoverageChallenge(data)
 
@@ -234,7 +228,6 @@ class LineCoverageChallengeTest : FeatureSpec({
             every { element.attr("class") } returns "nc"
             challenge.isSolved(parameters, run, listener) shouldBe false
         }
-
         every { element.attr("title") } returns "1 of 3 branches missed."
         scenario("1 of 3 branches missed")
         {

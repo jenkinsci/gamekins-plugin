@@ -29,13 +29,16 @@ import org.sonarsource.sonarlint.core.commons.log.ClientLogOutput
 import java.io.File
 
 /**
- * Util object for code and test smells.
+ * Util object for code and test smells with SonarLint.
  *
  * @author Philipp Straubinger
  * @since 0.5
  */
 object SmellUtil {
 
+    /**
+     * Returns the list of smells found in [file] by SonarLint
+     */
     @JvmStatic
     fun getSmellsOfFile(file: FileDetails, listener: TaskListener = TaskListener.NULL): List<Issue> {
         val globalConfig = StandaloneGlobalConfiguration.builder()
@@ -61,6 +64,8 @@ object SmellUtil {
     }
 
     /**
+     * Returns the lines between [startLine] and [endLine] in [file].
+     *
      * @param startLine Starts with 1 not 0!
      */
     @JvmStatic

@@ -19,7 +19,6 @@ package org.gamekins.util
 import hudson.FilePath
 import hudson.model.Run
 import hudson.model.TaskListener
-import org.gamekins.util.GitUtil.GameUser
 import jenkins.security.MasterToSlaveCallable
 import org.gamekins.file.SourceFileDetails
 import org.gamekins.util.Constants.Parameters
@@ -28,11 +27,10 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import org.jsoup.parser.Parser
-import org.jsoup.safety.Whitelist
+import org.jsoup.safety.Safelist
 import org.jsoup.select.Elements
 import java.io.File
 import java.io.IOException
-import java.io.Serializable
 
 import kotlin.jvm.Throws
 import kotlin.random.Random
@@ -311,10 +309,10 @@ object JacocoUtil {
         for (i in (lineIndex - (linesAround/2))..(lineIndex + (linesAround/2 + offset))) {
             val temp = lines.getOrNull(i)
             if (temp != null) {
-                res += Jsoup.clean(temp, "", Whitelist.none(), outputSettings) + System.lineSeparator()
+                res += Jsoup.clean(temp, "", Safelist.none(), outputSettings) + System.lineSeparator()
             }
         }
-        val cleanTargetLine = Jsoup.clean(targetLine, "", Whitelist.none(), outputSettings)
+        val cleanTargetLine = Jsoup.clean(targetLine, "", Safelist.none(), outputSettings)
         return Pair(res, Parser.unescapeEntities(cleanTargetLine, true))
     }
 
@@ -444,136 +442,4 @@ object JacocoUtil {
      */
     class CoverageMethod internal constructor(val methodName: String, val lines: Int, val missedLines: Int,
                                               val firstLineID: String)
-
-    /**
-     * The internal representation of a class from JaCoCo.
-     *
-     * @param workspace Workspace of the project
-     * @param sourceFilePath Path of the file, starting in the workspace root directory
-     * @param shortJacocoPath Path of the JaCoCo root directory, beginning with ** / (without space)
-     * @param shortJacocoCSVPath Path of the JaCoCo csv file, beginning with ** / (without space)
-     *
-     * @author Philipp Straubinger
-     * @since 0.1
-     * @deprecated since 0.4
-     */
-    @Deprecated("Use implementation of new file structure",
-        replaceWith = ReplaceWith("SourceFileDetails", imports = ["org.gamekins.file.SourceFileDetails"]))
-    class ClassDetails(workspace: FilePath,
-                       var sourceFilePath: String,
-                       shortJacocoPath: String,
-                       shortJacocoCSVPath: String,
-                       shortMocoJSONPath: String,
-                       var constants: HashMap<String, String>,
-                       listener: TaskListener = TaskListener.NULL)
-        : Serializable {
-
-        val className: String
-        val extension: String
-        val packageName: String
-        val jacocoMethodFile: File
-        val jacocoSourceFile: File
-        val jacocoCSVFile: File
-        val mocoJSONFile: File?
-        val coverage: Double
-        val changedByUsers: HashSet<GameUser>
-        val workspace: String = workspace.remote
-
-        init {
-            val pathSplit = sourceFilePath.split("/".toRegex())
-            //Compute class, package and extension name
-            className = pathSplit[pathSplit.size - 1].split("\\.".toRegex())[0]
-            this.extension = pathSplit[pathSplit.size - 1].split("\\.".toRegex())[1]
-            packageName = computePackageName(sourceFilePath)
-
-            //Build the paths to the JaCoCo files
-            val jacocoPath = StringBuilder(workspace.remote)
-            var i = 0
-            while (pathSplit[i] != "src") {
-                if (pathSplit[i].isNotEmpty()) jacocoPath.append("/").append(pathSplit[i])
-                i++
-            }
-            jacocoCSVFile = File(jacocoPath.toString() + shortJacocoCSVPath.substring(2))
-            if (!jacocoCSVFile.exists()) {
-                listener.logger.println("[Gamekins] JaCoCoCSVPath: " + jacocoCSVFile.absolutePath
-                        + Constants.EXISTS + jacocoCSVFile.exists())
-            }
-
-            if (shortMocoJSONPath.isNotEmpty()) {
-                mocoJSONFile = File(StringBuilder(workspace.remote).toString() + shortMocoJSONPath.substring(2))
-                if (!mocoJSONFile.exists()) {
-                    listener.logger.println("[Gamekins] MoCoJSONPath: " + mocoJSONFile.absolutePath
-                            + Constants.EXISTS + mocoJSONFile.exists())
-                }
-            } else {
-                mocoJSONFile = null
-            }
-
-            jacocoPath.append(shortJacocoPath.substring(2))
-            if (!jacocoPath.toString().endsWith("/")) jacocoPath.append("/")
-            jacocoPath.append(packageName).append("/")
-            jacocoMethodFile = File("$jacocoPath$className.html")
-            if (!jacocoMethodFile.exists()) {
-                listener.logger.println("[Gamekins] JaCoCoMethodPath: "
-                        + jacocoMethodFile.absolutePath + Constants.EXISTS + jacocoMethodFile.exists())
-            }
-
-            jacocoSourceFile = File(jacocoPath.toString() + className + "." + this.extension + ".html")
-            if (!jacocoSourceFile.exists()) {
-                listener.logger.println("[Gamekins] JaCoCoSourcePath: "
-                        + jacocoSourceFile.absolutePath + Constants.EXISTS + jacocoSourceFile.exists())
-            }
-
-            coverage = getCoverageInPercentageFromJacoco(className,
-                    calculateCurrentFilePath(workspace, jacocoCSVFile))
-            changedByUsers = HashSet()
-        }
-
-        /**
-         * Adds a new [user], who has recently changed the class.
-         */
-        fun addUser(user: GameUser) {
-            changedByUsers.add(user)
-        }
-
-        /**
-         * Check whether all JaCoCo files are existing, which is not always the case.
-         */
-        fun filesExists(): Boolean {
-            return jacocoCSVFile.exists() && jacocoSourceFile.exists() && jacocoMethodFile.exists()
-        }
-
-        /**
-         * Called by Jenkins after the object has been created from his XML representation. Used for data migration.
-         */
-        @Suppress("SENSELESS_COMPARISON")
-        private fun readResolve(): Any {
-            if (constants == null) constants = hashMapOf()
-
-            if (sourceFilePath == null) {
-                val split = packageName.split(".")
-                sourceFilePath = "/src/main/java/"
-                for (part in split) {
-                    sourceFilePath += "$part/"
-                }
-                sourceFilePath += "$className.$extension"
-            }
-
-            return this
-        }
-
-        override fun toString(): String {
-            var value = StringBuilder("ClassDetails{" +
-                    "className='" + className + '\'' +
-                    ", extension='" + extension + '\'' +
-                    ", packageName='" + packageName + '\'' +
-                    ", changedByUsers=")
-            for (user in changedByUsers) {
-                value.append(user.fullName).append(",")
-            }
-            value = StringBuilder(value.substring(0, value.length - 1))
-            value.append('}')
-            return value.toString()
-        }
-    }
 }

@@ -140,7 +140,7 @@ interface Challenge {
     /**
      * Data class for the initialisation of a Challenge. Every val variable will be non-null with the desired data.
      */
-    data class ChallengeGenerationData(val parameters: Parameters, val user: User, val selectedFile: FileDetails,
+    data class ChallengeGenerationData(val parameters: Parameters, val user: User, val selectedFile: FileDetails?,
                                        val listener: TaskListener, var method: CoverageMethod? = null,
                                        var line: Element? = null, var testCount: Int? = null,
                                        var headCommitHash: String? = null)

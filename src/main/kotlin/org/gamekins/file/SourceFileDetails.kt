@@ -20,7 +20,6 @@ import hudson.model.TaskListener
 import org.gamekins.util.Constants
 import org.gamekins.util.Constants.Parameters
 import org.gamekins.util.JacocoUtil
-import org.gamekins.util.JacocoUtil.ClassDetails
 import java.io.File
 
 /**
@@ -38,7 +37,6 @@ class SourceFileDetails(parameters: Parameters,
     val jacocoCSVFile: File
     val jacocoMethodFile: File
     val jacocoSourceFile: File
-    val mocoJSONFile: File?
 
     init {
         val pathSplit = filePath.split("/".toRegex())
@@ -54,17 +52,6 @@ class SourceFileDetails(parameters: Parameters,
         if (!jacocoCSVFile.exists()) {
             listener.logger.println("[Gamekins] JaCoCoCSVPath: " + jacocoCSVFile.absolutePath
                     + Constants.EXISTS + jacocoCSVFile.exists())
-        }
-
-        if (parameters.mocoJSONPath != "") {
-            mocoJSONFile = File(StringBuilder(parameters.remote).toString()
-                    + parameters.mocoJSONPath.substring(2))
-            if (!mocoJSONFile.exists()) {
-                listener.logger.println("[Gamekins] MoCoJSONPath: " + mocoJSONFile.absolutePath
-                        + Constants.EXISTS + mocoJSONFile.exists())
-            }
-        } else {
-            mocoJSONFile = null
         }
 
         jacocoPath.append(parameters.jacocoResultsPath.substring(2))
@@ -88,53 +75,11 @@ class SourceFileDetails(parameters: Parameters,
         )
     }
 
-    companion object {
-        fun classDetailsToSourceFileDetails(classDetails: ClassDetails): SourceFileDetails {
-            val shortJacoco = getIdenticalStringPart(
-                                  classDetails.jacocoSourceFile.absolutePath,
-                                  classDetails.jacocoCSVFile.absolutePath
-                              ).removePrefix(classDetails.workspace)
-            val shortMoco = if (classDetails.mocoJSONFile == null) ""
-                            else classDetails.mocoJSONFile.absolutePath.removePrefix(classDetails.workspace)
-
-            val parameters = Constants.constantsToParameters(classDetails.constants)
-            parameters.jacocoResultsPath = shortJacoco
-            parameters.jacocoCSVPath = classDetails.jacocoCSVFile.absolutePath.removePrefix(classDetails.workspace)
-            parameters.mocoJSONPath = shortMoco
-            val sourceFileDetails = SourceFileDetails(parameters,
-                classDetails.sourceFilePath,
-                TaskListener.NULL)
-            classDetails.changedByUsers.forEach { sourceFileDetails.addUser(it) }
-
-            val prop = SourceFileDetails::class.java.getDeclaredField("coverage")
-            prop.isAccessible = true
-            prop.set(sourceFileDetails, classDetails.coverage)
-
-            return sourceFileDetails
-        }
-
-        fun getIdenticalStringPart(first: String, second: String): String {
-            first.zip(second).forEachIndexed { index, pair ->
-                if (pair.first != pair.second) return first.substring(0, index)
-            }
-            return first
-        }
-    }
-
     override fun filesExists(): Boolean {
         return super.filesExists() && jacocoCSVFile.exists() && jacocoMethodFile.exists() && jacocoSourceFile.exists()
     }
 
     override fun isTest(): Boolean {
         return false
-    }
-
-    /**
-     * Called by Jenkins after the object has been created from his XML representation. Used for data migration.
-     */
-    @Suppress("unused", "SENSELESS_COMPARISON")
-    private fun readResolve(): Any {
-        if (parameters == null) parameters = Parameters()
-        return this
     }
 }

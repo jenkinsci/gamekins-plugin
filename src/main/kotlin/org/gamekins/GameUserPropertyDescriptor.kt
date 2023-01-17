@@ -37,6 +37,7 @@ class GameUserPropertyDescriptor : UserPropertyDescriptor(GameUserProperty::clas
      * Returns the list of avatars available in Gamekins. [job] is only needed so that Jenkins does recognize this
      * method to be available from the frontend.
      */
+    @Suppress("UNUSED_PARAMETER", "unused")
     fun doGetAvatars(@AncestorInPath job: Job<*, *>?): String {
         val resource = javaClass.getResource("/avatars/avatars.json")
         val mapper = ObjectMapper()

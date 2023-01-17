@@ -64,9 +64,11 @@ class QuestTest : AnnotationSpec() {
     fun getCurrentStep() {
         quest1.getCurrentStep() shouldBe step1
 
+        every { challenge2.isSolved(any(), any(), any()) } returns false
         quest1.isCurrentStepSolved(Constants.Parameters(), run, TaskListener.NULL) shouldBe true
         quest1.getCurrentStep() shouldBe step2
 
+        every { challenge2.isSolved(any(), any(), any()) } returns true
         quest1.isCurrentStepSolved(Constants.Parameters(), run, TaskListener.NULL) shouldBe true
         quest1.getCurrentStep() shouldBe step2
     }
@@ -75,9 +77,11 @@ class QuestTest : AnnotationSpec() {
     fun getCurrentStepNumber() {
         quest1.getCurrentStepNumber() shouldBe 0
 
+        every { challenge2.isSolved(any(), any(), any()) } returns false
         quest1.isCurrentStepSolved(Constants.Parameters(), run, TaskListener.NULL) shouldBe true
         quest1.getCurrentStepNumber() shouldBe 1
 
+        every { challenge2.isSolved(any(), any(), any()) } returns true
         quest1.isCurrentStepSolved(Constants.Parameters(), run, TaskListener.NULL) shouldBe true
         quest1.getCurrentStepNumber() shouldBe 2
     }
@@ -86,9 +90,11 @@ class QuestTest : AnnotationSpec() {
     fun getLastStep() {
         quest1.getLastStep() shouldBe step1
 
+        every { challenge2.isSolved(any(), any(), any()) } returns false
         quest1.isCurrentStepSolved(Constants.Parameters(), run, TaskListener.NULL) shouldBe true
         quest1.getLastStep() shouldBe step1
 
+        every { challenge2.isSolved(any(), any(), any()) } returns true
         quest1.isCurrentStepSolved(Constants.Parameters(), run, TaskListener.NULL) shouldBe true
         quest1.getLastStep() shouldBe step2
     }
@@ -104,9 +110,9 @@ class QuestTest : AnnotationSpec() {
     fun isCurrentStepSolved() {
         quest.isCurrentStepSolved(Constants.Parameters(), run, TaskListener.NULL) shouldBe false
 
+        every { challenge2.isSolved(any(), any(), any()) } returns false
         quest1.isCurrentStepSolved(Constants.Parameters(), run, TaskListener.NULL) shouldBe true
 
-        every { challenge2.isSolved(any(), any(), any()) } returns false
         quest1.isCurrentStepSolved(Constants.Parameters(), run, TaskListener.NULL) shouldBe false
 
         every { challenge2.isSolved(any(), any(), any()) } returns true
@@ -127,12 +133,20 @@ class QuestTest : AnnotationSpec() {
     fun isSolved() {
         quest.isSolved() shouldBe false
 
+        every { challenge2.isSolved(any(), any(), any()) } returns false
         quest1.isCurrentStepSolved(Constants.Parameters(), run, TaskListener.NULL) shouldBe true
         quest1.isSolved() shouldBe false
 
+        every { challenge2.isSolved(any(), any(), any()) } returns true
         quest1.isCurrentStepSolved(Constants.Parameters(), run, TaskListener.NULL) shouldBe true
         quest1.isSolved() shouldBe true
         quest1.solved shouldNotBe 0
+
+        val quest2 = Quest("Lines over Lines", arrayListOf(step1, step2))
+        quest2.isCurrentStepSolved(Constants.Parameters(), run, TaskListener.NULL) shouldBe true
+        quest2.getCurrentStepNumber() shouldBe 2
+        quest2.isSolved() shouldBe true
+        quest2.solved shouldNotBe 0
     }
 
     @Test

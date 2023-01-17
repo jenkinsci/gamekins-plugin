@@ -19,9 +19,9 @@ package org.gamekins.util
 import hudson.FilePath
 import hudson.model.*
 import org.gamekins.GameUserProperty
+import org.gamekins.challenge.Challenge
 import org.gamekins.challenge.ChallengeFactory
 import org.gamekins.challenge.DummyChallenge
-import org.gamekins.challenge.MutationTestChallenge
 import org.gamekins.challenge.quest.QuestFactory
 import org.gamekins.event.EventHandler
 import org.gamekins.event.user.*
@@ -82,6 +82,7 @@ object PublisherUtil {
             }
             if (quest.isSolved()) {
                 property.completeQuest(parameters.projectName, quest)
+                property.addScore(parameters.projectName, quest.getScore())
                 EventHandler.addEvent(
                     QuestSolvedEvent(parameters.projectName, parameters.branch, property.getUser(), quest)
                 )
@@ -93,6 +94,10 @@ object PublisherUtil {
         for (quest in property.getCurrentQuests(parameters.projectName)) {
             if (!quest.isSolvable(parameters, run, listener)) {
                 property.rejectQuest(parameters.projectName, quest, "One or more challenges are not solvable anymore")
+                for (step in quest.steps) {
+                    if (step.challenge.getSolved() > 0)
+                        property.addScore(parameters.projectName, step.challenge.getScore() + 1)
+                }
                 EventHandler.addEvent(
                     QuestUnsolvableEvent(parameters.projectName, parameters.branch, property.getUser(), quest)
                 )
@@ -111,8 +116,7 @@ object PublisherUtil {
 
         for (challenge in property.getCurrentChallenges(parameters.projectName)) {
             if (!challenge.isSolvable(parameters, run, listener)) {
-                var reason = "Not solvable"
-                if (challenge is MutationTestChallenge) reason = "Source file changed"
+                val reason = "Not solvable"
                 property.rejectChallenge(parameters.projectName, challenge, reason)
                 EventHandler.addEvent(ChallengeUnsolvableEvent(parameters.projectName, parameters.branch,
                     property.getUser(), challenge))
@@ -130,11 +134,6 @@ object PublisherUtil {
 
         var solved = 0
         for (challenge in property.getCurrentChallenges(parameters.projectName)) {
-            if (challenge is MutationTestChallenge && parameters.mocoJSONPath.isEmpty()) {
-                listener.logger.println("[Gamekins] Cannot check this mutation test challenge is solved or not " +
-                        "because moco.json can't be found - ${challenge.toEscapedString()}")
-                continue
-            }
             if (challenge.isSolved(parameters, run, listener)) {
                 property.completeChallenge(parameters.projectName, challenge)
                 property.addScore(parameters.projectName, challenge.getScore())
@@ -156,8 +155,7 @@ object PublisherUtil {
 
         for (challenge in property.getStoredChallenges(parameters.projectName)) {
             if (!challenge.isSolvable(parameters, run, listener)) {
-                var reason = "Not solvable"
-                if (challenge is MutationTestChallenge) reason = "Source file changed"
+                val reason = "Not solvable"
                 property.rejectStoredChallenge(parameters.projectName, challenge, reason)
                 EventHandler.addEvent(ChallengeUnsolvableEvent(parameters.projectName, parameters.branch,
                     property.getUser(), challenge))
@@ -174,11 +172,6 @@ object PublisherUtil {
                             listener: TaskListener) {
 
         for (challenge in property.getStoredChallenges(parameters.projectName)) {
-            if (challenge is MutationTestChallenge && parameters.mocoJSONPath.isEmpty()) {
-                listener.logger.println("[Gamekins] Cannot check this mutation test challenge is solved or not " +
-                        "because moco.json can't be found - ${challenge.toEscapedString()}")
-                continue
-            }
             if (challenge.isSolved(parameters, run, listener)) {
                 property.rejectStoredChallenge(parameters.projectName, challenge, "Solved, but was stored")
                 EventHandler.addEvent(ChallengeUnsolvableEvent(parameters.projectName, parameters.branch,
@@ -289,32 +282,6 @@ object PublisherUtil {
         return false
     }
 
-    /**
-     * Checks whether the path of the moco json file [mocoJSONPath] exists in the [workspace].
-     */
-    @JvmStatic
-    fun doCheckMocoJSONPath(workspace: FilePath, mocoJSONPath: String?): Boolean {
-        if (mocoJSONPath.isNullOrEmpty()) {
-            return false
-        }
-        var jsonPath = mocoJSONPath
-        if (!jsonPath.endsWith(".json")) return false
-        if (jsonPath.startsWith("**")) jsonPath = jsonPath.substring(2)
-        val split = jsonPath.split("/".toRegex())
-        val files: List<FilePath> = try {
-            workspace.act(
-                FilesOfAllSubDirectoriesCallable(workspace, split[split.size - 1]))
-        } catch (ignored: Exception) {
-            return false
-        }
-        for (file in files) {
-            if (file.remote.endsWith(jsonPath) || file.remote.endsWith(jsonPath.replace("/", "\\"))) {
-                return true
-            }
-        }
-        return false
-    }
-
 
     /**
      * Checks whether the path of the JaCoCo index.html file [jacocoResultsPath] exists in the [workspace].
@@ -338,6 +305,34 @@ object PublisherUtil {
             }
         }
         return false
+    }
+
+    /**
+     * Generates a BuildChallenge if the build fails on the first run. Generates a TestChallenge if there are no tests
+     * on the first run.
+     */
+    fun generateBuildAndTestChallenges(parameters: Parameters, result: Result?, listener: TaskListener) {
+        for (user in User.getAll()) {
+
+            val property = user.getProperty(GameUserProperty::class.java)
+            if (property.isParticipating(parameters.projectName)) {
+
+                val generated = ChallengeFactory.generateBuildChallenge(result, user, property, parameters, listener)
+                if (!generated && result != Result.FAILURE) {
+
+                    val data = Challenge.ChallengeGenerationData(parameters, user, null, listener)
+                    val challenge = ChallengeFactory.generateTestChallenge(data, parameters, listener)
+                    if (!property.getCurrentChallenges(parameters.projectName).contains(challenge)) {
+
+                        property.newChallenge(parameters.projectName, challenge)
+                        EventHandler.addEvent(ChallengeGeneratedEvent(parameters.projectName, parameters.branch,
+                            user, challenge))
+                    }
+                }
+
+                user.save()
+            }
+        }
     }
 
     /**
@@ -450,6 +445,7 @@ object PublisherUtil {
                         run.startTimeInMillis,
                         generated,
                         solved,
+                        0,
                         solvedAchievements,
                         solvedQuests,
                         generatedQuests,

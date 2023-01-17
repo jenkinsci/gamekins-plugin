@@ -58,12 +58,14 @@ class FolderLeaderboardAction(val job: AbstractItem) : ProminentProjectAction, S
                 var score = 0
                 var challenges = 0
                 var quests = 0
+                var unfinishedQuests = 0
                 var achievements = 0
 
                 projects.forEach { project ->
                     score += property.getScore(project)
                     challenges += property.getCompletedChallenges(project).size
                     quests += property.getCompletedQuests(project).size
+                    unfinishedQuests += property.getUnfinishedQuests(project).size
                     achievements += property.getCompletedAchievements(project).size
                 }
 
@@ -74,6 +76,7 @@ class FolderLeaderboardAction(val job: AbstractItem) : ProminentProjectAction, S
                         score,
                         challenges,
                         quests,
+                        unfinishedQuests,
                         achievements,
                         user.absoluteUrl,
                         property.getCurrentAvatar()

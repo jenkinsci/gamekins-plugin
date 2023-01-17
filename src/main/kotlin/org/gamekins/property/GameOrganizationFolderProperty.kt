@@ -71,7 +71,11 @@ class GameOrganizationFolderProperty private constructor()
             if (job == null) return ListBoxModel()
             val listBoxModel = ListBoxModel()
             job.items.stream().map { obj: MultiBranchProject<*, *> -> obj.name }
-                    .forEach { nameAndValue: String? -> listBoxModel.add(nameAndValue) }
+                    .forEach { nameAndValue: String? ->
+                        if (nameAndValue != null) {
+                            listBoxModel.add(nameAndValue)
+                        }
+                    }
             return listBoxModel
         }
 
@@ -113,7 +117,9 @@ class GameOrganizationFolderProperty private constructor()
                                     formData.getInt(Constants.FormKeys.QUEST_COUNT),
                                     formData.getInt(Constants.FormKeys.STORED_CHALLENGES_COUNT),
                                     formData.getBoolean(Constants.FormKeys.CAN_SEND_CHALLENGE),
-                                    formData.getInt(Constants.FormKeys.SEARCH_COMMIT_COUNT)))
+                                    formData.getInt(Constants.FormKeys.SEARCH_COMMIT_COUNT),
+                                    formData.getString(Constants.FormKeys.PIT_CONFIGURATION),
+                                    formData.getBoolean(Constants.FormKeys.SHOW_PIT_OUTPUT)))
                         folder.save()
                         break
                     } catch (e: IOException) {

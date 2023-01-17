@@ -34,7 +34,6 @@ class ClassCoverageChallengeTest : FeatureSpec({
     val shortFilePath = "src/main/java/org/gamekins/challenge/$className.kt"
     val shortJacocoPath = "**/target/site/jacoco/"
     val shortJacocoCSVPath = "**/target/site/jacoco/csv"
-    val mocoJSONPath = "**/target/site/moco/mutation/"
     lateinit var details : SourceFileDetails
     lateinit var challenge : ClassCoverageChallenge
     val coverage = 0.0
@@ -49,7 +48,6 @@ class ClassCoverageChallengeTest : FeatureSpec({
         parameters.workspace = path
         parameters.jacocoResultsPath = shortJacocoPath
         parameters.jacocoCSVPath = shortJacocoCSVPath
-        parameters.mocoJSONPath = mocoJSONPath
         mockkStatic(JacocoUtil::class)
         val document = mockkClass(Document::class)
         every { JacocoUtil.calculateCurrentFilePath(any(), any()) } returns path
@@ -71,11 +69,11 @@ class ClassCoverageChallengeTest : FeatureSpec({
         {
             challenge.getScore() shouldBe 1
         }
+
         every { JacocoUtil.getCoverageInPercentageFromJacoco(any(), any()) } returns 0.9
         details = SourceFileDetails(parameters, shortFilePath, listener)
         every { data.selectedFile } returns details
         challenge = ClassCoverageChallenge(data)
-
         scenario("Coverage above 0.8")
         {
             challenge.getScore() shouldBe 2
@@ -89,9 +87,38 @@ class ClassCoverageChallengeTest : FeatureSpec({
     }
 
     feature("isSolvable") {
-        scenario("No SourceFile")
+        val solvableDetails = mockkClass(SourceFileDetails::class)
+        every { solvableDetails.jacocoSourceFile } returns details.jacocoSourceFile
+        every { solvableDetails.parameters } returns parameters
+        every { solvableDetails.coverage } returns details.coverage
+        every { solvableDetails.fileName } returns details.fileName
+        every { solvableDetails.update(any()) } returns solvableDetails
+        every { solvableDetails.filesExists() } returns false
+        val solvableData = mockkClass(Challenge.ChallengeGenerationData::class)
+        every { solvableData.selectedFile } returns solvableDetails
+        every { solvableData.parameters } returns parameters
+        val solvableChallenge = ClassCoverageChallenge(solvableData)
+        val newParameters = Parameters(branch = "stale")
+        scenario("Scenario")
         {
-            challenge.isSolvable(parameters, run, listener) shouldBe true
+            solvableChallenge.isSolvable(newParameters, run, listener) shouldBe true
+        }
+
+        scenario("Scenario")
+        {
+            solvableChallenge.isSolvable(parameters, run, listener) shouldBe false
+        }
+
+        every { solvableDetails.filesExists() } returns true
+        scenario("Scenario")
+        {
+            solvableChallenge.isSolvable(parameters, run, listener) shouldBe true
+        }
+
+        parameters.branch = branch
+        scenario("Scenario")
+        {
+            solvableChallenge.isSolvable(parameters, run, listener) shouldBe true
         }
 
         val pathMock = mockkClass(FilePath::class)
@@ -125,13 +152,11 @@ class ClassCoverageChallengeTest : FeatureSpec({
         {
             challenge.isSolved(parameters, run, listener) shouldBe false
         }
-
         every { pathMock.exists() } returns true
         scenario("No line fully covered")
         {
             challenge.isSolved(parameters, run, listener) shouldBe false
         }
-
         every { JacocoUtil.calculateCoveredLines(any(), "fc") } returns 1
         scenario("One line is fully covered")
         {

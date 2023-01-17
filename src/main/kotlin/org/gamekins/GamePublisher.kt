@@ -16,6 +16,7 @@
 
 package org.gamekins
 
+import hudson.EnvVars
 import hudson.FilePath
 import hudson.Launcher
 import hudson.model.*
@@ -41,7 +42,7 @@ import javax.annotation.Nonnull
  * Class that is called after the build of a job in Jenkins is finished. This one executes the main functionality of
  * Gamekins by creating and solving [Challenge]s.
  *
- * [jacocoResultsPath], [jacocoCSVPath], and [mocoJSONPath] must be of type String?, as Jenkins wants to instantiate the
+ * [jacocoResultsPath] and [jacocoCSVPath] must be of type String?, as Jenkins wants to instantiate the
  * [GamePublisher] with null when Gamekins is not activated.
  *
  * @author Philipp Straubinger
@@ -49,16 +50,8 @@ import javax.annotation.Nonnull
  */
 
 class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var jacocoResultsPath: String?,
-                                                      @set:DataBoundSetter var jacocoCSVPath: String?,
-                                                      mocoJSONPath: String?)
+                                                      @set:DataBoundSetter var jacocoCSVPath: String?)
     : Notifier(), SimpleBuildStep, StaplerProxy {
-
-    @set:DataBoundSetter
-    var mocoJSONPath: String = mocoJSONPath ?: ""
-
-    override fun getTarget(): Any {
-        return this
-    }
 
     /**
      * Starts the execution of Gamekins for a specific [run] with its [result]. The [parameters] contain needed data
@@ -69,23 +62,6 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
         run: Run<*, *>, parameters: Parameters, result: Result?,
         listener: TaskListener
     ) {
-
-        //Checks whether the paths of the JaCoCo files are correct
-        if (!PublisherUtil.doCheckJacocoResultsPath(parameters.workspace, parameters.jacocoResultsPath)) {
-            listener.logger.println("[Gamekins] JaCoCo folder is not correct")
-            return
-        }
-        if (!PublisherUtil.doCheckJacocoCSVPath(parameters.workspace, parameters.jacocoCSVPath)) {
-            listener.logger.println("[Gamekins] JaCoCo csv file could not be found")
-            return
-        }
-        if (!PublisherUtil.doCheckMocoJSONPath(parameters.workspace, parameters.mocoJSONPath)) {
-            parameters.mocoJSONPath = ""
-            listener.logger.println("[Gamekins] MoCo JSON file could not be found, mutation test challenge will " +
-                    "not be generated")
-            listener.logger.println("[Gamekins] Please check moco.json file path configuration to enable mutation " +
-                    "test challenge feature")
-        }
 
         //Extracts the branch
         when (run.parent.parent) {
@@ -98,6 +74,20 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
         }
 
         EventHandler.addEvent(BuildStartedEvent(parameters.projectName, parameters.branch, run))
+
+        //Checks whether the paths of the JaCoCo files are correct
+        if (!PublisherUtil.doCheckJacocoResultsPath(parameters.workspace, parameters.jacocoResultsPath)) {
+            listener.logger.println("[Gamekins] JaCoCo folder is not correct")
+            PublisherUtil.generateBuildAndTestChallenges(parameters, result, listener)
+            EventHandler.addEvent(BuildFinishedEvent(parameters.projectName, parameters.branch, run))
+            return
+        }
+        if (!PublisherUtil.doCheckJacocoCSVPath(parameters.workspace, parameters.jacocoCSVPath)) {
+            listener.logger.println("[Gamekins] JaCoCo csv file could not be found")
+            PublisherUtil.generateBuildAndTestChallenges(parameters, result, listener)
+            EventHandler.addEvent(BuildFinishedEvent(parameters.projectName, parameters.branch, run))
+            return
+        }
 
         listener.logger.println("[Gamekins] Start")
         listener.logger.println("[Gamekins] Solve Challenges and generate new Challenges")
@@ -145,6 +135,9 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
         return BuildStepMonitor.STEP
     }
 
+    override fun getTarget(): Any {
+        return this
+    }
 
     override fun needsToRunAfterFinalized(): Boolean {
         return true
@@ -164,7 +157,7 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
         }
 
         val parameters = Parameters(jacocoCSVPath = jacocoCSVPath!!, jacocoResultsPath = jacocoResultsPath!!,
-            mocoJSONPath = mocoJSONPath, workspace = build.workspace!!)
+            workspace = build.workspace!!)
         parameters.projectName = build.project.fullName
         parameters.currentChallengesCount = build.project.getProperty(GameJobProperty::class.java)
             .currentChallengesCount
@@ -174,6 +167,8 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
             .currentStoredChallengesCount
         parameters.searchCommitCount = build.project.getProperty(GameJobProperty::class.java)
             .searchCommitCount
+        parameters.pitConfiguration = build.project.getProperty(GameJobProperty::class.java)
+            .pitConfiguration
         executePublisher(build, parameters, build.result, listener)
         return true
     }
@@ -185,12 +180,12 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
      * @see SimpleBuildStep.perform
      */
     override fun perform(
-        @Nonnull run: Run<*, *>, @Nonnull workspace: FilePath,
+        @Nonnull run: Run<*, *>, @Nonnull workspace: FilePath, @Nonnull env: EnvVars,
         @Nonnull launcher: Launcher, @Nonnull listener: TaskListener
     ) {
 
         val parameters = Parameters(jacocoCSVPath = jacocoCSVPath!!,
-            jacocoResultsPath = jacocoResultsPath!!, mocoJSONPath = mocoJSONPath!!, workspace = workspace)
+            jacocoResultsPath = jacocoResultsPath!!, workspace = workspace)
         if (run.parent.parent is WorkflowMultiBranchProject) {
             val project = run.parent.parent as WorkflowMultiBranchProject
             if (project.properties.get(GameMultiBranchProperty::class.java) == null
@@ -208,6 +203,10 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
                 .currentStoredChallengesCount
             parameters.searchCommitCount = project.properties.get(GameMultiBranchProperty::class.java)
                 .searchCommitCount
+            parameters.pitConfiguration = project.properties.get(GameMultiBranchProperty::class.java)
+                .pitConfiguration
+            parameters.showPitOutput = project.properties.get(GameMultiBranchProperty::class.java)
+                .showPitOutput
         } else {
             if (run.parent.getProperty(GameJobProperty::class.java) == null
                 || !run.parent.getProperty(GameJobProperty::class.java).activated
@@ -220,10 +219,14 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
                 .currentChallengesCount
             parameters.currentQuestsCount = run.parent.getProperty(GameJobProperty::class.java)
                 .currentQuestsCount
-            parameters.storedChallengesCount =run.parent.getProperty(GameJobProperty::class.java)
+            parameters.storedChallengesCount = run.parent.getProperty(GameJobProperty::class.java)
                 .currentStoredChallengesCount
-            parameters.searchCommitCount =run.parent.getProperty(GameJobProperty::class.java)
+            parameters.searchCommitCount = run.parent.getProperty(GameJobProperty::class.java)
                 .searchCommitCount
+            parameters.pitConfiguration = run.parent.getProperty(GameJobProperty::class.java)
+                .pitConfiguration
+            parameters.showPitOutput = run.parent.getProperty(GameJobProperty::class.java)
+                .showPitOutput
         }
 
         executePublisher(run, parameters, run.result, listener)

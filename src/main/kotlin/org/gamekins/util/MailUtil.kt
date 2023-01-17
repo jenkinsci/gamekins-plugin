@@ -5,23 +5,25 @@ import hudson.model.AbstractItem
 import hudson.model.User
 import hudson.tasks.MailAddressResolver
 import hudson.tasks.Mailer
+import jakarta.mail.Message
+import jakarta.mail.MessagingException
+import jakarta.mail.Transport
+import jakarta.mail.internet.InternetAddress
+import jakarta.mail.internet.MimeMessage
 import org.gamekins.challenge.Challenge
 import org.gamekins.property.GameFolderProperty
 import org.gamekins.property.GameJobProperty
 import org.gamekins.property.GameMultiBranchProperty
+import org.jenkinsci.plugins.workflow.job.WorkflowJob
 import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject
 import java.util.*
-import javax.mail.Message
-import javax.mail.MessagingException
-import javax.mail.Transport
-import javax.mail.internet.InternetAddress
-import javax.mail.internet.MimeMessage
 
 
 /**
  * Util object for sending mails
  *
  * @author Matthias Rainer
+ * @since 0.6
  */
 object MailUtil {
 
@@ -37,13 +39,20 @@ object MailUtil {
         text += "Challenge: ${challenge.getName()}\n"
 
         text += "\nThe challenge is not immediately active and has to be unshelved from storage first.\n\n"
-        text += MailUtil.generateViewLeaderboardText(job)
+        text += generateViewLeaderboardText(job)
 
         return text
     }
 
+    /**
+     * Generates the leaderboard part of the mail text.
+     */
     fun generateViewLeaderboardText(job: AbstractItem): String {
-        var text = "View the leaderboard on ${job.absoluteUrl}leaderboard/\n"
+        var text = if (job is WorkflowJob && job.parent is WorkflowMultiBranchProject) {
+            "View the leaderboard on ${(job.parent as WorkflowMultiBranchProject).absoluteUrl}leaderboard/\n"
+        } else {
+            "View the leaderboard on ${job.absoluteUrl}leaderboard/\n"
+        }
         val property = PropertyUtil.retrieveGameProperty(job)
         if (property is GameJobProperty || property is GameMultiBranchProperty) {
             if (job.parent is Folder
@@ -63,6 +72,9 @@ object MailUtil {
         return text
     }
 
+    /**
+     * Sends a mail with the credentials provided by Jenkins.
+     */
     fun sendMail(user: User, subject: String, addressFrom: String, name: String, text: String) {
         val mailer = Mailer.descriptor()
         val mail = MailAddressResolver.resolve(user)

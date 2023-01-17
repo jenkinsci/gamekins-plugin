@@ -33,7 +33,7 @@ class BuildChallengeTest : FeatureSpec({
     lateinit var challenge : BuildChallenge
 
     beforeSpec {
-        challenge = BuildChallenge(Parameters())
+        challenge = BuildChallenge(Parameters(branch = "main"))
     }
 
     afterSpec {
@@ -73,7 +73,7 @@ class BuildChallengeTest : FeatureSpec({
         scenario("No Reason, no Indentation")
         {
             challenge.printToXML("", "") shouldBe
-                    "<BuildChallenge created=\"${challenge.getCreated()}\" solved=\"${challenge.getSolved()}\"/>"
+                    "<BuildChallenge created=\"${challenge.getCreated()}\" solved=\"${challenge.getSolved()}\" branch=\"main\"/>"
         }
 
         scenario("No Reason, with Indentation")
@@ -84,12 +84,12 @@ class BuildChallengeTest : FeatureSpec({
         scenario("With Reason, no Indentation")
         {
             challenge.printToXML("test", "") shouldBe
-                    "<BuildChallenge created=\"${challenge.getCreated()}\" solved=\"${challenge.getSolved()}\" reason=\"test\"/>"
+                    "<BuildChallenge created=\"${challenge.getCreated()}\" solved=\"${challenge.getSolved()}\" branch=\"main\" reason=\"test\"/>"
         }
     }
 
     feature("toString")
     {
-        challenge.toString() shouldBe "Let the Build run successfully"
+        challenge.toString() shouldBe "Let the Build run successfully in branch main"
     }
 })

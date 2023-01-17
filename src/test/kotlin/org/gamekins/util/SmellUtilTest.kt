@@ -18,7 +18,6 @@ class SmellUtilTest : FeatureSpec({
     lateinit var path : FilePath
     val shortJacocoPath = "**/target/site/jacoco/"
     val shortJacocoCSVPath = "**/target/site/jacoco/jacoco.csv"
-    val mocoJSONPath = "**/target/site/moco/mutation/"
 
     beforeSpec {
         //Needed because of bug in mockk library which does not release mocked objects
@@ -40,7 +39,6 @@ class SmellUtilTest : FeatureSpec({
         val parameters = Constants.Parameters()
         parameters.jacocoResultsPath = shortJacocoPath
         parameters.jacocoCSVPath = shortJacocoCSVPath
-        parameters.mocoJSONPath = mocoJSONPath
         parameters.workspace = path
         var file = SourceFileDetails(parameters, "/src/main/java/com/example/Calculator.java")
 
@@ -60,7 +58,6 @@ class SmellUtilTest : FeatureSpec({
         val parameters = Constants.Parameters()
         parameters.jacocoResultsPath = shortJacocoPath
         parameters.jacocoCSVPath = shortJacocoCSVPath
-        parameters.mocoJSONPath = mocoJSONPath
         parameters.workspace = path
         val file = SourceFileDetails(parameters, "/src/main/java/com/example/Calculator.java")
         val content = "package com.example;\n" +

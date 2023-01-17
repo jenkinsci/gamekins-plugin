@@ -13,7 +13,9 @@ import org.gamekins.file.TestFileDetails
 import org.sonarsource.sonarlint.core.client.api.common.analysis.Issue
 import org.gamekins.util.Constants
 import org.gamekins.util.SmellUtil
-import org.sonarsource.sonarlint.core.analysis.api.TextRange
+import org.sonarsource.sonarlint.core.commons.IssueSeverity
+import org.sonarsource.sonarlint.core.commons.RuleType
+import org.sonarsource.sonarlint.core.commons.TextRange
 
 class SmellChallengeTest : AnnotationSpec() {
 
@@ -27,9 +29,9 @@ class SmellChallengeTest : AnnotationSpec() {
         every { issue.startLine } returns 1
         every { issue.endLine } returns 2
         every { issue.message } returns "Message"
-        every { issue.ruleKey } returns "Key"
-        every { issue.severity } returns "MAJOR"
-        every { issue.type } returns "Type"
+        every { issue.ruleKey } returns "Key-155"
+        every { issue.severity } returns IssueSeverity.MAJOR
+        every { issue.type } returns RuleType.BUG
         every { file.contents() } returns "Content"
         every { file.packageName } returns "org.example"
         every { file.fileName } returns "File"
@@ -59,16 +61,17 @@ class SmellChallengeTest : AnnotationSpec() {
         every { secondFile.fileName } returns "File"
         every { secondChallenge.details } returns secondFile
         val secondIssue = mockkClass(Issue::class)
-        every { secondIssue.severity } returns "MINOR"
+        every { secondIssue.severity } returns IssueSeverity.MINOR
         every { secondChallenge.issue } returns secondIssue
         (challenge == secondChallenge) shouldBe  false
 
-        every { secondIssue.severity } returns "MAJOR"
-        every { secondIssue.type } returns "Other"
+        every { secondIssue.severity } returns IssueSeverity.MAJOR
+        every { secondIssue.type } returns RuleType.BUG
+        every { secondIssue.ruleKey } returns "Rule"
         every { secondChallenge.issue } returns secondIssue
         (challenge == secondChallenge) shouldBe  false
 
-        every { secondIssue.type } returns "Type"
+        every { secondIssue.type } returns RuleType.BUG
         every { secondIssue.ruleKey } returns "Rule"
         every { secondChallenge.issue } returns secondIssue
         (challenge == secondChallenge) shouldBe  false
@@ -111,19 +114,19 @@ class SmellChallengeTest : AnnotationSpec() {
     fun getScore() {
         challenge.getScore() shouldBe 2
 
-        every { issue.severity } returns "BLOCKER"
+        every { issue.severity } returns IssueSeverity.BLOCKER
         challenge.getScore() shouldBe 4
 
-        every { issue.severity } returns "CRITICAL"
+        every { issue.severity } returns IssueSeverity.CRITICAL
         challenge.getScore() shouldBe 3
 
-        every { issue.severity } returns "MINOR"
+        every { issue.severity } returns IssueSeverity.MINOR
         challenge.getScore() shouldBe 1
     }
 
     @Test
     fun getSnippet() {
-        val snippet = "<pre class='prettyprint mt-2 linenums:-1'><code class='language-java'>Content</code></pre><br><em>Message <a href=\"https://rules.sonarsource.com/java/RSPEC-Key\" target=\"_blank\">More Information</a> </em>"
+        val snippet = "<pre class='prettyprint mt-2 linenums:-1'><code class='language-java'>Content</code></pre><br><em>Message <a href=\"https://rules.sonarsource.com/java/RSPEC-155\" target=\"_blank\">More Information</a> </em>"
         challenge.getSnippet() shouldBe snippet
     }
 
@@ -143,7 +146,7 @@ class SmellChallengeTest : AnnotationSpec() {
         every { issue.textRange } returns null
         challenge.isSolvable(parameters, run, TaskListener.NULL) shouldBe true
 
-        every { issue.textRange } returns TextRange(1)
+        every { issue.textRange } returns TextRange(1, 0, 1, 0)
         every { file.filesExists() } returns false
         challenge.isSolvable(parameters, run, TaskListener.NULL) shouldBe false
 
@@ -159,7 +162,7 @@ class SmellChallengeTest : AnnotationSpec() {
         every { SmellUtil.getSmellsOfFile(file, any()) } returns arrayListOf(secondIssue)
         challenge.isSolvable(parameters, run, TaskListener.NULL) shouldBe true
 
-        every { secondIssue.textRange } returns TextRange(2)
+        every { secondIssue.textRange } returns TextRange(2, 0, 2, 0)
         every { secondIssue.startLine } returns 2
         every { secondIssue.endLine } returns 2
         every { SmellUtil.getSmellsOfFile(file, any()) } returns arrayListOf(secondIssue)
@@ -173,11 +176,11 @@ class SmellChallengeTest : AnnotationSpec() {
         challenge.isSolvable(parameters, run, TaskListener.NULL) shouldBe false
 
         every { secondIssue.ruleKey } returns issue.ruleKey
-        every { secondIssue.type } returns "Nothing"
+        every { secondIssue.type } returns RuleType.BUG
         challenge.isSolvable(parameters, run, TaskListener.NULL) shouldBe false
 
         every { secondIssue.type } returns issue.type
-        every { secondIssue.severity } returns "Nothing"
+        every { secondIssue.severity } returns IssueSeverity.CRITICAL
         challenge.isSolvable(parameters, run, TaskListener.NULL) shouldBe false
     }
 
@@ -185,7 +188,7 @@ class SmellChallengeTest : AnnotationSpec() {
     fun isSolved() {
         val run = mockkClass(hudson.model.Run::class)
         val parameters = Constants.Parameters()
-        every { issue.textRange } returns TextRange(1)
+        every { issue.textRange } returns TextRange(1, 0, 1, 0)
 
         every { file.filesExists() } returns false
         challenge.isSolved(parameters, run, TaskListener.NULL) shouldBe false
@@ -202,7 +205,7 @@ class SmellChallengeTest : AnnotationSpec() {
         every { SmellUtil.getSmellsOfFile(file, any()) } returns arrayListOf(secondIssue)
         challenge.isSolved(parameters, run, TaskListener.NULL) shouldBe false
 
-        every { secondIssue.textRange } returns TextRange(2)
+        every { secondIssue.textRange } returns TextRange(2, 0, 2, 0)
         every { secondIssue.startLine } returns 2
         every { secondIssue.endLine } returns 2
         every { SmellUtil.getSmellsOfFile(file, any()) } returns arrayListOf(secondIssue)
@@ -217,23 +220,23 @@ class SmellChallengeTest : AnnotationSpec() {
         challenge.isSolved(parameters, run, TaskListener.NULL) shouldBe true
 
         every { secondIssue.ruleKey } returns issue.ruleKey
-        every { secondIssue.type } returns "Nothing"
+        every { secondIssue.type } returns RuleType.BUG
         challenge.isSolved(parameters, run, TaskListener.NULL) shouldBe true
 
         every { secondIssue.type } returns issue.type
-        every { secondIssue.severity } returns "Nothing"
+        every { secondIssue.severity } returns IssueSeverity.CRITICAL
         challenge.isSolved(parameters, run, TaskListener.NULL) shouldBe true
     }
 
     @Test
     fun printToXML() {
-        var text = "<SmellChallenge created=\"${challenge.getCreated()}\" solved=\"0\" class=\"File\" type=\"Type\" severity=\"MAJOR\" line=\"1\" rule=\"Key\"/>"
+        var text = "<SmellChallenge created=\"${challenge.getCreated()}\" solved=\"0\" class=\"File\" type=\"BUG\" severity=\"MAJOR\" line=\"1\" rule=\"Key-155\"/>"
         challenge.printToXML("", "") shouldBe text
 
-        text = "    <SmellChallenge created=\"${challenge.getCreated()}\" solved=\"0\" class=\"File\" type=\"Type\" severity=\"MAJOR\" line=\"1\" rule=\"Key\"/>"
+        text = "    <SmellChallenge created=\"${challenge.getCreated()}\" solved=\"0\" class=\"File\" type=\"BUG\" severity=\"MAJOR\" line=\"1\" rule=\"Key-155\"/>"
         challenge.printToXML("", "    ") shouldBe text
 
-        text = "<SmellChallenge created=\"${challenge.getCreated()}\" solved=\"0\" class=\"File\" type=\"Type\" severity=\"MAJOR\" line=\"1\" rule=\"Key\" reason=\"reason\"/>"
+        text = "<SmellChallenge created=\"${challenge.getCreated()}\" solved=\"0\" class=\"File\" type=\"BUG\" severity=\"MAJOR\" line=\"1\" rule=\"Key-155\" reason=\"reason\"/>"
         challenge.printToXML("reason", "") shouldBe text
     }
 

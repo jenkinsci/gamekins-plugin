@@ -81,11 +81,15 @@ class Quest(val name: String, val steps: ArrayList<QuestStep>) {
      */
     fun isCurrentStepSolved(parameters: Constants.Parameters, run: Run<*, *>, listener: TaskListener): Boolean {
         if (steps.isEmpty()) return false
+        if (currentStep >= steps.size) return false
         if (steps[currentStep].challenge.isSolved(parameters, run, listener)) {
             currentStep++
             if (currentStep < steps.size) {
                 steps[currentStep].challenge.update(parameters)
+                //Check for next Challenges in Quest if solved to reduce the rejection rate
+                isCurrentStepSolved(parameters, run, listener)
             }
+
             return true
         }
 
@@ -132,7 +136,7 @@ class Quest(val name: String, val steps: ArrayList<QuestStep>) {
             print += "\n"
         }
         print += "$indentation    </QuestSteps>\n"
-        print += "</Quest>"
+        print += "$indentation</Quest>"
         return print
     }
 

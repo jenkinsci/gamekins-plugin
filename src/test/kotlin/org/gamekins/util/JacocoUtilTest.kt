@@ -19,7 +19,6 @@ package org.gamekins.util
 import hudson.FilePath
 import hudson.model.Job
 import hudson.model.Run
-import hudson.model.TaskListener
 import org.gamekins.test.TestUtils
 import io.kotest.core.spec.style.FeatureSpec
 import io.kotest.matchers.collections.shouldHaveSize
@@ -30,11 +29,9 @@ import io.mockk.every
 import io.mockk.mockkClass
 import io.mockk.mockkStatic
 import io.mockk.unmockkAll
-import org.eclipse.jgit.revwalk.RevCommit
 import org.gamekins.file.SourceFileDetails
 import org.gamekins.util.Constants.Parameters
 import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject
-import org.jsoup.nodes.Document
 import org.jsoup.select.Elements
 import java.io.File
 
@@ -260,45 +257,6 @@ class JacocoUtilTest : FeatureSpec({
             JacocoUtil.isGetterOrSetter(rationalPath.readToString().split("\n"),
                 "not found") shouldBe false
         }
-    }
-
-    feature("ClassDetails") {
-        val className = "Complex"
-        val filePath = mockkClass(FilePath::class)
-        val shortFilePath = "src/main/java/com/example/$className.java"
-        val shortJacocoPath = "**/target/site/jacoco/"
-        val shortJacocoCSVPath = "**/target/site/jacoco/jacoco.csv"
-        val mocoJSONPath = "**/target/site/moco/mutation/"
-
-        val coverage = 0.0
-        val testCount = 10
-        mockkStatic(JacocoUtil::class)
-        val document = mockkClass(Document::class)
-        every { JacocoUtil.calculateCurrentFilePath(any(), any()) } returns filePath
-        every { JacocoUtil.getCoverageInPercentageFromJacoco(any(), any()) } returns coverage
-        every { JacocoUtil.generateDocument(any()) } returns document
-        every { JacocoUtil.calculateCoveredLines(any(), any()) } returns 0
-        every { JUnitUtil.getTestCount(any(), any()) } returns testCount
-        val commit = mockkClass(RevCommit::class)
-        every { commit.name } returns "ef97erb"
-        every { filePath.act(ofType(GitUtil.HeadCommitCallable::class)) } returns commit
-        every { filePath.act(ofType(JacocoUtil.FilesOfAllSubDirectoriesCallable::class)) } returns arrayListOf()
-        every { filePath.remote } returns path.remote
-        every { filePath.channel } returns null
-        val details = JacocoUtil.ClassDetails(filePath, shortFilePath, shortJacocoPath, shortJacocoCSVPath, mocoJSONPath, hashMapOf(),
-                TaskListener.NULL)
-
-        details.filesExists() shouldBe true
-
-        details.toString() shouldBe
-                "ClassDetails{className='Complex', extension='java', packageName='com.example', changedByUsers}"
-
-        val user = mockkClass(GitUtil.GameUser::class)
-        every { user.fullName } returns "Philipp Straubinger"
-        details.addUser(user)
-        details.toString() shouldBe
-                "ClassDetails{className='Complex', extension='java', packageName='com.example', " +
-                "changedByUsers=Philipp Straubinger}"
     }
 
     feature("getLinesInRange") {

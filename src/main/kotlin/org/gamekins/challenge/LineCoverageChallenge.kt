@@ -126,6 +126,7 @@ class LineCoverageChallenge(data: Challenge.ChallengeGenerationData)
      */
     override fun isSolvable(parameters: Constants.Parameters, run: Run<*, *>, listener: TaskListener): Boolean {
         if (details.parameters.branch != parameters.branch) return true
+        if (!details.update(parameters).filesExists()) return false
 
         val jacocoSourceFile = JacocoUtil.calculateCurrentFilePath(parameters.workspace, details.jacocoSourceFile,
                 details.parameters.remote)
@@ -188,20 +189,6 @@ class LineCoverageChallenge(data: Challenge.ChallengeGenerationData)
 
     override fun isToolTip(): Boolean {
         return true
-    }
-
-    /**
-     * Called by Jenkins after the object has been created from his XML representation. Used for data migration.
-     */
-    @Suppress("unused", "SENSELESS_COMPARISON")
-    private fun readResolve(): Any {
-        if (solvedCoveredBranches == null) solvedCoveredBranches = 0
-        if (codeSnippet == null) codeSnippet = ""
-        if (details == null && classDetails != null) {
-            details = SourceFileDetails.classDetailsToSourceFileDetails(classDetails)
-        }
-
-        return this
     }
 
     /**

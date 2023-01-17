@@ -275,6 +275,11 @@ object ActionUtil {
         property.removeStoredChallenge(projectName, challenge)
         otherProperty.addStoredChallenge(projectName, challenge)
 
+        val branch = if (challenge.getParameters().remote.contains(challenge.getParameters().branch.toRegex()))
+            challenge.getParameters().branch else "master"
+        PropertyUtil.retrieveGameProperty(job)?.getStatistics()
+            ?.incrementSentChallenges(branch)
+
         try {
             user.save()
             other.save()

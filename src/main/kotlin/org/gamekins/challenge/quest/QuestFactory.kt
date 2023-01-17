@@ -27,6 +27,7 @@ import org.gamekins.file.FileDetails
 import org.gamekins.file.SourceFileDetails
 import org.gamekins.file.TestFileDetails
 import org.gamekins.util.*
+import org.gamekins.util.Constants.Parameters
 import org.jsoup.nodes.Element
 import kotlin.random.Random
 
@@ -43,7 +44,7 @@ object QuestFactory {
      */
     @JvmStatic
     fun generateNewQuests(
-        user: User, property: GameUserProperty, parameters: Constants.Parameters, listener: TaskListener,
+        user: User, property: GameUserProperty, parameters: Parameters, listener: TaskListener,
         files: ArrayList<FileDetails>, maxQuests: Int = Constants.Default.CURRENT_QUESTS
     ): Int {
 
@@ -92,7 +93,7 @@ object QuestFactory {
      */
     @JvmStatic
     fun generateQuest(
-        user: User, property: GameUserProperty, parameters: Constants.Parameters, listener: TaskListener,
+        user: User, property: GameUserProperty, parameters: Parameters, listener: TaskListener,
         classes: ArrayList<FileDetails>
     ): Quest {
 
@@ -125,11 +126,11 @@ object QuestFactory {
      */
     @JvmStatic
     fun generateClassQuest(
-        user: User, property: GameUserProperty, parameters: Constants.Parameters, listener: TaskListener,
+        user: User, property: GameUserProperty, parameters: Parameters, listener: TaskListener,
         classes: ArrayList<FileDetails>
     ): Quest? {
         val suitableClasses = ArrayList(classes.filterIsInstance<SourceFileDetails>()
-            .filter { it.coverage < 1.0 && it.filesExists() })
+            .filter { it.coverage < 0.9 && it.filesExists() })
         val rejectedClasses = property.getRejectedChallenges(parameters.projectName)
             .map { it.first }
             .filterIsInstance<ClassCoverageChallenge>()
@@ -152,12 +153,13 @@ object QuestFactory {
      * [LineCoverageChallenge] in the same class.
      */
     @JvmStatic
+    @Suppress("UNUSED_PARAMETER", "unused")
     fun generateDecreasingQuest(
-        user: User, property: GameUserProperty, parameters: Constants.Parameters, listener: TaskListener,
+        user: User, property: GameUserProperty, parameters: Parameters, listener: TaskListener,
         classes: ArrayList<FileDetails>
     ): Quest? {
         val suitableClasses = classes.filterIsInstance<SourceFileDetails>()
-            .filter { it.coverage < 1.0  && it.filesExists() }
+            .filter { it.coverage < 0.9  && it.filesExists() }
         if (suitableClasses.isEmpty()) return null
         val selectedClass = suitableClasses.random()
 
@@ -178,12 +180,13 @@ object QuestFactory {
      * [ClassCoverageChallenge] in the same class.
      */
     @JvmStatic
+    @Suppress("UNUSED_PARAMETER", "unused")
     fun generateExpandingQuest(
-        user: User, property: GameUserProperty, parameters: Constants.Parameters, listener: TaskListener,
+        user: User, property: GameUserProperty, parameters: Parameters, listener: TaskListener,
         classes: ArrayList<FileDetails>
     ): Quest? {
         val suitableClasses = classes.filterIsInstance<SourceFileDetails>()
-            .filter { it.coverage < 1.0  && it.filesExists() }
+            .filter { it.coverage < 0.9  && it.filesExists() }
         if (suitableClasses.isEmpty()) return null
         val selectedClass = suitableClasses.random()
 
@@ -204,11 +207,11 @@ object QuestFactory {
      */
     @JvmStatic
     fun generateLinesQuest(
-        user: User, property: GameUserProperty, parameters: Constants.Parameters, listener: TaskListener,
+        user: User, property: GameUserProperty, parameters: Parameters, listener: TaskListener,
         classes: ArrayList<FileDetails>
     ): Quest? {
         val suitableClasses = classes.filterIsInstance<SourceFileDetails>()
-            .filter { it.coverage < 1.0  && it.filesExists() }
+            .filter { it.coverage < 0.9  && it.filesExists() }
         if (suitableClasses.isEmpty()) return null
         val selectedClass = suitableClasses.random()
 
@@ -228,6 +231,9 @@ object QuestFactory {
             if (property.getRejectedChallenges(parameters.projectName).any { it.first == challenge }) {
                 return null
             }
+            for (step in steps) {
+                if (challenge == step.challenge) return null
+            }
             steps.add(QuestStep("", challenge))
         }
 
@@ -239,11 +245,11 @@ object QuestFactory {
      */
     @JvmStatic
     fun generateMethodsQuest(
-        user: User, property: GameUserProperty, parameters: Constants.Parameters, listener: TaskListener,
+        user: User, property: GameUserProperty, parameters: Parameters, listener: TaskListener,
         classes: ArrayList<FileDetails>
     ): Quest? {
         val suitableClasses = classes.filterIsInstance<SourceFileDetails>()
-            .filter { it.coverage < 1.0  && it.filesExists() }
+            .filter { it.coverage < 0.9  && it.filesExists() }
         if (suitableClasses.isEmpty()) return null
         val selectedClass = suitableClasses.random()
 
@@ -260,6 +266,9 @@ object QuestFactory {
             if (property.getRejectedChallenges(parameters.projectName).any { it.first == challenge }) {
                 return null
             }
+            for (step in steps) {
+                if (challenge == step.challenge) return null
+            }
             steps.add(QuestStep("", challenge))
         }
 
@@ -267,28 +276,22 @@ object QuestFactory {
     }
 
     /**
-     * Generates a new MutationQuest with three different [MutationTestChallenge]s in the same class.
+     * Generates a new MutationQuest with three different [MutationChallenge]s in the same class.
      */
     @JvmStatic
+    @Suppress("UNUSED_PARAMETER", "unused")
     fun generateMutationQuest(
-        user: User, property: GameUserProperty, parameters: Constants.Parameters, listener: TaskListener,
+        user: User, property: GameUserProperty, parameters: Parameters, listener: TaskListener,
         classes: ArrayList<FileDetails>
     ): Quest? {
         val suitableClasses = classes.filterIsInstance<SourceFileDetails>().filter { it.filesExists() }
         if (suitableClasses.isEmpty()) return null
         val selectedClass = suitableClasses.random()
 
-        val set = hashSetOf<MutationTestChallenge>()
+        val set = hashSetOf<MutationChallenge>()
         var count = 0
         while (set.size < 3 && count < 10) {
-            val challenge = ChallengeFactory.generateMutationTestChallenge(
-                selectedClass,
-                parameters.branch,
-                parameters.projectName,
-                listener,
-                parameters.workspace,
-                user
-            )
+            val challenge = ChallengeFactory.generateMutationChallenge(selectedClass, parameters, listener, user)
             if (challenge != null) set.add(challenge)
             count++
         }
@@ -299,19 +302,20 @@ object QuestFactory {
             steps.add(QuestStep("", ArrayList(set)[i]))
         }
 
-        return Quest("Coverage is not everything - Solve three Mutation Test Challenges", steps)
+        return Quest("Coverage is not everything - Solve three Mutation Challenges", steps)
     }
 
     /**
      * Generates a new PackageQuest with three different [Challenge]s in the same package.
      */
     @JvmStatic
+    @Suppress("UNUSED_PARAMETER", "unused")
     fun generatePackageQuest(
-        user: User, property: GameUserProperty, parameters: Constants.Parameters, listener: TaskListener,
+        user: User, property: GameUserProperty, parameters: Parameters, listener: TaskListener,
         files: ArrayList<FileDetails>
     ): Quest? {
         val suitableClasses = files.filterIsInstance<SourceFileDetails>()
-            .filter { it.coverage < 1.0  && it.filesExists() }
+            .filter { it.coverage < 0.9  && it.filesExists() }
         if (suitableClasses.isEmpty()) return null
         var selectedClass = suitableClasses.random()
 
@@ -332,6 +336,9 @@ object QuestFactory {
         for (cla in selectedClasses) {
             val challenge = ChallengeFactory.generateChallenge(user, parameters, listener,
                 files, cla)
+            for (step in steps) {
+                if (challenge == step.challenge) return null
+            }
             steps.add(QuestStep("", challenge))
         }
 
@@ -342,8 +349,9 @@ object QuestFactory {
      * Generates a new SmellQuest with [SmellChallenge]s.
      */
     @JvmStatic
+    @Suppress("UNUSED_PARAMETER", "unused")
     fun generateSmellQuest(
-        user: User, property: GameUserProperty, parameters: Constants.Parameters, listener: TaskListener,
+        user: User, property: GameUserProperty, parameters: Parameters, listener: TaskListener,
         classes: ArrayList<FileDetails>
     ): Quest? {
         val suitableFiles = classes.filter { it is SourceFileDetails || it is TestFileDetails }.shuffled()
@@ -370,8 +378,9 @@ object QuestFactory {
      * Generates a new TestQuest with three [TestChallenge]s.
      */
     @JvmStatic
+    @Suppress("UNUSED_PARAMETER", "unused")
     fun generateTestQuest(
-        user: User, property: GameUserProperty, parameters: Constants.Parameters, listener: TaskListener,
+        user: User, property: GameUserProperty, parameters: Parameters, listener: TaskListener,
         classes: ArrayList<FileDetails>
     ): Quest {
         val steps = arrayListOf<QuestStep>()

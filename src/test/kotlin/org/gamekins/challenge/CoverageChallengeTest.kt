@@ -34,7 +34,6 @@ class CoverageChallengeTest : FeatureSpec({
     val shortFilePath = "src/main/java/io/jenkins/plugins/gamekins/challenge/$className.kt"
     val shortJacocoPath = "**/target/site/jacoco/"
     val shortJacocoCSVPath = "**/target/site/jacoco/csv"
-    val mocoJSONPath = "**/target/site/moco/mutation/"
     lateinit var details : SourceFileDetails
     lateinit var challenge : ClassCoverageChallenge
     val coverage = 0.0
@@ -55,7 +54,6 @@ class CoverageChallengeTest : FeatureSpec({
         parameters.workspace = path
         parameters.jacocoResultsPath = shortJacocoPath
         parameters.jacocoCSVPath = shortJacocoCSVPath
-        parameters.mocoJSONPath = mocoJSONPath
         details = SourceFileDetails(parameters, shortFilePath, TaskListener.NULL)
         val data = mockkClass(Challenge.ChallengeGenerationData::class)
         every { data.selectedFile } returns details

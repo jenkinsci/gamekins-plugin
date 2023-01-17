@@ -56,7 +56,6 @@ class PublisherUtilTest : FeatureSpec( {
     lateinit var path : FilePath
     val jacocoResultsPath = "**/target/site/jacoco/"
     val jacocoCSVPath = "**/target/site/jacoco/jacoco.csv"
-    val mocoJSONPath = "**/target/moco/mutation/moco.json"
     val run = mockkClass(hudson.model.Run::class)
     val parameters = Parameters()
     val job = mockkClass(Job::class)
@@ -238,40 +237,6 @@ class PublisherUtilTest : FeatureSpec( {
         scenario("Windows-style path")
         {
             PublisherUtil.doCheckJacocoCSVPath(pathWin, jacocoCSVPath) shouldBe true
-        }
-    }
-
-    feature("doCheckMocoJSONPath") {
-        scenario("Folder does not contain file? Not sure why this test is this way")
-        {
-            PublisherUtil.doCheckMocoJSONPath(path, mocoJSONPath) shouldBe false
-        }
-
-        scenario("Folder does not contain file")
-        {
-            PublisherUtil.doCheckMocoJSONPath(FilePath(null, path.remote + "/src"), mocoJSONPath) shouldBe false
-        }
-    }
-
-    feature("doCheckMocoJSONPath OSCompatibility") {
-        val filepathLinux = mockkClass(FilePath::class)
-        val pathLinux = mockkClass(FilePath::class)
-        val listLinux = arrayListOf(filepathLinux)
-        every { pathLinux.act(any<JacocoUtil.FilesOfAllSubDirectoriesCallable>()) } returns listLinux
-        every { filepathLinux.remote } returns mocoJSONPath
-        scenario("Linux-style path")
-        {
-            PublisherUtil.doCheckMocoJSONPath(pathLinux, mocoJSONPath) shouldBe true
-        }
-
-        val filepathWin = mockkClass(FilePath::class)
-        val pathWin = mockkClass(FilePath::class)
-        val listWin = arrayListOf(filepathWin)
-        every { pathWin.act(any<JacocoUtil.FilesOfAllSubDirectoriesCallable>()) } returns listWin
-        every { filepathWin.remote } returns mocoJSONPath.replace('/', '\\')
-        scenario("Windows-style path")
-        {
-            PublisherUtil.doCheckMocoJSONPath(pathWin, mocoJSONPath) shouldBe true
         }
     }
 

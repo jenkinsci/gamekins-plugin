@@ -34,7 +34,6 @@ class MethodCoverageChallengeTest : FeatureSpec({
     val shortFilePath = "src/main/java/org/gamekins/challenge/$className.kt"
     val shortJacocoPath = "**/target/site/jacoco/"
     val shortJacocoCSVPath = "**/target/site/jacoco/csv"
-    val mocoJSONPath = "**/target/site/moco/mutation/"
     lateinit var details : SourceFileDetails
     lateinit var challenge : MethodCoverageChallenge
     lateinit var method : JacocoUtil.CoverageMethod
@@ -51,7 +50,6 @@ class MethodCoverageChallengeTest : FeatureSpec({
         parameters.workspace = path
         parameters.jacocoResultsPath = shortJacocoPath
         parameters.jacocoCSVPath = shortJacocoCSVPath
-        parameters.mocoJSONPath = mocoJSONPath
         mockkStatic(JacocoUtil::class)
         val document = mockkClass(Document::class)
         method = JacocoUtil.CoverageMethod(methodName, 10, 10, "")
@@ -77,7 +75,6 @@ class MethodCoverageChallengeTest : FeatureSpec({
         {
             challenge.getScore() shouldBe 2
         }
-
         method = JacocoUtil.CoverageMethod(methodName, 10, 1, "")
         every { JacocoUtil.getNotFullyCoveredMethodEntries(any()) } returns arrayListOf(method)
         every { data.method } returns method
@@ -90,6 +87,41 @@ class MethodCoverageChallengeTest : FeatureSpec({
     }
 
     feature("isSolvable") {
+        val solvableDetails = mockkClass(SourceFileDetails::class)
+        every { solvableDetails.jacocoSourceFile } returns details.jacocoSourceFile
+        every { solvableDetails.jacocoMethodFile } returns details.jacocoMethodFile
+        every { solvableDetails.parameters } returns parameters
+        every { solvableDetails.coverage } returns details.coverage
+        every { solvableDetails.fileName } returns details.fileName
+        every { solvableDetails.update(any()) } returns solvableDetails
+        every { solvableDetails.filesExists() } returns false
+        val solvableData = mockkClass(Challenge.ChallengeGenerationData::class)
+        every { solvableData.selectedFile } returns solvableDetails
+        every { solvableData.parameters } returns parameters
+        every { solvableData.method } returns data.method
+        val solvableChallenge = MethodCoverageChallenge(solvableData)
+        val newParameters = Parameters(branch = "stale")
+        scenario("Scenario")
+        {
+            solvableChallenge.isSolvable(newParameters, run, listener) shouldBe true
+
+        }
+
+        scenario("Scenario")
+        {
+            solvableChallenge.isSolvable(parameters, run, listener) shouldBe false
+
+        }
+
+        every { solvableDetails.filesExists() } returns true
+        scenario("Scenario")
+        {
+            scenario("Scenario")
+            {
+
+            }
+        }
+
         scenario("No MethodFile")
         {
             challenge.isSolvable(parameters, run, listener) shouldBe true

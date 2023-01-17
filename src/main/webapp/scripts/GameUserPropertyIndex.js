@@ -1,4 +1,12 @@
 let projects = document.getElementById("projects")
+let urlCurrentUser = window.location.href + "isCurrentUser"
+let currentUser = false
+
+new Ajax.Request(urlCurrentUser, {
+    onComplete: function (rsp) {
+        currentUser = (rsp.responseText === "true")
+    }
+})
 
 window.onload = function () {
     let url = window.location.href + "getProjects"
@@ -12,7 +20,10 @@ window.onload = function () {
                 projects.add(option)
             }
 
-            changeProjectURL()
+            if (currentUser) changeProjectURL()
+
+            changeLeaderboardURL()
+
             loadAchievements()
         }
     })
@@ -23,12 +34,24 @@ projects.addEventListener("change", function () {
     loadAchievements()
 })
 
+function changeLeaderboardURL() {
+    let url = window.location.href + "getLastLeaderboard"
+    new Ajax.Request(url, {
+        onComplete: function (rsp) {
+            let link = document.getElementById("leaderboardLink")
+
+            link.href = rsp.responseText
+            link.innerText = "Go to last leaderboard"
+        }
+    })
+}
+
 function changeProjectURL() {
     let link = document.getElementById("projectLink")
     let baseURL = window.location.origin + window.location.href.substring(window.location.origin.length, window.location.href.indexOf("user"))
     let projectName = projects.value.replaceAll("/", "/job/")
     link.href = baseURL + "job/" + projectName + "/leaderboard/"
-    link.innerText = "Go to leaderboard"
+    link.innerText = "Go to project leaderboard"
 }
 
 function loadAchievements() {
@@ -36,16 +59,8 @@ function loadAchievements() {
     let urlCompleted = window.location.href + "getCompletedAchievements"
     let urlTotalCount = window.location.href + "getAchievementsCount"
     let urlSecretCount = window.location.href + "getUnsolvedSecretAchievementsCount"
-    let urlCurrentUser = window.location.href + "isCurrentUser"
-    let currentUser = false
     let parameters = {}
     parameters["projectName"] = projects.value
-
-    new Ajax.Request(urlCurrentUser, {
-        onComplete: function (rsp) {
-            currentUser = (rsp.responseText === "true")
-        }
-    })
 
     new Ajax.Request(urlTotalCount, {
         parameters: parameters,

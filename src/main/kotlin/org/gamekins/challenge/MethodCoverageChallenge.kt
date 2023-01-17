@@ -77,6 +77,7 @@ class MethodCoverageChallenge(data: ChallengeGenerationData)
      */
     override fun isSolvable(parameters: Constants.Parameters, run: Run<*, *>, listener: TaskListener): Boolean {
         if (details.parameters.branch != parameters.branch) return true
+        if (!details.update(parameters).filesExists()) return false
 
         val jacocoMethodFile = JacocoUtil.calculateCurrentFilePath(parameters.workspace,
                 details.jacocoMethodFile, details.parameters.remote)
@@ -140,19 +141,6 @@ class MethodCoverageChallenge(data: ChallengeGenerationData)
         }
 
         return false
-    }
-
-    /**
-     * Called by Jenkins after the object has been created from his XML representation. Used for data migration.
-     */
-    @Suppress("unused", "SENSELESS_COMPARISON")
-    private fun readResolve(): Any {
-        if (codeSnippet == null) codeSnippet = ""
-        if (details == null && classDetails != null) {
-            details = SourceFileDetails.classDetailsToSourceFileDetails(classDetails)
-        }
-
-        return this
     }
 
     override fun toString(): String {
