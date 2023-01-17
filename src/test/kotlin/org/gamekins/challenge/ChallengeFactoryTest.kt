@@ -55,7 +55,6 @@ class ChallengeFactoryTest : FeatureSpec({
     val shortFilePath = "src/main/java/io/jenkins/plugins/gamekins/challenge/$className.kt"
     val shortJacocoPath = "**/target/site/jacoco/"
     val shortJacocoCSVPath = "**/target/site/jacoco/csv"
-    val mocoJSONPath = "**/target/site/moco/mutation/"
     val coverage = 0.0
     val testCount = 10
     lateinit var details : SourceFileDetails

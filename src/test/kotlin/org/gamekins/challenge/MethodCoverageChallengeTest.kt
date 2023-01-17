@@ -116,10 +116,7 @@ class MethodCoverageChallengeTest : FeatureSpec({
         every { solvableDetails.filesExists() } returns true
         scenario("Scenario")
         {
-            scenario("Scenario")
-            {
-
-            }
+            solvableChallenge.isSolvable(parameters, run, listener) shouldBe true
         }
 
         scenario("No MethodFile")

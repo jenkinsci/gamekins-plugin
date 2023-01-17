@@ -111,7 +111,7 @@ object Constants {
      */
     object Error
     {
-        private const val UNEXPECTED = "Unexpected Error"
+        const val UNEXPECTED = "Unexpected Error"
 
         const val GENERATION = "There was an error with generating a new challenge"
 
