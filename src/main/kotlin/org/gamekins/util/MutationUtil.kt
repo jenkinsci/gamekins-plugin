@@ -68,7 +68,7 @@ object MutationUtil {
     @JvmStatic
     fun getMutant(data: MutationData, parameters: Parameters): MutationData? {
         val mutationReport = FilePath(parameters.workspace.channel,
-            parameters.workspace.remote + "/target/pit-reports/mutations.xml")
+            parameters.workspace.remote + Constants.Mutation.REPORT_PATH)
         if (!mutationReport.exists()) return null
         val mutants = mutationReport.readToString().split("\n").filter { it.startsWith("<mutation ") }
         if (mutants.isEmpty()) return null
@@ -130,6 +130,7 @@ object MutationUtil {
                     "&gt;=".toRegex().containsMatchIn(snippet) -> snippet.replace("&gt;=", "&lt;")
                     "==".toRegex().containsMatchIn(snippet) -> snippet.replace("==", "!=")
                     "!=".toRegex().containsMatchIn(snippet) -> snippet.replace("!=", "==")
+                    //TODO: if (classTrackers.containsKey(pClassName)) {
                     else -> ""
                 }
             }
@@ -207,7 +208,7 @@ object MutationUtil {
         val mutatedClass: String
         val mutatedMethod: String
         val methodDescription: String
-        val lineNumber: Int
+        var lineNumber: Int
         val mutator: Mutator
         val killingTest: String
         val description: String

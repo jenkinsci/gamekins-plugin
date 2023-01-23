@@ -138,13 +138,8 @@ class LineCoverageChallenge(data: Challenge.ChallengeGenerationData)
 
         val elements = document.select("span." + "pc")
         elements.addAll(document.select("span." + "nc"))
-        for (element in elements) {
-            if (element.text() == lineContent) {
-                return true
-            }
-        }
 
-        return false
+        return elements.any { it.text().trim() == lineContent.trim() }
     }
 
     /**
@@ -165,13 +160,13 @@ class LineCoverageChallenge(data: Challenge.ChallengeGenerationData)
         val elements = document.select("span." + "fc")
         elements.addAll(document.select("span." + "pc"))
         for (element in elements) {
-            if (element.text() == lineContent && element.attr("id").substring(1).toInt() == lineNumber) {
+            if (element.text().trim() == lineContent.trim() && element.attr("id").substring(1).toInt() == lineNumber) {
                 return setSolved(element, jacocoCSVFile)
             }
         }
 
         elements.addAll(document.select("span." + "nc"))
-        elements.removeIf { it.text() != lineContent }
+        elements.removeIf { it.text().trim() != lineContent.trim() }
 
         if (elements.isNotEmpty()) {
             if (elements.size == 1 && elements[0].attr("class") != "nc") {

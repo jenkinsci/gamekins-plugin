@@ -269,6 +269,7 @@ class MutationChallengeTest : FeatureSpec({
         }
 
         parameters.workspace = testProjectPath
+	every { JacocoUtil.getLineNumberAfterCodeChange(any(), any(), any(), any(), any(), any()) } returns 109
         scenario("Mutant not detected")
         {
             solvableChallenge.isSolvable(parameters, run, listener) shouldBe true
@@ -297,6 +298,7 @@ class MutationChallengeTest : FeatureSpec({
 
         every { MutationUtil.executePIT(any(), any(), any()) } returns true
         every { MutationUtil.getMutant(any(), any()) } returns null
+	every { JacocoUtil.getLineNumberAfterCodeChange(any(), any(), any(), any(), any(), any()) } returns 109
         scenario("Mutant is null")
         {
             challenge.isSolved(parameters, run, listener) shouldBe false

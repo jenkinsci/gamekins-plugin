@@ -162,6 +162,8 @@ object Constants {
 
         const val SHIFT_RIGHT = "&gt;&gt;"
 
+        const val REPORT_PATH = "/target/pit-reports/mutations.xml"
+
         const val RETURN_TRUE = "return true"
 
         const val RETURN_FALSE = "return false"
