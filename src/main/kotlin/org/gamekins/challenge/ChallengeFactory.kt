@@ -122,6 +122,7 @@ object ChallengeFactory {
         do {
             if (count == 5 || workList.isEmpty()) {
                 listener.logger.println("[Gamekins] No Challenge could be built")
+                //TODO: Generate TestChallenge
                 return DummyChallenge(parameters, Constants.Error.GENERATION)
             }
             count++
@@ -301,7 +302,7 @@ object ChallengeFactory {
         if (!MutationUtil.executePIT(fileDetails, parameters, listener)) return null
 
         val mutationReport = FilePath(parameters.workspace.channel,
-            parameters.workspace.remote + "/target/pit-reports/mutations.xml")
+            parameters.workspace.remote + Constants.Mutation.REPORT_PATH)
         if (!mutationReport.exists()) return null
         val mutants = mutationReport.readToString().split("\n")
             .filter { it.startsWith("<mutation ") }.filter { !it.contains("status='KILLED'") }
@@ -393,6 +394,7 @@ object ChallengeFactory {
             var count = 0
             do {
                 if (count == 3) {
+                    //TODO: Generate TestChallenge
                     challenge = DummyChallenge(parameters, Constants.Error.GENERATION)
                     break
                 }

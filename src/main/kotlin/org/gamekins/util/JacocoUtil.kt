@@ -33,6 +33,7 @@ import java.io.File
 import java.io.IOException
 
 import kotlin.jvm.Throws
+import kotlin.math.abs
 import kotlin.random.Random
 
 /**
@@ -246,6 +247,49 @@ object JacocoUtil {
         } else {
             jacocoFile
         }
+    }
+
+    /**
+     * Returns the new line number of a challenges if the code has changed. Returns the original line number if
+     * unchanged. Returns the nearest element if it has changed. Trim [originalLine] before passing to this method.
+     */
+    @JvmStatic
+    fun getLineNumberAfterCodeChange(details: SourceFileDetails, originalLine: String, originalLineNumber: Int,
+                                     parameters: Parameters, run: Run<*, *>, listener: TaskListener): Int {
+        val jacocoSourceFile = getJacocoFileInMultiBranchProject(run, parameters,
+            calculateCurrentFilePath(parameters.workspace, details.jacocoSourceFile,
+                details.parameters.remote), details.parameters.branch)
+        val jacocoCSVFile = getJacocoFileInMultiBranchProject(run, parameters,
+            calculateCurrentFilePath(parameters.workspace, details.jacocoCSVFile,
+                details.parameters.remote), details.parameters.branch)
+
+        val document = generateDocument(jacocoSourceFile, jacocoCSVFile, listener) ?: return -1
+
+        val elements = document.select("span." + "fc")
+        elements.addAll(document.select("span." + "pc"))
+        elements.addAll(document.select("span." + "nc"))
+        for (element in elements) {
+            if (element.html().trim() == originalLine
+                && element.attr("id").substring(1).toInt() == originalLineNumber) {
+                return originalLineNumber
+            }
+        }
+
+        elements.removeIf { it.html().trim() != originalLine }
+
+        if (elements.isNotEmpty()) {
+            if (elements.size == 1) {
+                return elements[0].attr("id").substring(1).toInt()
+            } else {
+                val nearestElement = elements.minByOrNull {
+                    abs(originalLineNumber - it.attr("id").substring(1).toInt()) }
+                if (nearestElement != null) {
+                    return nearestElement.attr("id").substring(1).toInt()
+                }
+            }
+        }
+
+        return -1
     }
 
     /**

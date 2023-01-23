@@ -213,6 +213,7 @@ class MutationChallengeTest : AnnotationSpec() {
         solvableChallenge.isSolvable(parameters, run, listener) shouldBe true
 
         parameters.workspace = testProjectPath
+        every { JacocoUtil.getLineNumberAfterCodeChange(any(), any(), any(), any(), any(), any()) } returns 109
         solvableChallenge.isSolvable(parameters, run, listener) shouldBe true
 
         every { MutationUtil.getMutant(any(), any()) } returns null
@@ -230,6 +231,7 @@ class MutationChallengeTest : AnnotationSpec() {
 
         every { MutationUtil.executePIT(any(), any(), any()) } returns true
         every { MutationUtil.getMutant(any(), any()) } returns null
+        every { JacocoUtil.getLineNumberAfterCodeChange(any(), any(), any(), any(), any(), any()) } returns 109
         challenge.isSolved(parameters, run, listener) shouldBe false
 
         var mutant = MutationData(line.replace("detected='false'", "detected='true'"))
