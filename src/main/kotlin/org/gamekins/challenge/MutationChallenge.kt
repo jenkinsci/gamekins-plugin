@@ -174,7 +174,12 @@ class MutationChallenge(val details: SourceFileDetails, var data: MutationUtil.M
     @Suppress("unused")
     private fun readResolve(): Any {
         if (originalLine.isNullOrEmpty()) {
-            originalLine = codeSnippet.split("\n")[3].trim()
+            if (codeSnippet.split("\n").size >= 4) {
+                originalLine = codeSnippet.split("\n")[3].trim()
+            } else {
+                originalLine = ""
+            }
+
         }
 
         return this
