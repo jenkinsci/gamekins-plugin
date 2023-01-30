@@ -52,7 +52,7 @@ class LineCoverageChallengeTest : FeatureSpec({
         mockkStatic(JacocoUtil::class)
     }
 
-    beforeTest {
+    beforeContainer {
         parameters.branch = branch
         parameters.workspace = path
         parameters.jacocoResultsPath = shortJacocoPath
@@ -97,6 +97,7 @@ class LineCoverageChallengeTest : FeatureSpec({
             challenge.getMaxCoveredBranchesIfFullyCovered() shouldBe 1
         }
 
+        challenge = LineCoverageChallenge(data)
         every { document.select("span.fc") } returns Elements()
         scenario("No lines covered")
         {
