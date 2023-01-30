@@ -31,7 +31,6 @@ import org.gamekins.property.GameJobProperty
 import org.gamekins.statistics.Statistics
 import org.gamekins.util.Constants.Parameters
 import org.gamekins.test.TestUtils
-import io.kotest.core.spec.style.AnnotationSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.string.shouldEndWith

@@ -151,9 +151,46 @@ class LineCoverageChallengeTest : FeatureSpec({
     }
 
     feature("isSolvable") {
+        val solvableDetails = mockkClass(SourceFileDetails::class)
+        every { solvableDetails.jacocoSourceFile } returns details.jacocoSourceFile
+        every { solvableDetails.jacocoCSVFile } returns details.jacocoCSVFile
+        every { solvableDetails.parameters } returns parameters
+        every { solvableDetails.coverage } returns details.coverage
+        every { solvableDetails.fileName } returns details.fileName
+        every { solvableDetails.update(any()) } returns solvableDetails
+        every { solvableDetails.filesExists() } returns false
+        val solvableData = mockkClass(Challenge.ChallengeGenerationData::class)
+        every { solvableData.selectedFile } returns solvableDetails
+        every { solvableData.parameters } returns parameters
+        every { solvableData.line } returns data.line
+        val solvableChallenge = LineCoverageChallenge(solvableData)
+
+        val newParameters = Parameters(branch = "stale")
+        scenario("Scenario")
+        {
+            solvableChallenge.isSolvable(newParameters, run, listener) shouldBe true
+        }
+
+        scenario("Scenario")
+        {
+            solvableChallenge.isSolvable(parameters, run, listener) shouldBe false
+        }
+
+        every { solvableDetails.filesExists() } returns true
+        scenario("Scenario")
+        {
+            solvableChallenge.isSolvable(parameters, run, listener) shouldBe true
+        }
+
+        parameters.branch = branch
+        scenario("Scenario")
+        {
+            solvableChallenge.isSolvable(parameters, run, listener) shouldBe true
+        }
+
         scenario("JacocoFiles do not exist")
         {
-            challenge.isSolvable(parameters, run, listener) shouldBe true
+            solvableChallenge.isSolvable(parameters, run, listener) shouldBe true
         }
 
         every { document.select("span.pc") } returns Elements()
@@ -163,13 +200,14 @@ class LineCoverageChallengeTest : FeatureSpec({
         every { JacocoUtil.calculateCurrentFilePath(any(), any(), any()) } returns pathMock
         scenario("No uncovered lines exist")
         {
-            challenge.isSolvable(parameters, run, listener) shouldBe false
+            every { JacocoUtil.calculateCurrentFilePath(any(), any(), any()) } returns pathMock
+            solvableChallenge.isSolvable(parameters, run, listener) shouldBe false
         }
 
         every { document.select("span.nc") } returns elements
         scenario("An uncovered line exists")
         {
-            challenge.isSolvable(parameters, run, listener) shouldBe true
+            solvableChallenge.isSolvable(parameters, run, listener) shouldBe true
         }
     }
 

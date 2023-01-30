@@ -126,20 +126,20 @@ class ClassCoverageChallengeTest : FeatureSpec({
         every { JacocoUtil.calculateCurrentFilePath(any(), any(), any()) } returns pathMock
         scenario("All Lines covered (No uncovered / partially covered lines exist)")
         {
-            challenge.isSolvable(parameters, run, listener) shouldBe false
+            solvableChallenge.isSolvable(parameters, run, listener) shouldBe false
         }
 
         every { JacocoUtil.calculateCoveredLines(any(), "pc") } returns 1
         scenario("Line to be fully covered still exists")
         {
-            challenge.isSolvable(parameters, run, listener) shouldBe true
+            solvableChallenge.isSolvable(parameters, run, listener) shouldBe true
         }
 
         every { JacocoUtil.calculateCoveredLines(any(), "pc") } returns 0
         every { JacocoUtil.calculateCoveredLines(any(), "nc") } returns 1
         scenario("Line to be covered still exists")
         {
-            challenge.isSolvable(parameters, run, listener) shouldBe true
+            solvableChallenge.isSolvable(parameters, run, listener) shouldBe true
         }
     }
 

@@ -121,7 +121,7 @@ class MethodCoverageChallengeTest : FeatureSpec({
 
         scenario("No MethodFile")
         {
-            challenge.isSolvable(parameters, run, listener) shouldBe true
+            solvableChallenge.isSolvable(parameters, run, listener) shouldBe true
         }
 
         val pathMock = mockkClass(FilePath::class)
@@ -129,20 +129,20 @@ class MethodCoverageChallengeTest : FeatureSpec({
         every { JacocoUtil.calculateCurrentFilePath(any(), any(), any()) } returns pathMock
         scenario("Method has no Entry in Jacoco File")
         {
-            challenge.isSolvable(parameters, run, listener) shouldBe false
+            solvableChallenge.isSolvable(parameters, run, listener) shouldBe false
         }
 
         every { JacocoUtil.getMethodEntries(any()) } returns arrayListOf(method)
         scenario("Method has missed lines")
         {
-            challenge.isSolvable(parameters, run, listener) shouldBe true
+            solvableChallenge.isSolvable(parameters, run, listener) shouldBe true
         }
 
         method = JacocoUtil.CoverageMethod(methodName, 10, 0, "")
         every { JacocoUtil.getMethodEntries(any()) } returns arrayListOf(method)
         scenario("Method is fully covered")
         {
-            challenge.isSolvable(parameters, run, listener) shouldBe false
+            solvableChallenge.isSolvable(parameters, run, listener) shouldBe false
         }
     }
 
