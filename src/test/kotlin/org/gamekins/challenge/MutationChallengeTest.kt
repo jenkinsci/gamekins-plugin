@@ -3,7 +3,7 @@ package org.gamekins.challenge
 import hudson.FilePath
 import hudson.model.Run
 import hudson.model.TaskListener
-import io.kotest.core.spec.style.AnnotationSpec
+import io.kotest.core.spec.style.FeatureSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.string.shouldEndWith
@@ -21,32 +21,31 @@ import org.gamekins.util.Pair
 import org.jsoup.nodes.Document
 import java.io.File
 
-class MutationChallengeTest : AnnotationSpec() {
+class MutationChallengeTest : FeatureSpec({
 
-    private val className = "Challenge"
-    private val path = FilePath(null, "/home/test/workspace")
-    private val shortFilePath = "src/main/java/org/gamekins/challenge/$className.kt"
-    private val shortJacocoPath = "**/target/site/jacoco/"
-    private val shortJacocoCSVPath = "**/target/site/jacoco/csv"
-    private lateinit var details: SourceFileDetails
-    private lateinit var data : MutationData
-    private lateinit var challenge: MutationChallenge
-    private val line = "<mutation detected='false' status='NO_COVERAGE' numberOfTestsRun='0'>" +
+    val className = "Challenge"
+    val path = FilePath(null, "/home/test/workspace")
+    val shortFilePath = "src/main/java/org/gamekins/challenge/$className.kt"
+    val shortJacocoPath = "**/target/site/jacoco/"
+    val shortJacocoCSVPath = "**/target/site/jacoco/csv"
+    lateinit var details: SourceFileDetails
+    lateinit var data : MutationData
+    lateinit var challenge: MutationChallenge
+    val line = "<mutation detected='false' status='NO_COVERAGE' numberOfTestsRun='0'>" +
             "<sourceFile>Complex.java</sourceFile><mutatedClass>com.example.Complex</mutatedClass>" +
             "<mutatedMethod>abs</mutatedMethod><methodDescription>()D</methodDescription>" +
             "<lineNumber>109</lineNumber><mutator>org.pitest.mutationtest.engine.gregor.mutators.MathMutator</mutator>" +
             "<indexes><index>7</index></indexes><blocks><block>0</block></blocks><killingTest/>" +
             "<description>Replaced double multiplication with division</description></mutation>"
-    private val listener = TaskListener.NULL
-    private val parameters = Parameters()
-    private val branch = "master"
-    private val coverage = 0.0
-    private val run = mockkClass(Run::class)
-    private lateinit var root : String
-    private lateinit var testProjectPath : FilePath
+    val listener = TaskListener.NULL
+    val parameters = Parameters()
+    val branch = "master"
+    val coverage = 0.0
+    val run = mockkClass(Run::class)
+    lateinit var root : String
+    lateinit var testProjectPath : FilePath
 
-    @BeforeEach
-    fun init() {
+    beforeContainer {
         parameters.branch = branch
         parameters.workspace = path
         parameters.jacocoResultsPath = shortJacocoPath
@@ -63,8 +62,7 @@ class MutationChallengeTest : AnnotationSpec() {
         challenge = MutationChallenge(details, data)
     }
 
-    @BeforeAll
-    fun initAll() {
+    beforeSpec {
         val rootDirectory = javaClass.classLoader.getResource("test-project.zip")
         rootDirectory shouldNotBe null
         root = rootDirectory.file.removeSuffix(".zip")
@@ -73,30 +71,37 @@ class MutationChallengeTest : AnnotationSpec() {
         testProjectPath = FilePath(null, root)
     }
 
-    @AfterAll
-    fun cleanUp() {
+    afterSpec {
         unmockkAll()
         File(root).deleteRecursively()
     }
 
-    @Test
-    fun createCodeSnippet() {
+    feature("createCodeSnippet") {
         var codeChallenge = MutationChallenge(details, MutationData(
             line.replace("<lineNumber>109</lineNumber>", "<lineNumber>0</lineNumber>"))
         )
-        codeChallenge.getSnippet() shouldBe ""
+        scenario("LineNumber is 0")
+        {
+            codeChallenge.getSnippet() shouldBe ""
+        }
 
         codeChallenge = MutationChallenge(details, MutationData(
             line.replace("<lineNumber>109</lineNumber>", "<lineNumber>-109</lineNumber>"))
         )
-        codeChallenge.getSnippet() shouldBe ""
+        scenario("LineNumber negative")
+        {
+            codeChallenge.getSnippet() shouldBe ""
+        }
 
         val file = mockkClass(File::class)
         every { file.exists() } returns false
         val codeDetails = mockkClass(SourceFileDetails::class)
         every { codeDetails.jacocoSourceFile } returns file
         codeChallenge = MutationChallenge(codeDetails, MutationData(line))
-        codeChallenge.getSnippet() shouldBe ""
+        scenario("jacocoSourceFile does not exist")
+        {
+            codeChallenge.getSnippet() shouldBe ""
+        }
 
         every { file.exists() } returns true
         val filePath = mockkClass(FilePath::class)
@@ -105,39 +110,65 @@ class MutationChallengeTest : AnnotationSpec() {
         every { JacocoUtil.getLinesInRange(any(), any(), any()) } returns elements
         every { codeDetails.parameters } returns parameters
         codeChallenge = MutationChallenge(codeDetails, MutationData(line))
-        codeChallenge.getSnippet() shouldBe ""
+        scenario("Lines are empty")
+        {
+            codeChallenge.getSnippet() shouldBe ""
+        }
 
         elements = Pair("Test", "")
         every { JacocoUtil.getLinesInRange(any(), any(), any()) } returns elements
         every { MutationUtil.getMutatedCode(any(), any()) } returns ""
         codeChallenge = MutationChallenge(codeDetails, MutationData(line))
-        codeChallenge.getSnippet() shouldBe "Write or update tests so that they fail on the mutant described below.\n" +
-                "Original code snippet\n" +
-                "<pre class='prettyprint linenums:108 mt-2'><code class='language-java'>Test</code></pre>Mutated line of code \n" +
-                "<br><em>No mutated line available</em><br>The mutated line is built from information provided by PIT and could be syntactically invalid or wrong. Please use along with the description in that case:<br><a href=\"https://pitest.org/quickstart/mutators/#MATH\"target=\"_blank\">Replaced double multiplication with division</a> "
+        scenario("Without mutated line")
+        {
+            codeChallenge.getSnippet() shouldBe "Write or update tests so that they fail on the mutant described below.\n" +
+                    "Original code snippet\n" +
+                    "<pre class='prettyprint linenums:108 mt-2'><code class='language-java'>Test</code></pre>Mutated line of code \n" +
+                    "<br><em>No mutated line available</em><br>The mutated line is built from information provided by PIT and could be syntactically invalid or wrong. Please use along with the description in that case:<br><a href=\"https://pitest.org/quickstart/mutators/#MATH\"target=\"_blank\">Replaced double multiplication with division</a> "
+
+        }
 
         every { MutationUtil.getMutatedCode(any(), any()) } returns "Mutant"
         codeChallenge = MutationChallenge(codeDetails, MutationData(line))
-        codeChallenge.getSnippet() shouldBe "Write or update tests so that they fail on the mutant described below.\n" +
-                "Original code snippet\n" +
-                "<pre class='prettyprint linenums:108 mt-2'><code class='language-java'>Test</code></pre>Mutated line of code \n" +
-                "<pre class='prettyprint linenums:109 mt-2'><code class='language-java'>Mutant</code></pre>The mutated line is built from information provided by PIT and could be syntactically invalid or wrong. Please use along with the description in that case:<br><a href=\"https://pitest.org/quickstart/mutators/#MATH\"target=\"_blank\">Replaced double multiplication with division</a> "
+        scenario("With mutated line")
+        {
+            codeChallenge.getSnippet() shouldBe "Write or update tests so that they fail on the mutant described below.\n" +
+                    "Original code snippet\n" +
+                    "<pre class='prettyprint linenums:108 mt-2'><code class='language-java'>Test</code></pre>Mutated line of code \n" +
+                    "<pre class='prettyprint linenums:109 mt-2'><code class='language-java'>Mutant</code></pre>The mutated line is built from information provided by PIT and could be syntactically invalid or wrong. Please use along with the description in that case:<br><a href=\"https://pitest.org/quickstart/mutators/#MATH\"target=\"_blank\">Replaced double multiplication with division</a> "
 
+        }
     }
 
-    @Test
-    fun equals() {
-        challenge.equals(null) shouldBe false
+    feature("equals") {
+        scenario("Null")
+        {
+            challenge.equals(null) shouldBe false
+        }
 
-        challenge.equals(listener) shouldBe false
+        scenario("Not Challenge")
+        {
+            challenge.equals(listener) shouldBe false
+        }
+
+        scenario("Self")
+        {
+            (challenge == challenge) shouldBe true
+        }
 
         var details2 = SourceFileDetails(parameters, shortFilePath.replace("gamekins", "game"))
         var challenge2 = MutationChallenge(details2, data)
-        (challenge == challenge2) shouldBe false
+        scenario("Different PackageName")
+        {
+            (challenge == challenge2) shouldBe false
+        }
 
         details2 = SourceFileDetails(parameters, shortFilePath.replace("Challenge", "Property"))
         challenge2 = MutationChallenge(details2, data)
-        (challenge == challenge2) shouldBe false
+        scenario("Different FileName")
+        {
+            (challenge == challenge2) shouldBe false
+        }
 
         val line2 = "<mutation detected='false' status='NO_COVERAGE' numberOfTestsRun='0'>" +
                 "<sourceFile>Rational.java</sourceFile><mutatedClass>com.example.Complex</mutatedClass>" +
@@ -147,15 +178,23 @@ class MutationChallengeTest : AnnotationSpec() {
                 "<description>Replaced double multiplication with division</description></mutation>"
         val data2 = MutationData(line2)
         challenge2 = MutationChallenge(details, data2)
-        (challenge == challenge2) shouldBe false
+        scenario("Different Data")
+        {
+            (challenge == challenge2) shouldBe false
+        }
 
         challenge2 = MutationChallenge(details, data)
-        (challenge == challenge2) shouldBe true
+        scenario("Equivalent Challenge")
+        {
+            (challenge == challenge2) shouldBe true
+        }
     }
 
-    @Test
-    fun getKillingTest() {
-        challenge.getKillingTest() shouldBe ""
+    feature("getKillingTest") {
+        scenario("No KillingTest yet")
+        {
+            challenge.getKillingTest() shouldBe ""
+        }
 
         val killingLine = "<mutation detected='false' status='NO_COVERAGE' numberOfTestsRun='0'>" +
                 "<sourceFile>Complex.java</sourceFile><mutatedClass>com.example.Complex</mutatedClass>" +
@@ -167,31 +206,36 @@ class MutationChallengeTest : AnnotationSpec() {
                 "<description>Replaced double multiplication with division</description></mutation>"
         val killingData = MutationData(killingLine)
         val challenge2 = MutationChallenge(details, killingData)
-        challenge2.getKillingTest() shouldBe "com.example.ComplexTest.testAdd()"
+        scenario("Has KillingTest")
+        {
+            challenge2.getKillingTest() shouldBe "com.example.ComplexTest.testAdd()"
+        }
     }
 
-    @Test
-    fun getName() {
+    feature("getName") {
         challenge.getName() shouldBe "Mutation"
     }
 
-    @Test
-    fun getParameters() {
+    feature("getParameters") {
         challenge.getParameters() shouldBe parameters
     }
 
-    @Test
-    fun getScore() {
-        challenge.getScore() shouldBe 4
+    feature("getScore") {
+        scenario("Default Value")
+        {
+            challenge.getScore() shouldBe 4
+        }
 
         val newChallenge = MutationChallenge(details, MutationData(
             line.replace("status='NO_COVERAGE'", "status='SURVIVED'"))
         )
-        newChallenge.getScore() shouldBe 5
+        scenario("Mutant has survived")
+        {
+            newChallenge.getScore() shouldBe 5
+        }
     }
 
-    @Test
-    fun isSolvable() {
+    feature("isSolvable") {
         val solvableDetails = mockkClass(SourceFileDetails::class)
         every { solvableDetails.jacocoSourceFile } returns details.jacocoSourceFile
         every { solvableDetails.parameters } returns parameters
@@ -201,75 +245,120 @@ class MutationChallengeTest : AnnotationSpec() {
         every { solvableDetails.filesExists() } returns false
         val solvableChallenge = MutationChallenge(solvableDetails, challenge.data)
         val newParameters = Parameters(branch = "stale")
-        solvableChallenge.isSolvable(newParameters, run, listener) shouldBe true
+        scenario("Different branch")
+        {
+            solvableChallenge.isSolvable(newParameters, run, listener) shouldBe true
+        }
 
-        solvableChallenge.isSolvable(parameters, run, listener) shouldBe false
+        scenario("SourceFileDetails do not exist")
+        {
+            solvableChallenge.isSolvable(parameters, run, listener) shouldBe false
+        }
 
         every { solvableDetails.filesExists() } returns true
         every { MutationUtil.executePIT(any(), any(), any()) } returns false
-        solvableChallenge.isSolvable(parameters, run, listener) shouldBe false
+        scenario("PIT could not execute")
+        {
+            solvableChallenge.isSolvable(parameters, run, listener) shouldBe false
+        }
 
         every { MutationUtil.executePIT(any(), any(), any()) } returns true
-        solvableChallenge.isSolvable(parameters, run, listener) shouldBe true
+        scenario("MutationReport does not exist")
+        {
+            solvableChallenge.isSolvable(parameters, run, listener) shouldBe true
+        }
 
         parameters.workspace = testProjectPath
-        solvableChallenge.isSolvable(parameters, run, listener) shouldBe true
+        scenario("Mutant not detected")
+        {
+            solvableChallenge.isSolvable(parameters, run, listener) shouldBe true
+        }
 
         every { MutationUtil.getMutant(any(), any()) } returns null
-        solvableChallenge.isSolvable(parameters, run, listener) shouldBe true
+        scenario("Mutant was not generated by PIT this time")
+        {
+            solvableChallenge.isSolvable(parameters, run, listener) shouldBe true
+        }
 
         val mutant = MutationData(line.replace("detected='false'", "detected='true'"))
         every { MutationUtil.getMutant(any(), any()) } returns mutant
-        solvableChallenge.isSolvable(parameters, run, listener) shouldBe false
+        scenario("Mutant detected")
+        {
+            solvableChallenge.isSolvable(parameters, run, listener) shouldBe false
+        }
     }
 
-    @Test
-    fun isSolved() {
+    feature("isSolved") {
         every { MutationUtil.executePIT(any(), any(), any()) } returns false
-        challenge.isSolved(parameters, run, listener) shouldBe false
+        scenario("PIT could not execute")
+        {
+            challenge.isSolved(parameters, run, listener) shouldBe false
+        }
 
         every { MutationUtil.executePIT(any(), any(), any()) } returns true
         every { MutationUtil.getMutant(any(), any()) } returns null
-        challenge.isSolved(parameters, run, listener) shouldBe false
+        scenario("Mutant is null")
+        {
+            challenge.isSolved(parameters, run, listener) shouldBe false
+        }
 
         var mutant = MutationData(line.replace("detected='false'", "detected='true'"))
         every { MutationUtil.getMutant(any(), any()) } returns mutant
-        challenge.isSolved(parameters, run, listener) shouldBe false
+        scenario("Mutant is not covered")
+        {
+            challenge.isSolved(parameters, run, listener) shouldBe false
+        }
 
         mutant = MutationData(line.replace("status='NO_COVERAGE'", "status='KILLED'"))
         every { MutationUtil.getMutant(any(), any()) } returns mutant
-        challenge.isSolved(parameters, run, listener) shouldBe false
+        scenario("Mutant not detected")
+        {
+            challenge.isSolved(parameters, run, listener) shouldBe false
+        }
 
         mutant = MutationData(line
             .replace("detected='false'", "detected='true'")
             .replace("status='NO_COVERAGE'", "status='KILLED'"))
         every { MutationUtil.getMutant(any(), any()) } returns mutant
-        challenge.isSolved(parameters, run, listener) shouldBe true
+        scenario("Solved")
+        {
+            challenge.isSolved(parameters, run, listener) shouldBe true
+        }
     }
 
-    @Test
-    fun printToXML() {
+    feature("printToXML") {
         var printOutput = "<MutationChallenge created=\"${challenge.getCreated()}\" solved=\"0\" class=\"Challenge\" " +
                 "detected=\"false\" status=\"NO_COVERAGE\" numberOfTestsRun=\"0\" mutator=\"MATH\" " +
                 "killingTest=\"\" description=\"Replaced double multiplication with division\"/>"
-        challenge.printToXML("", "") shouldBe printOutput
+        scenario("No Reason, no Indentation")
+        {
+            challenge.printToXML("", "") shouldBe printOutput
+        }
 
         printOutput = "    <MutationChallenge created=\"${challenge.getCreated()}\" solved=\"0\" class=\"Challenge\" " +
                 "detected=\"false\" status=\"NO_COVERAGE\" numberOfTestsRun=\"0\" mutator=\"MATH\" " +
                 "killingTest=\"\" description=\"Replaced double multiplication with division\"/>"
-        challenge.printToXML("", "    ") shouldBe printOutput
+        scenario("No Reason, with Indentation")
+        {
+            challenge.printToXML("", "    ") shouldBe printOutput
+        }
 
         printOutput = "    <MutationChallenge created=\"${challenge.getCreated()}\" solved=\"0\" class=\"Challenge\" " +
                 "detected=\"false\" status=\"NO_COVERAGE\" numberOfTestsRun=\"0\" mutator=\"MATH\" " +
                 "killingTest=\"\" description=\"Replaced double multiplication with division\" reason=\"test\"/>"
-        challenge.printToXML("test", "    ") shouldBe printOutput
+        scenario("With Reason, no Indentation")
+        {
+            challenge.printToXML("test", "    ") shouldBe printOutput
+        }
     }
 
-    @Test
-    fun testToString() {
+    feature("ToString") {
         var stringOutput = "Write a test to kill the mutant at line <b>109</b> of method <b>abs()</b> in class " +
                 "<b>Challenge</b> in package <b>org.gamekins.challenge</b> (created for branch master)"
-        challenge.toString() shouldBe stringOutput
+        scenario("Kill mutant in method abs")
+        {
+            challenge.toString() shouldBe stringOutput
+        }
 
         val lineConstructor = "<mutation detected='false' status='NO_COVERAGE' numberOfTestsRun='0'>" +
             "<sourceFile>Complex.java</sourceFile><mutatedClass>com.example.Complex</mutatedClass>" +
@@ -281,6 +370,9 @@ class MutationChallengeTest : AnnotationSpec() {
         val challengeConstructor = MutationChallenge(details, dataConstructor)
         stringOutput = "Write a test to kill the mutant at line <b>109</b> of method <b>Complex()</b> in class " +
                 "<b>Challenge</b> in package <b>org.gamekins.challenge</b> (created for branch master)"
-        challengeConstructor.toString() shouldBe stringOutput
+        scenario("Kill mutant in method Complex")
+        {
+            challengeConstructor.toString() shouldBe stringOutput
+        }
     }
-}
+})
