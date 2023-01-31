@@ -327,7 +327,9 @@ class ActionUtilTest: FeatureSpec({
         parameters.branch = "branch1"
 
         val gameProperty = mockkClass(GameJobProperty::class)
+        every { job.getProperty(any()) } returns gameProperty
         every { gameProperty.getStatistics().incrementSentChallenges(any()) } returns Unit
+        every { gameProperty.currentStoredChallengesCount } returns 1
 
             ActionUtil.doSendChallenge(job, stringChallenge, "User1").kind shouldBe FormValidation.Kind.OK
         }
