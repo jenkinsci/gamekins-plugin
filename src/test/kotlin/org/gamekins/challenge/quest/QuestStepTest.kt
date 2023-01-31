@@ -1,35 +1,45 @@
 package org.gamekins.challenge.quest
 
-import io.kotest.core.spec.style.AnnotationSpec
+import io.kotest.core.spec.style.FeatureSpec
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockkClass
 import org.gamekins.challenge.LineCoverageChallenge
 
-class QuestStepTest : AnnotationSpec() {
+class QuestStepTest : FeatureSpec({
 
-    private val description = "Description"
+    val description = "Description"
 
-    @Test
-    fun printToXML() {
+    feature("printToXML") {
         val challenge = mockkClass(LineCoverageChallenge::class)
         every { challenge.printToXML(any(), any()) } returns "    <Challenge>"
-        QuestStep(description, challenge).printToXML("") shouldBe "<QuestStep description=\"Description\">\n" +
-                "    <Challenge>\n" +
-                "</QuestStep>"
+        scenario("With Indentation")
+        {
+            QuestStep(description, challenge).printToXML("") shouldBe "<QuestStep description=\"Description\">\n" +
+                    "    <Challenge>\n" +
+                    "</QuestStep>"
+        }
 
         every { challenge.printToXML(any(), any()) } returns "        <Challenge>"
-        QuestStep(description, challenge).printToXML("    ") shouldBe "    <QuestStep description=\"Description\">\n" +
-                "        <Challenge>\n" +
-                "    </QuestStep>"
+        scenario("Without Indentation")
+        {
+            QuestStep(description, challenge).printToXML("    ") shouldBe "    <QuestStep description=\"Description\">\n" +
+                    "        <Challenge>\n" +
+                    "    </QuestStep>"
+        }
     }
 
-    @Test
-    fun testToString() {
+    feature("ToString") {
         val challenge = mockkClass(LineCoverageChallenge::class)
-        QuestStep(description, challenge).toString() shouldBe description
+        scenario("From Description")
+        {
+            QuestStep(description, challenge).toString() shouldBe description
+        }
 
         every { challenge.toEscapedString() } returns "String"
-        QuestStep("", challenge).toString() shouldBe "String"
+        scenario("Empty description, from EscapedString")
+        {
+            QuestStep("", challenge).toString() shouldBe "String"
+        }
     }
-}
+})
