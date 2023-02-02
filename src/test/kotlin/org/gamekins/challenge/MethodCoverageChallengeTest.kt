@@ -101,20 +101,19 @@ class MethodCoverageChallengeTest : FeatureSpec({
         every { solvableData.method } returns data.method
         val solvableChallenge = MethodCoverageChallenge(solvableData)
         val newParameters = Parameters(branch = "stale")
-        scenario("Scenario")
+        scenario("Different Branch")
         {
             solvableChallenge.isSolvable(newParameters, run, listener) shouldBe true
 
         }
 
-        scenario("Scenario")
+        scenario("FileDetails do not exist")
         {
             solvableChallenge.isSolvable(parameters, run, listener) shouldBe false
-
         }
 
         every { solvableDetails.filesExists() } returns true
-        scenario("Scenario")
+        scenario("JacocoSourceFile does not exist yet (No coverage)")
         {
             solvableChallenge.isSolvable(parameters, run, listener) shouldBe true
         }

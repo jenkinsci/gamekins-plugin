@@ -251,9 +251,9 @@ class QuestTest : FeatureSpec({
                 "        </QuestStep>\n" +
                 "    </QuestSteps>\n" +
                 "</Quest>"
-        scenario("Scenario")
+        scenario("With Reason, no Indentation")
         {
-            twoStepQuest.printToXML("With Reason, no Indentation", "") shouldBe result2
+            twoStepQuest.printToXML("reason", "") shouldBe result2
         }
     }
 
