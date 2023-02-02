@@ -3,7 +3,7 @@ package org.gamekins.challenge.quest
 import hudson.FilePath
 import hudson.model.TaskListener
 import hudson.model.User
-import io.kotest.core.spec.style.AnnotationSpec
+import io.kotest.core.spec.style.FeatureSpec
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockkClass
@@ -27,17 +27,16 @@ import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.CopyOnWriteArraySet
 import kotlin.random.Random
 
-class QuestFactoryTest : AnnotationSpec() {
+class QuestFactoryTest : FeatureSpec({
 
-    private val user = mockkClass(User::class)
-    private val property = mockkClass(GameUserProperty::class)
-    private val parameters = Constants.Parameters()
-    private val listener: TaskListener = TaskListener.NULL
-    private lateinit var classes: ArrayList<FileDetails>
-    private val numberOfQuests = 9
+    val user = mockkClass(User::class)
+    val property = mockkClass(GameUserProperty::class)
+    val parameters = Constants.Parameters()
+    val listener: TaskListener = TaskListener.NULL
+    lateinit var classes: ArrayList<FileDetails>
+    val numberOfQuests = 9
 
-    @BeforeEach
-    fun init() {
+    beforeContainer {
         mockkStatic(QuestFactory::class)
         mockkObject(Random)
         mockkStatic(JacocoUtil::class)
@@ -53,86 +52,137 @@ class QuestFactoryTest : AnnotationSpec() {
         every { user.getProperty(GameUserProperty::class.java) } returns property
     }
 
-    @Test
-    fun generateNewQuests() {
-        QuestFactory.generateNewQuests(user, property, parameters, listener, classes, 0) shouldBe 0
+    feature("generateNewQuests") {
+        scenario("Scenario")
+        {
+            QuestFactory.generateNewQuests(user, property, parameters, listener, classes, 0) shouldBe 0
+        }
 
         every { property.newQuest(any(), any()) } returns Unit
-        QuestFactory.generateNewQuests(user, property, parameters, listener, classes, 1) shouldBe 0
+        scenario("Scenario")
+        {
+            QuestFactory.generateNewQuests(user, property, parameters, listener, classes, 1) shouldBe 0
+        }
 
         val detail = mockkClass(FileDetails::class)
         val gameUser = GitUtil.GameUser(user)
         every { detail.changedByUsers } returns hashSetOf(gameUser)
         classes.add(detail)
         every { QuestFactory.generateQuest(any(), any(), any(), any(), any()) } returns Quest(Constants.NO_QUEST, arrayListOf())
-        QuestFactory.generateNewQuests(user, property, parameters, listener, classes, 1) shouldBe 0
+        scenario("Scenario")
+        {
+            QuestFactory.generateNewQuests(user, property, parameters, listener, classes, 1) shouldBe 0
+        }
 
         every { QuestFactory.generateQuest(any(), any(), any(), any(), any()) } returns Quest("Some quest", arrayListOf())
-        QuestFactory.generateNewQuests(user, property, parameters, listener, classes, 1) shouldBe 1
+        scenario("Scenario")
+        {
+            QuestFactory.generateNewQuests(user, property, parameters, listener, classes, 1) shouldBe 1
+        }
     }
 
-    @Test
-    fun generateTest() {
+    feature("generateTest") {
         every { QuestFactory.generateLinesQuest(any(), any(), any(), any(), any()) } returns null
         every { Random.nextInt(numberOfQuests) } returns 0
         every { property.getRejectedQuests(any()) } returns CopyOnWriteArrayList()
-        QuestFactory.generateQuest(user, property, parameters, listener, classes) shouldBe Quest(Constants.NO_QUEST, arrayListOf())
+        scenario("Scenario")
+        {
+            QuestFactory.generateQuest(user, property, parameters, listener, classes) shouldBe Quest(Constants.NO_QUEST, arrayListOf())
+        }
 
         val quest = mockkClass(Quest::class)
         every { QuestFactory.generateLinesQuest(any(), any(), any(), any(), any()) } returns quest
-        QuestFactory.generateQuest(user, property, parameters, listener, classes) shouldBe quest
+        scenario("Scenario")
+        {
+            QuestFactory.generateQuest(user, property, parameters, listener, classes) shouldBe quest
+        }
 
         val pair = Pair(quest, "")
         every { property.getRejectedQuests(any()) } returns CopyOnWriteArrayList(arrayListOf(pair))
-        QuestFactory.generateQuest(user, property, parameters, listener, classes) shouldBe Quest(Constants.NO_QUEST, arrayListOf())
+        scenario("Scenario")
+        {
+            QuestFactory.generateQuest(user, property, parameters, listener, classes) shouldBe Quest(Constants.NO_QUEST, arrayListOf())
+        }
 
         every { property.getRejectedQuests(any()) } returns CopyOnWriteArrayList()
         every { QuestFactory.generateMethodsQuest(any(), any(), any(), any(), any()) } returns quest
         every { Random.nextInt(numberOfQuests) } returns 1
-        QuestFactory.generateQuest(user, property, parameters, listener, classes) shouldBe quest
+        scenario("Scenario")
+        {
+            QuestFactory.generateQuest(user, property, parameters, listener, classes) shouldBe quest
+        }
 
         every { QuestFactory.generatePackageQuest(any(), any(), any(), any(), any()) } returns quest
         every { Random.nextInt(numberOfQuests) } returns 2
-        QuestFactory.generateQuest(user, property, parameters, listener, classes) shouldBe quest
+        scenario("Scenario")
+        {
+            QuestFactory.generateQuest(user, property, parameters, listener, classes) shouldBe quest
+        }
 
         every { QuestFactory.generateClassQuest(any(), any(), any(), any(), any()) } returns quest
         every { Random.nextInt(numberOfQuests) } returns 3
-        QuestFactory.generateQuest(user, property, parameters, listener, classes) shouldBe quest
+        scenario("Scenario")
+        {
+            QuestFactory.generateQuest(user, property, parameters, listener, classes) shouldBe quest
+        }
 
         every { QuestFactory.generateExpandingQuest(any(), any(), any(), any(), any()) } returns quest
         every { Random.nextInt(numberOfQuests) } returns 4
-        QuestFactory.generateQuest(user, property, parameters, listener, classes) shouldBe quest
+        scenario("Scenario")
+        {
+            QuestFactory.generateQuest(user, property, parameters, listener, classes) shouldBe quest
+        }
 
         every { QuestFactory.generateDecreasingQuest(any(), any(), any(), any(), any()) } returns quest
         every { Random.nextInt(numberOfQuests) } returns 5
-        QuestFactory.generateQuest(user, property, parameters, listener, classes) shouldBe quest
+        scenario("Scenario")
+        {
+            QuestFactory.generateQuest(user, property, parameters, listener, classes) shouldBe quest
+        }
 
         every { QuestFactory.generateTestQuest(any(), any(), any(), any(), any()) } returns quest
         every { Random.nextInt(numberOfQuests) } returns 6
-        QuestFactory.generateQuest(user, property, parameters, listener, classes) shouldBe quest
+        scenario("Scenario")
+        {
+            QuestFactory.generateQuest(user, property, parameters, listener, classes) shouldBe quest
+        }
 
         every { QuestFactory.generateMutationQuest(any(), any(), any(), any(), any()) } returns quest
         every { Random.nextInt(numberOfQuests) } returns 7
-        QuestFactory.generateQuest(user, property, parameters, listener, classes) shouldBe quest
+        scenario("Scenario")
+        {
+            QuestFactory.generateQuest(user, property, parameters, listener, classes) shouldBe quest
+        }
 
         every { QuestFactory.generateSmellQuest(any(), any(), any(), any(), any()) } returns quest
         every { Random.nextInt(numberOfQuests) } returns 8
-        QuestFactory.generateQuest(user, property, parameters, listener, classes) shouldBe quest
+        scenario("Scenario")
+        {
+            QuestFactory.generateQuest(user, property, parameters, listener, classes) shouldBe quest
+        }
 
         every { Random.nextInt(numberOfQuests) } returns 9
-        QuestFactory.generateQuest(user, property, parameters, listener, classes) shouldBe Quest(Constants.NO_QUEST, arrayListOf())
+        scenario("Scenario")
+        {
+            QuestFactory.generateQuest(user, property, parameters, listener, classes) shouldBe Quest(Constants.NO_QUEST, arrayListOf())
+        }
     }
 
-    @Test
-    fun generateClassQuest() {
+    feature("generateClassQuest") {
         every { property.getRejectedChallenges(any()) } returns CopyOnWriteArrayList()
-        QuestFactory.generateClassQuest(user, property, parameters, listener, classes) shouldBe null
+        scenario("Scenario")
+        {
+            QuestFactory.generateClassQuest(user, property, parameters, listener, classes) shouldBe null
+        }
 
         val sourceDetail = mockkClass(SourceFileDetails::class)
         every { sourceDetail.coverage } returns 1.0
         every { sourceDetail.filesExists() } returns true
         classes.add(sourceDetail)
-        QuestFactory.generateClassQuest(user, property, parameters, listener, classes) shouldBe null
+        scenario("Scenario")
+        {
+            QuestFactory.generateClassQuest(user, property, parameters, listener, classes) shouldBe null
+        }
 
         every { sourceDetail.coverage } returns 0.8
         val challenge = mockkClass(ClassCoverageChallenge::class)
@@ -140,7 +190,10 @@ class QuestFactoryTest : AnnotationSpec() {
         every { sourceDetail == any() } returns true
         every { challenge.details } returns classDetails
         every { property.getRejectedChallenges(any()) } returns CopyOnWriteArrayList(arrayListOf(Pair(challenge, "")))
-        QuestFactory.generateClassQuest(user, property, parameters, listener, classes) shouldBe null
+        scenario("Scenario")
+        {
+            QuestFactory.generateClassQuest(user, property, parameters, listener, classes) shouldBe null
+        }
 
         every { sourceDetail == any() } returns false
         every { sourceDetail.jacocoSourceFile } returns File("")
@@ -148,18 +201,26 @@ class QuestFactoryTest : AnnotationSpec() {
         every { sourceDetail.fileName } returns "file"
         every { JacocoUtil.generateDocument(any()) } returns mockkClass(Document::class)
         every { JacocoUtil.calculateCoveredLines(any(), any()) } returns 1
-        QuestFactory.generateClassQuest(user, property, parameters, listener, classes)!!.name shouldBe "Incremental - Solve three Class Coverage Challenges"
+        scenario("Scenario")
+        {
+            QuestFactory.generateClassQuest(user, property, parameters, listener, classes)!!.name shouldBe "Incremental - Solve three Class Coverage Challenges"
+        }
     }
 
-    @Test
-    fun generateDecreasingQuest() {
-        QuestFactory.generateDecreasingQuest(user, property, parameters, listener, classes) shouldBe null
+    feature("generateDecreasingQuest") {
+        scenario("Scenario")
+        {
+            QuestFactory.generateDecreasingQuest(user, property, parameters, listener, classes) shouldBe null
+        }
 
         val sourceDetail = mockkClass(SourceFileDetails::class)
         every { sourceDetail.coverage } returns 1.0
         every { sourceDetail.filesExists() } returns true
         classes.add(sourceDetail)
-        QuestFactory.generateDecreasingQuest(user, property, parameters, listener, classes) shouldBe null
+        scenario("Scenario")
+        {
+            QuestFactory.generateDecreasingQuest(user, property, parameters, listener, classes) shouldBe null
+        }
 
         every { sourceDetail.coverage } returns 0.8
         every { sourceDetail.jacocoSourceFile } returns File("")
@@ -175,18 +236,26 @@ class QuestFactoryTest : AnnotationSpec() {
         every { JacocoUtil.chooseRandomLine(any(), any()) } returns line
         val method = JacocoUtil.CoverageMethod("method", 10, 5, "7")
         every { JacocoUtil.chooseRandomMethod(any(), any()) } returns method
-        QuestFactory.generateDecreasingQuest(user, property, parameters, listener, classes)!!.name shouldBe "Decreasing - Solve a Class, Method and Line Coverage Challenge"
+        scenario("Scenario")
+        {
+            QuestFactory.generateDecreasingQuest(user, property, parameters, listener, classes)!!.name shouldBe "Decreasing - Solve a Class, Method and Line Coverage Challenge"
+        }
     }
 
-    @Test
-    fun generateExpandingQuest() {
-        QuestFactory.generateExpandingQuest(user, property, parameters, listener, classes) shouldBe null
+    feature("generateExpandingQuest") {
+        scenario("Scenario")
+        {
+            QuestFactory.generateExpandingQuest(user, property, parameters, listener, classes) shouldBe null
+        }
 
         val sourceDetail = mockkClass(SourceFileDetails::class)
         every { sourceDetail.coverage } returns 1.0
         every { sourceDetail.filesExists() } returns true
         classes.add(sourceDetail)
-        QuestFactory.generateExpandingQuest(user, property, parameters, listener, classes) shouldBe null
+        scenario("Scenario")
+        {
+            QuestFactory.generateExpandingQuest(user, property, parameters, listener, classes) shouldBe null
+        }
 
         every { sourceDetail.coverage } returns 0.8
         every { sourceDetail.jacocoSourceFile } returns File("")
@@ -202,18 +271,26 @@ class QuestFactoryTest : AnnotationSpec() {
         every { JacocoUtil.chooseRandomLine(any(), any()) } returns line
         val method = JacocoUtil.CoverageMethod("method", 10, 5, "7")
         every { JacocoUtil.chooseRandomMethod(any(), any()) } returns method
-        QuestFactory.generateExpandingQuest(user, property, parameters, listener, classes)!!.name shouldBe "Expanding - Solve a Line, Method and Class Coverage Challenge"
+        scenario("Scenario")
+        {
+            QuestFactory.generateExpandingQuest(user, property, parameters, listener, classes)!!.name shouldBe "Expanding - Solve a Line, Method and Class Coverage Challenge"
+        }
     }
 
-    @Test
-    fun generateLinesQuest() {
-        QuestFactory.generateLinesQuest(user, property, parameters, listener, classes) shouldBe null
+    feature("generateLinesQuest") {
+        scenario("Scenario")
+        {
+            QuestFactory.generateLinesQuest(user, property, parameters, listener, classes) shouldBe null
+        }
 
         val sourceDetail = mockkClass(SourceFileDetails::class)
         every { sourceDetail.coverage } returns 1.0
         every { sourceDetail.filesExists() } returns true
         classes.add(sourceDetail)
-        QuestFactory.generateLinesQuest(user, property, parameters, listener, classes) shouldBe null
+        scenario("Scenario")
+        {
+            QuestFactory.generateLinesQuest(user, property, parameters, listener, classes) shouldBe null
+        }
 
         every { sourceDetail.coverage } returns 0.8
         every { JacocoUtil.calculateCurrentFilePath(any(), any(), any()) } returns mockkClass(FilePath::class)
@@ -222,7 +299,10 @@ class QuestFactoryTest : AnnotationSpec() {
         every { JacocoUtil.getLines(any()) } returns elements
         every { sourceDetail.jacocoSourceFile } returns File("")
         every { sourceDetail.parameters } returns Constants.Parameters()
-        QuestFactory.generateLinesQuest(user, property, parameters, listener, classes) shouldBe null
+        scenario("Scenario")
+        {
+            QuestFactory.generateLinesQuest(user, property, parameters, listener, classes) shouldBe null
+        }
 
         every { sourceDetail.packageName } returns "org.example"
         every { sourceDetail.fileName } returns "TestClass"
@@ -246,48 +326,67 @@ class QuestFactoryTest : AnnotationSpec() {
         every { JacocoUtil.calculateCoveredLines(any(), any()) } returns 1
         every { JacocoUtil.chooseRandomLine(any(), any()) } returns line1 andThen null andThen line2 andThen line3
         every { property.getRejectedChallenges(any()) } returns CopyOnWriteArrayList()
-        QuestFactory.generateLinesQuest(user, property, parameters, listener, classes)!!.name shouldBe "Lines over lines - Solve three Line Coverage Challenges"
+        scenario("Scenario")
+        {
+            QuestFactory.generateLinesQuest(user, property, parameters, listener, classes)!!.name shouldBe "Lines over lines - Solve three Line Coverage Challenges"
+        }
 
         val challenge = mockkClass(LineCoverageChallenge::class)
         every { challenge == any() } returns true
         every { property.getRejectedChallenges(any()) } returns CopyOnWriteArrayList(arrayListOf(Pair(challenge, "")))
         every { JacocoUtil.chooseRandomLine(any(), any()) } returns line1 andThen line2 andThen line3
-        QuestFactory.generateLinesQuest(user, property, parameters, listener, classes) shouldBe null
+        scenario("Scenario")
+        {
+            QuestFactory.generateLinesQuest(user, property, parameters, listener, classes) shouldBe null
+        }
 
         every { challenge == any() } returns false
         every { JacocoUtil.chooseRandomLine(any(), any()) } returns line1 andThen line2 andThen line3
         QuestFactory.generateLinesQuest(user, property, parameters, listener, classes)!!.name shouldBe "Lines over lines - Solve three Line Coverage Challenges"
+        scenario("Scenario")
+        {
+
+        }
     }
 
     //TODO: Fix
-    @Test
-    @Ignore
-    fun generateMutationQuest() {
+    xfeature("generateMutationQuest") {
         QuestFactory.generateMutationQuest(user, property, parameters, listener, classes) shouldBe null
 
         val sourceDetail = mockkClass(SourceFileDetails::class)
         every { sourceDetail.filesExists() } returns true
         classes.add(sourceDetail)
 
-        QuestFactory.generateMutationQuest(user, property, parameters, listener, classes) shouldBe null
+        scenario("Scenario")
+        {
+            QuestFactory.generateMutationQuest(user, property, parameters, listener, classes) shouldBe null
 
-        QuestFactory.generateMutationQuest(user, property, parameters, listener, classes)!!.name shouldBe "Coverage is not everything - Solve three Mutation Test Challenges"
+            QuestFactory.generateMutationQuest(user, property, parameters, listener, classes)!!.name shouldBe "Coverage is not everything - Solve three Mutation Test Challenges"
+        }
     }
 
-    @Test
-    fun generateMethodsQuest() {
-        QuestFactory.generateMethodsQuest(user, property, parameters, listener, classes) shouldBe null
+    feature("generateMethodsQuest") {
+        scenario("Scenario")
+        {
+            QuestFactory.generateMethodsQuest(user, property, parameters, listener, classes) shouldBe null
+        }
 
         val sourceDetail = mockkClass(SourceFileDetails::class)
         every { sourceDetail.coverage } returns 1.0
         every { sourceDetail.filesExists() } returns true
         classes.add(sourceDetail)
-        QuestFactory.generateMethodsQuest(user, property, parameters, listener, classes) shouldBe null
+        scenario("Scenario")
+        {
+            QuestFactory.generateMethodsQuest(user, property, parameters, listener, classes) shouldBe null
+        }
 
         every { sourceDetail.coverage } returns 0.8
         every { sourceDetail.jacocoMethodFile } returns File("")
         every { JacocoUtil.getMethodEntries(any()) } returns arrayListOf()
-        QuestFactory.generateMethodsQuest(user, property, parameters, listener, classes) shouldBe null
+        scenario("Scenario")
+        {
+            QuestFactory.generateMethodsQuest(user, property, parameters, listener, classes) shouldBe null
+        }
 
         val method1 = JacocoUtil.CoverageMethod("method1", 10, 5, "7")
         val method2 = JacocoUtil.CoverageMethod("method2", 10, 5, "7")
@@ -301,27 +400,41 @@ class QuestFactoryTest : AnnotationSpec() {
         every { sourceDetail.packageName } returns "org.example"
         every { sourceDetail.fileName } returns "TestClass"
         every { property.getRejectedChallenges(any()) } returns CopyOnWriteArrayList()
-        QuestFactory.generateMethodsQuest(user, property, parameters, listener, classes)!!.name shouldBe "More than methods - Solve three Method Coverage Challenge"
+        scenario("Scenario")
+        {
+            QuestFactory.generateMethodsQuest(user, property, parameters, listener, classes)!!.name shouldBe "More than methods - Solve three Method Coverage Challenge"
+        }
 
         val challenge = mockkClass(LineCoverageChallenge::class)
         every { challenge == any() } returns true
         every { property.getRejectedChallenges(any()) } returns CopyOnWriteArrayList(arrayListOf(Pair(challenge, "")))
-        QuestFactory.generateMethodsQuest(user, property, parameters, listener, classes) shouldBe null
+        scenario("Scenario")
+        {
+            QuestFactory.generateMethodsQuest(user, property, parameters, listener, classes) shouldBe null
+        }
     }
 
-    @Test
-    fun generatePackageQuest() {
-        QuestFactory.generatePackageQuest(user, property, parameters, listener, classes) shouldBe null
+    feature("generatePackageQuest") {
+        scenario("Scenario")
+        {
+            QuestFactory.generatePackageQuest(user, property, parameters, listener, classes) shouldBe null
+        }
 
         val sourceDetail = mockkClass(SourceFileDetails::class)
         every { sourceDetail.coverage } returns 1.0
         every { sourceDetail.filesExists() } returns true
         classes.add(sourceDetail)
-        QuestFactory.generatePackageQuest(user, property, parameters, listener, classes) shouldBe null
+        scenario("Scenario")
+        {
+            QuestFactory.generatePackageQuest(user, property, parameters, listener, classes) shouldBe null
+        }
 
         every { sourceDetail.coverage } returns 0.8
         every { sourceDetail.packageName } returns "package"
-        QuestFactory.generatePackageQuest(user, property, parameters, listener, classes) shouldBe null
+        scenario("Scenario")
+        {
+            QuestFactory.generatePackageQuest(user, property, parameters, listener, classes) shouldBe null
+        }
 
         val details1 = mockkClass(SourceFileDetails::class)
         val details2 = mockkClass(SourceFileDetails::class)
@@ -339,14 +452,19 @@ class QuestFactoryTest : AnnotationSpec() {
         classes.add(details2)
         classes.add(details3)
         every { ChallengeFactory.generateChallenge(any(), any(), any(), any(), any()) } returns mockkClass(LineCoverageChallenge::class)
-        QuestFactory.generatePackageQuest(user, property, parameters, listener, classes)?.name shouldBe null
+        scenario("Scenario")
+        {
+            QuestFactory.generatePackageQuest(user, property, parameters, listener, classes)?.name shouldBe null
+        }
 
         every { ChallengeFactory.generateChallenge(any(), any(), any(), any(), any()) } returns mockkClass(LineCoverageChallenge::class) andThen mockkClass(MethodCoverageChallenge::class) andThen mockkClass(ClassCoverageChallenge::class)
-        QuestFactory.generatePackageQuest(user, property, parameters, listener, classes)?.name shouldBe "Pack it together - Solve three Challenges in the same package"
+        scenario("Scenario")
+        {
+            QuestFactory.generatePackageQuest(user, property, parameters, listener, classes)?.name shouldBe "Pack it together - Solve three Challenges in the same package"
+        }
     }
 
-    @Test
-    fun generateSmellQuest() {
+    feature("generateSmellQuest") {
         val file = mockkClass(SourceFileDetails::class)
         every { file.contents() } returns ""
         val issue1 = mockkClass(Issue::class)
@@ -369,22 +487,33 @@ class QuestFactoryTest : AnnotationSpec() {
         val issueList = arrayListOf(issue1, issue2, issue3)
         mockkStatic(SmellUtil::class)
 
-        QuestFactory.generateSmellQuest(user, property, parameters, listener, arrayListOf()) shouldBe null
+        scenario("Scenario")
+        {
+            QuestFactory.generateSmellQuest(user, property, parameters, listener, arrayListOf()) shouldBe null
+        }
 
         every { SmellUtil.getSmellsOfFile(file, any()) } returns arrayListOf()
-        QuestFactory.generateSmellQuest(user, property, parameters, listener, arrayListOf(file)) shouldBe null
+        scenario("Scenario")
+        {
+            QuestFactory.generateSmellQuest(user, property, parameters, listener, arrayListOf(file)) shouldBe null
+        }
 
         every { SmellUtil.getSmellsOfFile(file, any()) } returns arrayListOf(issue1, issue2)
-        QuestFactory.generateSmellQuest(user, property, parameters, listener, arrayListOf(file)) shouldBe null
+        scenario("Scenario")
+        {
+            QuestFactory.generateSmellQuest(user, property, parameters, listener, arrayListOf(file)) shouldBe null
+        }
 
         every { SmellUtil.getSmellsOfFile(file, any()) } returns issueList
-        QuestFactory.generateSmellQuest(user, property, parameters, listener, arrayListOf(file))!!.name shouldBe "Smelly - Solve three Smell Challenges in the same class"
+        scenario("Scenario")
+        {
+            QuestFactory.generateSmellQuest(user, property, parameters, listener, arrayListOf(file))!!.name shouldBe "Smelly - Solve three Smell Challenges in the same class"
+        }
     }
 
-    @Test
-    fun generateTestQuest() {
+    feature("generateTestQuest") {
         val sourceDetail = mockkClass(SourceFileDetails::class)
         classes.add(sourceDetail)
         QuestFactory.generateTestQuest(user, property, parameters, listener, classes).name shouldBe "Just test - Solve three Test Challenges"
     }
-}
+})
