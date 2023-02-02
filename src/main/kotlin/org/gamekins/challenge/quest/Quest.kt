@@ -37,6 +37,7 @@ class Quest(val name: String, val steps: ArrayList<QuestStep>) {
         if (other !is Quest) return false
 
         return steps.map { it.challenge }.containsAll(other.steps.map { it.challenge })
+                && other.steps.map { it.challenge }.containsAll(steps.map { it.challenge })
     }
 
     /**
@@ -56,7 +57,7 @@ class Quest(val name: String, val steps: ArrayList<QuestStep>) {
     /**
      * Returns the last solved or first [QuestStep] of the [Quest].
      */
-    fun getLastStep(): QuestStep {
+    fun getLastSolvedStep(): QuestStep {
         return if (currentStep == 0) steps[currentStep] else steps[currentStep - 1]
     }
 
@@ -77,7 +78,7 @@ class Quest(val name: String, val steps: ArrayList<QuestStep>) {
     }
 
     /**
-     * Checks whether the current [QuestStep] is solved.
+     * Checks whether the current [QuestStep] is solved and increases current step until unsolved step is reached.
      */
     fun isCurrentStepSolved(parameters: Constants.Parameters, run: Run<*, *>, listener: TaskListener): Boolean {
         if (steps.isEmpty()) return false

@@ -74,7 +74,7 @@ object PublisherUtil {
         var solved = 0
         for (quest in property.getCurrentQuests(parameters.projectName)) {
             if (quest.isCurrentStepSolved(parameters, run, listener)) {
-                val questStep = quest.getLastStep()
+                val questStep = quest.getLastSolvedStep()
                 listener.logger.println("[Gamekins] Solved quest step $questStep of quest $quest")
                 EventHandler.addEvent(
                     QuestStepSolvedEvent(parameters.projectName, parameters.branch, property.getUser(), quest)
