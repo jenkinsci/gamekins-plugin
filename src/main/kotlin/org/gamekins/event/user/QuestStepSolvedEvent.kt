@@ -28,7 +28,7 @@ import org.gamekins.challenge.quest.Quest
 class QuestStepSolvedEvent(projectName: String, branch: String, user: User, val quest: Quest)
     : UserEvent(projectName, branch, user) {
 
-    val questStep = quest.getLastStep()
+    val questStep = quest.getLastSolvedStep()
 
     override fun run() = Unit
 }

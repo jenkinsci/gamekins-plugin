@@ -275,7 +275,7 @@ class PublisherUtilTest : FeatureSpec( {
     }
 
     feature("retrieveLastChangedClasses") {
-        scenario("Scenario")
+        scenario("A completely uncovered File exists")
         {
             PublisherUtil.retrieveLastChangedClasses(parameters, listOf(),
                 removeClassesWithoutJacocoFiles = false, removeFullyCoveredClasses = false, sort = false) shouldHaveSize
@@ -284,7 +284,7 @@ class PublisherUtilTest : FeatureSpec( {
         }
         every { classDetails.coverage } returns 0.1
         every { classDetails.filesExists() } returns true
-        scenario("Without classes without JacocoFile")
+        scenario("A barely covered File exists")
         {
             PublisherUtil.retrieveLastChangedClasses(parameters, listOf(),
                 removeClassesWithoutJacocoFiles = true, removeFullyCoveredClasses = true, sort = true) shouldHaveSize
@@ -292,7 +292,7 @@ class PublisherUtilTest : FeatureSpec( {
         }
         every { classDetails.coverage } returns 1.0
         every { GitUtil.getLastChangedClasses(any(), any(), any(), any()) } returns arrayListOf(classDetails)
-        scenario("Without fully covered classes")
+        scenario("Existing class fully covered")
         {
             PublisherUtil.retrieveLastChangedClasses(parameters, listOf(),
                 removeClassesWithoutJacocoFiles = true, removeFullyCoveredClasses = true, sort = true) shouldHaveSize
