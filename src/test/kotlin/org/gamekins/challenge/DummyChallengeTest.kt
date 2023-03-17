@@ -73,7 +73,7 @@ class DummyChallengeTest : FeatureSpec({
     feature("printToXML") {
         scenario("No Reason, no Indentation")
         {
-            challenge.printToXML("", "") shouldBe "<DummyChallenge>"
+            challenge.printToXML("", "") shouldBe "<DummyChallenge/>"
         }
 
         scenario("No Reason, with Indentation")
@@ -83,7 +83,7 @@ class DummyChallengeTest : FeatureSpec({
 
         scenario("With Reason, no Indentation")
         {
-            challenge.printToXML("test", "") shouldBe "<DummyChallenge>"
+            challenge.printToXML("test", "") shouldBe "<DummyChallenge/>"
         }
     }
 
