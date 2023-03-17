@@ -18,7 +18,6 @@ package org.gamekins.challenge
 
 import hudson.model.Run
 import hudson.model.TaskListener
-import org.gamekins.util.Constants
 import org.gamekins.util.Constants.Parameters
 
 /**
@@ -98,7 +97,7 @@ class DummyChallenge(private var parameters: Parameters, private var reason: Str
      * @see Challenge
      */
     override fun printToXML(reason: String, indentation: String): String {
-        return "$indentation<DummyChallenge>"
+        return "$indentation<DummyChallenge/>"
     }
 
     /**
