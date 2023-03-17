@@ -52,9 +52,9 @@ class DummyChallengeTest : AnnotationSpec() {
 
     @Test
     fun printToXML() {
-        challenge.printToXML("", "") shouldBe "<DummyChallenge>"
+        challenge.printToXML("", "") shouldBe "<DummyChallenge/>"
         challenge.printToXML("", "    ") shouldStartWith "    <"
-        challenge.printToXML("test", "") shouldBe "<DummyChallenge>"
+        challenge.printToXML("test", "") shouldBe "<DummyChallenge/>"
         challenge.toString() shouldBe "You haven't developed anything lately"
     }
 }
