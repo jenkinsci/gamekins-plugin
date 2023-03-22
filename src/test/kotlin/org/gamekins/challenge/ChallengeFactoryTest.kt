@@ -62,7 +62,7 @@ class ChallengeFactoryTest : FeatureSpec({
 
 
 
-    beforeTest {
+    beforeContainer {
         mockkStatic(AchievementInitializer::class)
         every { AchievementInitializer.initializeAchievements(any()) } returns listOf()
         GamePublisherDescriptor()

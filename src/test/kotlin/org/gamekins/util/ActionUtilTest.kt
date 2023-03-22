@@ -86,33 +86,33 @@ class ActionUtilTest: FeatureSpec({
             formValidation.message shouldBe Constants.Error.NO_REASON
         }
 
+        every { User.current() } returns null
         scenario("No User signed in") {
-            every { User.current() } returns null
             formValidation = ActionUtil.doRejectChallenge(job, "", " ")
             formValidation.kind shouldBe FormValidation.Kind.ERROR
             formValidation.message shouldBe Constants.Error.NO_USER_SIGNED_IN
         }
 
+        every { User.current() } returns user
+        every { user.getProperty(GameUserProperty::class.java) } returns null
         scenario("No Property") {
-            every { User.current() } returns user
-            every { user.getProperty(GameUserProperty::class.java) } returns null
             formValidation = ActionUtil.doRejectChallenge(job, "", "reason")
             formValidation.kind shouldBe FormValidation.Kind.ERROR
             formValidation.message shouldBe Constants.Error.RETRIEVING_PROPERTY
         }
 
+        every { user.getProperty(GameUserProperty::class.java) } returns userProperty
+        every { userProperty.getCurrentChallenges(any()) } returns CopyOnWriteArrayList()
         scenario("Challenge does not exist") {
-            every { user.getProperty(GameUserProperty::class.java) } returns userProperty
-            every { userProperty.getCurrentChallenges(any()) } returns CopyOnWriteArrayList()
             formValidation = ActionUtil.doRejectChallenge(job, "", "reason")
             formValidation.kind shouldBe FormValidation.Kind.ERROR
             formValidation.message shouldBe Constants.Error.NO_CHALLENGE_EXISTS
         }
 
+        mockkStatic(ActionUtil::class)
+        every { ActionUtil.generateChallengeAfterRejection(any(), any(), any(), any()) } returns ""
+        every { userProperty.getCurrentChallenges(any()) } returns CopyOnWriteArrayList(listOf(challenge))
         scenario("Successful Action") {
-            mockkStatic(ActionUtil::class)
-            every { ActionUtil.generateChallengeAfterRejection(any(), any(), any(), any()) } returns ""
-            every { userProperty.getCurrentChallenges(any()) } returns CopyOnWriteArrayList(listOf(challenge))
             ActionUtil.doRejectChallenge(job, stringChallenge, "reason").kind shouldBe FormValidation.Kind.OK
         }
     }
@@ -120,47 +120,47 @@ class ActionUtilTest: FeatureSpec({
     feature("doStoreChallenge") {
         var formValidation : FormValidation
 
+        every { User.current() } returns null
         scenario("No User signed in") {
-            every { User.current() } returns null
             formValidation = ActionUtil.doStoreChallenge(job, "")
             formValidation.kind shouldBe FormValidation.Kind.ERROR
             formValidation.message shouldBe Constants.Error.NO_USER_SIGNED_IN
         }
 
+        every { User.current() } returns user
+        every { user.getProperty(GameUserProperty::class.java) } returns null
         scenario("No Property") {
-            every { User.current() } returns user
-            every { user.getProperty(GameUserProperty::class.java) } returns null
             formValidation = ActionUtil.doStoreChallenge(job, "")
             formValidation.kind shouldBe FormValidation.Kind.ERROR
             formValidation.message shouldBe Constants.Error.RETRIEVING_PROPERTY
         }
 
+        every { user.getProperty(GameUserProperty::class.java) } returns userProperty
+        every { userProperty.getCurrentChallenges(any()) } returns CopyOnWriteArrayList()
         scenario("Challenge does not exist") {
-            every { user.getProperty(GameUserProperty::class.java) } returns userProperty
-            every { userProperty.getCurrentChallenges(any()) } returns CopyOnWriteArrayList()
             formValidation = ActionUtil.doStoreChallenge(job, "")
             formValidation.kind shouldBe FormValidation.Kind.ERROR
             formValidation.message shouldBe Constants.Error.NO_CHALLENGE_EXISTS
         }
 
         val job = mockkClass(AbstractProject::class)
+        mockkStatic(ActionUtil::class)
+        every { ActionUtil.generateChallengeAfterRejection(any(), any(), any(), any()) } returns ""
+        every { userProperty.getCurrentChallenges(any()) } returns CopyOnWriteArrayList(listOf(challenge))
+        every { userProperty.getStoredChallenges(any()).size } returns 1
+        every { job.fullName } returns "test-project"
+        every { job.save() } returns Unit
+        val gameProperty = mockkClass(GameJobProperty::class)
+        every { gameProperty.currentStoredChallengesCount } returns 1
+        every { job.getProperty(any()) } returns gameProperty
         scenario("Storage Limit reached") {
-            mockkStatic(ActionUtil::class)
-            every { ActionUtil.generateChallengeAfterRejection(any(), any(), any(), any()) } returns ""
-            every { userProperty.getCurrentChallenges(any()) } returns CopyOnWriteArrayList(listOf(challenge))
-            every { userProperty.getStoredChallenges(any()).size } returns 1
-            every { job.fullName } returns "test-project"
-            every { job.save() } returns Unit
-            val gameProperty = mockkClass(GameJobProperty::class)
-            every { gameProperty.currentStoredChallengesCount } returns 1
-            every { job.getProperty(any()) } returns gameProperty
             formValidation = ActionUtil.doStoreChallenge(job, stringChallenge)
             formValidation.kind shouldBe FormValidation.Kind.ERROR
             formValidation.message shouldBe Constants.Error.STORAGE_LIMIT
         }
 
+        every { userProperty.getStoredChallenges(any()).size } returns 0
         scenario("Successful Action") {
-            every { userProperty.getStoredChallenges(any()).size } returns 0
             ActionUtil.doStoreChallenge(job, stringChallenge).kind shouldBe FormValidation.Kind.OK
         }
     }
@@ -168,25 +168,25 @@ class ActionUtilTest: FeatureSpec({
     feature("doUndoStoreChallenge") {
         var formValidation : FormValidation
 
+        every { User.current() } returns null
         scenario("No User signed in") {
-            every { User.current() } returns null
             formValidation = ActionUtil.doUndoStoreChallenge(job, "")
             formValidation.kind shouldBe FormValidation.Kind.ERROR
             formValidation.message shouldBe Constants.Error.NO_USER_SIGNED_IN
         }
 
+        every { User.current() } returns user
+        every { user.getProperty(GameUserProperty::class.java) } returns null
         scenario("No Property") {
-            every { User.current() } returns user
-            every { user.getProperty(GameUserProperty::class.java) } returns null
             formValidation = ActionUtil.doUndoStoreChallenge(job, "")
             formValidation.kind shouldBe FormValidation.Kind.ERROR
             formValidation.message shouldBe Constants.Error.RETRIEVING_PROPERTY
         }
 
+        every { user.getProperty(GameUserProperty::class.java) } returns userProperty
+        every { userProperty.getCurrentChallenges(any()) } returns CopyOnWriteArrayList()
+        every { userProperty.getStoredChallenges(any()) } returns CopyOnWriteArrayList(listOf(challenge))
         scenario("Challenge does not exist") {
-            every { user.getProperty(GameUserProperty::class.java) } returns userProperty
-            every { userProperty.getCurrentChallenges(any()) } returns CopyOnWriteArrayList()
-            every { userProperty.getStoredChallenges(any()) } returns CopyOnWriteArrayList(listOf(challenge))
             formValidation = ActionUtil.doUndoStoreChallenge(job, "")
             formValidation.kind shouldBe FormValidation.Kind.ERROR
             formValidation.message shouldBe Constants.Error.NO_CHALLENGE_EXISTS
@@ -245,35 +245,33 @@ class ActionUtilTest: FeatureSpec({
         var formValidation : FormValidation
 
 
+        every { userProperty.getStoredChallenges(any()) } returns CopyOnWriteArrayList(listOf(challenge))
+        every { User.current() } returns user
         scenario("Challenge does not exist") {
-            every { userProperty.getStoredChallenges(any()) } returns CopyOnWriteArrayList(listOf(challenge))
-
-            every { User.current() } returns user
             formValidation = ActionUtil.doSendChallenge(job, "", "")
             formValidation.kind shouldBe FormValidation.Kind.ERROR
             formValidation.message shouldBe Constants.Error.NO_CHALLENGE_EXISTS
         }
 
+        every { User.current() } returns null
         scenario("No User signed in") {
-            every { User.current() } returns null
             formValidation = ActionUtil.doSendChallenge(job, "", "")
             formValidation.kind shouldBe FormValidation.Kind.ERROR
             formValidation.message shouldBe Constants.Error.NO_USER_SIGNED_IN
         }
 
+        every { User.current() } returns user
+        every { user.getProperty(GameUserProperty::class.java) } returns null
         scenario("No Property") {
-            every { User.current() } returns user
-            every { user.getProperty(GameUserProperty::class.java) } returns null
             formValidation = ActionUtil.doSendChallenge(job, "", "")
             formValidation.kind shouldBe FormValidation.Kind.ERROR
             formValidation.message shouldBe Constants.Error.RETRIEVING_PROPERTY
         }
 
+        every { user.getProperty(GameUserProperty::class.java) } returns userProperty
+        every { User.get("User1", false, any()) } returns null
+        every { User.get("User0", false, any()) } returns user
         scenario("Unknown Receiver") {
-            every { user.getProperty(GameUserProperty::class.java) } returns userProperty
-            every { User.get("User1", false, any()) } returns null
-            every { User.get("User0", false, any()) } returns user
-
             formValidation = ActionUtil.doSendChallenge(job, stringChallenge, "User1")
             formValidation.kind shouldBe FormValidation.Kind.ERROR
             formValidation.message shouldBe Constants.Error.USER_NOT_FOUND
@@ -286,11 +284,10 @@ class ActionUtilTest: FeatureSpec({
         }
 
         val user1 = mockkClass(User::class)
+        every { User.get("User1", false, any()) } returns user1
+        every { user1.save() } returns Unit
+        every { user1.getProperty(GameUserProperty::class.java) } returns null
         scenario("No Property at Receiver") {
-
-            every { User.get("User1", false, any()) } returns user1
-            every { user1.save() } returns Unit
-            every { user1.getProperty(GameUserProperty::class.java) } returns null
             formValidation = ActionUtil.doSendChallenge(job, stringChallenge, "User1")
             formValidation.kind shouldBe FormValidation.Kind.ERROR
             formValidation.message shouldBe Constants.Error.RETRIEVING_PROPERTY
@@ -298,39 +295,31 @@ class ActionUtilTest: FeatureSpec({
 
         val userProperty1 = mockkClass(GameUserProperty::class)
         val job = mockkClass(AbstractProject::class)
+        every { user1.getProperty(GameUserProperty::class.java) } returns userProperty1
+        every { userProperty1.getStoredChallenges(any()).size } returns 1
+        every { job.fullName } returns "test-project"
+        every { job.save() } returns Unit
+        val gameProperty = mockkClass(GameJobProperty::class)
+        every { gameProperty.currentStoredChallengesCount } returns 1
+        every { job.getProperty(any()) } returns gameProperty
         scenario("Storage Limit reached") {
-            every { user1.getProperty(GameUserProperty::class.java) } returns userProperty1
-            every { userProperty1.getStoredChallenges(any()).size } returns 1
-            every { job.fullName } returns "test-project"
-            every { job.save() } returns Unit
-            val gameProperty = mockkClass(GameJobProperty::class)
-            every { gameProperty.currentStoredChallengesCount } returns 1
-            every { job.getProperty(any()) } returns gameProperty
-
             formValidation = ActionUtil.doSendChallenge(job, stringChallenge, "User1")
             formValidation.kind shouldBe FormValidation.Kind.ERROR
             formValidation.message shouldBe Constants.Error.STORAGE_LIMIT
         }
 
-        scenario("Successful Action") {
-            every { userProperty1.getStoredChallenges(any()).size } returns 0
-            every { userProperty.removeStoredChallenge(any(), any()) } returns Unit
-            every { userProperty1.addStoredChallenge(any(), any()) } returns Unit
-
-            mockkStatic(Mailer::class)
-            every { Mailer.descriptor() } returns null
-
-            every { userProperty1.getNotifications() } returns false
-
+        every { userProperty1.getStoredChallenges(any()).size } returns 0
+        every { userProperty.removeStoredChallenge(any(), any()) } returns Unit
+        every { userProperty1.addStoredChallenge(any(), any()) } returns Unit
+        mockkStatic(Mailer::class)
+        every { Mailer.descriptor() } returns null
+        every { userProperty1.getNotifications() } returns false
         every { challenge.getParameters() } returns parameters
         parameters.workspace = FilePath(null, root)
         parameters.branch = "branch1"
-
-        val gameProperty = mockkClass(GameJobProperty::class)
-        every { job.getProperty(any()) } returns gameProperty
         every { gameProperty.getStatistics().incrementSentChallenges(any()) } returns Unit
         every { gameProperty.currentStoredChallengesCount } returns 1
-
+        scenario("Successful Action") {
             ActionUtil.doSendChallenge(job, stringChallenge, "User1").kind shouldBe FormValidation.Kind.OK
         }
     }
