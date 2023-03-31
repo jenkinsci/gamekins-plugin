@@ -60,9 +60,6 @@ addition, the publisher for Gamekins has to be added to the **Post-build Actions
   is located (*Mandatory* Property)
 - Path to jacoco.csv: Starting from the project workspace with ```**/``` where the file ```jacoco.csv``` is located
   (Note: include also the file name since it can be different from ```jacoco.csv```) (*Mandatory* Property)
-- Path to moco.json: Starting from the project workspace with ```**/``` where the file ```moco.json``` is located
-  (Note: include also the file name since it can be different from ```moco.json```) (*Optional* Property)
-- Commits to be searched: Mainly for performance reasons (50 per default) (*Optional* Property)
 
 #### Pipeline projects
 
@@ -73,7 +70,7 @@ in the following or similar way (with example values):
 pipeline {
     post {
         always {
-            gamekins jacocoCSVPath: '**/target/site/jacoco/jacoco.csv', jacocoResultsPath: '**/target/site/jacoco/', mocoJSONPath: '**/target/moco/mutation/moco.json', searchCommitCount: 50
+            gamekins jacocoCSVPath: '**/target/site/jacoco/jacoco.csv', jacocoResultsPath: '**/target/site/jacoco/'
         }
     }
 }
@@ -96,6 +93,11 @@ removed. The newly added team is only displayed after reloading the page. No inf
 section, even if a popup says otherwise. To add or remove a user to a team, choose both the team and the user in the 
 dropdown menus and click on  the corresponding button. Team members can be looked up in the Leaderboard (more later).
 
+#### Advanced options
+The Gamekins section in the configuration of a projects provides advanced options. These include the number of
+simultaneous current (stored) challenges and quests, the allowance to send challenges, the number of commits to be 
+searched and the configuration for PIT.
+
 #### Execution
 
 If configured correctly, Gamekins is executed after each run of the project. Every output of the plugin, including error
@@ -117,12 +119,6 @@ instance and privacy promises.
 #### Additional help
 Users who have been added to a team in the job can access a **Help** section in the Leaderboard with a short 
 explanation of the Leaderboard itself, and the game in total.
-
-#### Mutation challenges
-For generating mutation challenges, the Maven plugin MoCo must be added to the project. MoCo ist available on 
-[Github](https://github.com/phantran/moco) and 
-[Maven Central](https://search.maven.org/artifact/io.github.phantran/m0c0-maven-plugin). Please have a look at the 
-configuration on Github.
 
 ### Extensibility
 There are two possible ways to add Challenges to the current version of Gamekins:
