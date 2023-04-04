@@ -41,6 +41,7 @@
             <input id="removeUserFromTeam" type="button" value="Remove User from Team" data-descriptor-url="${descriptor.descriptorFullUrl}" />
             <input id="deleteTeam" type="button" value="Delete Team" data-descriptor-url="${descriptor.descriptorFullUrl}" />
             <input id="showTeamMemberships" type="button" value="Show Team Memberships" data-descriptor-url="${descriptor.descriptorFullUrl}" />
+            <input id="participateAlone" type="button" value="Participate alone" data-descriptor-url="${descriptor.descriptorFullUrl}" />
         </f:entry>
 
         <div class="table-responsive">

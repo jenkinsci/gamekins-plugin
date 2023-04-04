@@ -210,11 +210,12 @@ class GameMultiBranchProperty
          * Called from the Jetty server when the configuration page is displayed. Fills the combo box with the names of
          * all teams of the [job].
          */
-        fun doFillTeamsBoxItems(@AncestorInPath job: WorkflowMultiBranchProject?): ListBoxModel {
+        fun doFillTeamsBoxItems(@AncestorInPath job: WorkflowMultiBranchProject?,
+                                @QueryParameter includeNoTeam: Boolean): ListBoxModel {
             val property =
                     if (job == null || job.properties[this] == null) null
                     else job.properties[this] as GameMultiBranchProperty
-            return PropertyUtil.doFillTeamsBoxItems(property)
+            return PropertyUtil.doFillTeamsBoxItems(property, includeNoTeam)
         }
 
         /**
