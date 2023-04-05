@@ -131,7 +131,7 @@ object PropertyUtil {
     fun doFillTeamsBoxItems(property: GameProperty?, includeNoTeam: Boolean): ListBoxModel {
         val listBoxModel = ListBoxModel()
         property?.getTeams()?.forEach(Consumer { nameAndValue: String? ->
-            if (nameAndValue != null && (nameAndValue != "No Team" || includeNoTeam)) {
+            if (nameAndValue != null && (includeNoTeam || nameAndValue != "No Team")) {
                 listBoxModel.add(nameAndValue)
             }
         })

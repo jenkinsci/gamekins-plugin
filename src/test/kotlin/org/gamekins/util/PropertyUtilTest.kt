@@ -289,11 +289,11 @@ class PropertyUtilTest : FeatureSpec({
 
     feature("doShowTeamMemberships") {
         scenario("Test on Job1") {
-            PropertyUtil.doShowTeamMemberships(job1, property1) shouldBe "{\"Team2\":[],\"Team1\":[]}"
+            PropertyUtil.doShowTeamMemberships(job1, property1) shouldBe "{\"No Team\":[],\"Team2\":[],\"Team1\":[]}"
         }
 
         scenario("Test on Job2") {
-            PropertyUtil.doShowTeamMemberships(job2, property2) shouldBe "{\"Team1\":[\"User1\"]}"
+            PropertyUtil.doShowTeamMemberships(job2, property2) shouldBe "{\"No Team\":[],\"Team1\":[\"User1\"]}"
         }
     }
 
