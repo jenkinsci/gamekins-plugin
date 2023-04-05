@@ -41,6 +41,7 @@ class PropertyUtilTest : FeatureSpec({
     val detailsProperty = mockkClass(Details::class)
     val team1 = "Team1"
     val team2 = "Team2"
+    val noTeam = "No Team"
     val userName1 = "User1"
     val userName2 = "User2"
     val userName3 = "User3"
@@ -56,8 +57,8 @@ class PropertyUtilTest : FeatureSpec({
 
         every { property1.addTeam(any()) } returns Unit
         every { property2.addTeam(any()) } returns Unit
-        every { property1.getTeams() } returns arrayListOf(team1, team2)
-        every { property2.getTeams() } returns arrayListOf(team1)
+        every { property1.getTeams() } returns arrayListOf(team1, team2, noTeam)
+        every { property2.getTeams() } returns arrayListOf(team1, noTeam)
         every { property1.removeTeam(any()) } returns Unit
         every { property2.removeTeam(any()) } returns Unit
         every { property1.resetStatistics(any()) } returns Unit
@@ -196,7 +197,14 @@ class PropertyUtilTest : FeatureSpec({
     }
 
     feature("doFillTeamsBoxItems") {
-        PropertyUtil.doFillTeamsBoxItems(property1).size shouldBe 2
+        scenario("Include Pseudo-Team")
+        {
+            PropertyUtil.doFillTeamsBoxItems(property1, false).size shouldBe 2
+        }
+        scenario("Do not include Pseudo-Team")
+        {
+            PropertyUtil.doFillTeamsBoxItems(property1, true).size shouldBe 3
+        }
     }
 
     feature("doFillUsersBoxItems") {
