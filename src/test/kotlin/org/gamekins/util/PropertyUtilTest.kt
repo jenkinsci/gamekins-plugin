@@ -90,6 +90,8 @@ class PropertyUtilTest : FeatureSpec({
         every { userProperty1.isParticipating(projectName1, team1) } returns false
         every { userProperty1.isParticipating(projectName1, team2) } returns true
         every { userProperty1.isParticipating(projectName2, team1) } returns false
+        every { userProperty1.isParticipating(projectName1, noTeam) } returns false
+        every { userProperty1.isParticipating(projectName2, noTeam) } returns false
         every { userProperty1.setParticipating(any(), any()) } returns Unit
         every { userProperty1.removeParticipation(any()) } returns Unit
         every { userProperty1.reset(any()) } returns Unit
