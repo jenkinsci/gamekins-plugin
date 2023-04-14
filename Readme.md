@@ -201,3 +201,7 @@ always a String, but it can be converted in the method if necessary.
 This project is funded by the [German Research Foundation](https://www.dfg.de/en/) and developed on the
 [Chair of Software Engineering II](https://www.fim.uni-passau.de/lehrstuhl-fuer-software-engineering-ii/) at the 
 University of Passau.
+
+### Publications
+* "Gamekins: Gamifying Software Testing in Jenkins"
+  Philipp Straubinger, Gordon Fraser, ICSE 2022 [[download]](https://arxiv.org/pdf/2202.06562.pdf)
