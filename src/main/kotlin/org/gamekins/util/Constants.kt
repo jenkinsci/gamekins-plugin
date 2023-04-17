@@ -198,6 +198,8 @@ object Constants {
 
     const val TRY_CLASS = "[Gamekins] Try class "
 
+    const val NO_TEAM_TEAM_NAME = "---"
+
     /**
      * Returns the path to the most recent jar file of the Sonar-Java-Plugin for SonarLint.
      */

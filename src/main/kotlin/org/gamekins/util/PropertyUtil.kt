@@ -75,7 +75,7 @@ object PropertyUtil {
             val projectName = job.fullName
             val property = user.getProperty(GameUserProperty::class.java)
             return if (property != null &&
-                (!property.isParticipating(projectName) || property.isParticipating(projectName, "No Team"))) {
+                (!property.isParticipating(projectName) || property.isParticipating(projectName, Constants.NO_TEAM_TEAM_NAME))) {
                 property.setParticipating(projectName, teamsBox)
                 try {
                     user.save()
@@ -126,12 +126,12 @@ object PropertyUtil {
      */
     @JvmStatic
     fun doFillTeamsBoxItems(property: GameProperty?, includeNoTeam: Boolean): ListBoxModel {
-        if (property?.getTeams()?.contains("No Team") == false) {
-            property.addTeam("No Team")
+        if (property?.getTeams()?.contains(Constants.NO_TEAM_TEAM_NAME) == false) {
+            property.addTeam(Constants.NO_TEAM_TEAM_NAME)
         }
         val listBoxModel = ListBoxModel()
         property?.getTeams()?.forEach(Consumer { nameAndValue: String? ->
-            if (nameAndValue != null && (includeNoTeam || nameAndValue != "No Team")) {
+            if (nameAndValue != null && (includeNoTeam || nameAndValue != Constants.NO_TEAM_TEAM_NAME)) {
                 listBoxModel.add(nameAndValue)
             }
         })

@@ -41,7 +41,7 @@ class PropertyUtilTest : FeatureSpec({
     val detailsProperty = mockkClass(Details::class)
     val team1 = "Team1"
     val team2 = "Team2"
-    val noTeam = "No Team"
+    val noTeam = Constants.NO_TEAM_TEAM_NAME
     val userName1 = "User1"
     val userName2 = "User2"
     val userName3 = "User3"

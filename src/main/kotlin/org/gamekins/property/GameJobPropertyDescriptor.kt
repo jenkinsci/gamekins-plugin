@@ -104,10 +104,10 @@ class GameJobPropertyDescriptor : JobPropertyDescriptor(GameJobProperty::class.j
 
     /**
      * Called from the Jetty server if the button to participate alone is pressed. Adds the participant
-     * [usersBox] to the "No Team"-Pseudo-Team via the method [PropertyUtil.doAddUserToTeam].
+     * [usersBox] to a Pseudo-Team via the method [PropertyUtil.doAddUserToTeam].
      */
     fun doParticipateAlone(@AncestorInPath job: Job<*, *>?, @QueryParameter usersBox: String?): FormValidation {
-        return PropertyUtil.doAddUserToTeam(job, "No Team", usersBox!!)
+        return PropertyUtil.doAddUserToTeam(job, Constants.NO_TEAM_TEAM_NAME, usersBox!!)
     }
 
     /**
