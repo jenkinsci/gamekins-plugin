@@ -84,11 +84,10 @@ abstract class CoverageChallenge(var details: SourceFileDetails, workspace: File
         return created
     }
 
-    //TODO: Fix problem with not escaped XML
+    //TODO: Clean fix for problem with not escaped XML
     override fun getHighlightedFileContent(): String {
-        return ""
-        //return "<pre class='prettyprint mt-2 linenums:1'><code class='language-java'>" +
-        //        details.contents() + "</code></pre>"
+        return "<pre class='prettyprint mt-2 linenums:1'><code class='language-java'>" +
+                details.contents().replace("<", "&lt;")/*.replace(">", "&gt;").replace("&", "&amp;").replace("\"", "&quot;").replace("\'", "&#39;")*/ + "</code></pre>"
     }
 
     override fun getParameters(): Parameters {
