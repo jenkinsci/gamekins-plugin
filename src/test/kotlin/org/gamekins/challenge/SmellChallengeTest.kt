@@ -113,7 +113,7 @@ class SmellChallengeTest : FeatureSpec({
         }
     }
 
-    xfeature("getHighlightedFileContent") {
+    feature("getHighlightedFileContent") {
         val content = "<pre class='prettyprint mt-2 linenums:1'><code class='language-java'>Content</code></pre>"
         challenge.getHighlightedFileContent() shouldBe content
     }

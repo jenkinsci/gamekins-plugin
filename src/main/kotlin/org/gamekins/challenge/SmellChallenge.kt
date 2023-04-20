@@ -66,10 +66,10 @@ class SmellChallenge(val details: FileDetails, val issue: Issue): Challenge {
         return created
     }
 
-    //TODO: Clean fix for problem with not escaped XML
     override fun getHighlightedFileContent(): String {
         return "<pre class='prettyprint mt-2 linenums:1'><code class='language-java'>" +
-                details.contents().replace("<", "&lt;")/*.replace(">", "&gt;").replace("&", "&amp;").replace("\"", "&quot;").replace("\'", "&#39;")*/ + "</code></pre>"
+                details.contents().replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+                    .replace("\"", "&quot;").replace("\'", "&#39;") + "</code></pre>"
     }
 
     override fun getName(): String {
