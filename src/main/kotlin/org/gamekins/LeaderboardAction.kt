@@ -23,6 +23,7 @@ import jenkins.model.Jenkins
 import org.gamekins.challenge.quest.Quest
 import org.gamekins.property.GameJobProperty
 import org.gamekins.property.GameMultiBranchProperty
+import org.gamekins.util.Constants
 import org.gamekins.util.Pair
 import org.jenkinsci.plugins.workflow.job.WorkflowJob
 import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject
@@ -163,6 +164,7 @@ class LeaderboardAction(val job: AbstractItem) : ProminentProjectAction, Describ
             }
         }
 
+        details.removeIf { it.teamName == Constants.NO_TEAM_TEAM_NAME }
         return details
             .sortedWith(
                 compareBy({it.score}, {it.completedChallenges}, {it.completedQuests}, {it.completedAchievements}))
