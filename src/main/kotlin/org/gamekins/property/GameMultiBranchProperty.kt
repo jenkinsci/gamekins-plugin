@@ -228,12 +228,12 @@ class GameMultiBranchProperty
 
         /**
          * Called from the Jetty server if the button to remove a participant from a team is pressed. Removes the
-         * participant [usersBox] from the team [teamsBox] of the [job] via the method
-         * [PropertyUtil.doRemoveUserFromTeam].
+         * participant [usersBox] from the project of the [job] via the method
+         * [PropertyUtil.doRemoveUserFromProject].
          */
-        fun doRemoveUserFromTeam(@AncestorInPath job: WorkflowMultiBranchProject?, @QueryParameter teamsBox: String?,
-                                 @QueryParameter usersBox: String?): FormValidation {
-            return PropertyUtil.doRemoveUserFromTeam(job, teamsBox!!, usersBox!!)
+        fun doRemoveUserFromProject(@AncestorInPath job: WorkflowMultiBranchProject?,
+                                    @QueryParameter usersBox: String?): FormValidation {
+            return PropertyUtil.doRemoveUserFromProject(job, usersBox!!)
         }
         /**
          * Called from the Jetty server if the button to reset Gamekins in the specific [job] is called. Deletes all

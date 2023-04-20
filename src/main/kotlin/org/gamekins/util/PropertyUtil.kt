@@ -74,8 +74,7 @@ object PropertyUtil {
         if (user != null) {
             val projectName = job.fullName
             val property = user.getProperty(GameUserProperty::class.java)
-            return if (property != null &&
-                (!property.isParticipating(projectName) || property.isParticipating(projectName, Constants.NO_TEAM_TEAM_NAME))) {
+            return if (property != null) {
                 property.setParticipating(projectName, teamsBox)
                 try {
                     user.save()
@@ -84,7 +83,7 @@ object PropertyUtil {
                 }
                 FormValidation.ok("User successfully added")
             } else {
-                FormValidation.error(Constants.Error.USER_ALREADY_IN_TEAM)
+                FormValidation.error(Constants.Error.RETRIEVING_PROPERTY)
             }
         }
 
@@ -172,19 +171,18 @@ object PropertyUtil {
     }
 
     /**
-     * Removes a participant [usersBox] from a team [teamsBox]. Returns an error if the [job] is null, the user was
+     * Removes a participant [usersBox] from the project. Returns an error if the [job] is null, the user was
      * not found or the suer is not in the team.
      */
     @JvmStatic
-    fun doRemoveUserFromTeam(job: AbstractItem?, teamsBox: String, usersBox: String): FormValidation {
-        if (teamsBox.trim { it <= ' ' }.isEmpty()) return FormValidation.error(Constants.Error.NO_TEAM)
+    fun doRemoveUserFromProject(job: AbstractItem?, usersBox: String): FormValidation {
         if (job == null) return FormValidation.error(Constants.Error.PARENT)
 
         val user = retrieveUser(usersBox)
         if (user != null) {
             val projectName = job.fullName
             val property = user.getProperty(GameUserProperty::class.java)
-            return if (property != null && property.isParticipating(projectName, teamsBox)) {
+            return if (property != null && property.isParticipating(projectName)) {
                 property.removeParticipation(projectName)
                 try {
                     user.save()
@@ -193,7 +191,7 @@ object PropertyUtil {
                 }
                 FormValidation.ok("User successfully removed")
             } else {
-                FormValidation.error(Constants.Error.USER_NOT_IN_TEAM)
+                FormValidation.error(Constants.Error.USER_NOT_IN_PROJECT)
             }
         }
 

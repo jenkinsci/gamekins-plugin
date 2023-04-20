@@ -145,7 +145,7 @@ object Constants {
         
         const val UNKNOWN_TEAM = "The specified team does not exist"
         
-        const val USER_NOT_IN_TEAM = "The user is not in the specified team"
+        const val USER_NOT_IN_PROJECT = "The user does not participate in the project"
 
         const val UNKNOWN_USER = "No user with the specified name found"
 
