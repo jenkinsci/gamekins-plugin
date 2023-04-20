@@ -22,7 +22,6 @@ import hudson.model.TaskListener
 import org.gamekins.file.SourceFileDetails
 import org.gamekins.util.Constants
 import org.gamekins.util.JacocoUtil
-import org.jsoup.nodes.Element
 import kotlin.math.abs
 
 /**
@@ -35,49 +34,35 @@ class LineCoverageChallenge(data: Challenge.ChallengeGenerationData)
     : CoverageChallenge(data.selectedFile as SourceFileDetails, data.parameters.workspace) {
 
     private val coverageType: String = data.line!!.attr("class")
-    private val currentCoveredBranches: Int
     private val lineContent: String = data.line!!.text()
     private val lineNumber: Int = data.line!!.attr("id").substring(1).toInt()
-    private val maxCoveredBranches: Int
-    private var solvedCoveredBranches: Int = 0
 
 
     init {
-        codeSnippet = createCodeSnippet(details, lineNumber,  data.parameters.workspace)
-        val split = data.line!!.attr("title").split(" ".toRegex())
-        when {
-            split.isEmpty() || (split.size == 1 && split[0].isBlank()) -> {
-                currentCoveredBranches = 0
-                maxCoveredBranches = 1
+        codeSnippet = LineCoverageChallenge.createCodeSnippet(details, lineNumber,  data.parameters.workspace)
+    }
+
+    companion object {
+        fun createCodeSnippet(classDetails: SourceFileDetails,
+                                       target: Any, workspace: FilePath): String {
+            if (target !is Int) return ""
+            else if (target < 0) return ""
+            if (classDetails.jacocoSourceFile.exists()) {
+                val javaHtmlPath = JacocoUtil.calculateCurrentFilePath(
+                    workspace, classDetails.jacocoSourceFile, classDetails.parameters.remote
+                )
+                val snippetElements = JacocoUtil.getLinesInRange(javaHtmlPath, target, 2)
+                if (snippetElements.first == "") return ""
+
+                return "<pre class='prettyprint linenums:${target - 1} mt-2'><code class='language-java'>" +
+                        snippetElements.first +
+                        "</code></pre>"
             }
-            data.line!!.attr("class").startsWith("pc") -> {
-                currentCoveredBranches = split[2].toInt() - split[0].toInt()
-                maxCoveredBranches = split[2].toInt()
-            }
-            else -> {
-                currentCoveredBranches = 0
-                maxCoveredBranches = split[1].toInt()
-            }
+            return ""
         }
     }
 
-    override fun createCodeSnippet(classDetails: SourceFileDetails,
-                                   target: Any, workspace: FilePath): String {
-        if (target !is Int) return ""
-        else if (target < 0) return ""
-        if (classDetails.jacocoSourceFile.exists()) {
-            val javaHtmlPath = JacocoUtil.calculateCurrentFilePath(
-                workspace, classDetails.jacocoSourceFile, classDetails.parameters.remote
-            )
-            val snippetElements = JacocoUtil.getLinesInRange(javaHtmlPath, target, 2)
-            if (snippetElements.first == "") return ""
 
-            return "<pre class='prettyprint linenums:${target - 1} mt-2'><code class='language-java'>" +
-                    snippetElements.first +
-                    "</code></pre>"
-        }
-        return ""
-    }
 
     override fun equals(other: Any?): Boolean {
         if (other == null) return false
@@ -86,11 +71,6 @@ class LineCoverageChallenge(data: Challenge.ChallengeGenerationData)
                 && other.details.fileName == this.details.fileName
                 && other.lineNumber == this.lineNumber
                 && other.lineContent == this.lineContent
-                && other.coverageType == this.coverageType
-    }
-
-    fun getMaxCoveredBranchesIfFullyCovered(): Int {
-        return if (solvedCoveredBranches == maxCoveredBranches) maxCoveredBranches else 0
     }
 
     override fun getName(): String {
@@ -111,10 +91,8 @@ class LineCoverageChallenge(data: Challenge.ChallengeGenerationData)
 
     override fun hashCode(): Int {
         var result = coverageType.hashCode()
-        result = 31 * result + currentCoveredBranches
         result = 31 * result + lineContent.hashCode()
         result = 31 * result + lineNumber
-        result = 31 * result + maxCoveredBranches
         return result
     }
 
@@ -161,20 +139,24 @@ class LineCoverageChallenge(data: Challenge.ChallengeGenerationData)
         elements.addAll(document.select("span." + "pc"))
         for (element in elements) {
             if (element.text().trim() == lineContent.trim() && element.attr("id").substring(1).toInt() == lineNumber) {
-                return setSolved(element, jacocoCSVFile)
+                super.setSolved(System.currentTimeMillis())
+                solvedCoverage = JacocoUtil.getCoverageInPercentageFromJacoco(details.fileName, jacocoCSVFile)
+                return true
             }
         }
 
-        elements.addAll(document.select("span." + "nc"))
         elements.removeIf { it.text().trim() != lineContent.trim() }
-
         if (elements.isNotEmpty()) {
-            if (elements.size == 1 && elements[0].attr("class") != "nc") {
-                return setSolved(elements[0], jacocoCSVFile)
+            if (elements.size == 1) {
+                super.setSolved(System.currentTimeMillis())
+                solvedCoverage = JacocoUtil.getCoverageInPercentageFromJacoco(details.fileName, jacocoCSVFile)
+                return true
             } else {
                 val nearestElement = elements.minByOrNull { abs(lineNumber - it.attr("id").substring(1).toInt()) }
-                if (nearestElement != null && nearestElement.attr("class") != "nc") {
-                    return setSolved(nearestElement, jacocoCSVFile)
+                if (nearestElement != null) {
+                    super.setSolved(System.currentTimeMillis())
+                    solvedCoverage = JacocoUtil.getCoverageInPercentageFromJacoco(details.fileName, jacocoCSVFile)
+                    return true
                 }
             }
         }
@@ -186,35 +168,8 @@ class LineCoverageChallenge(data: Challenge.ChallengeGenerationData)
         return true
     }
 
-    /**
-     * Checks whether the line [element] has more covered branches than during creation and sets the time and
-     * coverage if solved.
-     */
-    private fun setSolved(element: Element, jacocoCSVFile: FilePath): Boolean {
-        val split = element.attr("title").split(" ".toRegex())
-        val title = split[0]
-        if (split.size >= 4 && split[3] == "missed.") return false
-        if (title != "All"
-            && maxCoveredBranches > 1 && maxCoveredBranches - title.toInt() <= currentCoveredBranches) {
-            return false
-        }
-
-        solvedCoveredBranches = when (title) {
-            "All" -> maxCoveredBranches
-            "" -> maxCoveredBranches
-            else -> maxCoveredBranches - title.toInt()
-        }
-        super.setSolved(System.currentTimeMillis())
-        solvedCoverage = JacocoUtil.getCoverageInPercentageFromJacoco(details.fileName, jacocoCSVFile)
-        return true
-    }
-
     override fun toString(): String {
-        val prefix =
-                if (maxCoveredBranches > 1) "Write a test to cover more branches (currently $currentCoveredBranches " +
-                        "of $maxCoveredBranches covered) of line "
-                else "Write a test to fully cover line "
-        return (prefix + "<b>" + lineNumber + "</b> in class <b>" + details.fileName
+        return ("Write a test to cover line " + "<b>" + lineNumber + "</b> in class <b>" + details.fileName
                 + "</b> in package <b>" + details.packageName + "</b> (created for branch "
                 + details.parameters.branch + ")")
     }

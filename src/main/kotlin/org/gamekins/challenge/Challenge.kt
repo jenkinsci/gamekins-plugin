@@ -88,7 +88,8 @@ interface Challenge {
     fun getSolved(): Long
 
     /**
-     * Returns the tooltip of the Challenge. Currently only available for the [LineCoverageChallenge].
+     * Returns the tooltip of the Challenge. Currently only available for the [LineCoverageChallenge]
+     * and [BranchCoverageChallenge].
      */
     fun getToolTipText(): String {
         return ""
@@ -108,7 +109,7 @@ interface Challenge {
 
     /**
      * Returns whether a tooltip should be shown for the Challenge. Currently only available for the
-     * [LineCoverageChallenge].
+     * [LineCoverageChallenge] and [BranchCoverageChallenge].
      */
     fun isToolTip(): Boolean {
         return false

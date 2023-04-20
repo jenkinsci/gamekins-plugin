@@ -29,7 +29,7 @@ import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import org.jsoup.select.Elements
 
-class LineCoverageChallengeTest : FeatureSpec({
+class BranchCoverageChallengeTest : FeatureSpec({
 
     val className = "Challenge"
     val path = FilePath(null, "/home/test/workspace")
@@ -37,7 +37,7 @@ class LineCoverageChallengeTest : FeatureSpec({
     val shortJacocoPath = "**/target/site/jacoco/"
     val shortJacocoCSVPath = "**/target/site/jacoco/csv"
     lateinit var details : SourceFileDetails
-    lateinit var challenge : LineCoverageChallenge
+    lateinit var challenge : BranchCoverageChallenge
     val document = mockkClass(Document::class)
     val element = mockkClass(Element::class)
     val elements = Elements(listOf(element))
@@ -71,17 +71,46 @@ class LineCoverageChallengeTest : FeatureSpec({
         every { data.selectedFile } returns details
         every { data.parameters } returns parameters
         every { data.line } returns element
-        challenge = LineCoverageChallenge(data)
+        challenge = BranchCoverageChallenge(data)
     }
 
     afterSpec {
         unmockkAll()
     }
 
+    feature("getMaxCoveredBranchesIfFullyCovered") {
+        scenario("Default Value")
+        {
+            challenge.getMaxCoveredBranchesIfFullyCovered() shouldBe 0
+        }
+
+        val pathMock = mockkClass(FilePath::class)
+        every { pathMock.exists() } returns true
+        every { pathMock.remote } returns path.remote
+        every { JacocoUtil.getJacocoFileInMultiBranchProject(any(), any(), any(), any()) } returns pathMock
+        every { document.select("span.pc") } returns Elements()
+        every { document.select("span.nc") } returns Elements()
+        every { document.select("span.fc") } returns elements
+        scenario("Line covered")
+        {
+            challenge.isSolved(parameters, run, listener) shouldBe true     //needs to be called to update
+            challenge.getMaxCoveredBranchesIfFullyCovered() shouldBe 1
+        }
+
+        challenge = BranchCoverageChallenge(data)
+        every { document.select("span.fc") } returns Elements()
+        scenario("No lines covered")
+        {
+            challenge.isSolved(parameters, run, listener) shouldBe false    //needs to be called to update
+            challenge.getMaxCoveredBranchesIfFullyCovered() shouldBe 0
+        }
+
+    }
+
     feature("getScore") {
         scenario("Default Value")
         {
-            challenge.getScore() shouldBe 2
+            challenge.getScore() shouldBe 3
         }
 
         scenario("Sufficient coverage")
@@ -89,7 +118,7 @@ class LineCoverageChallengeTest : FeatureSpec({
             every { JacocoUtil.getCoverageInPercentageFromJacoco(any(), any()) } returns 0.9
             details = SourceFileDetails(parameters, shortFilePath, listener)
             every { data.selectedFile } returns details
-            challenge = LineCoverageChallenge(data)
+            challenge = BranchCoverageChallenge(data)
             challenge.getScore() shouldBe 3
         }
 
@@ -99,7 +128,7 @@ class LineCoverageChallengeTest : FeatureSpec({
             every { JacocoUtil.getCoverageInPercentageFromJacoco(any(), any()) } returns coverage
             details = SourceFileDetails(parameters, shortFilePath, listener)
             every { data.selectedFile } returns details
-            challenge = LineCoverageChallenge(data)
+            challenge = BranchCoverageChallenge(data)
             challenge.getScore() shouldBe 3
         }
 
@@ -108,7 +137,7 @@ class LineCoverageChallengeTest : FeatureSpec({
             every { element.attr("class") } returns "pc"
             every { element.attr("title") } returns "1 of 2 branches missed."
             every { data.line } returns element
-            challenge = LineCoverageChallenge(data)
+            challenge = BranchCoverageChallenge(data)
             challenge.getScore() shouldBe 3
         }
 
@@ -117,8 +146,8 @@ class LineCoverageChallengeTest : FeatureSpec({
             every { element.attr("title") } returns "All 2 branches missed."
             every { element.attr("class") } returns "nc"
             every { data.line } returns element
-            challenge = LineCoverageChallenge(data)
-            challenge.getScore() shouldBe 2
+            challenge = BranchCoverageChallenge(data)
+            challenge.getScore() shouldBe 3
         }
     }
 
@@ -220,13 +249,12 @@ class LineCoverageChallengeTest : FeatureSpec({
         {
             every { element.attr("title") } returns "2 of 3 branches missed."
             every { element.attr("class") } returns "pc"
-            challenge = LineCoverageChallenge(data)
-            challenge.isSolved(parameters, run, listener) shouldBe true
+            challenge = BranchCoverageChallenge(data)
+            challenge.isSolved(parameters, run, listener) shouldBe false
         }
-
         every { data.line } returns element
-        challenge = LineCoverageChallenge(data)
-        every { document.select("span.fc") } returns Elements()
+        challenge = BranchCoverageChallenge(data)
+
         scenario("All 3 branches missed")
         {
             every { element.attr("title") } returns "All 3 branches missed."
@@ -234,7 +262,6 @@ class LineCoverageChallengeTest : FeatureSpec({
             challenge.isSolved(parameters, run, listener) shouldBe false
         }
         every { element.attr("title") } returns "1 of 3 branches missed."
-        every { document.select("span.fc") } returns elements
         scenario("1 of 3 branches missed")
         {
             challenge.isSolved(parameters, run, listener) shouldBe true
