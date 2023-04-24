@@ -278,6 +278,10 @@ class LeaderboardAction(val job: AbstractItem) : ProminentProjectAction, Describ
         }
     }
 
+    fun getHasTeams(): Boolean {
+        return getTeamDetails().isNotEmpty()
+    }
+
     /**
      * Container for the details of a user displayed on the Leaderboard.
      *

@@ -52,34 +52,36 @@
                     </table>
                 </div>
             </div>
-            <div class="container-fluid row px-4 justify-content-center">
-                <div class="col-12 table-responsive pl-3">
-                    <table class="mt-3 shadow table-hover table pane sortable bigtable">
-                        <thead class="thead-dark">
-                            <tr>
-                                <th scope="col" class="text-center">#</th>
-                                <th scope="col" class="text-center">Team</th>
-                                <th scope="col" class="text-center">Completed Challenges</th>
-                                <th scope="col" class="text-center">Completed Quests</th>
-                                <th scope="col" class="text-center">Unfinished Quests</th>
-                                <th scope="col" class="text-center">Completed Achievements</th>
-                                <th initialSortDir="up" class="text-center" scope="col">Score</th>
-                            </tr>
-                        </thead>
-                        <j:forEach indexVar="index" var="teamDetail" items="${it.teamDetails}">
-                            <tr>
-                                <td class="text-center">${index + 1}</td>
-                                <td class="text-center">${teamDetail.teamName}</td>
-                                <td class="text-center">${teamDetail.completedChallenges}</td>
-                                <td class="text-center" style="vertical-align: middle">${userDetail.completedQuests}</td>
-                                <td class="text-center" style="vertical-align: middle">${userDetail.unfinishedQuests}</td>
-                                <td class="text-center">${teamDetail.completedAchievements}</td>
-                                <td class="text-center">${teamDetail.score}</td>
-                            </tr>
-                        </j:forEach>
-                    </table>
+            <j:if test="${it.hasTeams}">
+                <div class="container-fluid row px-4 justify-content-center">
+                    <div class="col-12 table-responsive pl-3">
+                        <table class="mt-3 shadow table-hover table pane sortable bigtable">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th scope="col" class="text-center">#</th>
+                                    <th scope="col" class="text-center">Team</th>
+                                    <th scope="col" class="text-center">Completed Challenges</th>
+                                    <th scope="col" class="text-center">Completed Quests</th>
+                                    <th scope="col" class="text-center">Unfinished Quests</th>
+                                    <th scope="col" class="text-center">Completed Achievements</th>
+                                    <th initialSortDir="up" class="text-center" scope="col">Score</th>
+                                </tr>
+                            </thead>
+                            <j:forEach indexVar="index" var="teamDetail" items="${it.teamDetails}">
+                                <tr>
+                                    <td class="text-center">${index + 1}</td>
+                                    <td class="text-center">${teamDetail.teamName}</td>
+                                    <td class="text-center">${teamDetail.completedChallenges}</td>
+                                    <td class="text-center" style="vertical-align: middle">${userDetail.completedQuests}</td>
+                                    <td class="text-center" style="vertical-align: middle">${userDetail.unfinishedQuests}</td>
+                                    <td class="text-center">${teamDetail.completedAchievements}</td>
+                                    <td class="text-center">${teamDetail.score}</td>
+                                </tr>
+                            </j:forEach>
+                        </table>
+                    </div>
                 </div>
-            </div>
+            </j:if>
             <br/>
 
             <j:if test="${it.participating}">
