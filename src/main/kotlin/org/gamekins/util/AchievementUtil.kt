@@ -22,6 +22,7 @@ import hudson.model.Run
 import hudson.model.TaskListener
 import hudson.model.User
 import org.gamekins.GameUserProperty
+import org.gamekins.challenge.BranchCoverageChallenge
 import org.gamekins.challenge.BuildChallenge
 import org.gamekins.challenge.CoverageChallenge
 import org.gamekins.challenge.LineCoverageChallenge
@@ -48,7 +49,7 @@ object AchievementUtil {
                                run: Run<*, *>, property: GameUserProperty, listener: TaskListener,
                                additionalParameters: HashMap<String, String>): Boolean {
         return property.getCompletedChallenges(parameters.projectName)
-            .filterIsInstance<LineCoverageChallenge>()
+            .filterIsInstance<BranchCoverageChallenge>()
             .any {
                 (it.getMaxCoveredBranchesIfFullyCovered() >= (additionalParameters["branches"]?.toInt()
                     ?: Int.MAX_VALUE)

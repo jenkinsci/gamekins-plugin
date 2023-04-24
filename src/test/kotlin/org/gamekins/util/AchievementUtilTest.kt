@@ -31,9 +31,9 @@ import io.mockk.mockkStatic
 import io.mockk.unmockkAll
 import org.eclipse.jgit.lib.PersonIdent
 import org.eclipse.jgit.revwalk.RevCommit
+import org.gamekins.challenge.BranchCoverageChallenge
 import org.gamekins.challenge.BuildChallenge
 import org.gamekins.challenge.ClassCoverageChallenge
-import org.gamekins.challenge.LineCoverageChallenge
 import org.gamekins.file.FileDetails
 import org.gamekins.file.SourceFileDetails
 import org.gamekins.property.GameJobProperty
@@ -85,30 +85,30 @@ class AchievementUtilTest: FeatureSpec({
         }
 
         additionalParameters["branches"] = "2"
-        val lineChallenge = mockkClass(LineCoverageChallenge::class)
-        every { property.getCompletedChallenges(any()) } returns CopyOnWriteArrayList(listOf(lineChallenge))
-        every { lineChallenge.getMaxCoveredBranchesIfFullyCovered() } returns 0
+        val branchChallenge = mockkClass(BranchCoverageChallenge::class)
+        every { property.getCompletedChallenges(any()) } returns CopyOnWriteArrayList(listOf(branchChallenge))
+        every { branchChallenge.getMaxCoveredBranchesIfFullyCovered() } returns 0
         scenario("Lines do not have enough (0) branches")
         {
             AchievementUtil.coverLineWithXBranches(files, parameters, run, property, TaskListener.NULL,
                 additionalParameters) shouldBe false
         }
 
-        every { lineChallenge.getMaxCoveredBranchesIfFullyCovered() } returns 1
+        every { branchChallenge.getMaxCoveredBranchesIfFullyCovered() } returns 1
         scenario("Lines do not have enough (1) branches")
         {
             AchievementUtil.coverLineWithXBranches(files, parameters, run, property, TaskListener.NULL,
                 additionalParameters) shouldBe false
         }
 
-        every { lineChallenge.getMaxCoveredBranchesIfFullyCovered() } returns 2
+        every { branchChallenge.getMaxCoveredBranchesIfFullyCovered() } returns 2
         scenario("Lines have exactly enough branches")
         {
             AchievementUtil.coverLineWithXBranches(files, parameters, run, property, TaskListener.NULL,
                 additionalParameters) shouldBe true
         }
 
-        every { lineChallenge.getMaxCoveredBranchesIfFullyCovered() } returns 3
+        every { branchChallenge.getMaxCoveredBranchesIfFullyCovered() } returns 3
         scenario("Lines have more than enough branches")
         {
             AchievementUtil.coverLineWithXBranches(files, parameters, run, property, TaskListener.NULL,

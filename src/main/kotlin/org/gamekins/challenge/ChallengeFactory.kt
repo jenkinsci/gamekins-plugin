@@ -278,6 +278,13 @@ object ChallengeFactory {
                         .getConstructor(ChallengeGenerationData::class.java)
                         .newInstance(data)
                 }
+                BranchCoverageChallenge::class.java -> {
+                    data.line = JacocoUtil.chooseRandomLine(data.selectedFile, data.parameters.workspace,
+                        partiallyOnly = true)
+                    if (data.line == null) null else challengeClass
+                        .getConstructor(ChallengeGenerationData::class.java)
+                        .newInstance(data)
+                }
                 else -> {
                     data.line = JacocoUtil.chooseRandomLine(data.selectedFile, data.parameters.workspace)
                     if (data.line == null) null else challengeClass

@@ -94,9 +94,10 @@ object JacocoUtil {
      * Chooses a random not fully covered line of the given [classDetails]. Returns null if there are no such lines.
      */
     @JvmStatic
-    fun chooseRandomLine(classDetails: SourceFileDetails, workspace: FilePath): Element? {
+    fun chooseRandomLine(classDetails: SourceFileDetails, workspace: FilePath, partiallyOnly: Boolean = false)
+    : Element? {
         val elements = getLines(calculateCurrentFilePath(
-                workspace, classDetails.jacocoSourceFile, classDetails.parameters.remote))
+                workspace, classDetails.jacocoSourceFile, classDetails.parameters.remote), partiallyOnly)
         return if (elements.isEmpty()) null else elements[Random.nextInt(elements.size)]
     }
 
@@ -297,10 +298,10 @@ object JacocoUtil {
      */
     @JvmStatic
     @Throws(IOException::class, InterruptedException::class)
-    fun getLines(jacocoSourceFile: FilePath): Elements {
+    fun getLines(jacocoSourceFile: FilePath, partiallyOnly: Boolean = false): Elements {
         val document = Jsoup.parse(jacocoSourceFile.readToString())
         val elements = document.select("span." + "pc")
-        elements.addAll(document.select("span." + "nc"))
+        if (!partiallyOnly) elements.addAll(document.select("span." + "nc"))
         elements.removeIf { e: Element ->
             (e.text().trim() == "{" || e.text().trim() == "}"
                     || e.text().trim() == "(" || e.text().trim() == ")"

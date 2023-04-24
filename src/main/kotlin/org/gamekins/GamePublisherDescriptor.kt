@@ -133,6 +133,7 @@ class GamePublisherDescriptor : BuildStepDescriptor<Publisher?>(GamePublisher::c
      * Adds the built-in [Challenge]s to the [HashMap] [challenges] for generation.
      */
     private fun initChallengesMap() {
+        challenges[BranchCoverageChallenge::class.java] = 3
         challenges[ClassCoverageChallenge::class.java] = 2
         challenges[LineCoverageChallenge::class.java] = 4
         challenges[MethodCoverageChallenge::class.java] = 3
