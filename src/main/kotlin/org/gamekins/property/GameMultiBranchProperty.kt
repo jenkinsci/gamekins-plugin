@@ -22,6 +22,7 @@ import com.cloudbees.hudson.plugins.folder.AbstractFolderPropertyDescriptor
 import hudson.Extension
 import hudson.model.AbstractItem
 import hudson.model.Item
+import hudson.model.Job
 import hudson.model.JobPropertyDescriptor
 import hudson.util.FormValidation
 import hudson.util.ListBoxModel
@@ -235,6 +236,16 @@ class GameMultiBranchProperty
                                     @QueryParameter usersBox: String?): FormValidation {
             return PropertyUtil.doRemoveUserFromProject(job, usersBox!!)
         }
+
+        /**
+         * Called from the Jetty server if the button to participate alone is pressed. Adds the participant
+         * [usersBox] to a Pseudo-Team via the method [PropertyUtil.doAddUserToTeam].
+         */
+        fun doParticipateAlone(@AncestorInPath job: WorkflowMultiBranchProject?,
+                               @QueryParameter usersBox: String?): FormValidation {
+            return PropertyUtil.doAddUserToTeam(job, Constants.NO_TEAM_TEAM_NAME, usersBox!!)
+        }
+
         /**
          * Called from the Jetty server if the button to reset Gamekins in the specific [job] is called. Deletes all
          * Challenges from all users for the current project and resets the statistics.
