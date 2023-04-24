@@ -13,6 +13,7 @@ jQuery3("#addTeam").on('click', function () {
                 buildTeamsList(descriptorFullUrl)
             }
             jQuery3("#error-user-team")[0].innerHTML = rsp.responseText
+            updateTeamsTable(descriptorFullUrl)
         }
     })
 })
@@ -30,6 +31,7 @@ jQuery3("#addUserToTeam").on('click', function () {
         parameters: parameters,
         onComplete: function (rsp) {
             jQuery3("#error-user-team")[0].innerHTML = rsp.responseText
+            updateTeamsTable(descriptorFullUrl)
         }
     })
 })
@@ -47,6 +49,7 @@ jQuery3("#removeUserFromProject").on('click', function () {
         parameters: parameters,
         onComplete: function (rsp) {
             jQuery3("#error-user-team")[0].innerHTML = rsp.responseText
+            updateTeamsTable(descriptorFullUrl)
         }
     })
 })
@@ -64,6 +67,7 @@ jQuery3("#deleteTeam").on('click', function () {
             jQuery3("#error-user-team")[0].innerHTML = rsp.responseText
 
             buildTeamsList(descriptorFullUrl)
+            updateTeamsTable(descriptorFullUrl)
         }
     })
 })
@@ -79,6 +83,7 @@ jQuery3("#participateAlone").on('click', function () {
         parameters: parameters,
         onComplete: function (rsp) {
             jQuery3("#error-user-team")[0].innerHTML = rsp.responseText
+            updateTeamsTable(descriptorFullUrl)
         }
     })
 })
@@ -192,4 +197,12 @@ function buildTeamsTable(descriptorFullUrl, rebuild = false) {
             })
         }
     })
+}
+
+function updateTeamsTable(descriptorFullUrl) {
+    let table = jQuery3("#team-table")[0]
+
+    if (!table.innerHTML == "") {
+        buildTeamsTable(descriptorFullUrl, true)
+    }
 }

@@ -151,8 +151,6 @@ object Constants {
 
         const val PARENT_WITHOUT_PROPERTY = "$UNEXPECTED: Parent job has no property"
 
-        const val USER_ALREADY_IN_TEAM = "The user is already participating in a team"
-
         const val TEAM_NAME_TAKEN = "The team already exists - please use another name for your team"
     }
 
