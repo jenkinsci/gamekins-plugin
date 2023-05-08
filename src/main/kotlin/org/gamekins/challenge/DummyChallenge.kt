@@ -100,6 +100,8 @@ class DummyChallenge(private var parameters: Parameters, private var reason: Str
         return "$indentation<DummyChallenge/>"
     }
 
+    override fun setRejectedTime(time: Long) = Unit
+
     /**
      * Only for dummy purposes, no need for further information.
      *

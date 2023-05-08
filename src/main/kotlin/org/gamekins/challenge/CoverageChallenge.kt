@@ -109,6 +109,10 @@ abstract class CoverageChallenge(var details: SourceFileDetails, workspace: File
         return print
     }
 
+    override fun setRejectedTime(time: Long) {
+        setSolved(time)
+    }
+
     /**
      * Needed because of automatically generated getter and setter in Kotlin.
      */

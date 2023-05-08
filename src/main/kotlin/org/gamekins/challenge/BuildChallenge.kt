@@ -92,6 +92,10 @@ class BuildChallenge(private var parameters: Parameters) : Challenge {
         return print
     }
 
+    override fun setRejectedTime(time: Long) {
+        solved = time
+    }
+
     override fun toString(): String {
         return "Let the Build run successfully in branch ${parameters.branch}"
     }

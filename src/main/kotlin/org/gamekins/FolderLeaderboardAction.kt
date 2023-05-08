@@ -58,6 +58,7 @@ class FolderLeaderboardAction(val job: AbstractItem) : ProminentProjectAction, S
                 var score = 0
                 var challenges = 0
                 var quests = 0
+                var questTasks = 0
                 var unfinishedQuests = 0
                 var achievements = 0
 
@@ -65,6 +66,7 @@ class FolderLeaderboardAction(val job: AbstractItem) : ProminentProjectAction, S
                     score += property.getScore(project)
                     challenges += property.getCompletedChallenges(project).size
                     quests += property.getCompletedQuests(project).size
+                    questTasks += property.getCompletedQuestTasks(project).size
                     unfinishedQuests += property.getUnfinishedQuests(project).size
                     achievements += property.getCompletedAchievements(project).size
                 }
@@ -76,6 +78,7 @@ class FolderLeaderboardAction(val job: AbstractItem) : ProminentProjectAction, S
                         score,
                         challenges,
                         quests,
+                        questTasks,
                         unfinishedQuests,
                         achievements,
                         user.absoluteUrl,
@@ -86,8 +89,8 @@ class FolderLeaderboardAction(val job: AbstractItem) : ProminentProjectAction, S
         }
 
         return details
-            .sortedWith(compareBy({it.score}, {it.completedChallenges}, {it.completedAchievements},
-                {it.completedQuests}))
+            .sortedWith(compareBy({it.score}, {it.completedChallenges}, {it.completedQuestTasks},
+                {it.completedAchievements}))
             .reversed()
     }
 }

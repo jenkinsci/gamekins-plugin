@@ -23,6 +23,7 @@ import jenkins.model.Jenkins
 import org.gamekins.challenge.quest.Quest
 import org.gamekins.property.GameJobProperty
 import org.gamekins.property.GameMultiBranchProperty
+import org.gamekins.questtask.QuestTask
 import org.gamekins.util.Pair
 import org.jenkinsci.plugins.workflow.job.WorkflowJob
 import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject
@@ -60,6 +61,16 @@ class LeaderboardAction(val job: AbstractItem) : ProminentProjectAction, Describ
     }
 
     /**
+     * Returns the list of completed QuestTasks of the current project and user.
+     */
+    fun getCompletedQuestTasks(): CopyOnWriteArrayList<QuestTask> {
+        val user: User = User.current() ?: return CopyOnWriteArrayList()
+        val property = user.getProperty(GameUserProperty::class.java)
+            ?: return CopyOnWriteArrayList()
+        return property.getCompletedQuestTasks(job.fullName)
+    }
+
+    /**
      * Returns the list of current Challenges of the current project and user.
      */
     fun getCurrentChallenges(): CopyOnWriteArrayList<Challenge> {
@@ -70,16 +81,6 @@ class LeaderboardAction(val job: AbstractItem) : ProminentProjectAction, Describ
     }
 
     /**
-     * Returns the list of stored Challenges of the current project and user.
-     */
-    fun getStoredChallenges(): CopyOnWriteArrayList<Challenge> {
-        val user: User = User.current() ?: return CopyOnWriteArrayList()
-        val property = user.getProperty(GameUserProperty::class.java)
-            ?: return CopyOnWriteArrayList()
-        return property.getStoredChallenges(job.fullName)
-    }
-
-    /**
      * Returns the list of current Quests of the current project and user.
      */
     fun getCurrentQuests(): CopyOnWriteArrayList<Quest> {
@@ -87,6 +88,16 @@ class LeaderboardAction(val job: AbstractItem) : ProminentProjectAction, Describ
         val property = user.getProperty(GameUserProperty::class.java)
             ?: return CopyOnWriteArrayList()
         return property.getCurrentQuests(job.fullName)
+    }
+
+    /**
+     * Returns the list of current QuestTasks of the current project and user.
+     */
+    fun getCurrentQuestTasks(): CopyOnWriteArrayList<QuestTask> {
+        val user: User = User.current() ?: return CopyOnWriteArrayList()
+        val property = user.getProperty(GameUserProperty::class.java)
+            ?: return CopyOnWriteArrayList()
+        return property.getCurrentQuestTasks(job.fullName)
     }
 
     override fun getDescriptor(): Descriptor<LeaderboardAction> {
@@ -119,6 +130,16 @@ class LeaderboardAction(val job: AbstractItem) : ProminentProjectAction, Describ
         val property = user.getProperty(GameUserProperty::class.java)
             ?: return CopyOnWriteArrayList()
         return property.getRejectedQuests(job.fullName)
+    }
+
+    /**
+     * Returns the list of stored Challenges of the current project and user.
+     */
+    fun getStoredChallenges(): CopyOnWriteArrayList<Challenge> {
+        val user: User = User.current() ?: return CopyOnWriteArrayList()
+        val property = user.getProperty(GameUserProperty::class.java)
+            ?: return CopyOnWriteArrayList()
+        return property.getStoredChallenges(job.fullName)
     }
 
     override fun getTarget(): Any {
@@ -155,6 +176,7 @@ class LeaderboardAction(val job: AbstractItem) : ProminentProjectAction, Describ
                             property.getScore(job.fullName),
                             property.getCompletedChallenges(job.fullName).size,
                             property.getCompletedQuests(job.fullName).size,
+                            property.getCompletedQuestTasks(job.fullName).size,
                             property.getUnfinishedQuests(job.fullName).size,
                             property.getCompletedAchievements(job.fullName).size
                         )
@@ -199,6 +221,7 @@ class LeaderboardAction(val job: AbstractItem) : ProminentProjectAction, Describ
                         property.getScore(job.fullName),
                         property.getCompletedChallenges(job.fullName).size,
                         property.getCompletedQuests(job.fullName).size,
+                        property.getCompletedQuestTasks(job.fullName).size,
                         property.getUnfinishedQuests(job.fullName).size,
                         property.getCompletedAchievements(job.fullName).size,
                         user.absoluteUrl,
@@ -210,7 +233,7 @@ class LeaderboardAction(val job: AbstractItem) : ProminentProjectAction, Describ
 
         return details
             .sortedWith(
-                compareBy({it.score}, {it.completedChallenges}, {it.completedQuests}, {it.completedAchievements}))
+                compareBy({it.score}, {it.completedChallenges}, {it.completedQuestTasks}, {it.completedAchievements}))
             .reversed()
     }
 
@@ -285,9 +308,9 @@ class LeaderboardAction(val job: AbstractItem) : ProminentProjectAction, Describ
     @ExportedBean(defaultVisibility = 999)
     class UserDetails(@get:Exported val userName: String, @get:Exported val teamName: String,
                       @get:Exported val score: Int, @get:Exported val completedChallenges: Int,
-                      @get:Exported val completedQuests: Int, @get:Exported val unfinishedQuests: Int,
-                      @get:Exported val completedAchievements: Int, @get:Exported val url: String,
-                      @get:Exported val image: String)
+                      @get:Exported val completedQuests: Int, @get:Exported val completedQuestTasks: Int,
+                      @get:Exported val unfinishedQuests: Int, @get:Exported val completedAchievements: Int,
+                      @get:Exported val url: String, @get:Exported val image: String)
 
     /**
      * Container for the details of a team displayed on the Leaderboard.
@@ -298,7 +321,8 @@ class LeaderboardAction(val job: AbstractItem) : ProminentProjectAction, Describ
     @ExportedBean(defaultVisibility = 999)
     class TeamDetails(@get:Exported val teamName: String, @get:Exported var score: Int,
                       @get:Exported var completedChallenges: Int, @get:Exported var completedQuests: Int,
-                      @get:Exported var unfinishedQuests: Int, @get:Exported var completedAchievements: Int) {
+                      @get:Exported val completedQuestTasks: Int, @get:Exported var unfinishedQuests: Int,
+                      @get:Exported var completedAchievements: Int) {
 
         /**
          * Adds additional completed Achievements to the team.

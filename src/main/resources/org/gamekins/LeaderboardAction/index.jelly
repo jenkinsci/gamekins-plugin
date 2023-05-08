@@ -29,7 +29,6 @@
                             <th scope="col" class="text-center">Team</th>
                             <th scope="col" class="text-center">Completed Challenges</th>
                             <th scope="col" class="text-center">Completed Quests</th>
-                            <th scope="col" class="text-center">Unfinished Quests</th>
                             <th scope="col" class="text-center">Completed Achievements</th>
                             <th initialSortDir="up" class="text-center" scope="col">Score</th>
                         </tr>
@@ -43,8 +42,7 @@
                                 <td style="vertical-align: middle"><a href="${userDetail.url}/achievements">${userDetail.userName}</a></td>
                                 <td class="text-center" style="vertical-align: middle">${userDetail.teamName}</td>
                                 <td class="text-center" style="vertical-align: middle">${userDetail.completedChallenges}</td>
-                                <td class="text-center" style="vertical-align: middle">${userDetail.completedQuests}</td>
-                                <td class="text-center" style="vertical-align: middle">${userDetail.unfinishedQuests}</td>
+                                <td class="text-center" style="vertical-align: middle">${userDetail.completedQuestTasks}</td>
                                 <td class="text-center" style="vertical-align: middle">${userDetail.completedAchievements}</td>
                                 <td class="text-center" style="vertical-align: middle">${userDetail.score}</td>
                             </tr>
@@ -61,7 +59,6 @@
                                 <th scope="col" class="text-center">Team</th>
                                 <th scope="col" class="text-center">Completed Challenges</th>
                                 <th scope="col" class="text-center">Completed Quests</th>
-                                <th scope="col" class="text-center">Unfinished Quests</th>
                                 <th scope="col" class="text-center">Completed Achievements</th>
                                 <th initialSortDir="up" class="text-center" scope="col">Score</th>
                             </tr>
@@ -71,8 +68,7 @@
                                 <td class="text-center">${index + 1}</td>
                                 <td class="text-center">${teamDetail.teamName}</td>
                                 <td class="text-center">${teamDetail.completedChallenges}</td>
-                                <td class="text-center" style="vertical-align: middle">${userDetail.completedQuests}</td>
-                                <td class="text-center" style="vertical-align: middle">${userDetail.unfinishedQuests}</td>
+                                <td class="text-center" style="vertical-align: middle">${userDetail.completedQuestTasks}</td>
                                 <td class="text-center">${teamDetail.completedAchievements}</td>
                                 <td class="text-center">${teamDetail.score}</td>
                             </tr>
@@ -88,102 +84,27 @@
                 </h1>
 
                 <div class="row container-fluid py-1 px-5 justify-content-center">
-                    <p class="font-italic font-weight-light">Click on a quest to expand and see more details if
-                        available</p>
-                    <div id="questAccordion" class="col-12 px-0 shadow-lg">
+                    <div id="questTaskAccordion" class="col-12 px-0 shadow-lg">
                         <div class="card-header py-2 my-1 bg-dark text-white" id="headingOne">
-                            <h5 class="m-2">Current Quests</h5>
+                            <h4 class="m-2">Current Quests</h4>
                         </div>
                         <?jelly escape-by-default='false'?>
 
-                        <j:forEach indexVar="index" var="currentQuest" items="${it.currentQuests}">
+                        <j:forEach indexVar="index" var="currentQuestTask" items="${it.currentQuestTasks}">
                             <div class="card border-0">
-                                <div class="card-header p-0 m-0" data-toggle="tooltip" data-placement="top"
-                                     title="Click to see more details" id="headingQuest${index + 1}">
-                                    <div class="row mx-1 align-items-center mb-2">
-                                        <div class="col-12 col-sm-10">
-                                            <h5>
-                                                <button class="btn btn-link text-dark text-left text-decoration-none"
-                                                        data-toggle="collapse" data-target="#quest${index + 1}"
-                                                        aria-expanded="true"
-                                                        aria-controls="collapseOne"
-                                                        style="font-size:14px;">
-                                                    ${index + 1}. <span id="currentQuestText${index + 1}">${currentQuest}</span>
-                                                    <span class="ml-2 badge badge-success">${currentQuest.score} points</span>
-                                                </button>
-                                            </h5>
+                                <div class="card-header p-0 m-0">
+                                    <div class="col-12 col-sm-20">
+                                        <div class="p-4"
+                                             style="font-size:14px;">
+                                            ${index + 1}. <span id="currentQuestTaskText${index + 1}">${currentQuestTask}</span>
+                                            <span class="ml-2 badge badge-success">${currentQuestTask.score} points</span>
                                         </div>
-                                        <div class="col-12 col-sm-2">
-                                            <button type="button" class="btn btn-danger m-2 py-1"
-                                                    style="font-size: 14px;"
-                                                    data-toggle="modal" data-target="#rejectModal"
-                                                    data-quest-id="${index + 1}"
-                                                    data-descriptor-url="${it.descriptor.descriptorFullUrl}">
-                                                Reject
-                                            </button>
-                                        </div>
+                                        <h5>
+                                            <div class="progress">
+                                                <div class="progress-bar bg-info" role="progressbar" style="width: ${currentQuestTask.completedPercentage}%" aria-valuenow="${currentQuestTask.completedPercentage}" aria-valuemin="0" aria-valuemax="100">${currentQuestTask.completedPercentage}%</div>
+                                            </div>
+                                        </h5>
                                     </div>
-                                </div>
-                            </div>
-
-                            <div id="quest${index + 1}" class="collapse" aria-labelledby="headingQuest${index + 1}"
-                                 data-parent="#questAccordion">
-                                <div class="card-body" style="font-size:15px;">
-                                    <j:forEach indexVar="indexQuest" var="step" items="${currentQuest.steps}">
-                                        <div class="card border-0">
-                                            <j:if test="${indexQuest == currentQuest.currentStepNumber}">
-                                                <j:if test="${step == currentQuest.currentStep}">
-                                                    <div class="card-header p-0 m-0" data-toggle="tooltip" data-placement="top"
-                                                         title="Click to see more details" id="headingQuestChallenge${indexQuest + 1}">
-                                                        <div class="row mx-1 align-items-center mb-2">
-                                                            <div class="col-12 col-sm-12">
-                                                                <h5>
-                                                                    <j:if test='${step.description != ""}'>
-                                                                        ${step.description}
-                                                                        <br/>
-                                                                    </j:if>
-                                                                    <button class="btn btn-link text-dark text-left text-decoration-none"
-                                                                            data-toggle="collapse" data-target="#step${indexQuest + 1}"
-                                                                            aria-expanded="true"
-                                                                            aria-controls="collapseOne"
-                                                                            style="font-size:14px;">
-                                                                        ${indexQuest + 1}. <span id="questChallengeText${indexQuest + 1}">${step.challenge}</span>
-                                                                        <span class="ml-2 badge badge-warning">${step.challenge.name}</span>
-                                                                    </button>
-                                                                </h5>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-                                                    <div id="step${indexQuest + 1}" class="collapse" aria-labelledby="questStepHeading${indexQuest + 1}"
-                                                         data-parent="#quest${index + 1}">
-                                                        <div class="card-body" style="font-size:15px;">
-
-                                                            <j:if test='${step.challenge.snippet != ""}'>
-                                                                ${step.challenge.snippet}
-                                                            </j:if>
-
-                                                        </div>
-                                                    </div>
-                                                </j:if>
-                                            </j:if>
-                                            <j:if test="${indexQuest != currentQuest.currentStepNumber}">
-                                                <div class="card-header p-0 m-0">
-                                                    <div class="row mx-1 align-items-center mb-2">
-                                                        <div class="col-12 col-sm-12" style="opacity: 0.4">
-                                                            <h5>
-                                                                <button class="btn btn-link text-dark text-left text-decoration-none"
-                                                                        style="font-size:14px;" disabled="disabled">
-                                                                    ${indexQuest + 1}. <span id="questChallengeText${index + 1}">${step.challenge}</span>
-                                                                    <span class="ml-2 badge badge-warning">${step.challenge.name}</span>
-                                                                </button>
-                                                            </h5>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </j:if>
-                                        </div>
-                                    </j:forEach>
                                 </div>
                             </div>
                         </j:forEach>
@@ -196,7 +117,7 @@
 
                     <div id="accordion" class="col-12 px-0 shadow-lg">
                         <div class="card-header py-2 my-1 bg-dark text-white" id="headingOne">
-                            <h5 class="m-2">Current Challenges</h5>
+                            <h4 class="m-2">Current Challenges</h4>
                         </div>
                         <?jelly escape-by-default='false'?>
 
@@ -441,63 +362,17 @@
 
                 <div class="row container-fluid py-2 px-4 justify-content-center">
                     <div class="col-12 col-md-6 table-responsive p-4" style="max-height: 600px">
-                        <table class="mt-3 shadow table-hover table pane sortable bigtable" id="completedQuestsTable">
+                        <table class="mt-3 shadow table-hover table pane sortable bigtable" id="completedQuestTasksTable">
                             <thead class="thead-dark">
                                 <tr>
-                                    <th scope="col" class="text-left"><h5 class="pl-4">Completed Quests</h5></th>
+                                    <th scope="col" class="text-left"><h4 class="pl-4">Completed Quests</h4></th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <j:forEach indexVar="index" var="completedQuest" items="${it.completedQuests}">
-                                    <j:if test="${!completedQuest.first.toString().contains('No quest could be generated')}">
-                                        <tr>
-                                            <td class="p-4" style="background-color: #dbffe0;">${completedQuest}
-                                                <span class="ml-2 badge badge-success">${completedQuest.score} points</span>
-                                            </td>
-                                        </tr>
-                                    </j:if>
-                                </j:forEach>
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="col-12 col-md-6 table-responsive p-4" style="max-height: 600px">
-                        <table class="mt-3 shadow table-hover table pane sortable bigtable" id="rejectedQuestsTable">
-                            <thead class="thead-dark">
-                                <tr>
-                                    <th scope="col" class="text-left"><h5 class="pl-4">Rejected Quests</h5></th>
-                                </tr>
-                            </thead>
-
-                            <tbody>
-                                <j:forEach indexVar="index" var="rejectedQuests" items="${it.rejectedQuests}">
-                                    <j:if test="${!completedQuest.first.toString().contains('No quest could be generated')}">
-                                        <tr>
-                                            <td data-toggle="tooltip" data-placement="right"
-                                                title="Reason: ${rejectedQuests.second}" class="p-4"
-                                                style="background-color: #fff4e8;">
-                                                ${rejectedQuests.first}
-                                            </td>
-                                        </tr>
-                                    </j:if>
-                                </j:forEach>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <div class="row container-fluid py-2 px-4 justify-content-center">
-                    <div class="col-12 col-md-6 table-responsive p-4" style="max-height: 600px">
-                        <table class="mt-3 shadow table-hover table pane sortable bigtable" id="unfinishedQuestsTable">
-                            <thead class="thead-dark">
-                                <tr>
-                                    <th scope="col" class="text-left"><h5 class="pl-4">Unfinished Quests</h5></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <j:forEach indexVar="index" var="unfinishedQuest" items="${it.unfinishedQuests}">
+                                <j:forEach indexVar="index" var="completedQuestTask" items="${it.completedQuestTasks}">
                                     <tr>
-                                        <td class="p-4" style="background-color: #fff4e8;">${unfinishedQuest}
-                                            <span class="ml-2 badge badge-success">${unfinishedQuest.currentStepNumber} of ${unfinishedQuest.steps.size()} steps finished</span>
+                                        <td class="p-4" style="background-color: #dbffe0;">${completedQuestTask}
+                                            <span class="ml-2 badge badge-success">${completedQuestTask.score} points</span>
                                         </td>
                                     </tr>
                                 </j:forEach>
@@ -511,7 +386,7 @@
                         <table class="mt-3 shadow table-hover table pane sortable bigtable" id="completedTable">
                             <thead class="thead-dark">
                             <tr>
-                                <th scope="col" class="text-left"><h5 class="pl-4">Completed Challenges</h5></th>
+                                <th scope="col" class="text-left"><h4 class="pl-4">Completed Challenges</h4></th>
                             </tr>
                             </thead>
                             <tbody>
@@ -541,7 +416,7 @@
                         <table class="mt-3 shadow table-hover table pane sortable bigtable" id="rejectedTable">
                             <thead class="thead-dark">
                             <tr>
-                                <th scope="col" class="text-left"><h5 class="pl-4">Rejected Challenges</h5></th>
+                                <th scope="col" class="text-left"><h4 class="pl-4">Rejected Challenges</h4></th>
                             </tr>
                             </thead>
                             <tbody>

@@ -121,6 +121,8 @@ interface Challenge {
      */
     fun printToXML(reason: String, indentation: String): String?
 
+    fun setRejectedTime(time: Long)
+
     /**
      * Removes all HTML formatting of the [Challenge.toString] method.
      */

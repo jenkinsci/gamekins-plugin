@@ -317,7 +317,7 @@ class PublisherUtilTest : FeatureSpec( {
         var output : String
         scenario("Added entry for Statistics")
         {
-            PublisherUtil.updateStatistics(run, parameters, 0, 0, 0, 0, 0, listener)
+            PublisherUtil.updateStatistics(run, parameters, 0, 0, 0, 0, 0, 0, 0, listener)
             output = FilePath(null, "$root/output.txt").readToString()
             output shouldNotContain outputString
         }
@@ -328,7 +328,7 @@ class PublisherUtilTest : FeatureSpec( {
                 null
         scenario("No entry for Statistics added")
         {
-            PublisherUtil.updateStatistics(run, parameters, 0, 0, 0, 0, 0, listener)
+            PublisherUtil.updateStatistics(run, parameters, 0, 0, 0, 0, 0, 0, 0, listener)
             output = FilePath(null, "$root/output.txt").readToString()
             File("$root/output.txt").delete() shouldBe true
             listener = StreamTaskListener(File("$root/output.txt"))
@@ -338,7 +338,7 @@ class PublisherUtilTest : FeatureSpec( {
         every { job.parent } returns multiProject
         scenario("MultiBranchProject: Added entry for Statistics")
         {
-            PublisherUtil.updateStatistics(run, parameters, 0, 0, 0, 0, 0, listener)
+            PublisherUtil.updateStatistics(run, parameters, 0, 0, 0, 0, 0, 0, 0, listener)
             output = FilePath(null, "$root/output.txt").readToString()
             output shouldNotContain outputString
         }
@@ -347,7 +347,7 @@ class PublisherUtilTest : FeatureSpec( {
         scenario("No GameJobProperty")
         {
             val e = shouldThrow<NullPointerException> {
-                PublisherUtil.updateStatistics(run, parameters, 0, 0, 0, 0, 0, listener)
+                PublisherUtil.updateStatistics(run, parameters, 0, 0, 0, 0, 0, 0, 0, listener)
             }
             e.message shouldBe "null cannot be cast to non-null type org.gamekins.property.GameJobProperty"
         }

@@ -168,6 +168,10 @@ class MutationChallenge(val details: SourceFileDetails, var data: MutationUtil.M
         return print
     }
 
+    override fun setRejectedTime(time: Long) {
+        solved = time
+    }
+
     /**
      * Called by Jenkins after the object has been created from his XML representation. Used for data migration.
      */

@@ -158,6 +158,10 @@ class SmellChallenge(val details: FileDetails, val issue: Issue): Challenge {
         return print
     }
 
+    override fun setRejectedTime(time: Long) {
+        solved = time
+    }
+
     override fun toString(): String {
         val line = if (issue.startLine == null) "concerning the whole"
         else "starting from line <b>${issue.startLine}</b> in"

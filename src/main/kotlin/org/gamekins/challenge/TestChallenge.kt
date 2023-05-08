@@ -130,6 +130,10 @@ class TestChallenge(data: Challenge.ChallengeGenerationData) : Challenge {
         return print
     }
 
+    override fun setRejectedTime(time: Long) {
+        solved = time
+    }
+
     override fun toString(): String {
         return "Write a new test in branch ${parameters.branch}"
     }

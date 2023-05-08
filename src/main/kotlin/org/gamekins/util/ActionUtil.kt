@@ -28,7 +28,10 @@ import org.gamekins.challenge.quest.Quest
 import org.gamekins.file.FileDetails
 import org.gamekins.property.GameJobProperty
 import org.gamekins.property.GameMultiBranchProperty
+import org.gamekins.questtask.ReceiveChallengeQuestTask
+import org.gamekins.questtask.SendChallengeQuestTask
 import org.gamekins.util.Constants.Parameters
+import org.jenkinsci.remoting.protocol.ProtocolLayer.Send
 import java.io.IOException
 import java.util.*
 
@@ -293,6 +296,11 @@ object ActionUtil {
             MailUtil.sendMail(other, "New Gamekins Challenge", "challenges@gamekins.org", "Gamekins",
                 MailUtil.generateMailText(projectName, challenge, other, user, job))
         }
+
+        property.getCurrentQuestTasks(projectName).filterIsInstance<SendChallengeQuestTask>().first()
+            .challengeSent(challenge)
+        otherProperty.getCurrentQuestTasks(projectName).filterIsInstance<ReceiveChallengeQuestTask>().first()
+            .challengeSent(challenge)
 
         return FormValidation.ok("Challenge sent")
     }

@@ -214,6 +214,32 @@ object JacocoUtil {
         return 0.0
     }
 
+    @JvmStatic
+    fun getCoveredBranches(csv: FilePath): Int {
+        val content = csv.readToString()
+        val lines = content.split("\n".toRegex()).filter { line -> line.isNotEmpty() }
+        var coveredLines = 0
+        for (coverageLine in lines) {
+            val entries = coverageLine.split(",".toRegex())
+            coveredLines += entries[6].toInt()
+        }
+
+        return coveredLines
+    }
+
+    @JvmStatic
+    fun getCoveredLines(csv: FilePath): Int {
+        val content = csv.readToString()
+        val lines = content.split("\n".toRegex()).filter { line -> line.isNotEmpty() }
+        var coveredLines = 0
+        for (coverageLine in lines) {
+            val entries = coverageLine.split(",".toRegex())
+            coveredLines += entries[8].toInt()
+        }
+
+        return coveredLines
+    }
+
     /**
      * Returns all files in a given [directory] including subdirectories that matches a specific [regex].
      */
