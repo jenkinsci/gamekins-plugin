@@ -297,10 +297,10 @@ object ActionUtil {
                 MailUtil.generateMailText(projectName, challenge, other, user, job))
         }
 
-        property.getCurrentQuestTasks(projectName).filterIsInstance<SendChallengeQuestTask>().first()
-            .challengeSent(challenge)
-        otherProperty.getCurrentQuestTasks(projectName).filterIsInstance<ReceiveChallengeQuestTask>().first()
-            .challengeSent(challenge)
+        property.getCurrentQuestTasks(projectName).filterIsInstance<SendChallengeQuestTask>()
+            .forEach { it.challengeSent(challenge) }
+        property.getCurrentQuestTasks(projectName).filterIsInstance<ReceiveChallengeQuestTask>()
+            .forEach { it.challengeSent(challenge) }
 
         return FormValidation.ok("Challenge sent")
     }

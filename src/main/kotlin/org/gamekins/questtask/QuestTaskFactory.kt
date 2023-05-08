@@ -56,6 +56,7 @@ object QuestTaskFactory {
         return weightList[Random.nextInt(weightList.size)]
     }
 
+    @JvmStatic
     fun generateNewQuestTasks(
         user: User,
         property: GameUserProperty,

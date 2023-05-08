@@ -230,7 +230,8 @@ object PublisherUtil {
         var solvedQuestTasks = 0
         var generatedQuestTasks = 0
         if (!PropertyUtil.realUser(user)) return hashMapOf("generated" to 0, "solved" to 0,
-            "solvedAchievements" to 0, "solvedQuests" to 0, "generatedQuests" to 0)
+            "solvedAchievements" to 0, "solvedQuests" to 0, "generatedQuests" to 0,
+            "generatedQuestTasks" to 0, "solvedQuestTasks" to 0)
 
         val property = user.getProperty(GameUserProperty::class.java)
         if (property != null && property.isParticipating(parameters.projectName)) {

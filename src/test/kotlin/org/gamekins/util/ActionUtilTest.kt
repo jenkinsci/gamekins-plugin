@@ -311,6 +311,8 @@ class ActionUtilTest: FeatureSpec({
         every { userProperty1.getStoredChallenges(any()).size } returns 0
         every { userProperty.removeStoredChallenge(any(), any()) } returns Unit
         every { userProperty1.addStoredChallenge(any(), any()) } returns Unit
+        every { userProperty.getCurrentQuestTasks(any()) } returns CopyOnWriteArrayList()
+        every { userProperty1.getCurrentQuestTasks(any()) } returns CopyOnWriteArrayList()
         mockkStatic(Mailer::class)
         every { Mailer.descriptor() } returns null
         every { userProperty1.getNotifications() } returns false

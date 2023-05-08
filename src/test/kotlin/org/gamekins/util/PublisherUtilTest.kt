@@ -44,6 +44,7 @@ import jenkins.branch.MultiBranchProject
 import org.gamekins.achievement.Achievement
 import org.gamekins.challenge.quest.QuestFactory
 import org.gamekins.file.SourceFileDetails
+import org.gamekins.questtask.QuestTaskFactory
 import org.gamekins.util.Constants.Parameters
 import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject
 import java.io.File
@@ -119,6 +120,7 @@ class PublisherUtilTest : FeatureSpec( {
         mockkStatic(PropertyUtil::class)
         mockkStatic(ChallengeFactory::class)
         mockkStatic(QuestFactory::class)
+        mockkStatic(QuestTaskFactory::class)
         every { user.properties } returns mapOf()
         every { user.fullName } returns "Name"
         every { user.save() } returns Unit
@@ -133,7 +135,7 @@ class PublisherUtilTest : FeatureSpec( {
      * There is some real issue with mocking non-static object methods.
      */
     feature("checkUser") {
-        val map = hashMapOf("generated" to 0, "solved" to 0, "solvedAchievements" to 0, "generatedQuests" to 0, "solvedQuests" to 0)
+        val map = hashMapOf("generated" to 0, "solved" to 0, "solvedAchievements" to 0, "generatedQuests" to 0, "solvedQuests" to 0, "generatedQuestTasks" to 0, "solvedQuestTasks" to 0)
 
         every { PropertyUtil.realUser(user) } returns false
         scenario("User is not real")
@@ -161,11 +163,13 @@ class PublisherUtilTest : FeatureSpec( {
         every { userProperty.getStoredChallenges(any()) } returns CopyOnWriteArrayList()
         every { userProperty.getUnsolvedAchievements(any()) } returns CopyOnWriteArrayList()
         every { userProperty.getCurrentQuests(any()) } returns CopyOnWriteArrayList()
+        every { userProperty.getCurrentQuestTasks(any()) } returns CopyOnWriteArrayList()
         every { ChallengeFactory.generateNewChallenges(any(), any(), any(), any(), any()) } returns 0
         every { QuestFactory.generateNewQuests(any(), any(), any(), any(), any()) } returns 0
+        every { QuestTaskFactory.generateNewQuestTasks(any(), any(), any(), any(), any()) } returns 0
         scenario("BuildChallenge generated")
         {
-            PublisherUtil.checkUser(user, run, arrayListOf(classDetails), parameters, Result.SUCCESS) shouldBe hashMapOf("generated" to 1, "solved" to 0, "solvedAchievements" to 0, "generatedQuests" to 0, "solvedQuests" to 0)
+            PublisherUtil.checkUser(user, run, arrayListOf(classDetails), parameters, Result.SUCCESS) shouldBe hashMapOf("generated" to 1, "solved" to 0, "solvedAchievements" to 0, "generatedQuests" to 0, "solvedQuests" to 0, "generatedQuestTasks" to 0, "solvedQuestTasks" to 0)
         }
 
         every { ChallengeFactory.generateBuildChallenge(any(), any(), any(), any(), any()) } returns false
@@ -187,7 +191,7 @@ class PublisherUtilTest : FeatureSpec( {
         every { userProperty.getUser() } returns user
         scenario("Solved challenge")
         {
-            PublisherUtil.checkUser(user, run, arrayListOf(classDetails), parameters, Result.SUCCESS) shouldBe hashMapOf("generated" to 0, "solved" to 1, "solvedAchievements" to 0, "generatedQuests" to 0, "solvedQuests" to 0)
+            PublisherUtil.checkUser(user, run, arrayListOf(classDetails), parameters, Result.SUCCESS) shouldBe hashMapOf("generated" to 0, "solved" to 1, "solvedAchievements" to 0, "generatedQuests" to 0, "solvedQuests" to 0, "generatedQuestTasks" to 0, "solvedQuestTasks" to 0)
         }
 
         val achievement = mockkClass(Achievement::class)
@@ -196,13 +200,13 @@ class PublisherUtilTest : FeatureSpec( {
         every { userProperty.completeAchievement(any(), any()) } returns Unit
         scenario("Solved Achievement")
         {
-            PublisherUtil.checkUser(user, run, arrayListOf(classDetails), parameters, Result.SUCCESS) shouldBe hashMapOf("generated" to 0, "solved" to 1, "solvedAchievements" to 0, "generatedQuests" to 0, "solvedQuests" to 0)
+            PublisherUtil.checkUser(user, run, arrayListOf(classDetails), parameters, Result.SUCCESS) shouldBe hashMapOf("generated" to 0, "solved" to 1, "solvedAchievements" to 0, "generatedQuests" to 0, "solvedQuests" to 0, "generatedQuestTasks" to 0, "solvedQuestTasks" to 0)
         }
 
         every { achievement.isSolved(any(), any(), any(), any(), any()) } returns true
         scenario("Has solved Achievement")
         {
-            PublisherUtil.checkUser(user, run, arrayListOf(classDetails), parameters, Result.SUCCESS) shouldBe hashMapOf("generated" to 0, "solved" to 1, "solvedAchievements" to 1, "generatedQuests" to 0, "solvedQuests" to 0)
+            PublisherUtil.checkUser(user, run, arrayListOf(classDetails), parameters, Result.SUCCESS) shouldBe hashMapOf("generated" to 0, "solved" to 1, "solvedAchievements" to 1, "generatedQuests" to 0, "solvedQuests" to 0, "generatedQuestTasks" to 0, "solvedQuestTasks" to 0)
         }
     }
 
