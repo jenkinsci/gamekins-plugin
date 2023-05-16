@@ -24,7 +24,7 @@ jQuery3("#changeAvatarBtn").on("click", function () {
     new Ajax.Request(url, {
         parameters: parameters,
         onComplete: function (rsp) {
-            let carousel = jQuery3("#carousel")
+           let avatarPicker = jQuery3("#avatar-picker")
             if (jQuery3('div.active').index() === -1) {
                 let response = rsp.responseText.replace("[", "")
                 response = response.replace("]", "")
@@ -32,12 +32,7 @@ jQuery3("#changeAvatarBtn").on("click", function () {
                 for (let i = 0; i < avatars.length; i++) {
                     let item = document.createElement("div")
                     let currentAvatarSplit = jQuery3("#currentAvatar").attr("src").split("/")
-                    if (avatars[i].endsWith(currentAvatarSplit[currentAvatarSplit.length - 1])) {
-                        item.classList.add("carousel-item")
-                        item.classList.add("active")
-                    } else {
-                        item.classList.add("carousel-item")
-                    }
+                    item.classList.add("card")
                     let img = document.createElement("img")
                     let src = document.getElementsByTagName("img")[0].src
                     let base = src.substring(0, src.indexOf("static"))
@@ -47,7 +42,7 @@ jQuery3("#changeAvatarBtn").on("click", function () {
                     img.classList.add("w-10")
                     img.style.margin = "auto"
                     item.appendChild(img)
-                    carousel.append(item)
+                    avatarPicker.append(item)
                 }
             }
 
