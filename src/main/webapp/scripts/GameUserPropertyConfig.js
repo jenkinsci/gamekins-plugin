@@ -29,20 +29,30 @@ jQuery3("#changeAvatarBtn").on("click", function () {
                 let response = rsp.responseText.replace("[", "")
                 response = response.replace("]", "")
                 let avatars = response.split(", ")
-                for (let i = 0; i < avatars.length; i++) {
-                    let item = document.createElement("div")
-                    let currentAvatarSplit = jQuery3("#currentAvatar").attr("src").split("/")
-                    item.classList.add("card")
-                    let img = document.createElement("img")
-                    let src = document.getElementsByTagName("img")[0].src
-                    let base = src.substring(0, src.indexOf("static"))
-                    let endSplit = src.substring(src.indexOf("static")).split("/")
-                    img.src = base + "static/" + endSplit[1] + avatars[i]
-                    img.classList.add("d-block")
-                    img.classList.add("w-10")
-                    img.style.margin = "auto"
-                    item.appendChild(img)
-                    avatarPicker.append(item)
+                let avatarRows = sliceIntoChunks(avatars, 4)
+
+                for (let i = 0; i < avatarRows.length; j++)
+                {
+                    let row = document.createElement("div")
+                    row.classList.add("row")
+                    for(j = 0; j < avatarRows[i].length; j++)
+                    {
+                        let item = document.createElement("div")
+                        let currentAvatarSplit = jQuery3("#currentAvatar").attr("src").split("/")
+                        item.classList.add("card")
+                        item.classList.add("col-sm")
+                        let img = document.createElement("img")
+                        let src = document.getElementsByTagName("img")[0].src
+                        let base = src.substring(0, src.indexOf("static"))
+                        let endSplit = src.substring(src.indexOf("static")).split("/")
+                        img.src = base + "static/" + endSplit[1] + avatarRows[i][j]
+                        img.classList.add("d-block")
+                        img.classList.add("w-10")
+                        img.style.margin = "auto"
+                        item.appendChild(img)
+                        row.append(item)
+                    }
+                    avatarPicker.append(row)
                 }
             }
 
@@ -70,3 +80,14 @@ jQuery3("#chooseModalBtn").on("click", () => {
         }
     })
 })
+
+function sliceIntoChunks(array, size) {
+    let chunked_arr = [array.length/size + 1]
+        for (let i = 0; i < chunked_arr.length; i++) {
+            chunked_arr[i] = [size]
+            for(let j = 0; j < size && i*size+j < array.length; j++) {
+                  chunked_arr[i][j] = array[i*size+j]
+            }
+        }
+        return chunked_arr
+}
