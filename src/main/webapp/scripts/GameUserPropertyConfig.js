@@ -40,7 +40,7 @@ jQuery3("#changeAvatarBtn").on("click", function () {
                         let item = document.createElement("div")
                         let currentAvatarSplit = jQuery3("#currentAvatar").attr("src").split("/")
                         item.classList.add("card")
-                        item.classList.add("col-sm")
+                        item.classList.add("col")
                         let img = document.createElement("img")
                         let src = document.getElementsByTagName("img")[0].src
                         let base = src.substring(0, src.indexOf("static"))
@@ -82,9 +82,9 @@ jQuery3("#chooseModalBtn").on("click", () => {
 })
 
 function sliceIntoChunks(array, size) {
-    let chunked_arr = [array.length/size + 1]
+    let chunked_arr = []
         for (let i = 0; i < chunked_arr.length; i++) {
-            chunked_arr[i] = [size]
+            chunked_arr[i] = []
             for(let j = 0; j < size && i*size+j < array.length; j++) {
                   chunked_arr[i][j] = array[i*size+j]
             }
