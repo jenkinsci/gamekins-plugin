@@ -15,15 +15,15 @@
     <f:entry title="Avatar">
         <img class="d-block w-10" id="currentAvatar" width="200px"/>
         <br/>
-        <div class="modal fade modal-xl" id="avatarModal" tabindex="-1" role="dialog" aria-labelledby="avatarModalLabel"
+        <div class="modal fade" id="avatarModal" tabindex="-1" role="dialog" aria-labelledby="avatarModalLabel"
              aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-dialog modal-dialog-centered  modal-xl" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title" id="avatarModalLabel">Choose Avatar</h5>
                     </div>
                     <div class="modal-body">
-                        <div id="avatar-picker">
+                        <div class="input-group" id="avatar-picker">
 
                         </div>
                     </div>

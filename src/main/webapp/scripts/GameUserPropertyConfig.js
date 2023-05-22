@@ -29,15 +29,21 @@ jQuery3("#changeAvatarBtn").on("click", function () {
                 let response = rsp.responseText.replace("[", "")
                 response = response.replace("]", "")
                 let avatars = response.split(", ")
-                let avatarRows = sliceIntoChunks(avatars, 4)
+                let avatarRows = sliceIntoChunks(avatars, 10)
 
-                for (let i = 0; i < avatarRows.length; j++)
+                for (let i = 0; i < avatarRows.length; i++)
                 {
                     let row = document.createElement("div")
                     row.classList.add("row")
-                    for(j = 0; j < avatarRows[i].length; j++)
+                    for(let j = 0; j < avatarRows[i].length; j++)
                     {
                         let item = document.createElement("div")
+                        let radio = document.createElement("input")
+                        let cardbody = document.createElement("div")
+                        cardbody.classList.add("card-body")
+                        cardbody.appendChild(radio)
+                        radio.setAttribute("type", "radio")
+                        radio.setAttribute("id", "avatarradio")
                         let currentAvatarSplit = jQuery3("#currentAvatar").attr("src").split("/")
                         item.classList.add("card")
                         item.classList.add("col")
@@ -48,8 +54,10 @@ jQuery3("#changeAvatarBtn").on("click", function () {
                         img.src = base + "static/" + endSplit[1] + avatarRows[i][j]
                         img.classList.add("d-block")
                         img.classList.add("w-10")
+                        img.classList.add("img-fluid")
                         img.style.margin = "auto"
                         item.appendChild(img)
+                        item.appendChild(cardbody)
                         row.append(item)
                     }
                     avatarPicker.append(row)
@@ -83,10 +91,10 @@ jQuery3("#chooseModalBtn").on("click", () => {
 
 function sliceIntoChunks(array, size) {
     let chunked_arr = []
-        for (let i = 0; i < chunked_arr.length; i++) {
+        for (let i = 0; i < array.length/size; i++) {
             chunked_arr[i] = []
             for(let j = 0; j < size && i*size+j < array.length; j++) {
-                  chunked_arr[i][j] = array[i*size+j]
+                chunked_arr[i][j] = array[i*size+j]
             }
         }
         return chunked_arr
