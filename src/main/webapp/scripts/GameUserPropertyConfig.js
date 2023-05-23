@@ -25,7 +25,7 @@ jQuery3("#changeAvatarBtn").on("click", function () {
         parameters: parameters,
         onComplete: function (rsp) {
            let avatarPicker = jQuery3("#avatar-picker")
-            if (jQuery3('div.active').index() === -1) {
+            if (jQuery3('input[name="avatarradio"]').index() === -1) {
                 let response = rsp.responseText.replace("[", "")
                 response = response.replace("]", "")
                 let avatars = response.split(", ")
@@ -43,10 +43,16 @@ jQuery3("#changeAvatarBtn").on("click", function () {
                         cardbody.classList.add("card-body")
                         cardbody.appendChild(radio)
                         radio.setAttribute("type", "radio")
-                        radio.setAttribute("id", "avatarradio")
+                        radio.setAttribute("name", "avatarradio")
                         let currentAvatarSplit = jQuery3("#currentAvatar").attr("src").split("/")
                         item.classList.add("card")
                         item.classList.add("col")
+                        if (avatarRows[i][j].endsWith(currentAvatarSplit[currentAvatarSplit.length - 1])) {
+                            radio.checked = true
+                        } else {
+                            radio.checked = false
+                        }
+
                         let img = document.createElement("img")
                         let src = document.getElementsByTagName("img")[0].src
                         let base = src.substring(0, src.indexOf("static"))
@@ -71,7 +77,7 @@ jQuery3("#changeAvatarBtn").on("click", function () {
 })
 
 jQuery3("#chooseModalBtn").on("click", () => {
-    let newAvatarUrl = jQuery3('div.active')[0].firstChild.src
+    let newAvatarUrl = jQuery3('input[name=avatarradio]:checked')[0].parentElement.parentElement.firstChild.src
     let split = newAvatarUrl.split("/")
     let name = split[split.length - 1]
 
