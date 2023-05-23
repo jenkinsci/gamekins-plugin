@@ -97,7 +97,12 @@
                                         <div class="p-4"
                                              style="font-size:14px;">
                                             ${index + 1}. <span id="currentQuestTaskText${index + 1}">${currentQuestTask}</span>
-                                            <span class="ml-2 badge badge-success">${currentQuestTask.score} points</span>
+                                            <j:if test="${currentQuestTask.score > 1}">
+                                                <span class="ml-2 badge badge-success">${currentQuestTask.score} points</span>
+                                            </j:if>
+                                            <j:if test="${currentQuestTask.score == 1}">
+                                                <span class="ml-2 badge badge-success">${currentQuestTask.score} point</span>
+                                            </j:if>
                                         </div>
                                         <h5>
                                             <div class="progress">
@@ -134,7 +139,12 @@
                                                         aria-controls="collapseOne"
                                                         style="font-size:14px;">
                                                     ${index + 1}. <span id="currentChallengeText${index + 1}">${currentChallenge}</span>
-                                                    <span class="ml-2 badge badge-success">${currentChallenge.score} points</span>
+                                                    <j:if test="${currentChallenge.score > 1}">
+                                                        <span class="ml-2 badge badge-success">${currentChallenge.score} points</span>
+                                                    </j:if>
+                                                    <j:if test="${currentChallenge.score == 1}">
+                                                        <span class="ml-2 badge badge-success">${currentChallenge.score} point</span>
+                                                    </j:if>
                                                     <span class="ml-2 badge badge-warning">${currentChallenge.name}</span>
                                                 </button>
                                             </h5>
@@ -372,7 +382,12 @@
                                 <j:forEach indexVar="index" var="completedQuestTask" items="${it.completedQuestTasks}">
                                     <tr>
                                         <td class="p-4" style="background-color: #dbffe0;">${completedQuestTask}
-                                            <span class="ml-2 badge badge-success">${completedQuestTask.score} points</span>
+                                            <j:if test="${completedQuestTask.score > 1}">
+                                                <span class="ml-2 badge badge-success">${completedQuestTask.score} points</span>
+                                            </j:if>
+                                            <j:if test="${completedQuestTask.score == 1}">
+                                                <span class="ml-2 badge badge-success">${completedQuestTask.score} point</span>
+                                            </j:if>
                                         </td>
                                     </tr>
                                 </j:forEach>
@@ -396,13 +411,23 @@
                                             <j:if test='${completedChallenge.name == "Mutation"}'>
                                                 <td data-toggle="tooltip" data-placement="right" title="Killed by test: ${completedChallenge.killingTest}"
                                                     class="p-4" style="background-color: #dbffe0;">${completedChallenge}
-                                                    <span class="ml-2 badge badge-success">${completedChallenge.score} points</span>
+                                                    <j:if test="${completedChallenge.score > 1}">
+                                                        <span class="ml-2 badge badge-success">${completedChallenge.score} points</span>
+                                                    </j:if>
+                                                    <j:if test="${completedChallenge.score == 1}">
+                                                        <span class="ml-2 badge badge-success">${completedChallenge.score} point</span>
+                                                    </j:if>
                                                     <span class="ml-2 badge badge-warning">${completedChallenge.name}</span>
                                                 </td>
                                             </j:if>
                                             <j:if test='${completedChallenge.name != "Mutation"}'>
                                                 <td class="p-4" style="background-color: #dbffe0;">${completedChallenge}
-                                                    <span class="ml-2 badge badge-success">${completedChallenge.score} points</span>
+                                                    <j:if test="${completedChallenge.score > 1}">
+                                                        <span class="ml-2 badge badge-success">${completedChallenge.score} points</span>
+                                                    </j:if>
+                                                    <j:if test="${completedChallenge.score == 1}">
+                                                        <span class="ml-2 badge badge-success">${completedChallenge.score} point</span>
+                                                    </j:if>
                                                     <span class="ml-2 badge badge-warning">${completedChallenge.name}</span>
                                                 </td>
                                             </j:if>
