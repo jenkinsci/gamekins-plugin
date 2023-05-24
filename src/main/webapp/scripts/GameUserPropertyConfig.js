@@ -25,7 +25,7 @@ jQuery3("#changeAvatarBtn").on("click", function () {
         parameters: parameters,
         onComplete: function (rsp) {
            let avatarPicker = jQuery3("#avatar-picker")
-            if (jQuery3('input[name="avatarradio"]').index() === -1) {
+            if (jQuery3('input[name="avatarRadio"]').index() === -1) {
                 let response = rsp.responseText.replace("[", "")
                 response = response.replace("]", "")
                 let avatars = response.split(", ")
@@ -39,11 +39,11 @@ jQuery3("#changeAvatarBtn").on("click", function () {
                     {
                         let item = document.createElement("div")
                         let radio = document.createElement("input")
-                        let cardbody = document.createElement("div")
-                        cardbody.classList.add("card-body")
-                        cardbody.appendChild(radio)
+                        let cardBody = document.createElement("div")
+                        cardBody.classList.add("card-body")
+                        cardBody.appendChild(radio)
                         radio.setAttribute("type", "radio")
-                        radio.setAttribute("name", "avatarradio")
+                        radio.setAttribute("name", "avatarRadio")
                         let currentAvatarSplit = jQuery3("#currentAvatar").attr("src").split("/")
                         item.classList.add("card")
                         item.classList.add("col")
@@ -52,18 +52,15 @@ jQuery3("#changeAvatarBtn").on("click", function () {
                         } else {
                             radio.checked = false
                         }
-
                         let img = document.createElement("img")
                         let src = document.getElementsByTagName("img")[0].src
                         let base = src.substring(0, src.indexOf("static"))
                         let endSplit = src.substring(src.indexOf("static")).split("/")
                         img.src = base + "static/" + endSplit[1] + avatarRows[i][j]
-                        img.classList.add("d-block")
-                        img.classList.add("w-10")
                         img.classList.add("img-fluid")
                         img.style.margin = "auto"
                         item.appendChild(img)
-                        item.appendChild(cardbody)
+                        item.appendChild(cardBody)
                         row.append(item)
                     }
                     avatarPicker.append(row)
@@ -77,7 +74,7 @@ jQuery3("#changeAvatarBtn").on("click", function () {
 })
 
 jQuery3("#chooseModalBtn").on("click", () => {
-    let newAvatarUrl = jQuery3('input[name=avatarradio]:checked')[0].parentElement.parentElement.firstChild.src
+    let newAvatarUrl = jQuery3('input[name=avatarRadio]:checked')[0].parentElement.parentElement.firstChild.src
     let split = newAvatarUrl.split("/")
     let name = split[split.length - 1]
 
