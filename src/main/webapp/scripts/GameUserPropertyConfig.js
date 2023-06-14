@@ -41,12 +41,16 @@ jQuery3("#changeAvatarBtn").on("click", function () {
                         let radio = document.createElement("input")
                         let cardBody = document.createElement("div")
                         cardBody.classList.add("card-body")
+                        cardBody.setAttribute("role" , "button")
                         cardBody.appendChild(radio)
                         radio.setAttribute("type", "radio")
                         radio.setAttribute("name", "avatarRadio")
+                        radio.setAttribute("id", i + "_" + j)
+                        cardBody.classList.add("text-center")
                         let currentAvatarSplit = jQuery3("#currentAvatar").attr("src").split("/")
                         item.classList.add("card")
                         item.classList.add("col")
+                        item.setAttribute("id", i + "_" + j + "-card")
                         if (avatarRows[i][j].endsWith(currentAvatarSplit[currentAvatarSplit.length - 1])) {
                             radio.checked = true
                         } else {
@@ -65,6 +69,16 @@ jQuery3("#changeAvatarBtn").on("click", function () {
                     }
                     avatarPicker.append(row)
                 }
+                jQuery3('input:radio').change(function () {
+                        var radioClicked = jQuery3(this).attr('id')
+                        unclickRadio()
+                        clickRadio(radioClicked)
+                    });
+                    jQuery3(".card").click(function () {
+                        var inputElement = jQuery3(this).find('input[type=radio]').attr('id')
+                        unclickRadio()
+                        clickRadio(inputElement)
+                    });
             }
 
             jQuery3("#avatarModal").modal()
@@ -101,4 +115,12 @@ function sliceIntoChunks(array, size) {
             }
         }
         return chunked_arr
+}
+
+function unclickRadio() {
+    jQuery3("input:radio").prop("checked", false)
+}
+
+function clickRadio(inputElement) {
+    jQuery3("#" + inputElement).prop("checked", true)
 }
