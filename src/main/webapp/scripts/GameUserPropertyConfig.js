@@ -25,7 +25,7 @@ jQuery3("#changeAvatarBtn").on("click", function () {
         parameters: parameters,
         onComplete: function (rsp) {
            let avatarPicker = jQuery3("#avatar-picker")
-            if (jQuery3('input[name="avatarRadio"]').index() === -1) {
+            if (jQuery3('div[class="row"]').index() === -1) {
                 let response = rsp.responseText.replace("[", "")
                 response = response.replace("]", "")
                 let avatars = response.split(", ")
@@ -35,6 +35,7 @@ jQuery3("#changeAvatarBtn").on("click", function () {
                 {
                     let row = document.createElement("div")
                     row.classList.add("row")
+                    row.classList.add("mt-2")
                     for(let j = 0; j < avatarRows[i].length; j++)
                     {
                         let item = document.createElement("div")
@@ -45,6 +46,8 @@ jQuery3("#changeAvatarBtn").on("click", function () {
                         let currentAvatarSplit = jQuery3("#currentAvatar").attr("src").split("/")
                         item.classList.add("card")
                         item.classList.add("col")
+                        item.classList.add("mr-1")
+                        item.classList.add("ml-1")
                         item.setAttribute("id", i + "_" + j + "-card")
                         if (avatarRows[i][j].endsWith(currentAvatarSplit[currentAvatarSplit.length - 1])) {
                             item.style.boxShadow = "0 0 1px 1px #2ecc71"
@@ -57,7 +60,7 @@ jQuery3("#changeAvatarBtn").on("click", function () {
                         img.src = base + "static/" + endSplit[1] + avatarRows[i][j]
                         img.classList.add("img-fluid")
                         img.style.margin = "auto"
-                        item.appendChild(img)
+                        cardBody.appendChild(img)
                         item.appendChild(cardBody)
                         row.append(item)
                     }
@@ -77,7 +80,14 @@ jQuery3("#changeAvatarBtn").on("click", function () {
 })
 
 jQuery3("#chooseModalBtn").on("click", () => {
-    let newAvatarUrl = jQuery3('div:checked')[0].parentElement.firstChild.src
+    var card
+    let cards = document.getElementsByClassName("card")
+    for (let i = 0; i < cards.length; i++) {
+        if (cards[i].style.boxShadow != "") {
+            card = cards[i]
+        }
+    }
+    let newAvatarUrl = card.firstChild.firstChild.src
     let split = newAvatarUrl.split("/")
     let name = split[split.length - 1]
 
