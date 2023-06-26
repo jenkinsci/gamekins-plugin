@@ -38,23 +38,17 @@ jQuery3("#changeAvatarBtn").on("click", function () {
                     for(let j = 0; j < avatarRows[i].length; j++)
                     {
                         let item = document.createElement("div")
-                        let radio = document.createElement("input")
                         let cardBody = document.createElement("div")
                         cardBody.classList.add("card-body")
                         cardBody.setAttribute("role" , "button")
-                        cardBody.appendChild(radio)
-                        radio.setAttribute("type", "radio")
-                        radio.setAttribute("name", "avatarRadio")
-                        radio.setAttribute("id", i + "_" + j)
                         cardBody.classList.add("text-center")
                         let currentAvatarSplit = jQuery3("#currentAvatar").attr("src").split("/")
                         item.classList.add("card")
                         item.classList.add("col")
                         item.setAttribute("id", i + "_" + j + "-card")
                         if (avatarRows[i][j].endsWith(currentAvatarSplit[currentAvatarSplit.length - 1])) {
-                            radio.checked = true
+                            item.style.boxShadow = "0 0 1px 1px #2ecc71"
                         } else {
-                            radio.checked = false
                         }
                         let img = document.createElement("img")
                         let src = document.getElementsByTagName("img")[0].src
@@ -69,16 +63,11 @@ jQuery3("#changeAvatarBtn").on("click", function () {
                     }
                     avatarPicker.append(row)
                 }
-                jQuery3('input:radio').change(function () {
-                        var radioClicked = jQuery3(this).attr('id')
-                        unclickRadio()
-                        clickRadio(radioClicked)
-                    });
-                    jQuery3(".card").click(function () {
-                        var inputElement = jQuery3(this).find('input[type=radio]').attr('id')
-                        unclickRadio()
-                        clickRadio(inputElement)
-                    });
+                jQuery3(".card").click(function () {
+                    var inputElement = jQuery3(this).attr('id')
+                    unclickRadio()
+                    clickRadio(inputElement)
+                });
             }
 
             jQuery3("#avatarModal").modal()
@@ -88,7 +77,7 @@ jQuery3("#changeAvatarBtn").on("click", function () {
 })
 
 jQuery3("#chooseModalBtn").on("click", () => {
-    let newAvatarUrl = jQuery3('input[name=avatarRadio]:checked')[0].parentElement.parentElement.firstChild.src
+    let newAvatarUrl = jQuery3('div:checked')[0].parentElement.firstChild.src
     let split = newAvatarUrl.split("/")
     let name = split[split.length - 1]
 
@@ -118,9 +107,12 @@ function sliceIntoChunks(array, size) {
 }
 
 function unclickRadio() {
-    jQuery3("input:radio").prop("checked", false)
+    let cards = document.getElementsByClassName("card")
+    for (let i = 0; i < cards.length; i++) {
+        cards[i].style.boxShadow = ""
+    }
 }
 
 function clickRadio(inputElement) {
-    jQuery3("#" + inputElement).prop("checked", true)
+    document.getElementById(inputElement).style.boxShadow = "0 0 1px 1px #2ecc71"
 }
