@@ -25,7 +25,7 @@ jQuery3("#changeAvatarBtn").on("click", function () {
         parameters: parameters,
         onComplete: function (rsp) {
            let avatarPicker = jQuery3("#avatar-picker")
-            if (jQuery3('div[class="row"]').index() === -1) {
+            if (avatarPicker.children().length === 0) {
                 let response = rsp.responseText.replace("[", "")
                 response = response.replace("]", "")
                 let avatars = response.split(", ")
@@ -50,7 +50,7 @@ jQuery3("#changeAvatarBtn").on("click", function () {
                         item.classList.add("ml-1")
                         item.setAttribute("id", i + "_" + j + "-card")
                         if (avatarRows[i][j].endsWith(currentAvatarSplit[currentAvatarSplit.length - 1])) {
-                            item.style.boxShadow = "0 0 1px 1px #2ecc71"
+                            item.style.boxShadow = "0 0 1px 1px #292b2c"
                         } else {
                         }
                         let img = document.createElement("img")
@@ -59,7 +59,11 @@ jQuery3("#changeAvatarBtn").on("click", function () {
                         let endSplit = src.substring(src.indexOf("static")).split("/")
                         img.src = base + "static/" + endSplit[1] + avatarRows[i][j]
                         img.classList.add("img-fluid")
+                        img.classList.add("w-100")
                         img.style.margin = "auto"
+                        img.classList.add("pt-2")
+                        img.classList.add("pb-1")
+                        cardBody.classList.add("p-0")
                         cardBody.appendChild(img)
                         item.appendChild(cardBody)
                         row.append(item)
@@ -124,5 +128,5 @@ function unclickRadio() {
 }
 
 function clickRadio(inputElement) {
-    document.getElementById(inputElement).style.boxShadow = "0 0 1px 1px #2ecc71"
+    document.getElementById(inputElement).style.boxShadow = "0 0 1px 1px #292b2c"
 }
