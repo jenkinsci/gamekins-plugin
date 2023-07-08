@@ -54,14 +54,14 @@ class GumTree {
         val methodDeclaration: NodeWrapper = getMethodDeclaration(lineNumber, mappings) ?: return null
         val classDeclaration: NodeWrapper = getClassDeclaration(methodDeclaration) ?: return null
 
-        var mutatedClass = (classDeclaration.node as ClassOrInterfaceDeclaration).fullyQualifiedName.get() //Überprüfen ob das so geht
+        var mutatedClass = (classDeclaration.node as ClassOrInterfaceDeclaration).fullyQualifiedName.get()
         if (classDeclaration.node.isInnerClass) {
             mutatedClass = replaceLastCharacter(mutatedClass, '.', '$')
         }
         val mutatedMethod = (methodDeclaration.node as MethodDeclaration).nameAsString
         var mutatedMethodDescription = MethodNameConverter().getByteCodeRepresentation(methodDeclaration.node)
         if (mutatedMethodDescription == null) {
-            mutatedMethodDescription = retrieveMethodDescriptionThrewPitReport(lineNumber, methodDeclaration, parameters)?: return null
+            mutatedMethodDescription = retrieveMethodDescriptionThrewPitReport(lineNumber, parameters)?: return null
         }
 
         return MutationData(
@@ -143,13 +143,12 @@ class GumTree {
     /**
      * Tries to retrieve the methodDescription from the pit report for the given method and line number.
      */
-    private fun retrieveMethodDescriptionThrewPitReport(lineNumber: Int, methodDeclaration: NodeWrapper, parameters: Parameters): String? {
+    private fun retrieveMethodDescriptionThrewPitReport(lineNumber: Int, parameters: Parameters): String? {
         val mutationReport = FilePath(parameters.workspace.channel,
             parameters.workspace.remote + "/target/pit-reports/mutations.xml")
         if (!mutationReport.exists()) return null
         val mutants = mutationReport.readToString().split("\n").filter { it.startsWith("<mutation ") }
         if (mutants.isEmpty()) return null
-        //TODO: Do check with methodName and lineNumber
         for (mutant in mutants) {
             if (mutant.contains("<lineNumber>$lineNumber</lineNumber>"))
                 return """<methodDescription>(.*)</methodDescription>""".toRegex().find(mutant)!!.groupValues[1]
