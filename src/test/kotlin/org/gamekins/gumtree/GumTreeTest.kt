@@ -5,28 +5,19 @@ import com.github.javaparser.StaticJavaParser
 import com.github.javaparser.ast.CompilationUnit
 import com.github.javaparser.symbolsolver.JavaSymbolSolver
 import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver
-import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeSolver
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver
 import hudson.FilePath
-import hudson.model.Run
-import hudson.model.TaskListener
 import io.kotest.assertions.assertSoftly
 import io.kotest.core.spec.style.FeatureSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.string.shouldEndWith
 import io.mockk.*
-import org.gamekins.challenge.MutationChallenge
-import org.gamekins.file.SourceFileDetails
 import org.gamekins.gumTree.GumTree
 import org.gamekins.gumTree.JavaParser
 import org.gamekins.test.TestUtils
 import org.gamekins.util.Constants
-import org.gamekins.util.JacocoUtil
-import org.gamekins.util.MutationUtil
 import org.gamekins.util.MutationUtil.MutationData
-import org.gamekins.util.Pair
-import org.jsoup.nodes.Document
 import java.io.File
 
 class GumTreeTest: FeatureSpec ({
