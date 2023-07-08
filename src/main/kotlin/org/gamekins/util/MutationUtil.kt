@@ -1,8 +1,11 @@
 package org.gamekins.util
 
+import com.github.javaparser.ast.CompilationUnit
 import hudson.FilePath
 import hudson.model.TaskListener
 import org.gamekins.file.SourceFileDetails
+import org.gamekins.gumTree.GumTree
+import org.gamekins.gumTree.JavaParser
 import org.gamekins.util.Constants.Mutation.RETURN_FALSE
 import org.gamekins.util.Constants.Mutation.RETURN_REGEX
 import org.gamekins.util.Constants.Mutation.RETURN_TRUE
@@ -72,7 +75,14 @@ object MutationUtil {
         if (!mutationReport.exists()) return null
         val mutants = mutationReport.readToString().split("\n").filter { it.startsWith("<mutation ") }
         if (mutants.isEmpty()) return null
-        return mutants.map { MutationData(it) }.find { it == data }
+        //return mutants.map { MutationData(it) }.find { it == data } hier war schluss
+        var mutant = mutants.map { MutationData(it) }.find { it == data }
+        if (mutant == null) {
+            val updatedData = GumTree().findMapping(data, parameters)
+            mutant = mutants.map { MutationData(it) }.find { it == updatedData }
+        }
+        mutant?.generateCompilationUnit(parameters)
+        return mutant
     }
 
     /**
@@ -199,35 +209,36 @@ object MutationUtil {
      * @author Philipp Straubinger
      * @since 0.6
      */
-    class MutationData(line: String) {
+    class MutationData(
+        val detected: Boolean,
+        val status: MutationStatus,
+        val numberOfTestsRun: Int,
+        val sourceFile: String,
+        val mutatedClass: String,
+        val mutatedMethod: String,
+        val methodDescription: String,
+        var lineNumber: Int,
+        val mutator: Mutator,
+        val killingTest: String,
+        val description: String,
+        var compilationUnit: CompilationUnit?
+    ) {
 
-        val detected: Boolean
-        val status: MutationStatus
-        val numberOfTestsRun: Int
-        val sourceFile: String
-        val mutatedClass: String
-        val mutatedMethod: String
-        val methodDescription: String
-        var lineNumber: Int
-        val mutator: Mutator
-        val killingTest: String
-        val description: String
-
-        init {
-            detected = """detected='([a-z]*)'""".toRegex().find(line)!!.groupValues[1].toBoolean()
-            status = when ("""status='([A-Z_]*)'""".toRegex().find(line)!!.groupValues[1]) {
+        constructor(line: String) : this(
+            """detected='([a-z]*)'""".toRegex().find(line)!!.groupValues[1].toBoolean(),
+            when ("""status='([A-Z_]*)'""".toRegex().find(line)!!.groupValues[1]) {
                 "NO_COVERAGE" -> MutationStatus.NO_COVERAGE
                 "SURVIVED" -> MutationStatus.SURVIVED
                 "KILLED" -> MutationStatus.KILLED
                 else -> MutationStatus.KILLED
-            }
-            numberOfTestsRun = """numberOfTestsRun='(\d*)'""".toRegex().find(line)!!.groupValues[1].toInt()
-            sourceFile = """<sourceFile>(.*)</sourceFile>""".toRegex().find(line)!!.groupValues[1]
-            mutatedClass = """<mutatedClass>(.*)</mutatedClass>""".toRegex().find(line)!!.groupValues[1]
-            mutatedMethod = """<mutatedMethod>(.*)</mutatedMethod>""".toRegex().find(line)!!.groupValues[1]
-            methodDescription = """<methodDescription>(.*)</methodDescription>""".toRegex().find(line)!!.groupValues[1]
-            lineNumber = """<lineNumber>(.*)</lineNumber>""".toRegex().find(line)!!.groupValues[1].toInt()
-            mutator = when ("""<mutator>(.*)</mutator>""".toRegex().find(line)!!.groupValues[1]) {
+            },
+            """numberOfTestsRun='(\d*)'""".toRegex().find(line)!!.groupValues[1].toInt(),
+            """<sourceFile>(.*)</sourceFile>""".toRegex().find(line)!!.groupValues[1],
+            """<mutatedClass>(.*)</mutatedClass>""".toRegex().find(line)!!.groupValues[1],
+            """<mutatedMethod>(.*)</mutatedMethod>""".toRegex().find(line)!!.groupValues[1],
+            """<methodDescription>(.*)</methodDescription>""".toRegex().find(line)!!.groupValues[1],
+            """<lineNumber>(.*)</lineNumber>""".toRegex().find(line)!!.groupValues[1].toInt(),
+            when ("""<mutator>(.*)</mutator>""".toRegex().find(line)!!.groupValues[1]) {
                 "$MUTATOR_PACKAGE.ConditionalsBoundaryMutator" -> CONDITIONALS_BOUNDARY
                 "$MUTATOR_PACKAGE.IncrementsMutator" -> INCREMENTS
                 "$MUTATOR_PACKAGE.InvertNegsMutator" -> INVERT_NEGS
@@ -241,10 +252,57 @@ object MutationUtil {
                 "$MUTATOR_PACKAGE.returns.NullReturnValsMutator" -> NULL_RETURNS
                 "$MUTATOR_PACKAGE.returns.PrimitiveReturnsMutator" -> PRIMITIVE_RETURNS
                 else -> UNKNOWN
-            }
-            killingTest = (if (line.contains("<killingTest/>")) "" else
-                """<killingTest>(.*)</killingTest>""".toRegex().find(line)!!.groupValues[1])
-            description = """<description>(.*)</description>""".toRegex().find(line)!!.groupValues[1]
+            },
+            (if (line.contains("<killingTest/>")) "" else
+                """<killingTest>(.*)</killingTest>""".toRegex().find(line)!!.groupValues[1]),
+            """<description>(.*)</description>""".toRegex().find(line)!!.groupValues[1],
+            null
+        )
+
+        constructor(line: String, parameters: Parameters) : this(
+            """detected='([a-z]*)'""".toRegex().find(line)!!.groupValues[1].toBoolean(),
+            when ("""status='([A-Z_]*)'""".toRegex().find(line)!!.groupValues[1]) {
+                "NO_COVERAGE" -> MutationStatus.NO_COVERAGE
+                "SURVIVED" -> MutationStatus.SURVIVED
+                "KILLED" -> MutationStatus.KILLED
+                else -> MutationStatus.KILLED
+            },
+            """numberOfTestsRun='(\d*)'""".toRegex().find(line)!!.groupValues[1].toInt(),
+            """<sourceFile>(.*)</sourceFile>""".toRegex().find(line)!!.groupValues[1],
+            """<mutatedClass>(.*)</mutatedClass>""".toRegex().find(line)!!.groupValues[1],
+            """<mutatedMethod>(.*)</mutatedMethod>""".toRegex().find(line)!!.groupValues[1],
+            """<methodDescription>(.*)</methodDescription>""".toRegex().find(line)!!.groupValues[1],
+            """<lineNumber>(.*)</lineNumber>""".toRegex().find(line)!!.groupValues[1].toInt(),
+            when ("""<mutator>(.*)</mutator>""".toRegex().find(line)!!.groupValues[1]) {
+                "$MUTATOR_PACKAGE.ConditionalsBoundaryMutator" -> CONDITIONALS_BOUNDARY
+                "$MUTATOR_PACKAGE.IncrementsMutator" -> INCREMENTS
+                "$MUTATOR_PACKAGE.InvertNegsMutator" -> INVERT_NEGS
+                "$MUTATOR_PACKAGE.MathMutator" -> MATH
+                "$MUTATOR_PACKAGE.NegateConditionalsMutator" -> NEGATE_CONDITIONALS
+                "$MUTATOR_PACKAGE.ReturnValsMutator" -> RETURN_VALS
+                "$MUTATOR_PACKAGE.VoidMethodCallMutator" -> VOID_METHOD_CALLS
+                "$MUTATOR_PACKAGE.returns.EmptyObjectReturnValsMutator" -> EMPTY_RETURNS
+                "$MUTATOR_PACKAGE.returns.BooleanFalseReturnValsMutator" -> FALSE_RETURNS
+                "$MUTATOR_PACKAGE.returns.BooleanTrueReturnValsMutator" -> TRUE_RETURNS
+                "$MUTATOR_PACKAGE.returns.NullReturnValsMutator" -> NULL_RETURNS
+                "$MUTATOR_PACKAGE.returns.PrimitiveReturnsMutator" -> PRIMITIVE_RETURNS
+                else -> UNKNOWN
+            },
+            (if (line.contains("<killingTest/>")) "" else
+                """<killingTest>(.*)</killingTest>""".toRegex().find(line)!!.groupValues[1]),
+            """<description>(.*)</description>""".toRegex().find(line)!!.groupValues[1],
+            JavaParser.parse(
+                """<sourceFile>(.*)</sourceFile>""".toRegex().find(line)!!.groupValues[1],
+                """<mutatedClass>(.*)</mutatedClass>""".toRegex().find(line)!!.groupValues[1],
+                parameters
+            )
+        )
+
+        /**
+         * Generates the compilationUnit if it is null.
+         */
+        fun generateCompilationUnit(parameters: Parameters) {
+            if (compilationUnit == null) compilationUnit = JavaParser.parse(sourceFile, mutatedClass, parameters)
         }
 
         override fun equals(other: Any?): Boolean {
