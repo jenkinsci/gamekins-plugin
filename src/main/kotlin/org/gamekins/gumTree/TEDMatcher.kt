@@ -3,6 +3,7 @@ package org.gamekins.gumTree
 /**
  * Implementation of the "Simple Fast Algorithms for the Editing Distance Between Trees and Related Problems"
  * algorithm by Zhang and Sasha using dynamic programming.
+ * Inspired by the implementation of jgrapht (https://github.com/jgrapht/jgrapht/blob/master/jgrapht-core/src/main/java/org/jgrapht/alg/similarity/ZhangShashaTreeEditDistance.java)
  *
  * @author Michael Gruener
  * @since versionNumber
