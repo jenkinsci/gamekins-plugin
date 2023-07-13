@@ -63,8 +63,6 @@ class GumTreeTest: FeatureSpec ({
     val path = FilePath(null, "src/test/resources")
     val parameters = Constants.Parameters()
     val branch = "master"
-    lateinit var root : String
-    lateinit var testProjectPath : FilePath
 
     beforeContainer {
         StaticJavaParser.setConfiguration(ParserConfiguration().setAttributeComments(false))
@@ -83,22 +81,8 @@ class GumTreeTest: FeatureSpec ({
         every { JavaParser.parse(any(), any(), any()) } returns destinationCompilationUnit
     }
 
-
-    /*
-    beforeSpec {
-        val rootDirectory = javaClass.classLoader.getResource("gumtreeTestResources.zip")
-        rootDirectory shouldNotBe null
-        root = rootDirectory.file.removeSuffix(".zip")
-        root shouldEndWith "gumtreeTestResources"
-        TestUtils.unzip("$root.zip", root)
-        //testProjectPath = FilePath(null, root)
-    }
-
-     */
-
     afterSpec {
         unmockkAll()
-        //File(root).deleteRecursively()
     }
 
     feature("testGumTree") {
