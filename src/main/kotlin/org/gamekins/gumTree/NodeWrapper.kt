@@ -26,7 +26,7 @@ class NodeWrapper(
         return if (height != -1) {
             height
         } else {
-            lineNumber = node.begin.get().line
+            if (!node.begin.isEmpty) lineNumber = node.begin.get().line
             label = node.metaModel.typeName
             identifier = getIdentifier(this.node)
             height = if (children.isNotEmpty()) {
