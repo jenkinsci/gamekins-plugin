@@ -23,6 +23,7 @@ class JavaParser private constructor(){
 
             synchronized(this) {
                 StaticJavaParser.setConfiguration(ParserConfiguration().setAttributeComments(false))
+                StaticJavaParser.getParserConfiguration().setLanguageLevel(ParserConfiguration.LanguageLevel.JAVA_17)
                 val combinedSolver = CombinedTypeSolver()
                 //ReflectionTypeSolver is used to get the fully qualified name of standard java classes e.g. String
                 combinedSolver.add(ReflectionTypeSolver())
@@ -36,6 +37,12 @@ class JavaParser private constructor(){
                 filePath = parameters.remote + "/src/main/java/$filePath$sourceFile"
                 return StaticJavaParser.parse(File(filePath))
             }
+        }
+
+        fun parse(sourceCode: String): CompilationUnit {
+            StaticJavaParser.getParserConfiguration().setAttributeComments(false)
+            StaticJavaParser.getParserConfiguration().setLanguageLevel(ParserConfiguration.LanguageLevel.JAVA_17)
+            return StaticJavaParser.parse(sourceCode)
         }
     }
 }

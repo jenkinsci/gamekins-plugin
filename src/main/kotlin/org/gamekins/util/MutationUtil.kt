@@ -1,6 +1,7 @@
 package org.gamekins.util
 
 import com.github.javaparser.ast.CompilationUnit
+import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinter
 import hudson.FilePath
 import hudson.model.TaskListener
 import org.gamekins.file.SourceFileDetails
@@ -221,7 +222,7 @@ object MutationUtil {
         val mutator: Mutator,
         val killingTest: String,
         val description: String,
-        var compilationUnit: CompilationUnit?
+        var sourceCode: String
     ) {
 
         constructor(line: String) : this(
@@ -256,7 +257,7 @@ object MutationUtil {
             (if (line.contains("<killingTest/>")) "" else
                 """<killingTest>(.*)</killingTest>""".toRegex().find(line)!!.groupValues[1]),
             """<description>(.*)</description>""".toRegex().find(line)!!.groupValues[1],
-            null
+            ""
         )
 
         constructor(line: String, parameters: Parameters) : this(
@@ -295,14 +296,18 @@ object MutationUtil {
                 """<sourceFile>(.*)</sourceFile>""".toRegex().find(line)!!.groupValues[1],
                 """<mutatedClass>(.*)</mutatedClass>""".toRegex().find(line)!!.groupValues[1],
                 parameters
-            )
+            ).toString()
         )
 
         /**
          * Generates the compilationUnit if it is null.
          */
         fun generateCompilationUnit(parameters: Parameters) {
-            if (compilationUnit == null) compilationUnit = JavaParser.parse(sourceFile, mutatedClass, parameters)
+            if (sourceCode.isEmpty()) {
+                val compilationUnit = JavaParser.parse(sourceFile, mutatedClass, parameters)
+                LexicalPreservingPrinter.setup(compilationUnit)
+                sourceCode = LexicalPreservingPrinter.print(compilationUnit)
+            }
         }
 
         override fun equals(other: Any?): Boolean {

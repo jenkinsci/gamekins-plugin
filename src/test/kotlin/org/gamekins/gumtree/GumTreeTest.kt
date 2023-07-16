@@ -3,6 +3,7 @@ package org.gamekins.gumtree
 import com.github.javaparser.ParserConfiguration
 import com.github.javaparser.StaticJavaParser
 import com.github.javaparser.ast.CompilationUnit
+import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinter
 import com.github.javaparser.symbolsolver.JavaSymbolSolver
 import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver
@@ -11,11 +12,9 @@ import io.kotest.assertions.assertSoftly
 import io.kotest.core.spec.style.FeatureSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
-import io.kotest.matchers.string.shouldEndWith
 import io.mockk.*
 import org.gamekins.gumTree.GumTree
 import org.gamekins.gumTree.JavaParser
-import org.gamekins.test.TestUtils
 import org.gamekins.util.Constants
 import org.gamekins.util.MutationUtil.MutationData
 import java.io.File
@@ -57,7 +56,7 @@ class GumTreeTest: FeatureSpec ({
             "<description>replaced return value with null for org/example/TestClass::doSomethingElse</description>" +
             "</mutation>"
 
-    lateinit var sourceCompilationUnit: CompilationUnit
+    lateinit var sourceCode: String
     lateinit var destinationCompilationUnit: CompilationUnit
 
     val path = FilePath(null, "src/test/resources")
@@ -72,7 +71,9 @@ class GumTreeTest: FeatureSpec ({
         val symbolSolver = JavaSymbolSolver(combinedSolver)
         StaticJavaParser.getParserConfiguration().setSymbolResolver(symbolSolver)
 
-        sourceCompilationUnit = StaticJavaParser.parse(File("src/test/resources/TestClass.java"))
+        val sourceCompilationUnit = StaticJavaParser.parse(File("src/test/resources/TestClass.java"))
+        LexicalPreservingPrinter.setup(sourceCompilationUnit)
+        sourceCode = LexicalPreservingPrinter.print(sourceCompilationUnit)
         destinationCompilationUnit = StaticJavaParser.parse(File("src/test/resources/TestClass2.java"))
 
         parameters.branch = branch
@@ -87,7 +88,7 @@ class GumTreeTest: FeatureSpec ({
 
     feature("testGumTree") {
         var mutationData = MutationData(line1)
-        mutationData.compilationUnit = sourceCompilationUnit
+        mutationData.sourceCode = sourceCode
         scenario("MoveMethod")
         {
             val updatedMutationData = GumTree().findMapping(mutationData, parameters)
@@ -100,7 +101,7 @@ class GumTreeTest: FeatureSpec ({
         }
 
         mutationData = MutationData(line2)
-        mutationData.compilationUnit = sourceCompilationUnit
+        mutationData.sourceCode = sourceCode
         scenario("MoveMethodToInternalClassAndAddParameter")
         {
             val updatedMutationData = GumTree().findMapping(mutationData, parameters)
@@ -113,7 +114,7 @@ class GumTreeTest: FeatureSpec ({
         }
 
         mutationData = MutationData(line3)
-        mutationData.compilationUnit = sourceCompilationUnit
+        mutationData.sourceCode = sourceCode
         scenario("RenameMethod")
         {
             val updatedMutationData = GumTree().findMapping(mutationData, parameters)
@@ -127,7 +128,7 @@ class GumTreeTest: FeatureSpec ({
         }
 
         mutationData = MutationData(line4)
-        mutationData.compilationUnit = sourceCompilationUnit
+        mutationData.sourceCode = sourceCode
         scenario("RetrieveMutationDataThrewPITReport")
         {
             val updatedMutationData = GumTree().findMapping(mutationData, parameters)

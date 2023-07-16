@@ -38,9 +38,10 @@ class GumTree {
      * Returns null if no suitable mapping was found.
      */
     fun findMapping(mutationData: MutationData, parameters: Parameters): MutationData? {
-        if (mutationData.compilationUnit == null) throw InvalidParameterException("CompilationUnit in MutationData must not be null.")
-        val destination = JavaParser.parse(mutationData.sourceFile, mutationData.mutatedClass, parameters)
-        val mappings = map(mutationData.compilationUnit!!, destination)
+        if (mutationData.sourceCode.isEmpty()) throw InvalidParameterException("CompilationUnit in MutationData must not be null.")
+        val source: CompilationUnit = JavaParser.parse(mutationData.sourceCode)
+        val destination: CompilationUnit = JavaParser.parse(mutationData.sourceFile, mutationData.mutatedClass, parameters)
+        val mappings = map(source, destination)
 
         return updateMutationData(mutationData, mappings, destination, parameters)
     }
@@ -76,7 +77,7 @@ class GumTree {
             mutationData.mutator,
             mutationData.killingTest,
             mutationData.description,
-            destinationCU
+            destinationCU.toString()
         )
     }
 
