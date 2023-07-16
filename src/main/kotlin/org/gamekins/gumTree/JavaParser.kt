@@ -7,6 +7,7 @@ import com.github.javaparser.symbolsolver.JavaSymbolSolver
 import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver
 import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeSolver
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver
+import org.gamekins.util.Constants
 import org.gamekins.util.Constants.Parameters
 import java.io.File
 
@@ -23,7 +24,7 @@ class JavaParser private constructor(){
 
             synchronized(this) {
                 StaticJavaParser.setConfiguration(ParserConfiguration().setAttributeComments(false))
-                StaticJavaParser.getParserConfiguration().setLanguageLevel(ParserConfiguration.LanguageLevel.JAVA_17)
+                StaticJavaParser.getParserConfiguration().setLanguageLevel(Constants.JAVA_PARSER_LANGUAGE_LEVEL)
                 val combinedSolver = CombinedTypeSolver()
                 //ReflectionTypeSolver is used to get the fully qualified name of standard java classes e.g. String
                 combinedSolver.add(ReflectionTypeSolver())
@@ -41,7 +42,7 @@ class JavaParser private constructor(){
 
         fun parse(sourceCode: String): CompilationUnit {
             StaticJavaParser.getParserConfiguration().setAttributeComments(false)
-            StaticJavaParser.getParserConfiguration().setLanguageLevel(ParserConfiguration.LanguageLevel.JAVA_17)
+            StaticJavaParser.getParserConfiguration().setLanguageLevel(Constants.JAVA_PARSER_LANGUAGE_LEVEL)
             return StaticJavaParser.parse(sourceCode)
         }
     }
