@@ -20,7 +20,7 @@ abstract class QuestTask(val numberGoal: Int) {
 
     abstract fun getScore(): Int
 
-    protected fun getSolvedChallengesOfUserSince(
+    fun getSolvedChallengesOfUserSince(
         user: User,
         project: String,
         since: Long,
@@ -36,16 +36,17 @@ abstract class QuestTask(val numberGoal: Int) {
         return arrayListOf()
     }
 
-    protected fun getSolvedChallengesOfUserSinceLastRejection(user: User,
-                                                              project: String,
-                                                              since: Long
+    fun getSolvedChallengesOfUserSinceLastRejection(user: User, project: String, since: Long
     ): ArrayList<Challenge> {
         val property = user.getProperty(GameUserProperty::class.java)
         if (property != null) {
             val challenges = property.getCompletedChallenges(project)
             challenges.removeIf { it.getSolved() < since }
-            val lastRejectedChallenge = property.getRejectedChallenges(project).last().first
-            challenges.removeIf { it.getSolved() < lastRejectedChallenge.getSolved() }
+            val rejectedChallenges = property.getRejectedChallenges(project)
+            if (rejectedChallenges.isNotEmpty()) {
+                val lastRejectedChallenge = rejectedChallenges.last().first
+                challenges.removeIf { it.getSolved() < lastRejectedChallenge.getSolved() }
+            }
             return ArrayList(challenges)
         }
 
