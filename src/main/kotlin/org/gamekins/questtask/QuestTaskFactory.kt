@@ -1,3 +1,19 @@
+/*
+ * Copyright 2023 Gamekins contributors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+
+ * http://www.apache.org/licenses/LICENSE-2.0
+
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.gamekins.questtask
 
 import hudson.FilePath
@@ -13,6 +29,12 @@ import org.gamekins.event.user.QuestTaskGeneratedEvent
 import org.gamekins.util.Constants
 import kotlin.random.Random
 
+/**
+ * Factory for generating [QuestTask]s.
+ *
+ * @author Philipp Straubinger
+ * @since 0.6
+ */
 object QuestTaskFactory {
 
     /**
@@ -56,6 +78,9 @@ object QuestTaskFactory {
         return weightList[Random.nextInt(weightList.size)]
     }
 
+    /**
+     * Generates new [QuestTask]s for a particular [user].
+     */
     @JvmStatic
     fun generateNewQuestTasks(
         user: User,
@@ -83,6 +108,9 @@ object QuestTaskFactory {
         return generated
     }
 
+    /**
+     * Generates a random new [QuestTask].
+     */
     private fun generateQuestTask(
         user: User,
         property: GameUserProperty,
@@ -117,6 +145,10 @@ object QuestTaskFactory {
         return SolveChallengesQuestTask(number, Challenge::class.java)
     }
 
+    /**
+     * Retrieves the number of participants in the current project. Needed to determine whether
+     * [ReceiveChallengeQuestTask]s and [SendChallengeQuestTask]s should be generated.
+     */
     private fun getNumberOfParticipantsInProject(projectName: String): Int {
         var number = 0
         for (user in User.getAll()) {
