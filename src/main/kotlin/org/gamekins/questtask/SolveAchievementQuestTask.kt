@@ -37,7 +37,7 @@ class SolveAchievementQuestTask(user: User, project: String): QuestTask(1) {
     }
 
     override fun printToXML(indentation: String): String {
-        return "$indentation < ${this::class.simpleName} created=\"$created\" solved=\"$solved\" " +
+        return "$indentation<${this::class.simpleName} created=\"$created\" solved=\"$solved\" " +
                 "startNumberOfAchievements=\"$startNumberOfAchievements\">"
     }
 

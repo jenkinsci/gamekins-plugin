@@ -33,7 +33,7 @@ class CoverMoreLinesQuestTask(linesNumber: Int, csvFile: FilePath): QuestTask(li
     }
 
     override fun printToXML(indentation: String): String {
-        return "$indentation < ${this::class.simpleName} created=\"$created\" solved=\"$solved\" " +
+        return "$indentation<${this::class.simpleName} created=\"$created\" solved=\"$solved\" " +
                 "currentNumber=\"$currentNumber\" numberGoal=\"$numberGoal\" " +
                 "startNumberOfLines=\"$startNumberOfLines\">"
     }

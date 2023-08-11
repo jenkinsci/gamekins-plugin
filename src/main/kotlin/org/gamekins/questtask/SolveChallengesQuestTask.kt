@@ -33,7 +33,7 @@ class SolveChallengesQuestTask(challengeNumber: Int, private val challengeType: 
     }
 
     override fun printToXML(indentation: String): String {
-        return "$indentation < ${this::class.simpleName} created=\"$created\" solved=\"$solved\" " +
+        return "$indentation<${this::class.simpleName} created=\"$created\" solved=\"$solved\" " +
                 "currentNumber=\"$currentNumber\" numberGoal=\"$numberGoal\">"
     }
 
@@ -48,6 +48,6 @@ class SolveChallengesQuestTask(challengeNumber: Int, private val challengeType: 
             SmellChallenge::class.java -> "Smell "
             else -> ""
         }
-        return if (numberGoal == 1) "Solve one ${type}challenge" else "Solve $numberGoal ${type}challenges"
+        return if (numberGoal == 1) "Solve one ${type}Challenge" else "Solve $numberGoal ${type}Challenges"
     }
 }

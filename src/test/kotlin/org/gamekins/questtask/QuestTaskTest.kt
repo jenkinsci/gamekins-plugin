@@ -86,7 +86,7 @@ class QuestTaskTest : FeatureSpec({
         val project = "test"
         val since = 1000L
         every { user.getProperty(GameUserProperty::class.java) } returns null
-        scenario("property is null") {
+        scenario("Property is null") {
             questTask.getSolvedChallengesOfUserSinceLastRejection(user, project, since) should beEmpty()
         }
 

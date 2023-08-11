@@ -33,7 +33,7 @@ class CoverMoreBranchesQuestTask(branchesNumber: Int, csvFile: FilePath): QuestT
     }
 
     override fun printToXML(indentation: String): String {
-        return "$indentation < ${this::class.simpleName} created=\"$created\" solved=\"$solved\" " +
+        return "$indentation<${this::class.simpleName} created=\"$created\" solved=\"$solved\" " +
                 "currentNumber=\"$currentNumber\" numberGoal=\"$numberGoal\" " +
                 "startNumberOfBranches=\"$startNumberOfBranches\">"
     }

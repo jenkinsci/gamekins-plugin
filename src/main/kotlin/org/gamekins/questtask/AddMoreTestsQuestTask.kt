@@ -32,7 +32,7 @@ class AddMoreTestsQuestTask(testsNumber: Int, workspace: FilePath): QuestTask(te
     }
 
     override fun printToXML(indentation: String): String {
-        return "$indentation < ${this::class.simpleName} created=\"$created\" solved=\"$solved\" " +
+        return "$indentation<${this::class.simpleName} created=\"$created\" solved=\"$solved\" " +
                 "currentNumber=\"$currentNumber\" numberGoal=\"$numberGoal\" " +
                 "startNumberOfTests=\"$startNumberOfTests\">"
     }

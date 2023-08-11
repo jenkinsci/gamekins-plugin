@@ -6,7 +6,7 @@ import hudson.model.User
 import org.gamekins.challenge.Challenge
 import org.gamekins.util.Constants
 
-class ReceiveChallengeQuestTask(): QuestTask(1) {
+class ReceiveChallengeQuestTask : QuestTask(1) {
 
     val challenges: ArrayList<Challenge> = arrayListOf()
 
@@ -34,7 +34,7 @@ class ReceiveChallengeQuestTask(): QuestTask(1) {
     }
 
     override fun printToXML(indentation: String): String {
-        return "$indentation < ${this::class.simpleName} created=\"$created\" solved=\"$solved\" " +
+        return "$indentation<${this::class.simpleName} created=\"$created\" solved=\"$solved\" " +
                 "currentNumber=\"$currentNumber\" numberGoal=\"$numberGoal\">"
     }
 

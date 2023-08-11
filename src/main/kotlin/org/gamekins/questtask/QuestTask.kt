@@ -9,9 +9,9 @@ import org.gamekins.util.Constants
 
 abstract class QuestTask(val numberGoal: Int) {
 
-    protected val created = System.currentTimeMillis()
+    val created = System.currentTimeMillis()
     var currentNumber: Int = 0
-    protected var solved: Long = 0
+    var solved: Long = 0
 
     fun getCompletedPercentage(): Int {
         val percentage = currentNumber.toDouble() / numberGoal.toDouble() * 100
