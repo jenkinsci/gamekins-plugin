@@ -22,6 +22,7 @@ import com.cloudbees.hudson.plugins.folder.AbstractFolderPropertyDescriptor
 import hudson.Extension
 import hudson.model.AbstractItem
 import hudson.model.Item
+import hudson.model.Job
 import hudson.model.JobPropertyDescriptor
 import hudson.util.FormValidation
 import hudson.util.ListBoxModel
@@ -210,11 +211,12 @@ class GameMultiBranchProperty
          * Called from the Jetty server when the configuration page is displayed. Fills the combo box with the names of
          * all teams of the [job].
          */
-        fun doFillTeamsBoxItems(@AncestorInPath job: WorkflowMultiBranchProject?): ListBoxModel {
+        fun doFillTeamsBoxItems(@AncestorInPath job: WorkflowMultiBranchProject?,
+                                @QueryParameter includeNoTeam: Boolean): ListBoxModel {
             val property =
                     if (job == null || job.properties[this] == null) null
                     else job.properties[this] as GameMultiBranchProperty
-            return PropertyUtil.doFillTeamsBoxItems(property)
+            return PropertyUtil.doFillTeamsBoxItems(property, includeNoTeam)
         }
 
         /**
@@ -227,13 +229,23 @@ class GameMultiBranchProperty
 
         /**
          * Called from the Jetty server if the button to remove a participant from a team is pressed. Removes the
-         * participant [usersBox] from the team [teamsBox] of the [job] via the method
-         * [PropertyUtil.doRemoveUserFromTeam].
+         * participant [usersBox] from the project of the [job] via the method
+         * [PropertyUtil.doRemoveUserFromProject].
          */
-        fun doRemoveUserFromTeam(@AncestorInPath job: WorkflowMultiBranchProject?, @QueryParameter teamsBox: String?,
-                                 @QueryParameter usersBox: String?): FormValidation {
-            return PropertyUtil.doRemoveUserFromTeam(job, teamsBox!!, usersBox!!)
+        fun doRemoveUserFromProject(@AncestorInPath job: WorkflowMultiBranchProject?,
+                                    @QueryParameter usersBox: String?): FormValidation {
+            return PropertyUtil.doRemoveUserFromProject(job, usersBox!!)
         }
+
+        /**
+         * Called from the Jetty server if the button to participate alone is pressed. Adds the participant
+         * [usersBox] to a Pseudo-Team via the method [PropertyUtil.doAddUserToTeam].
+         */
+        fun doParticipateAlone(@AncestorInPath job: WorkflowMultiBranchProject?,
+                               @QueryParameter usersBox: String?): FormValidation {
+            return PropertyUtil.doAddUserToTeam(job, Constants.NO_TEAM_TEAM_NAME, usersBox!!)
+        }
+
         /**
          * Called from the Jetty server if the button to reset Gamekins in the specific [job] is called. Deletes all
          * Challenges from all users for the current project and resets the statistics.

@@ -41,6 +41,7 @@ class PropertyUtilTest : FeatureSpec({
     val detailsProperty = mockkClass(Details::class)
     val team1 = "Team1"
     val team2 = "Team2"
+    val noTeam = Constants.NO_TEAM_TEAM_NAME
     val userName1 = "User1"
     val userName2 = "User2"
     val userName3 = "User3"
@@ -56,8 +57,8 @@ class PropertyUtilTest : FeatureSpec({
 
         every { property1.addTeam(any()) } returns Unit
         every { property2.addTeam(any()) } returns Unit
-        every { property1.getTeams() } returns arrayListOf(team1, team2)
-        every { property2.getTeams() } returns arrayListOf(team1)
+        every { property1.getTeams() } returns arrayListOf(team1, team2, noTeam)
+        every { property2.getTeams() } returns arrayListOf(team1, noTeam)
         every { property1.removeTeam(any()) } returns Unit
         every { property2.removeTeam(any()) } returns Unit
         every { property1.resetStatistics(any()) } returns Unit
@@ -89,6 +90,8 @@ class PropertyUtilTest : FeatureSpec({
         every { userProperty1.isParticipating(projectName1, team1) } returns false
         every { userProperty1.isParticipating(projectName1, team2) } returns true
         every { userProperty1.isParticipating(projectName2, team1) } returns false
+        every { userProperty1.isParticipating(projectName1, noTeam) } returns false
+        every { userProperty1.isParticipating(projectName2, noTeam) } returns false
         every { userProperty1.setParticipating(any(), any()) } returns Unit
         every { userProperty1.removeParticipation(any()) } returns Unit
         every { userProperty1.reset(any()) } returns Unit
@@ -142,24 +145,6 @@ class PropertyUtilTest : FeatureSpec({
             formValidation.message shouldBe Constants.Error.PARENT
         }
 
-        scenario("User is already in a team") {
-            formValidation = PropertyUtil.doAddUserToTeam(job2, team1, "$id3 ($userName3)")
-            formValidation.kind shouldBe FormValidation.Kind.ERROR
-            formValidation.message shouldBe Constants.Error.USER_ALREADY_IN_TEAM
-        }
-
-        scenario("User is already in a team") {
-            formValidation = PropertyUtil.doAddUserToTeam(job2, team1, "$id2 ($userName2)")
-            formValidation.kind shouldBe FormValidation.Kind.ERROR
-            formValidation.message shouldBe Constants.Error.USER_ALREADY_IN_TEAM
-        }
-
-        scenario("User already in a team") {
-            formValidation = PropertyUtil.doAddUserToTeam(job2, team1, "$id1 ($userName1)")
-            formValidation.kind shouldBe FormValidation.Kind.ERROR
-            formValidation.message shouldBe Constants.Error.USER_ALREADY_IN_TEAM
-        }
-
         scenario("Specified User does not exist") {
             formValidation = PropertyUtil.doAddUserToTeam(job2, team1, "")
             formValidation.kind shouldBe FormValidation.Kind.ERROR
@@ -196,7 +181,14 @@ class PropertyUtilTest : FeatureSpec({
     }
 
     feature("doFillTeamsBoxItems") {
-        PropertyUtil.doFillTeamsBoxItems(property1).size shouldBe 2
+        scenario("Include Pseudo-Team")
+        {
+            PropertyUtil.doFillTeamsBoxItems(property1, false).size shouldBe 2
+        }
+        scenario("Do not include Pseudo-Team")
+        {
+            PropertyUtil.doFillTeamsBoxItems(property1, true).size shouldBe 3
+        }
     }
 
     feature("doFillUsersBoxItems") {
@@ -211,47 +203,29 @@ class PropertyUtilTest : FeatureSpec({
         }
     }
 
-    feature("doRemoveUserFromTeam") {
+    feature("doRemoveUserFromProject") {
         var formValidation : FormValidation
 
-        scenario("No Team specified") {
-            formValidation = PropertyUtil.doRemoveUserFromTeam(job2, " ", "")
-            formValidation.kind shouldBe FormValidation.Kind.ERROR
-            formValidation.message shouldBe Constants.Error.NO_TEAM
-        }
-
         scenario("No parent job given") {
-            formValidation = PropertyUtil.doRemoveUserFromTeam(null, team1, "")
+            formValidation = PropertyUtil.doRemoveUserFromProject(null, "")
             formValidation.kind shouldBe FormValidation.Kind.ERROR
             formValidation.message shouldBe Constants.Error.PARENT
         }
 
-        scenario("User already not in Team") {
-            formValidation = PropertyUtil.doRemoveUserFromTeam(job2, team1, "$id3 ($userName3)")
+        scenario("User already not in Project") {
+            formValidation = PropertyUtil.doRemoveUserFromProject(job2, "$id3 ($userName3)")
             formValidation.kind shouldBe FormValidation.Kind.ERROR
-            formValidation.message shouldBe Constants.Error.USER_NOT_IN_TEAM
-        }
-
-        scenario("User already not in Team") {
-            formValidation = PropertyUtil.doRemoveUserFromTeam(job2, team1, "$id2 ($userName2)")
-            formValidation.kind shouldBe FormValidation.Kind.ERROR
-            formValidation.message shouldBe Constants.Error.USER_NOT_IN_TEAM
-        }
-
-        scenario("User already not in Team") {
-            formValidation = PropertyUtil.doRemoveUserFromTeam(job2, team1, "$id1 ($userName1)")
-            formValidation.kind shouldBe FormValidation.Kind.ERROR
-            formValidation.message shouldBe Constants.Error.USER_NOT_IN_TEAM
+            formValidation.message shouldBe Constants.Error.USER_NOT_IN_PROJECT
         }
 
         scenario("User does not exist") {
-            formValidation = PropertyUtil.doRemoveUserFromTeam(job2, team1, "")
+            formValidation = PropertyUtil.doRemoveUserFromProject(job2, "")
             formValidation.kind shouldBe FormValidation.Kind.ERROR
             formValidation.message shouldBe Constants.Error.UNKNOWN_USER
         }
 
         scenario("Successful Action") {
-            PropertyUtil.doRemoveUserFromTeam(job1, team2, "$id1 ($userName1)").kind shouldBe FormValidation.Kind.OK
+            PropertyUtil.doRemoveUserFromProject(job2, "$id1 ($userName1)").kind shouldBe FormValidation.Kind.OK
         }
     }
 
@@ -281,11 +255,11 @@ class PropertyUtilTest : FeatureSpec({
 
     feature("doShowTeamMemberships") {
         scenario("Test on Job1") {
-            PropertyUtil.doShowTeamMemberships(job1, property1) shouldBe "{\"Team2\":[],\"Team1\":[]}"
+            PropertyUtil.doShowTeamMemberships(job1, property1) shouldBe "{\"Team2\":[],\"Team1\":[],\"---\":[]}"
         }
 
         scenario("Test on Job2") {
-            PropertyUtil.doShowTeamMemberships(job2, property2) shouldBe "{\"Team1\":[\"User1\"]}"
+            PropertyUtil.doShowTeamMemberships(job2, property2) shouldBe "{\"Team1\":[\"User1\"],\"---\":[]}"
         }
     }
 

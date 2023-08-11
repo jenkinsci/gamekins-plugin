@@ -145,13 +145,11 @@ object Constants {
         
         const val UNKNOWN_TEAM = "The specified team does not exist"
         
-        const val USER_NOT_IN_TEAM = "The user is not in the specified team"
+        const val USER_NOT_IN_PROJECT = "The user does not participate in the project"
 
         const val UNKNOWN_USER = "No user with the specified name found"
 
         const val PARENT_WITHOUT_PROPERTY = "$UNEXPECTED: Parent job has no property"
-
-        const val USER_ALREADY_IN_TEAM = "The user is already participating in a team"
 
         const val TEAM_NAME_TAKEN = "The team already exists - please use another name for your team"
     }
@@ -197,6 +195,8 @@ object Constants {
     const val TYPE_PLAIN = "text/plain"
 
     const val TRY_CLASS = "[Gamekins] Try class "
+
+    const val NO_TEAM_TEAM_NAME = "---"
 
     /**
      * Returns the path to the most recent jar file of the Sonar-Java-Plugin for SonarLint.

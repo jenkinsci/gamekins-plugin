@@ -13,6 +13,7 @@ jQuery3("#addTeam").on('click', function () {
                 buildTeamsList(descriptorFullUrl)
             }
             jQuery3("#error-user-team")[0].innerHTML = rsp.responseText
+            updateTeamsTable(descriptorFullUrl)
         }
     })
 })
@@ -30,15 +31,16 @@ jQuery3("#addUserToTeam").on('click', function () {
         parameters: parameters,
         onComplete: function (rsp) {
             jQuery3("#error-user-team")[0].innerHTML = rsp.responseText
+            updateTeamsTable(descriptorFullUrl)
         }
     })
 })
 
-jQuery3("#removeUserFromTeam").on('click', function () {
+jQuery3("#removeUserFromProject").on('click', function () {
     let teamsBox = jQuery3("#teamsBox")[0].value
     let usersBox = jQuery3("#usersBox")[0].value
     let descriptorFullUrl = jQuery3(this).data('descriptor-url')
-    let url = descriptorFullUrl + "/removeUserFromTeam"
+    let url = descriptorFullUrl + "/removeUserFromProject"
     let parameters = {}
     parameters["teamsBox"] = teamsBox
     parameters["usersBox"] = usersBox
@@ -47,6 +49,7 @@ jQuery3("#removeUserFromTeam").on('click', function () {
         parameters: parameters,
         onComplete: function (rsp) {
             jQuery3("#error-user-team")[0].innerHTML = rsp.responseText
+            updateTeamsTable(descriptorFullUrl)
         }
     })
 })
@@ -64,6 +67,23 @@ jQuery3("#deleteTeam").on('click', function () {
             jQuery3("#error-user-team")[0].innerHTML = rsp.responseText
 
             buildTeamsList(descriptorFullUrl)
+            updateTeamsTable(descriptorFullUrl)
+        }
+    })
+})
+
+jQuery3("#participateAlone").on('click', function () {
+    let usersBox = jQuery3("#usersBox")[0].value
+    let descriptorFullUrl = jQuery3(this).data('descriptor-url')
+    let url = descriptorFullUrl + "/participateAlone"
+    let parameters = {}
+    parameters["usersBox"] = usersBox
+
+    new Ajax.Request(url, {
+        parameters: parameters,
+        onComplete: function (rsp) {
+            jQuery3("#error-user-team")[0].innerHTML = rsp.responseText
+            updateTeamsTable(descriptorFullUrl)
         }
     })
 })
@@ -75,8 +95,11 @@ jQuery3("#showTeamMemberships").on('click', function () {
 
 function buildTeamsList(descriptorFullUrl) {
     let url = descriptorFullUrl + "/fillTeamsBoxItems"
+    let parameters = {}
+    parameters["includeNoTeam"] = false
 
     new Ajax.Request(url, {
+        parameters: parameters,
         onComplete: function (rsp) {
             let teamsBox = jQuery3("#teamsBox")[0]
             let values = rsp.responseJSON.values
@@ -105,8 +128,11 @@ function buildTeamsTable(descriptorFullUrl, rebuild = false) {
         onComplete: function (rsp) {
             url = descriptorFullUrl + "/fillTeamsBoxItems"
             let teamMap = JSON.parse(rsp.responseText)
+            let parameters = {}
+            parameters["includeNoTeam"] = true
 
             new Ajax.Request(url, {
+                parameters: parameters,
                 onComplete: function (rsp) {
                     let teams = rsp.responseJSON.values
 
@@ -171,4 +197,12 @@ function buildTeamsTable(descriptorFullUrl, rebuild = false) {
             })
         }
     })
+}
+
+function updateTeamsTable(descriptorFullUrl) {
+    let table = jQuery3("#team-table")[0]
+
+    if (!table.innerHTML == "") {
+        buildTeamsTable(descriptorFullUrl, true)
+    }
 }

@@ -38,8 +38,9 @@
         <f:entry field="buttons">
             <div id="error-user-team" style="margin-bottom: 5px"/>
             <input id="addUserToTeam" type="button" value="Add User to Team" data-descriptor-url="${descriptor.descriptorFullUrl}" />
-            <input id="removeUserFromTeam" type="button" value="Remove User from Team" data-descriptor-url="${descriptor.descriptorFullUrl}" />
+            <input id="removeUserFromProject" type="button" value="Remove User from Project" data-descriptor-url="${descriptor.descriptorFullUrl}" />
             <input id="deleteTeam" type="button" value="Delete Team" data-descriptor-url="${descriptor.descriptorFullUrl}" />
+            <input id="participateAlone" type="button" value="Participate alone" data-descriptor-url="${descriptor.descriptorFullUrl}" />
             <input id="showTeamMemberships" type="button" value="Show Team Memberships" data-descriptor-url="${descriptor.descriptorFullUrl}" />
         </f:entry>
 

@@ -78,11 +78,11 @@ class GameJobPropertyDescriptor : JobPropertyDescriptor(GameJobProperty::class.j
      * Called from the Jetty server when the configuration page is displayed. Fills the combo box with the names of
      * all teams of the [job].
      */
-    fun doFillTeamsBoxItems(@AncestorInPath job: Job<*, *>?): ListBoxModel {
+    fun doFillTeamsBoxItems(@AncestorInPath job: Job<*, *>?, @QueryParameter includeNoTeam: Boolean): ListBoxModel {
         val property =
                 if (job == null || job.properties[this] == null) null
                 else job.properties[this] as GameJobProperty?
-        return PropertyUtil.doFillTeamsBoxItems(property)
+        return PropertyUtil.doFillTeamsBoxItems(property, includeNoTeam)
     }
 
     /**
@@ -95,11 +95,18 @@ class GameJobPropertyDescriptor : JobPropertyDescriptor(GameJobProperty::class.j
 
     /**
      * Called from the Jetty server if the button to remove a participant from a team is pressed. Removes the
-     * participant [usersBox] from the team [teamsBox] of the [job] via the method [PropertyUtil.doRemoveUserFromTeam].
+     * participant [usersBox] from the project of the [job] via the method [PropertyUtil.doRemoveUserFromProject].
      */
-    fun doRemoveUserFromTeam(@AncestorInPath job: Job<*, *>?, @QueryParameter teamsBox: String?,
-                             @QueryParameter usersBox: String?): FormValidation {
-        return PropertyUtil.doRemoveUserFromTeam(job, teamsBox!!, usersBox!!)
+    fun doRemoveUserFromProject(@AncestorInPath job: Job<*, *>?, @QueryParameter usersBox: String?): FormValidation {
+        return PropertyUtil.doRemoveUserFromProject(job, usersBox!!)
+    }
+
+    /**
+     * Called from the Jetty server if the button to participate alone is pressed. Adds the participant
+     * [usersBox] to a Pseudo-Team via the method [PropertyUtil.doAddUserToTeam].
+     */
+    fun doParticipateAlone(@AncestorInPath job: Job<*, *>?, @QueryParameter usersBox: String?): FormValidation {
+        return PropertyUtil.doAddUserToTeam(job, Constants.NO_TEAM_TEAM_NAME, usersBox!!)
     }
 
     /**

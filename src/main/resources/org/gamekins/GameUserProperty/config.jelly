@@ -17,23 +17,14 @@
         <br/>
         <div class="modal fade" id="avatarModal" tabindex="-1" role="dialog" aria-labelledby="avatarModalLabel"
              aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-dialog modal-dialog-centered  modal-xl" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title" id="avatarModalLabel">Choose Avatar</h5>
                     </div>
                     <div class="modal-body">
-                        <div id="carouselExampleSlidesOnly" class="carousel slide" data-interval="false" data-ride="carousel" style="margin: auto" field="carousel">
-                            <div class="carousel-inner" id="carousel">
-                            </div>
-                            <a class="carousel-control-prev" href="#carouselExampleSlidesOnly" role="button" data-slide="prev">
-                                <span class="carousel-control-prev-icon" aria-hidden="true"/>
-                                <span class="sr-only">Previous</span>
-                            </a>
-                            <a class="carousel-control-next" href="#carouselExampleSlidesOnly" role="button" data-slide="next">
-                                <span class="carousel-control-next-icon" aria-hidden="true"/>
-                                <span class="sr-only">Next</span>
-                            </a>
+                        <div class="input-group" id="avatar-picker">
+
                         </div>
                     </div>
                     <div class="modal-footer">
