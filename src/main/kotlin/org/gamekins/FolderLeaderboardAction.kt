@@ -17,6 +17,7 @@
 package org.gamekins
 
 import hudson.model.*
+import org.gamekins.util.ActionUtil
 import org.gamekins.util.PropertyUtil
 import org.kohsuke.stapler.StaplerProxy
 
@@ -48,8 +49,8 @@ class FolderLeaderboardAction(val job: AbstractItem) : ProminentProjectAction, S
     /**
      * Returns the details of all users participating in all subprojects.
      */
-    fun getUserDetails(): List<LeaderboardAction.UserDetails> {
-        val details = ArrayList<LeaderboardAction.UserDetails>()
+    fun getUserDetails(): List<ActionUtil.UserDetails> {
+        val details = ArrayList<ActionUtil.UserDetails>()
         for (user in User.getAll()) {
             if (!PropertyUtil.realUser(user)) continue
             val property = user.getProperty(GameUserProperty::class.java)
@@ -72,7 +73,7 @@ class FolderLeaderboardAction(val job: AbstractItem) : ProminentProjectAction, S
                 }
 
                 details.add(
-                    LeaderboardAction.UserDetails(
+                    ActionUtil.UserDetails(
                         user.fullName,
                         property.getTeamName(job.fullName),
                         score,

@@ -21,22 +21,21 @@ import hudson.model.AbstractItem
 import hudson.model.Descriptor
 import hudson.util.FormValidation
 import org.gamekins.challenge.Challenge
-import org.gamekins.challenge.quest.Quest
 import org.gamekins.util.ActionUtil
 import org.kohsuke.stapler.AncestorInPath
 import org.kohsuke.stapler.QueryParameter
 import javax.annotation.Nonnull
 
 /**
- * Registers the [LeaderboardAction] to Jenkins as an extension and also works as an communication point between the
- * Jetty server and the [LeaderboardAction]. Actions normally have no [Descriptor], but it can be added. In this case
+ * Registers the [TaskAction] to Jenkins as an extension and also works as a communication point between the
+ * Jetty server and the [TaskAction]. Actions normally have no [Descriptor], but it can be added. In this case
  * for rejecting Challenges.
  *
  * @author Philipp Straubinger
- * @since 0.1
+ * @since 0.6
  */
 @Extension
-class LeaderboardActionDescriptor : Descriptor<LeaderboardAction>(LeaderboardAction::class.java) {
+class TaskActionDescriptor : Descriptor<TaskAction>(TaskAction::class.java) {
 
     /**
      * Rejects a [Challenge] with the String representation [reject] and a [reason].
@@ -44,14 +43,6 @@ class LeaderboardActionDescriptor : Descriptor<LeaderboardAction>(LeaderboardAct
     fun doRejectChallenge(@AncestorInPath job: AbstractItem, @QueryParameter reject: String,
                           @QueryParameter reason: String): FormValidation {
         return ActionUtil.doRejectChallenge(job, reject, reason)
-    }
-
-    /**
-     * Rejects a [Quest] with the String representation [reject] and a [reason].
-     */
-    fun doRejectQuest(@AncestorInPath job: AbstractItem, @QueryParameter reject: String,
-                          @QueryParameter reason: String): FormValidation {
-        return ActionUtil.doRejectQuest(job, reject, reason)
     }
 
     /**

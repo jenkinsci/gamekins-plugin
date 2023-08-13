@@ -45,6 +45,8 @@ object Constants {
 
         const val SHOW_LEADERBOARD = "showLeaderboard"
 
+        const val SHOW_TASKS = "showTasks"
+
         const val SHOW_FOLDER_LEADERBOARD = "leaderboard"
 
         const val CHALLENGES_COUNT = "currentChallengesCount"

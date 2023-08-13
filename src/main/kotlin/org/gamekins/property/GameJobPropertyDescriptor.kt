@@ -159,6 +159,7 @@ class GameJobPropertyDescriptor : JobPropertyDescriptor(GameJobProperty::class.j
             req.findAncestor(AbstractItem::class.java).getObject() as AbstractItem,
             formData.getBoolean(Constants.FormKeys.ACTIVATED),
             formData.getBoolean(Constants.FormKeys.SHOW_LEADERBOARD),
+            formData.getBoolean(Constants.FormKeys.SHOW_TASKS),
             formData.getBoolean(Constants.FormKeys.SHOW_STATISTICS),
             if (formData.getValue(Constants.FormKeys.CHALLENGES_COUNT) is Int)
                 formData.getInt(Constants.FormKeys.CHALLENGES_COUNT) else Constants.Default.CURRENT_CHALLENGES,
