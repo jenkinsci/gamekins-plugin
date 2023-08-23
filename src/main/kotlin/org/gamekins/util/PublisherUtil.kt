@@ -61,6 +61,7 @@ object PublisherUtil {
                 solved++
             }
         }
+        property.progressAchievementExample[parameters.projectName]!![0].progress(files, parameters, run, property, listener)
 
         return solved
     }

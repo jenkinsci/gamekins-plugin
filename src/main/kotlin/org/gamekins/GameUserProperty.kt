@@ -23,6 +23,7 @@ import org.gamekins.challenge.DummyChallenge
 import org.gamekins.statistics.Statistics
 import net.sf.json.JSONObject
 import org.gamekins.achievement.Achievement
+import org.gamekins.achievement.ProgressAchievement
 import org.gamekins.challenge.CoverageChallenge
 import org.gamekins.challenge.quest.Quest
 import org.gamekins.util.Constants
@@ -62,6 +63,7 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
     private var storedChallenges: HashMap<String, CopyOnWriteArrayList<Challenge>> = HashMap()
     private var unfinishedQuests: HashMap<String, CopyOnWriteArrayList<Quest>> = HashMap()
     private var unsolvedAchievements: HashMap<String, CopyOnWriteArrayList<Achievement>> = HashMap()
+    public var progressAchievementExample: HashMap<String, CopyOnWriteArrayList<ProgressAchievement>> = HashMap()
 
     /**
      * Adds an additional [score] to one project [projectName], since one user can participate in multiple projects.
@@ -187,6 +189,22 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
         val printer = rsp.writer
         printer.print(json)
         printer.flush()
+    }
+
+    fun doGetProgressAchievementExample(rsp: StaplerResponse, @QueryParameter projectName: String) {
+        val json = jacksonObjectMapper().writeValueAsString(progressAchievementExample[projectName])
+        rsp.contentType = Constants.TYPE_JSON
+        val printer = rsp.writer
+        printer.print(json)
+        printer.flush()
+
+        /*
+        rsp.contentType = "text/plain"
+        val printer = rsp.writer
+        rsp.characterEncoding = "US-ASCII"
+        printer.print(getProgressAchievementExample(projectName))
+        printer.flush()
+         */
     }
 
     /**
@@ -364,6 +382,10 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
      */
     fun getUnsolvedAchievements(projectName: String): CopyOnWriteArrayList<Achievement> {
         return unsolvedAchievements[projectName]!!
+    }
+
+    fun getProgressAchievementExample(projectName: String) : Int {
+        return progressAchievementExample[projectName]!![0].progress
     }
 
     override fun getUrlName(): String {
@@ -668,6 +690,8 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
         val list = CopyOnWriteArrayList<Achievement>()
         GamePublisherDescriptor.achievements.forEach { list.add(it.clone()) }
         unsolvedAchievements[projectName] = list
+
+        progressAchievementExample[projectName] = CopyOnWriteArrayList()
     }
 
     /**
@@ -759,6 +783,20 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
             list.removeAll(list.intersect(completedAchievements[project]!!))
             list = CopyOnWriteArrayList(list.distinct())
             unsolvedAchievements[project] = list
+
+            val listProgAchiev = CopyOnWriteArrayList<ProgressAchievement>()
+            listProgAchiev.add(ProgressAchievement("/plugin/gamekins/achievements/blackwhite/hourglass.png", listOf(10, 50, 100),
+                "org.gamekins.util.AchievementUtil::coverLineWithXBranches",
+                "Start a successful build with less than one minute duration", "Title", 42, HashMap()))
+            listProgAchiev.add(ProgressAchievement("/plugin/gamekins/achievements/blackwhite/hourglass.png", listOf(3, 15, 60),
+                "org.gamekins.util.AchievementUtil::coverLineWithXBranches",
+                "Have one test in your project", "Other Title", 7, HashMap()))
+            listProgAchiev.add(ProgressAchievement("/plugin/gamekins/achievements/blackwhite/hourglass.png", listOf(1, 2, 3),
+                "org.gamekins.util.AchievementUtil::coverLineWithXBranches",
+                "Have one test in your project", "Other Title", 0, HashMap()))
+            progressAchievementExample = HashMap()
+            progressAchievementExample[project] = listProgAchiev
+
         }
     }
 

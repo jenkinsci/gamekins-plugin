@@ -129,8 +129,130 @@ function loadAchievements() {
                 div = document.getElementById("secretAchievements")
                 div.style.display = "none"
             }
+
+            new Ajax.Request(window.location.href + "getProgressAchievementExample", {
+                parameters: parameters,
+                onComplete: function (rsp) {
+                    console.log(rsp.responseText)
+
+                    let list = JSON.parse(rsp.responseText)
+
+                    for(let i = 0; i < list.length; i++) {
+                        let progressAchievements = document.getElementById("newAchievements")
+                        createProgressAchievement(progressAchievements, list[i])
+                    }
+
+                }
+            })
         }
     })
+
+    function createProgressAchievement(parent, achievement) {
+        let milestones = achievement.milestones
+
+        let table = document.createElement("table")
+        table.style.border = "2px solid grey"
+        table.style.width = "50%"
+        table.style.marginLeft = "auto"
+        table.style.marginRight = "auto"
+        table.style.tableLayout = "fixed"
+
+        let tr1 = document.createElement("tr")
+
+        let td1 = document.createElement("td")
+        td1.rowSpan = 2
+        td1.style.paddingRight = "5px"
+        td1.style.verticalAlign = "middle"
+        td1.style.width = "50px"
+        let img = document.createElement("img")
+        let src = document.getElementsByTagName("img")[0].src
+        let base = src.substring(0, src.indexOf("static"))
+        let endSplit = src.substring(src.indexOf("static")).split("/")
+        if (achievement.progress <= 0) {
+            img.src = base + "static/" + endSplit[1] + achievement.badgeBasePath
+        } else {
+            img.src = base + "static/" + endSplit[1] + achievement.badgeBasePath.replace("blackwhite", "colour").replace(".png", "-colour.png")
+            let active = -1;
+            for (let i = 0; i < milestones.length; i++) {
+                if (achievement.progress > milestones[i]) {
+                    active = i
+                }
+            }
+            switch (active) {
+                case 0:
+                    let star = document.createElement("img")
+                    star.src = base + "static/" + endSplit[1] + achievement.badgeBasePath
+                        .substring(0, achievement.badgeBasePath.lastIndexOf("/")).replace("blackwhite", "stars") + "/004-badge.png"
+                    star.style.position = "absolute"
+                    star.height = 12
+                    star.width = 12
+                    td1.appendChild(star)
+                    break
+                default:
+                    break
+            }
+        }
+
+        img.height = 48
+        img.width = 48
+        td1.appendChild(img)
+        tr1.appendChild(td1)
+
+        let td2 = document.createElement("td")
+        td2.style.verticalAlign = "bottom"
+        td2.style.textAlign = "left"
+        let b = document.createElement("b")
+        b.innerText = achievement.title
+        td2.appendChild(b)
+        tr1.appendChild(td2)
+
+        let tr2 = document.createElement("tr")
+
+
+        for(let i = 0; i < milestones.length; i++) {
+            let cell = document.createElement("td")
+            let progContainer = document.createElement("div")
+            progContainer.classList.add("progress")
+            let progBar = document.createElement("div")
+            progBar.classList.add("progress-bar")
+            progBar.setAttribute("role", "progressbar")
+            if (i === 0) {
+                progBar.setAttribute("aria-valuemin", "0")
+                progBar.style.width = (achievement.progress / milestones[i]) * 100 + "%"
+                if (achievement.progress <= milestones[i] && achievement.progress > 0) {
+                    progBar.innerText = achievement.progress
+                }
+            }
+            else {
+                progBar.setAttribute("aria-valuemin", milestones[i - 1].toString())
+                progBar.style.width = ((achievement.progress - milestones[i - 1]) / (milestones[i] - milestones[i - 1])) * 100 + "%"
+                if (achievement.progress <= milestones[i] && achievement.progress > milestones[i - 1]) {
+                    progBar.innerText = achievement.progress
+                }
+            }
+            progBar.setAttribute("aria-valuenow", achievement.progress.toString())
+            progBar.setAttribute("aria-valuemax", milestones[i])
+
+
+            progContainer.appendChild(progBar)
+            cell.appendChild(progContainer)
+            cell.append(milestones[i])
+            cell.style.textAlign = "right"
+            tr2.appendChild(cell)
+        }
+
+        let tr3 = document.createElement("tr")
+        let td3 = document.createElement("td")
+        td3.colSpan = milestones.length
+        td3.innerText = achievement.description
+
+        tr3.appendChild(td3)
+
+        table.appendChild(tr1)
+        table.appendChild(tr2)
+        table.appendChild(tr3)
+        parent.appendChild(table)
+    }
 
     function createAchievement(parent, achievement, unsolved) {
         let table = document.createElement("table")
