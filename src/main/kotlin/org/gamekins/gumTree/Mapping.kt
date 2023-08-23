@@ -6,7 +6,7 @@ package org.gamekins.gumTree
  * @author Michael Gruener
  * @since versionNumber
  */
-class Mapping(val sourceNode: NodeWrapper, val destinationNode: NodeWrapper, val phase: String) {
+class Mapping(val sourceNode: NodeWrapper, val destinationNode: NodeWrapper) {
     override fun toString(): String {
         return "(" + sourceNode.lineNumber + "->" + destinationNode.lineNumber + ")"
     }

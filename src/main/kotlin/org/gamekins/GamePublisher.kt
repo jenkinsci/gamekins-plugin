@@ -62,6 +62,7 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
         run: Run<*, *>, parameters: Parameters, result: Result?,
         listener: TaskListener
     ) {
+        //Enteweder hier gleich Timestamp checken
 
         //Extracts the branch
         when (run.parent.parent) {
@@ -109,6 +110,7 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
         var solvedQuests = 0
         var generatedQuests = 0
         for (user in User.getAll()) {
+            //Oder hier Timestamp checken
             val results = PublisherUtil.checkUser(user, run, ArrayList(files), parameters, result, listener)
             generated += (if (results["generated"] != null) results["generated"] else 0)!!
             solved += (if (results["solved"] != null) results["solved"] else 0)!!

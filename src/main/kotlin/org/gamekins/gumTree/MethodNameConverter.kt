@@ -17,7 +17,8 @@ import java.util.*
 class MethodNameConverter {
 
     /**
-     * Returns the method-description as a string for the given methodDeclaration or null if it was not possible to determine .
+     * Returns the method-description as a string for the given methodDeclaration
+     * or null if it was not possible to determine .
      */
     fun getByteCodeRepresentation(methodDeclaration: MethodDeclaration): String? {
         val stringBuilder = StringBuilder()
@@ -40,35 +41,42 @@ class MethodNameConverter {
         if (isVarArgs) {
             stringBuilder.append('[')
         }
-        if (type.isPrimitiveType) {
-            stringBuilder.append(convertPrimitiveType(type.resolve().asPrimitive().name))
-        }
-        else if (type.isVoidType) {
-            stringBuilder.append("V")
-        }
-        else if (type.isArrayType) {
-            stringBuilder.append('[')
-            convertType((type as ArrayType).componentType, false, stringBuilder)
-        }
-        else if (type.isUnionType) {
-            return false
-        }
-        else if (type.isReferenceType) {
-            stringBuilder.append('L')
-            try {
-                stringBuilder.append(type.resolve().asReferenceType().qualifiedName.replace('.', '/'))
-            } catch (e: UnsolvedSymbolException) {
-                //Try to resolve dependency
-                val fullyQualifiedName = resolveReferenceWithImports(type.toString().replace(Regex("<.*?>"), ""), type.findCompilationUnit())
-                if (fullyQualifiedName == null) {
-                    return false
-                } else {
-                    stringBuilder.append(fullyQualifiedName)
-                }
+
+        return when {
+            type.isPrimitiveType -> {
+                stringBuilder.append(convertPrimitiveType(type.resolve().asPrimitive().name))
+                true
             }
-            stringBuilder.append(';')
+            type.isVoidType -> {
+                stringBuilder.append("V")
+                true
+            }
+            type.isArrayType -> {
+                stringBuilder.append('[')
+                convertType((type as ArrayType).componentType, false, stringBuilder)
+            }
+            type.isUnionType -> false
+            type.isReferenceType -> {
+                stringBuilder.append('L')
+                try {
+                    stringBuilder.append(type.resolve().asReferenceType().qualifiedName
+                        .replace('.', '/'))
+                } catch (e: UnsolvedSymbolException) {
+                    // Try to resolve dependency
+                    val fullyQualifiedName =
+                        resolveReferenceWithImports(type.toString().replace(Regex("<.*?>"), ""),
+                            type.findCompilationUnit())
+                    if (fullyQualifiedName == null) {
+                        return false
+                    } else {
+                        stringBuilder.append(fullyQualifiedName)
+                    }
+                }
+                stringBuilder.append(';')
+                true
+            }
+            else -> false
         }
-        return true
     }
 
     /**

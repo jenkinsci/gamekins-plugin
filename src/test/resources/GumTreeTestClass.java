@@ -8,7 +8,8 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TestClass {
+//TestClass used to test the mapping of the gumTree algorithm
+public class GumTreeTestClass {
 
     public String[] getList(String name, int... numbers) {
         StringBuilder stringBuilder = new StringBuilder(name);
