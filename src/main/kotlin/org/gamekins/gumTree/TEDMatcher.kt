@@ -3,18 +3,20 @@ package org.gamekins.gumTree
 /**
  * Implementation of the "Simple Fast Algorithms for the Editing Distance Between Trees and Related Problems"
  * algorithm by Zhang and Sasha using dynamic programming.
- * Inspired by the implementation of jgrapht (https://github.com/jgrapht/jgrapht/blob/master/jgrapht-core/src/main/java/org/jgrapht/alg/similarity/ZhangShashaTreeEditDistance.java)
+ * Inspired by the implementation of jgrapht
+ * (https://github.com/jgrapht/jgrapht/blob/master/jgrapht-core/src/main/java/org/jgrapht/alg/similarity/ZhangShashaTreeEditDistance.java)
  *
  * @author Michael Gruener
  * @since versionNumber
  */
-class TEDMatcher(val deleteCost: Double,
-                 val insertCost: Double,
-                 val changeCost: Double,
-                 val sourceRoot: TEDNodeWrapper,
-                 val destinationRoot: TEDNodeWrapper,
-                 val sourceCount: Int,
-                 val destinationCount: Int) {
+class TEDMatcher(
+    private val deleteCost: Double,
+    private val insertCost: Double,
+    private val changeCost: Double,
+    private val sourceRoot: TEDNodeWrapper,
+    private val destinationRoot: TEDNodeWrapper,
+    private val sourceCount: Int,
+    private val destinationCount: Int) {
 
     private lateinit var treeDistances: Array<DoubleArray>
     private lateinit var editOperationLists: Array<Array<ArrayList<EditOperation>?>>
@@ -52,7 +54,7 @@ class TEDMatcher(val deleteCost: Double,
                 && !editOperation.secondOperand!!.nodeWrapper.mapped ) {
                 val sourceNode = editOperation.firstOperand.nodeWrapper
                 val destinationNode = editOperation.secondOperand.nodeWrapper
-                mappings.add(Mapping(sourceNode, destinationNode, "recovery"))
+                mappings.add(Mapping(sourceNode, destinationNode))
 
                 sourceNode.mapped = true
                 sourceNode.gotMatchedChildren()
@@ -136,7 +138,7 @@ class TEDMatcher(val deleteCost: Double,
                     val dist2: Double = forestdist[iIndex][jIndex - 1] + insertCost
                     val dist3: Double = (forestdist[iIndex - 1][jIndex - 1]
                             + calculateChangeCost(i1Node, j1Node))
-                    val result = Math.min(dist1, Math.min(dist2, dist3))
+                    val result = dist1.coerceAtMost(dist2.coerceAtMost(dist3))
                     val entry: CacheEntry = when (result) {
                         dist1 -> { // remove operation
                             CacheEntry(
@@ -167,7 +169,7 @@ class TEDMatcher(val deleteCost: Double,
                     val dist1: Double = forestdist[iIndex - 1][jIndex] + deleteCost
                     val dist2: Double = forestdist[iIndex][jIndex - 1] + insertCost
                     val dist3 = forestdist[li1Index][lj1Index] + treeDistances[i1 - 1][j1 - 1]
-                    val result = Math.min(dist1, Math.min(dist2, dist3))
+                    val result = dist1.coerceAtMost(dist2.coerceAtMost(dist3))
                     forestdist[iIndex][jIndex] = result
                     var entry: CacheEntry
                     when (result) {

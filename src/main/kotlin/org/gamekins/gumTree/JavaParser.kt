@@ -20,6 +20,9 @@ import java.io.File
 class JavaParser private constructor(){
     companion object {
 
+        /**
+         * Parses the compilationUnit from a java file.
+         */
         fun parse(sourceFile: String, mutatedClass: String, parameters: Parameters): CompilationUnit {
 
             synchronized(this) {
@@ -34,12 +37,16 @@ class JavaParser private constructor(){
                 StaticJavaParser.getParserConfiguration().setSymbolResolver(symbolSolver)
 
                 var filePath = ""
-                if (mutatedClass.contains('.')) filePath = mutatedClass.substringBeforeLast('.').replace('.','/') + '/'
+                if (mutatedClass.contains('.')) filePath = mutatedClass.substringBeforeLast('.')
+                    .replace('.','/') + '/'
                 filePath = parameters.remote + "/src/main/java/$filePath$sourceFile"
                 return StaticJavaParser.parse(File(filePath))
             }
         }
 
+        /**
+         * Parses the compilationUnit from a string representation.
+         */
         fun parse(sourceCode: String): CompilationUnit {
             StaticJavaParser.getParserConfiguration().setAttributeComments(false)
             StaticJavaParser.getParserConfiguration().setLanguageLevel(Constants.JAVA_PARSER_LANGUAGE_LEVEL)

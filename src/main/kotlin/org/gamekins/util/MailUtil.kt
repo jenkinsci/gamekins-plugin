@@ -16,7 +16,6 @@ import org.gamekins.property.GameJobProperty
 import org.gamekins.property.GameMultiBranchProperty
 import org.jenkinsci.plugins.workflow.job.WorkflowJob
 import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject
-import java.lang.Exception
 import java.util.*
 
 
@@ -87,7 +86,7 @@ object MailUtil {
         msg.setText(text)
         try {
             Transport.send(msg)
-        } catch (e: Exception) {
+        } catch (e: MessagingException) {
             e.printStackTrace()
         }
     }

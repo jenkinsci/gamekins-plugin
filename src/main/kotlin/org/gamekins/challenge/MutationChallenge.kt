@@ -127,7 +127,7 @@ class MutationChallenge(val details: SourceFileDetails, var data: MutationUtil.M
     override fun isSolvable(parameters: Constants.Parameters, run: Run<*, *>, listener: TaskListener): Boolean {
         if (details.parameters.branch != parameters.branch) return true
         if (!details.update(parameters).filesExists()) return false
-        if (!MutationUtil.executePIT(details, parameters, listener)) return false
+        if (!MutationUtil.executePIT(details, parameters, listener)) return true
         val mutationReport = FilePath(parameters.workspace.channel,
             parameters.workspace.remote + Constants.Mutation.REPORT_PATH)
         if (!mutationReport.exists()) return true

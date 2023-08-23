@@ -68,6 +68,9 @@ class NodeWrapper(
         }
     }
 
+    /**
+     * Increments the counter for timesMapped by one.
+     */
     fun incrementMapping() {
         timesMapped += 1
     }
@@ -83,6 +86,9 @@ class NodeWrapper(
         }
     }
 
+    /**
+     * Returns the descendants of the node in pre-order.
+     */
     private fun returnDescendantsPreOrder(): Sequence<NodeWrapper> {
         return sequence {
             yield(this@NodeWrapper)

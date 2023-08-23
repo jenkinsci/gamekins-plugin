@@ -1,22 +1,14 @@
 package org.gamekins.gumTree
 
-import com.github.javaparser.ParserConfiguration
-import com.github.javaparser.StaticJavaParser
 import com.github.javaparser.ast.CompilationUnit
-import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration
-import com.github.javaparser.ast.body.MethodDeclaration
-import com.github.javaparser.symbolsolver.JavaSymbolSolver
-import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver
-import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeSolver
-import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver
+import com.github.javaparser.ast.body.*
 import hudson.FilePath
+import org.gamekins.util.Constants
 import org.gamekins.util.Constants.Parameters
 import org.gamekins.util.MutationUtil.MutationData
-import java.io.File
-import java.security.InvalidParameterException
 import java.util.*
-import kotlin.math.min
 import kotlin.math.max
+import kotlin.math.min
 
 
 /**
@@ -38,9 +30,9 @@ class GumTree {
      * Returns null if no suitable mapping was found.
      */
     fun findMapping(mutationData: MutationData, parameters: Parameters): MutationData? {
-        if (mutationData.sourceCode.isEmpty()) throw InvalidParameterException("CompilationUnit in MutationData must not be null.")
-        val source: CompilationUnit = JavaParser.parse(mutationData.sourceCode)
-        val destination: CompilationUnit = JavaParser.parse(mutationData.sourceFile, mutationData.mutatedClass, parameters)
+        if (mutationData.sourceCode.isEmpty()) return null
+        val source = JavaParser.parse(mutationData.sourceCode)
+        val destination = JavaParser.parse(mutationData.sourceFile, mutationData.mutatedClass, parameters)
         val mappings = map(source, destination)
 
         return updateMutationData(mutationData, mappings, destination, parameters)
@@ -50,19 +42,23 @@ class GumTree {
      * Tries to update the mutationData with the calculated mappings.
      * Returns null if an error occurred while updating the mutationData.
      */
-    private fun updateMutationData(mutationData: MutationData, mappings: List<Mapping>, destinationCU: CompilationUnit, parameters: Parameters): MutationData? {
+    private fun updateMutationData(
+        mutationData: MutationData,
+        mappings: List<Mapping>,
+        destinationCU: CompilationUnit,
+        parameters: Parameters
+    ): MutationData? {
         val lineNumber = findMostFrequentDestinationLineNumber(mappings, mutationData.lineNumber) ?: return null
-        val methodDeclaration: NodeWrapper = getMethodDeclaration(lineNumber, mappings) ?: return null
-        val classDeclaration: NodeWrapper = getClassDeclaration(methodDeclaration) ?: return null
+        val methodDeclaration = getMethodDeclaration(lineNumber, mappings) ?: return null
+        val classDeclaration = getClassDeclaration(methodDeclaration) ?: return null
 
-        var mutatedClass = (classDeclaration.node as ClassOrInterfaceDeclaration).fullyQualifiedName.get()
-        if (classDeclaration.node.isInnerClass) {
-            mutatedClass = replaceLastCharacter(mutatedClass, '.', '$')
-        }
-        val mutatedMethod = (methodDeclaration.node as MethodDeclaration).nameAsString
-        var mutatedMethodDescription = MethodNameConverter().getByteCodeRepresentation(methodDeclaration.node)
-        if (mutatedMethodDescription == null) {
-            mutatedMethodDescription = retrieveMethodDescriptionThrewPitReport(lineNumber, parameters)?: return null
+        val mutatedClass = getClassName(classDeclaration)
+        val mutatedMethod = if (methodDeclaration.node is ConstructorDeclaration) "&lt;init&gt;"
+        else (methodDeclaration.node as MethodDeclaration).nameAsString
+        var mutatedMethodDescription = if (methodDeclaration.node is ConstructorDeclaration) "()V"
+        else MethodNameConverter().getByteCodeRepresentation(methodDeclaration.node as MethodDeclaration)
+        if (mutatedMethodDescription == null || mutationData.methodDescription.contains("$")) {
+            mutatedMethodDescription = retrieveMethodDescriptionThroughPitReport(lineNumber, parameters) ?: return null
         }
 
         return MutationData(
@@ -111,7 +107,24 @@ class GumTree {
     }
 
     /**
-     * Finds the most frequent destination line number that corresponds to a given source line number in a list of mappings.
+     * Returns the fully qualified name of a class or enum.
+     */
+    private fun getClassName(declaration: NodeWrapper): String {
+        var mutatedClass = ""
+        if (declaration.node is ClassOrInterfaceDeclaration) mutatedClass = declaration.node.fullyQualifiedName.get()
+        if (declaration.node is EnumDeclaration) mutatedClass = declaration.node.fullyQualifiedName.get()
+        if (declaration.node.hasParentNode()
+            && (declaration.node.parentNode.get() is ClassOrInterfaceDeclaration
+                    || declaration.node.parentNode.get() is RecordDeclaration)
+        ) {
+            mutatedClass = replaceLastCharacter(mutatedClass, '.', '$')
+        }
+        return mutatedClass
+    }
+
+    /**
+     * Finds the most frequent destination line number that corresponds to a given source line number
+     * in a list of mappings.
      */
     private fun findMostFrequentDestinationLineNumber(mappings: List<Mapping>, sourceLineNumber: Int): Int? {
         val matchingMappings = mappings.filter { it.sourceNode.lineNumber == sourceLineNumber }
@@ -132,6 +145,9 @@ class GumTree {
         return mostFrequentLineNumbers.firstOrNull()
     }
 
+    /**
+     * Replaces the last occurrence of a given character with the new character.
+     */
     private fun replaceLastCharacter(input: String, oldChar: Char, newChar: Char): String {
         val lastIndex = input.lastIndexOf(oldChar)
         return if (lastIndex >= 0) {
@@ -144,9 +160,11 @@ class GumTree {
     /**
      * Tries to retrieve the methodDescription from the pit report for the given method and line number.
      */
-    private fun retrieveMethodDescriptionThrewPitReport(lineNumber: Int, parameters: Parameters): String? {
-        val mutationReport = FilePath(parameters.workspace.channel,
-            parameters.workspace.remote + "/target/pit-reports/mutations.xml")
+    private fun retrieveMethodDescriptionThroughPitReport(lineNumber: Int, parameters: Parameters): String? {
+        val mutationReport = FilePath(
+            parameters.workspace.channel,
+            parameters.workspace.remote + Constants.Mutation.REPORT_PATH
+        )
         if (!mutationReport.exists()) return null
         val mutants = mutationReport.readToString().split("\n").filter { it.startsWith("<mutation ") }
         if (mutants.isEmpty()) return null
@@ -177,42 +195,6 @@ class GumTree {
 
         return mappings
     }
-
-    /**
-     * Debugging method.
-     */
-    fun testMapping() {
-        val parserConfiguration = ParserConfiguration().setAttributeComments(false)
-        StaticJavaParser.setConfiguration(parserConfiguration)
-
-
-        val reflectionTypeSolver = ReflectionTypeSolver()
-        val javaParserTypeSolver = JavaParserTypeSolver("src/main/java")
-        val combinedSolver = CombinedTypeSolver()
-        combinedSolver.add(reflectionTypeSolver)
-        combinedSolver.add(javaParserTypeSolver)
-        val symbolSolver = JavaSymbolSolver(combinedSolver)
-        StaticJavaParser.getParserConfiguration().setSymbolResolver(symbolSolver)
-
-
-        val source = StaticJavaParser.parse(File("src/main/java/SimpleClass.java"))
-        val destination = StaticJavaParser.parse(File("src/main/java/ModifiedSimpleClass.java"))
-        val mappings = map(source, destination)
-        for (mapping in mappings) {
-            println(
-                "Mapping(" + mapping.sourceNode.lineNumber + ":" + mapping.sourceNode.toString()
-                        + "->" + mapping.destinationNode.lineNumber + ":" + mapping.destinationNode.toString()
-                        + ") in Phase:" + mapping.phase
-            )
-        }
-        val methodNameConverter = MethodNameConverter()
-        for (mapping in mappings) {
-            if (mapping.sourceNode.node is MethodDeclaration && mapping.destinationNode.node is MethodDeclaration) {
-                println("From " + methodNameConverter.getByteCodeRepresentation(mapping.sourceNode.node) + " to " + methodNameConverter.getByteCodeRepresentation(mapping.destinationNode.node))
-            }
-        }
-    }
-
 
     /**
      * Implements the top-down-phase of the algorithm.
@@ -249,7 +231,7 @@ class GumTree {
         candidateMappings.sortByDescending { dice(it.sourceNode.parent!!, it.destinationNode.parent!!) }
         while (candidateMappings.isNotEmpty()) {
             val mapping = candidateMappings.removeFirst()
-            mapIsomorphicChildren(mappings, mapping.sourceNode, mapping.destinationNode, "candidate")
+            mapIsomorphicChildren(mappings, mapping.sourceNode, mapping.destinationNode)
             candidateMappings.removeIf {
                 (it.sourceNode.hashCode() == mapping.sourceNode.hashCode()
                         && it.sourceNode.lineNumber == mapping.sourceNode.lineNumber)
@@ -291,10 +273,10 @@ class GumTree {
         // classify into mappings and candidate-mappings
         for (mapping in allMappings) {
             if (mapping.value.size == 1 && mapping.value[0].timesMapped == 1) {
-                mapIsomorphicChildren(mappings, mapping.key, mapping.value[0], "topDown")
+                mapIsomorphicChildren(mappings, mapping.key, mapping.value[0])
             } else {
                 for (destinationNode in mapping.value) {
-                    candidateMappings.add(Mapping(mapping.key, destinationNode, "candidate"))
+                    candidateMappings.add(Mapping(mapping.key, destinationNode))
                 }
             }
         }
@@ -310,7 +292,7 @@ class GumTree {
      * Maps all isomorphic children of the given nodes.
      */
     private fun mapIsomorphicChildren(
-        mappings: MutableList<Mapping>, sourceParentNode: NodeWrapper, destinationParentNode: NodeWrapper, phase: String
+        mappings: MutableList<Mapping>, sourceParentNode: NodeWrapper, destinationParentNode: NodeWrapper
     ) {
         sourceParentNode.gotMatchedChildren()
         val sourceStream = sourceParentNode.getDescendantsPreOrderWithoutRoot().iterator()
@@ -321,7 +303,7 @@ class GumTree {
             if (sourceNode == destinationNode) {
                 sourceNode.mapped = true
                 destinationNode.mapped = true
-                mappings.add(Mapping(sourceNode, destinationNode, phase))
+                mappings.add(Mapping(sourceNode, destinationNode))
             }
         }
     }
@@ -333,7 +315,7 @@ class GumTree {
         sourceRoot: NodeWrapper, destinationRoot: NodeWrapper, mappings: MutableList<Mapping>
     ) {
 
-        val sourceStream = sourceRoot.getDescendantsPostOrder().filter { !it.mapped }.iterator()
+        val sourceStream = sourceRoot.getDescendantsPostOrder().filter { !it.mapped }
         for (sourceNode in sourceStream) {
             if (!sourceNode.hasMatchedChildren) {
                 continue
@@ -341,7 +323,7 @@ class GumTree {
             val candidate = candidate(sourceNode, destinationRoot)
             if (candidate != null && dice(sourceNode, candidate) > minDice) {
                 sourceNode.parent?.gotMatchedChildren()
-                mappings.add(Mapping(sourceNode, candidate, "container"))
+                mappings.add(Mapping(sourceNode, candidate))
                 sourceNode.mapped = true
                 candidate.mapped = true
 
@@ -351,7 +333,9 @@ class GumTree {
                 val sourceCount = sourceClone.getDescendantsPostOrder().count()
                 val destinationCount = destinationClone.getDescendantsPostOrder().count()
                 if (max(sourceCount, destinationCount) < maxSize) {
-                    val tedMatcher = TEDMatcher(1.0, 1.0, 1.0, sourceClone, destinationClone, sourceCount, destinationCount)
+                    val tedMatcher =
+                        TEDMatcher(1.0, 1.0, 1.0,
+                            sourceClone, destinationClone, sourceCount, destinationCount)
                     tedMatcher.findMappings(mappings)
                 }
             }
@@ -386,9 +370,7 @@ class GumTree {
      * Adds all children of the given node to the given list.
      */
     private fun open(list: MutableList<NodeWrapper>, node: NodeWrapper) {
-        for (child in node.children) {
-            list.add(child)
-        }
+        list.addAll(node.children)
     }
 
     /**

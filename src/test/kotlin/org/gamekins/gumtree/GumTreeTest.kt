@@ -21,36 +21,36 @@ import java.io.File
 
 class GumTreeTest: FeatureSpec ({
     val line1 = "<mutation detected='false' status='NO_COVERAGE' numberOfTestsRun='0'>" +
-            "<sourceFile>TestClass.java</sourceFile><mutatedClass>org.example.TestClass</mutatedClass>" +
+            "<sourceFile>GumTreeTestClass.java</sourceFile><mutatedClass>org.example.GumTreeTestClass</mutatedClass>" +
             "<mutatedMethod>doSomething</mutatedMethod>" +
             "<methodDescription>(Lorg/example/anotherPackage/CSVParser;)V</methodDescription>" +
-            "<lineNumber>24</lineNumber>" +
+            "<lineNumber>25</lineNumber>" +
             "<mutator>org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator</mutator>" +
             "<indexes><index>4</index></indexes><blocks><block>0</block></blocks><killingTest/>" +
             "<description>removed call to java/lang/Object::notify</description></mutation>"
     val line2 = "<mutation detected='false' status='NO_COVERAGE' numberOfTestsRun='0'>" +
-            "<sourceFile>TestClass.java</sourceFile><mutatedClass>org.example.TestClass</mutatedClass>" +
+            "<sourceFile>GumTreeTestClass.java</sourceFile><mutatedClass>org.example.GumTreeTestClass</mutatedClass>" +
             "<mutatedMethod>doSomethingBig</mutatedMethod>" +
-            "<methodDescription>()Ljava/math/BigInteger;</methodDescription><lineNumber>33</lineNumber>" +
+            "<methodDescription>()Ljava/math/BigInteger;</methodDescription><lineNumber>34</lineNumber>" +
             "<mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator</mutator>" +
             "<indexes><index>24</index></indexes><blocks><block>5</block></blocks><killingTest/>" +
             "<description>replaced return value with null for org/example/TestClass::doSomethingBig</description>" +
             "</mutation>"
     val line3 = "<mutation detected='true' status='KILLED' numberOfTestsRun='1'>" +
-            "<sourceFile>TestClass.java</sourceFile><mutatedClass>org.example.TestClass</mutatedClass>" +
+            "<sourceFile>GumTreeTestClass.java</sourceFile><mutatedClass>org.example.GumTreeTestClass</mutatedClass>" +
             "<mutatedMethod>getList</mutatedMethod>" +
             "<methodDescription>(Ljava/lang/String;[I)[Ljava/lang/String;</methodDescription>" +
-            "<lineNumber>19</lineNumber>" +
+            "<lineNumber>20</lineNumber>" +
             "<mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator</mutator>" +
             "<indexes><index>47</index></indexes><blocks><block>7</block></blocks>" +
             "<killingTest>org.example.TestClassTest.[engine:junit-jupiter]/[class:org.example.TestClassTest]/" +
             "[method:testTestMethod()]</killingTest>" +
             "<description>replaced return value with null for org/example/TestClass::getList</description></mutation>"
     val line4 = "<mutation detected='false' status='NO_COVERAGE' numberOfTestsRun='0'>" +
-            "<sourceFile>TestClass.java</sourceFile><mutatedClass>org.example.TestClass</mutatedClass>" +
+            "<sourceFile>GumTreeTestClass.java</sourceFile><mutatedClass>org.example.GumTreeTestClass</mutatedClass>" +
             "<mutatedMethod>doSomethingElse</mutatedMethod>" +
             "<methodDescription>()Lorg/example/anotherAnotherPackage/Additive;</methodDescription>" +
-            "<lineNumber>43</lineNumber>" +
+            "<lineNumber>44</lineNumber>" +
             "<mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator</mutator>" +
             "<indexes><index>25</index></indexes><blocks><block>3</block></blocks><killingTest/>" +
             "<description>replaced return value with null for org/example/TestClass::doSomethingElse</description>" +
@@ -71,10 +71,10 @@ class GumTreeTest: FeatureSpec ({
         val symbolSolver = JavaSymbolSolver(combinedSolver)
         StaticJavaParser.getParserConfiguration().setSymbolResolver(symbolSolver)
 
-        val sourceCompilationUnit = StaticJavaParser.parse(File("src/test/resources/TestClass.java"))
+        val sourceCompilationUnit = StaticJavaParser.parse(File("src/test/resources/GumTreeTestClass.java"))
         LexicalPreservingPrinter.setup(sourceCompilationUnit)
         sourceCode = LexicalPreservingPrinter.print(sourceCompilationUnit)
-        destinationCompilationUnit = StaticJavaParser.parse(File("src/test/resources/TestClass2.java"))
+        destinationCompilationUnit = StaticJavaParser.parse(File("src/test/resources/GumTreeTestClass2.java"))
 
         parameters.branch = branch
         parameters.workspace = path
@@ -89,54 +89,63 @@ class GumTreeTest: FeatureSpec ({
     feature("testGumTree") {
         var mutationData = MutationData(line1)
         mutationData.sourceCode = sourceCode
+        //Tests the case when just the lineNumber of the mutant has been changed
+        //Gets the method signature through the imports of the class
         scenario("MoveMethod")
         {
             val updatedMutationData = GumTree().findMapping(mutationData, parameters)
             updatedMutationData shouldNotBe null
             assertSoftly {
-                updatedMutationData!!.lineNumber shouldBe 23
+                updatedMutationData!!.lineNumber shouldBe 24
                 updatedMutationData.methodDescription shouldBe "(Lorg/example/anotherPackage/CSVParser;)V"
-                updatedMutationData.mutatedClass shouldBe "org.example.TestClass"
+                updatedMutationData.mutatedClass shouldBe "org.example.GumTreeTestClass"
             }
         }
 
         mutationData = MutationData(line2)
         mutationData.sourceCode = sourceCode
+        //Tests the case when the class has changed, e.g. the method was refactored into an internal class
+        //Tests the case when the method signature has been changed
+        //Gets the method signature through the reflectionTypeResolver
         scenario("MoveMethodToInternalClassAndAddParameter")
         {
             val updatedMutationData = GumTree().findMapping(mutationData, parameters)
             updatedMutationData shouldNotBe null
             assertSoftly {
-                updatedMutationData!!.lineNumber shouldBe 45
+                updatedMutationData!!.lineNumber shouldBe 46
                 updatedMutationData.methodDescription shouldBe "(D)Ljava/math/BigInteger;"
-                updatedMutationData.mutatedClass shouldBe "org.example.TestClass\$InternalClass"
+                updatedMutationData.mutatedClass shouldBe "org.example.GumTreeTestClass\$InternalClass"
             }
         }
 
         mutationData = MutationData(line3)
         mutationData.sourceCode = sourceCode
+        //Tests the case when the method name has been changed
+        //Gets the method signature through the reflectionTypeResolver and primitive types
         scenario("RenameMethod")
         {
             val updatedMutationData = GumTree().findMapping(mutationData, parameters)
             updatedMutationData shouldNotBe null
             assertSoftly {
-                updatedMutationData!!.lineNumber shouldBe 19
+                updatedMutationData!!.lineNumber shouldBe 20
                 updatedMutationData.methodDescription shouldBe "(Ljava/lang/String;[I)[Ljava/lang/String;"
-                updatedMutationData.mutatedClass shouldBe "org.example.TestClass"
+                updatedMutationData.mutatedClass shouldBe "org.example.GumTreeTestClass"
                 updatedMutationData.mutatedMethod shouldBe "getName"
             }
         }
 
         mutationData = MutationData(line4)
         mutationData.sourceCode = sourceCode
-        scenario("RetrieveMutationDataThrewPITReport")
+        //Tests the case when it was not possible to resolve the method signature, so it tries to get that
+        //information through the pitReport, e.g. when star-imports were used
+        scenario("RetrieveMutationDataThroughPITReport")
         {
             val updatedMutationData = GumTree().findMapping(mutationData, parameters)
             updatedMutationData shouldNotBe null
             assertSoftly {
-                updatedMutationData!!.lineNumber shouldBe 34
+                updatedMutationData!!.lineNumber shouldBe 35
                 updatedMutationData.methodDescription shouldBe "()Lorg/example/anotherAnotherPackage/Additive;"
-                updatedMutationData.mutatedClass shouldBe "org.example.TestClass"
+                updatedMutationData.mutatedClass shouldBe "org.example.GumTreeTestClass"
                 updatedMutationData.mutatedMethod shouldBe "doSomethingElse"
             }
         }
