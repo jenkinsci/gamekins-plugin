@@ -49,16 +49,15 @@ class GumTree {
         parameters: Parameters
     ): MutationData? {
         val lineNumber = findMostFrequentDestinationLineNumber(mappings, mutationData.lineNumber) ?: return null
-        val methodDeclaration = getMethodDeclaration(lineNumber, mappings) ?: return null
-        val classDeclaration = getClassDeclaration(methodDeclaration) ?: return null
+        val methodDeclaration: NodeWrapper = getMethodDeclaration(lineNumber, mappings) ?: return null
+        val classDeclaration: NodeWrapper = getClassDeclaration(methodDeclaration) ?: return null
 
         val mutatedClass = getClassName(classDeclaration)
-        val mutatedMethod = if (methodDeclaration.node is ConstructorDeclaration) "&lt;init&gt;"
-        else (methodDeclaration.node as MethodDeclaration).nameAsString
+        val mutatedMethod = getMutatedMethod(methodDeclaration, mutationData.mutatedMethod)
         var mutatedMethodDescription = if (methodDeclaration.node is ConstructorDeclaration) "()V"
-        else MethodNameConverter().getByteCodeRepresentation(methodDeclaration.node as MethodDeclaration)
-        if (mutatedMethodDescription == null || mutationData.methodDescription.contains("$")) {
-            mutatedMethodDescription = retrieveMethodDescriptionThroughPitReport(lineNumber, parameters) ?: return null
+        else  MethodNameConverter().getByteCodeRepresentation(methodDeclaration.node as MethodDeclaration)
+        if (mutatedMethodDescription == null || mutationData.mutatedMethod.contains("$")) {
+            mutatedMethodDescription = retrieveMethodDescriptionThrewPitReport(lineNumber, mutatedMethod, parameters)?: return null
         }
 
         return MutationData(
@@ -123,6 +122,15 @@ class GumTree {
     }
 
     /**
+     * Returns the representation for pit of the method.
+     */
+    private fun getMutatedMethod(declaration: NodeWrapper, oldMethodName: String): String {
+        if (declaration.node is ConstructorDeclaration) return "&lt;init&gt;"
+        if (oldMethodName.contains("\$")) return oldMethodName
+        return (declaration.node as MethodDeclaration).nameAsString
+    }
+
+    /**
      * Finds the most frequent destination line number that corresponds to a given source line number
      * in a list of mappings.
      */
@@ -160,16 +168,16 @@ class GumTree {
     /**
      * Tries to retrieve the methodDescription from the pit report for the given method and line number.
      */
-    private fun retrieveMethodDescriptionThroughPitReport(lineNumber: Int, parameters: Parameters): String? {
-        val mutationReport = FilePath(
-            parameters.workspace.channel,
-            parameters.workspace.remote + Constants.Mutation.REPORT_PATH
-        )
+    private fun retrieveMethodDescriptionThrewPitReport(
+        lineNumber: Int, methodName: String, parameters: Parameters): String? {
+        val mutationReport = FilePath(parameters.workspace.channel,
+            parameters.workspace.remote + Constants.Mutation.REPORT_PATH)
         if (!mutationReport.exists()) return null
         val mutants = mutationReport.readToString().split("\n").filter { it.startsWith("<mutation ") }
         if (mutants.isEmpty()) return null
         for (mutant in mutants) {
-            if (mutant.contains("<lineNumber>$lineNumber</lineNumber>"))
+            if (mutant.contains("<lineNumber>$lineNumber</lineNumber>")
+                && mutant.contains("<mutatedMethod>$methodName</mutatedMethod>"))
                 return """<methodDescription>(.*)</methodDescription>""".toRegex().find(mutant)!!.groupValues[1]
         }
         return null
