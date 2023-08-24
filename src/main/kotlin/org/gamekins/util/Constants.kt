@@ -16,6 +16,7 @@
 
 package org.gamekins.util
 
+import com.github.javaparser.ParserConfiguration
 import hudson.FilePath
 import java.io.File
 import java.io.Serializable
@@ -197,6 +198,8 @@ object Constants {
     const val TRY_CLASS = "[Gamekins] Try class "
 
     const val NO_TEAM_TEAM_NAME = "---"
+
+    val JAVA_PARSER_LANGUAGE_LEVEL = ParserConfiguration.LanguageLevel.JAVA_17
 
     /**
      * Returns the path to the most recent jar file of the Sonar-Java-Plugin for SonarLint.

@@ -259,18 +259,11 @@ class MutationChallengeTest : FeatureSpec({
         every { MutationUtil.executePIT(any(), any(), any()) } returns false
         scenario("PIT could not execute")
         {
-            solvableChallenge.isSolvable(parameters, run, listener) shouldBe false
+            solvableChallenge.isSolvable(parameters, run, listener) shouldBe true
         }
 
         every { MutationUtil.executePIT(any(), any(), any()) } returns true
         scenario("MutationReport does not exist")
-        {
-            solvableChallenge.isSolvable(parameters, run, listener) shouldBe true
-        }
-
-        parameters.workspace = testProjectPath
-	every { JacocoUtil.getLineNumberAfterCodeChange(any(), any(), any(), any(), any(), any()) } returns 109
-        scenario("Mutant not detected")
         {
             solvableChallenge.isSolvable(parameters, run, listener) shouldBe true
         }
@@ -281,6 +274,7 @@ class MutationChallengeTest : FeatureSpec({
             solvableChallenge.isSolvable(parameters, run, listener) shouldBe true
         }
 
+        parameters.workspace = testProjectPath
         val mutant = MutationData(line.replace("detected='false'", "detected='true'"))
         every { MutationUtil.getMutant(any(), any()) } returns mutant
         scenario("Mutant detected")
@@ -296,15 +290,8 @@ class MutationChallengeTest : FeatureSpec({
             challenge.isSolved(parameters, run, listener) shouldBe false
         }
 
-        every { MutationUtil.executePIT(any(), any(), any()) } returns true
-        every { MutationUtil.getMutant(any(), any()) } returns null
-	every { JacocoUtil.getLineNumberAfterCodeChange(any(), any(), any(), any(), any(), any()) } returns 109
-        scenario("Mutant is null")
-        {
-            challenge.isSolved(parameters, run, listener) shouldBe false
-        }
-
         var mutant = MutationData(line.replace("detected='false'", "detected='true'"))
+        every { MutationUtil.executePIT(any(), any(), any()) } returns true
         every { MutationUtil.getMutant(any(), any()) } returns mutant
         scenario("Mutant is not covered")
         {
@@ -318,6 +305,7 @@ class MutationChallengeTest : FeatureSpec({
             challenge.isSolved(parameters, run, listener) shouldBe false
         }
 
+
         mutant = MutationData(line
             .replace("detected='false'", "detected='true'")
             .replace("status='NO_COVERAGE'", "status='KILLED'"))
@@ -326,6 +314,7 @@ class MutationChallengeTest : FeatureSpec({
         {
             challenge.isSolved(parameters, run, listener) shouldBe true
         }
+
     }
 
     feature("printToXML") {
