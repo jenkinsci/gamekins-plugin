@@ -317,6 +317,7 @@ object ChallengeFactory {
 
         val mutant = MutationUtil.MutationData(mutants[Random.nextInt(mutants.size)])
         if (mutant.status == MutationUtil.MutationStatus.KILLED) return null
+        mutant.generateCompilationUnit(parameters)
         return MutationChallenge(fileDetails, mutant)
     }
 
