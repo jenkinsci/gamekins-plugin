@@ -1,6 +1,9 @@
 kotlin.Pair
+org.sonarsource.sonarlint.core.analysis.api.ClientInputFileEdit
 org.sonarsource.sonarlint.core.analysis.api.DefaultLocation
 org.sonarsource.sonarlint.core.analysis.api.Flow
+org.sonarsource.sonarlint.core.analysis.api.QuickFix
+org.sonarsource.sonarlint.core.analysis.api.TextEdit
 org.sonarsource.sonarlint.core.analysis.api.TextRange
 org.sonarsource.sonarlint.core.client.api.common.analysis.DefaultClientIssue
 org.sonarsource.sonarlint.core.analysis.container.analysis.issue.DefaultQuickFix

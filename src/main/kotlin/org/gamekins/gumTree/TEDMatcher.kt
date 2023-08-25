@@ -7,7 +7,7 @@ package org.gamekins.gumTree
  * (https://github.com/jgrapht/jgrapht/blob/master/jgrapht-core/src/main/java/org/jgrapht/alg/similarity/ZhangShashaTreeEditDistance.java)
  *
  * @author Michael Gruener
- * @since versionNumber
+ * @since 0.6
  */
 class TEDMatcher(
     private val deleteCost: Double,

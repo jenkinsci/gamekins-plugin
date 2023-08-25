@@ -1,5 +1,7 @@
 package org.gamekins.challenge.quest
 
+import com.github.javaparser.ast.CompilationUnit
+import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinter
 import hudson.FilePath
 import hudson.model.TaskListener
 import hudson.model.User
@@ -13,6 +15,7 @@ import org.gamekins.GameUserProperty
 import org.gamekins.challenge.*
 import org.gamekins.file.FileDetails
 import org.gamekins.file.SourceFileDetails
+import org.gamekins.gumTree.JavaParser
 import org.gamekins.util.Constants
 import org.gamekins.util.GitUtil
 import org.gamekins.util.JacocoUtil
@@ -50,6 +53,13 @@ class QuestFactoryTest : FeatureSpec({
         every { user.id } returns "user"
         every { user.getProperty(hudson.tasks.Mailer.UserProperty::class.java) } returns null
         every { user.getProperty(GameUserProperty::class.java) } returns property
+
+        val compilationUnit = mockkClass(CompilationUnit::class)
+        mockkStatic(JavaParser::class)
+        mockkStatic(LexicalPreservingPrinter::class)
+        every { JavaParser.parse(any(), any(), any()) } returns compilationUnit
+        every { LexicalPreservingPrinter.setup(any()) } returns null
+        every { LexicalPreservingPrinter.print(any()) } returns ""
     }
 
     feature("generateNewQuests") {
@@ -226,6 +236,8 @@ class QuestFactoryTest : FeatureSpec({
         every { sourceDetail.jacocoSourceFile } returns File("")
         every { sourceDetail.parameters } returns Constants.Parameters()
         every { sourceDetail.fileName } returns "file"
+        every { sourceDetail.packageName } returns "org.example"
+        every { sourceDetail.fileExtension } returns "java"
         every { JacocoUtil.generateDocument(any()) } returns mockkClass(Document::class)
         every { JacocoUtil.calculateCoveredLines(any(), any()) } returns 1
         val line = mockkClass(Element::class)
@@ -261,6 +273,8 @@ class QuestFactoryTest : FeatureSpec({
         every { sourceDetail.jacocoSourceFile } returns File("")
         every { sourceDetail.parameters } returns Constants.Parameters()
         every { sourceDetail.fileName } returns "file"
+        every { sourceDetail.packageName } returns "org.example"
+        every { sourceDetail.fileExtension } returns "java"
         every { JacocoUtil.generateDocument(any()) } returns mockkClass(Document::class)
         every { JacocoUtil.calculateCoveredLines(any(), any()) } returns 1
         val line = mockkClass(Element::class)
@@ -306,6 +320,7 @@ class QuestFactoryTest : FeatureSpec({
 
         every { sourceDetail.packageName } returns "org.example"
         every { sourceDetail.fileName } returns "TestClass"
+        every { sourceDetail.fileExtension } returns "java"
         every { elements.size } returns 3
         val line1 = mockkClass(Element::class)
         val line2 = mockkClass(Element::class)

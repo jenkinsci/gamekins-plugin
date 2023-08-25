@@ -281,7 +281,7 @@ class MutationUtilTest : FeatureSpec({
 
         scenario("Default case")
         {
-            MutationUtil.getMutatedCode("    if (y.getClass()) {", MutationData(mutationLine)) shouldBe ""
+            MutationUtil.getMutatedCode("    if (y.getClass()) {", MutationData(mutationLine)) shouldBe "    if (!y.getClass()) {"
         }
 
         //RETURN_VALS

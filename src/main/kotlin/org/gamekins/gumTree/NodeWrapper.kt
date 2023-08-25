@@ -10,7 +10,7 @@ import java.util.*
  * A wrapper for the nodes of the ast to work with in the gumTree-algorithm
  *
  * @author Michael Gruener
- * @since versionNumber
+ * @since 0.6
  */
 class NodeWrapper(
     val node: Node, var height: Int = -1, val children: MutableList<NodeWrapper> = LinkedList(),

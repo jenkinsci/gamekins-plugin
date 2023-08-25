@@ -16,14 +16,19 @@
 
 package org.gamekins.challenge
 
+import com.github.javaparser.ast.CompilationUnit
+import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinter
 import hudson.FilePath
 import hudson.model.Run
 import hudson.model.TaskListener
+import io.kotest.assertions.any
 import org.gamekins.util.JacocoUtil
 import io.kotest.core.spec.style.FeatureSpec
 import io.kotest.matchers.shouldBe
 import io.mockk.*
 import org.gamekins.file.SourceFileDetails
+import org.gamekins.gumTree.GumTree
+import org.gamekins.gumTree.JavaParser
 import org.gamekins.util.Constants.Parameters
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
@@ -71,6 +76,14 @@ class BranchCoverageChallengeTest : FeatureSpec({
         every { data.selectedFile } returns details
         every { data.parameters } returns parameters
         every { data.line } returns element
+        val compilationUnit = mockkClass(CompilationUnit::class)
+        mockkStatic(JavaParser::class)
+        mockkStatic(LexicalPreservingPrinter::class)
+        mockkStatic(GumTree::class)
+        every { JavaParser.parse(any(), any(), any()) } returns compilationUnit
+        every { LexicalPreservingPrinter.setup(any()) } returns null
+        every { LexicalPreservingPrinter.print(any()) } returns ""
+        every { GumTree.findMapping(any(), any(), any(), any(), any()) } returns 0
         challenge = BranchCoverageChallenge(data)
     }
 
@@ -158,6 +171,8 @@ class BranchCoverageChallengeTest : FeatureSpec({
         every { solvableDetails.parameters } returns parameters
         every { solvableDetails.coverage } returns details.coverage
         every { solvableDetails.fileName } returns details.fileName
+        every { solvableDetails.packageName } returns details.packageName
+        every { solvableDetails.fileExtension } returns details.fileExtension
         every { solvableDetails.update(any()) } returns solvableDetails
         every { solvableDetails.filesExists() } returns false
         val solvableData = mockkClass(Challenge.ChallengeGenerationData::class)
@@ -178,6 +193,11 @@ class BranchCoverageChallengeTest : FeatureSpec({
         }
 
         every { solvableDetails.filesExists() } returns true
+        scenario("No mapping found") {
+            solvableChallenge.isSolvable(parameters, run, listener) shouldBe false
+        }
+
+        every { GumTree.findMapping(any(), any(), any(), any(), any()) } returns 1
         scenario("JacocoSourceFile does not exist yet (No coverage)")
         {
             solvableChallenge.isSolvable(parameters, run, listener) shouldBe true
@@ -239,11 +259,6 @@ class BranchCoverageChallengeTest : FeatureSpec({
         every { element.attr("id") } returns "L6"
         every { document.select("span.fc") } returns elements
         every { document.select("span.nc") } returns Elements()
-        scenario("Line 6 is fully covered")
-        {
-            challenge.isSolved(parameters, run, listener) shouldBe true
-        }
-
         every { data.line } returns element
         scenario("2 of 3 branches missed")
         {

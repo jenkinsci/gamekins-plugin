@@ -17,13 +17,13 @@ import kotlin.math.min
  * Uses the javaParser and symbolSolver to generate the ASTs.
  *
  * @author Michael Gruener
- * @since versionNumber
+ * @since 0.6
  */
-class GumTree {
+object GumTree {
 
-    private val minHeight = 2
-    private val minDice = 0.5
-    private val maxSize = 100
+    private const val MIN_HEIGHT = 2
+    private const val MIN_DICE = 0.5
+    private const val MAX_SIZE = 100
 
     /**
      * Tries to find a suitable mapping with the information of the given mutationData.
@@ -36,6 +36,19 @@ class GumTree {
         val mappings = map(source, destination)
 
         return updateMutationData(mutationData, mappings, destination, parameters)
+    }
+
+    /**
+     * Tries to find a suitable mapping for the line number with the information of the current challenge.
+     * Returns 0 if no suitable mapping was found.
+     */
+    @JvmStatic
+    fun findMapping(sourceCode: String, className: String, sourceFile: String, lineNUmber: Int, parameters: Parameters): Int {
+        val source = JavaParser.parse(sourceCode)
+        val destination = JavaParser.parse(sourceFile, className, parameters)
+        val mappings = map(source, destination)
+
+        return findMostFrequentDestinationLineNumber(mappings, lineNUmber) ?: 0
     }
 
     /**
@@ -220,7 +233,7 @@ class GumTree {
         push(priorityListDestination, destinationRoot)
 
         //calculate mappings
-        while (min(peekMax(priorityListSource), peekMax(priorityListDestination)) > minHeight) {
+        while (min(peekMax(priorityListSource), peekMax(priorityListDestination)) > MIN_HEIGHT) {
             val peekMaxSource = peekMax(priorityListSource)
             val peekMaxDestination = peekMax(priorityListDestination)
 
@@ -329,7 +342,7 @@ class GumTree {
                 continue
             }
             val candidate = candidate(sourceNode, destinationRoot)
-            if (candidate != null && dice(sourceNode, candidate) > minDice) {
+            if (candidate != null && dice(sourceNode, candidate) > MIN_DICE) {
                 sourceNode.parent?.gotMatchedChildren()
                 mappings.add(Mapping(sourceNode, candidate))
                 sourceNode.mapped = true
@@ -340,7 +353,7 @@ class GumTree {
                 val destinationClone = candidate.getTEDWrapperWithoutMatchedChildren()
                 val sourceCount = sourceClone.getDescendantsPostOrder().count()
                 val destinationCount = destinationClone.getDescendantsPostOrder().count()
-                if (max(sourceCount, destinationCount) < maxSize) {
+                if (max(sourceCount, destinationCount) < MAX_SIZE) {
                     val tedMatcher =
                         TEDMatcher(1.0, 1.0, 1.0,
                             sourceClone, destinationClone, sourceCount, destinationCount)

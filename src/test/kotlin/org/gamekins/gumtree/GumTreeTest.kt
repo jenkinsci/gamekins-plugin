@@ -63,6 +63,11 @@ class GumTreeTest: FeatureSpec ({
     val parameters = Constants.Parameters()
     val branch = "master"
 
+    beforeSpec {
+        mockkStatic(GumTree::class)
+        mockkStatic(LexicalPreservingPrinter::class)
+    }
+
     beforeContainer {
         StaticJavaParser.setConfiguration(ParserConfiguration().setAttributeComments(false))
         val combinedSolver = CombinedTypeSolver()
@@ -78,7 +83,7 @@ class GumTreeTest: FeatureSpec ({
 
         parameters.branch = branch
         parameters.workspace = path
-        mockkObject(JavaParser.Companion)
+        mockkStatic(JavaParser::class)
         every { JavaParser.parse(any(), any(), any()) } returns destinationCompilationUnit
     }
 
@@ -93,7 +98,7 @@ class GumTreeTest: FeatureSpec ({
         //Gets the method signature through the imports of the class
         scenario("MoveMethod")
         {
-            val updatedMutationData = GumTree().findMapping(mutationData, parameters)
+            val updatedMutationData = GumTree.findMapping(mutationData, parameters)
             updatedMutationData shouldNotBe null
             assertSoftly {
                 updatedMutationData!!.lineNumber shouldBe 24
@@ -109,7 +114,7 @@ class GumTreeTest: FeatureSpec ({
         //Gets the method signature through the reflectionTypeResolver
         scenario("MoveMethodToInternalClassAndAddParameter")
         {
-            val updatedMutationData = GumTree().findMapping(mutationData, parameters)
+            val updatedMutationData = GumTree.findMapping(mutationData, parameters)
             updatedMutationData shouldNotBe null
             assertSoftly {
                 updatedMutationData!!.lineNumber shouldBe 46
@@ -124,7 +129,7 @@ class GumTreeTest: FeatureSpec ({
         //Gets the method signature through the reflectionTypeResolver and primitive types
         scenario("RenameMethod")
         {
-            val updatedMutationData = GumTree().findMapping(mutationData, parameters)
+            val updatedMutationData = GumTree.findMapping(mutationData, parameters)
             updatedMutationData shouldNotBe null
             assertSoftly {
                 updatedMutationData!!.lineNumber shouldBe 20
@@ -140,7 +145,7 @@ class GumTreeTest: FeatureSpec ({
         //information through the pitReport, e.g. when star-imports were used
         scenario("RetrieveMutationDataThroughPITReport")
         {
-            val updatedMutationData = GumTree().findMapping(mutationData, parameters)
+            val updatedMutationData = GumTree.findMapping(mutationData, parameters)
             updatedMutationData shouldNotBe null
             assertSoftly {
                 updatedMutationData!!.lineNumber shouldBe 35
