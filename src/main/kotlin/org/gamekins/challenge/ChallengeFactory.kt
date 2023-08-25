@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Gamekins contributors
+ * Copyright 2023 Gamekins contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -317,6 +317,7 @@ object ChallengeFactory {
 
         val mutant = MutationUtil.MutationData(mutants[Random.nextInt(mutants.size)])
         if (mutant.status == MutationUtil.MutationStatus.KILLED) return null
+        mutant.generateCompilationUnit(parameters)
         return MutationChallenge(fileDetails, mutant)
     }
 

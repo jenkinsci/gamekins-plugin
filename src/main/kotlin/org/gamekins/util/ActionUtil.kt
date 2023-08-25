@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Gamekins contributors
+ * Copyright 2023 Gamekins contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import hudson.model.AbstractItem
 import hudson.model.User
 import hudson.util.FormValidation
 import org.gamekins.GameUserProperty
+import org.gamekins.LeaderboardAction
 import org.gamekins.challenge.Challenge
 import org.gamekins.challenge.ChallengeFactory
 import org.gamekins.challenge.DummyChallenge
@@ -28,7 +29,12 @@ import org.gamekins.challenge.quest.Quest
 import org.gamekins.file.FileDetails
 import org.gamekins.property.GameJobProperty
 import org.gamekins.property.GameMultiBranchProperty
+import org.gamekins.questtask.ReceiveChallengeQuestTask
+import org.gamekins.questtask.SendChallengeQuestTask
 import org.gamekins.util.Constants.Parameters
+import org.jenkinsci.remoting.protocol.ProtocolLayer.Send
+import org.kohsuke.stapler.export.Exported
+import org.kohsuke.stapler.export.ExportedBean
 import java.io.IOException
 import java.util.*
 
@@ -294,6 +300,11 @@ object ActionUtil {
                 MailUtil.generateMailText(projectName, challenge, other, user, job))
         }
 
+        property.getCurrentQuestTasks(projectName).filterIsInstance<SendChallengeQuestTask>()
+            .forEach { it.challengeSent(challenge) }
+        property.getCurrentQuestTasks(projectName).filterIsInstance<ReceiveChallengeQuestTask>()
+            .forEach { it.challengeSent(challenge) }
+
         return FormValidation.ok("Challenge sent")
     }
 
@@ -344,5 +355,147 @@ object ActionUtil {
             parameters.branch else "master"
         PropertyUtil.retrieveGameProperty(job)?.getStatistics()
                 ?.addGeneratedAfterRejection(branch, generated)
+    }
+
+    /**
+     * Returns the details of all teams of the current project.
+     */
+    fun getTeamDetails(job: AbstractItem): List<TeamDetails> {
+        val details = ArrayList<TeamDetails>()
+        for (user in User.getAll()) {
+            if (!PropertyUtil.realUser(user)) continue
+            val property = user.getProperty(GameUserProperty::class.java)
+            if (property != null && property.isParticipating(job.fullName)) {
+                var index = -1
+                details.indices.forEach { i ->
+                    if (details[i].teamName == property.getTeamName(job.fullName)) {
+                        index = i
+                    }
+                }
+
+                if (index != -1) {
+                    details[index].addCompletedAchievements(property.getCompletedAchievements(job.fullName).size)
+                    details[index].addCompletedChallenges(property.getCompletedChallenges(job.fullName).size)
+                    details[index].addCompletedQuests(property.getCompletedQuests(job.fullName).size)
+                    details[index].addUnfinishedQuests(property.getUnfinishedQuests(job.fullName).size)
+                    details[index].addScore(property.getScore(job.fullName))
+                } else {
+                    details.add(
+                        TeamDetails(
+                            property.getTeamName(job.fullName),
+                            property.getScore(job.fullName),
+                            property.getCompletedChallenges(job.fullName).size,
+                            property.getCompletedQuests(job.fullName).size,
+                            property.getCompletedQuestTasks(job.fullName).size,
+                            property.getUnfinishedQuests(job.fullName).size,
+                            property.getCompletedAchievements(job.fullName).size
+                        )
+                    )
+                }
+            }
+        }
+
+        return details
+            .sortedWith(
+                compareBy({it.score}, {it.completedChallenges}, {it.completedQuests}, {it.completedAchievements}))
+            .reversed()
+    }
+
+    /**
+     * Returns the details of all users participating in the current project.
+     */
+    fun getUserDetails(job: AbstractItem): List<UserDetails> {
+        val details = ArrayList<UserDetails>()
+        for (user in User.getAll()) {
+            if (!PropertyUtil.realUser(user)) continue
+            val property = user.getProperty(GameUserProperty::class.java)
+            if (property != null && property.isParticipating(job.fullName)) {
+                details.add(
+                    UserDetails(
+                        user.fullName,
+                        property.getTeamName(job.fullName),
+                        property.getScore(job.fullName),
+                        property.getCompletedChallenges(job.fullName).size,
+                        property.getCompletedQuests(job.fullName).size,
+                        property.getCompletedQuestTasks(job.fullName).size,
+                        property.getUnfinishedQuests(job.fullName).size,
+                        property.getCompletedAchievements(job.fullName).size,
+                        user.absoluteUrl,
+                        property.getCurrentAvatar()
+                    )
+                )
+            }
+        }
+
+        return details
+            .sortedWith(
+                compareBy({it.score}, {it.completedChallenges}, {it.completedQuestTasks}, {it.completedAchievements}))
+            .reversed()
+    }
+
+    /**
+     * Container for the details of a user displayed on the Leaderboard.
+     *
+     * @author Philipp Straubinger
+     * @since 0.1
+     */
+    @ExportedBean(defaultVisibility = 999)
+    class UserDetails(@get:Exported val userName: String, @get:Exported val teamName: String,
+                      @get:Exported val score: Int, @get:Exported val completedChallenges: Int,
+                      @get:Exported val completedQuests: Int, @get:Exported val completedQuestTasks: Int,
+                      @get:Exported val unfinishedQuests: Int, @get:Exported val completedAchievements: Int,
+                      @get:Exported val url: String, @get:Exported val image: String)
+
+    /**
+     * Container for the details of a team displayed on the Leaderboard.
+     *
+     * @author Philipp Straubinger
+     * @since 0.1
+     */
+    @ExportedBean(defaultVisibility = 999)
+    class TeamDetails(@get:Exported val teamName: String, @get:Exported var score: Int,
+                      @get:Exported var completedChallenges: Int, @get:Exported var completedQuests: Int,
+                      @get:Exported val completedQuestTasks: Int, @get:Exported var unfinishedQuests: Int,
+                      @get:Exported var completedAchievements: Int) {
+
+        /**
+         * Adds additional completed Achievements to the team.
+         */
+        @Exported
+        fun addCompletedAchievements(completedAchievements: Int) {
+            this.completedAchievements += completedAchievements
+        }
+
+        /**
+         * Adds additional completed Challenges to the team.
+         */
+        @Exported
+        fun addCompletedChallenges(completedChallenges: Int) {
+            this.completedChallenges += completedChallenges
+        }
+
+        /**
+         * Adds additional completed Quests to the team.
+         */
+        @Exported
+        fun addCompletedQuests(completedQuests: Int) {
+            this.completedQuests += completedQuests
+        }
+
+        /**
+         * Adds additional completed Quests to the team.
+         */
+        @Exported
+        fun addUnfinishedQuests(unfinishedQuests: Int) {
+            this.unfinishedQuests += unfinishedQuests
+        }
+
+        /**
+         * Adds one additional point to the score of the team.
+         */
+        @Exported
+        fun addScore(score: Int) {
+            this.score += score
+        }
     }
 }

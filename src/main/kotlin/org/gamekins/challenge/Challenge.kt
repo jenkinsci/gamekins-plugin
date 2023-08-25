@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Gamekins contributors
+ * Copyright 2023 Gamekins contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -120,6 +120,8 @@ interface Challenge {
      * for the [Statistics]. Adds an additional [reason] in case that the [Challenge] has been rejected.
      */
     fun printToXML(reason: String, indentation: String): String?
+
+    fun setRejectedTime(time: Long)
 
     /**
      * Removes all HTML formatting of the [Challenge.toString] method.

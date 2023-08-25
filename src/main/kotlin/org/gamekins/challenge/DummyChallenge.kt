@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Gamekins contributors
+ * Copyright 2023 Gamekins contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -99,6 +99,8 @@ class DummyChallenge(private var parameters: Parameters, private var reason: Str
     override fun printToXML(reason: String, indentation: String): String {
         return "$indentation<DummyChallenge/>"
     }
+
+    override fun setRejectedTime(time: Long) = Unit
 
     /**
      * Only for dummy purposes, no need for further information.

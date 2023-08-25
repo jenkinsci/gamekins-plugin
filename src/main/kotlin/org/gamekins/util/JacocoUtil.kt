@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Gamekins contributors
+ * Copyright 2023 Gamekins contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -212,6 +212,32 @@ object JacocoUtil {
         }
 
         return 0.0
+    }
+
+    @JvmStatic
+    fun getCoveredBranches(csv: FilePath): Int {
+        val content = csv.readToString()
+        val lines = content.split("\n".toRegex()).filter { line -> line.isNotEmpty() }
+        var coveredLines = 0
+        for (coverageLine in lines) {
+            val entries = coverageLine.split(",".toRegex())
+            coveredLines += entries[6].toInt()
+        }
+
+        return coveredLines
+    }
+
+    @JvmStatic
+    fun getCoveredLines(csv: FilePath): Int {
+        val content = csv.readToString()
+        val lines = content.split("\n".toRegex()).filter { line -> line.isNotEmpty() }
+        var coveredLines = 0
+        for (coverageLine in lines) {
+            val entries = coverageLine.split(",".toRegex())
+            coveredLines += entries[8].toInt()
+        }
+
+        return coveredLines
     }
 
     /**

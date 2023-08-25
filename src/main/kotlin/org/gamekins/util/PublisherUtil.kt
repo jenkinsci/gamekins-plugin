@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Gamekins contributors
+ * Copyright 2023 Gamekins contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import org.gamekins.GameUserProperty
 import org.gamekins.challenge.Challenge
 import org.gamekins.challenge.ChallengeFactory
 import org.gamekins.challenge.DummyChallenge
-import org.gamekins.challenge.quest.QuestFactory
 import org.gamekins.event.EventHandler
 import org.gamekins.event.user.*
 import org.gamekins.file.FileDetails
@@ -30,6 +29,7 @@ import org.gamekins.file.SourceFileDetails
 import org.gamekins.property.GameJobProperty
 import org.gamekins.property.GameMultiBranchProperty
 import org.gamekins.property.GameProperty
+import org.gamekins.questtask.QuestTaskFactory
 import org.gamekins.statistics.Statistics
 import org.gamekins.util.Constants.Parameters
 import org.gamekins.util.JacocoUtil.FilesOfAllSubDirectoriesCallable
@@ -67,7 +67,7 @@ object PublisherUtil {
     }
 
     /**
-     * Checks whether the quests / quest steps of a user are solved or unsolvable and generates new ones if needed.
+     * Checks whether the quests / quest steps of a user are solved or unsolvable.
      */
     private fun checkQuests(run: Run<*, *>, property: GameUserProperty, parameters: Parameters, listener: TaskListener
     ): Int {
@@ -103,6 +103,38 @@ object PublisherUtil {
                     QuestUnsolvableEvent(parameters.projectName, parameters.branch, property.getUser(), quest)
                 )
                 listener.logger.println("[Gamekins] Quest $quest can not be solved anymore")
+            }
+        }
+
+        return solved
+    }
+
+    /**
+     * Checks whether the quests tasks of a user are solved.
+     */
+    private fun checkQuestTasks(
+        run: Run<*, *>,
+        property: GameUserProperty,
+        parameters: Parameters,
+        listener: TaskListener
+    ): Int {
+
+        var solved = 0
+        for (questTask in property.getCurrentQuestTasks(parameters.projectName)) {
+            val currentNumber = questTask.currentNumber
+            if (questTask.isSolved(parameters, run, listener, property.getUser())) {
+                property.completeQuestTask(parameters.projectName, questTask)
+                property.addScore(parameters.projectName, questTask.getScore())
+                EventHandler.addEvent(
+                    QuestTaskSolvedEvent(parameters.projectName, parameters.branch, property.getUser(), questTask)
+                )
+                listener.logger.println("[Gamekins] Solved quest task $questTask")
+                solved++
+            } else if (questTask.currentNumber > currentNumber) {
+                EventHandler.addEvent(
+                    QuestTaskProgressEvent(parameters.projectName, parameters.branch, property.getUser(), questTask,
+                        questTask.currentNumber, questTask.numberGoal)
+                )
             }
         }
 
@@ -196,8 +228,11 @@ object PublisherUtil {
         var solvedAchievements = 0
         var solvedQuests = 0
         var generatedQuests = 0
+        var solvedQuestTasks = 0
+        var generatedQuestTasks = 0
         if (!PropertyUtil.realUser(user)) return hashMapOf("generated" to 0, "solved" to 0,
-            "solvedAchievements" to 0, "solvedQuests" to 0, "generatedQuests" to 0)
+            "solvedAchievements" to 0, "solvedQuests" to 0, "generatedQuests" to 0,
+            "generatedQuestTasks" to 0, "solvedQuestTasks" to 0)
 
         val property = user.getProperty(GameUserProperty::class.java)
         if (property != null && property.isParticipating(parameters.projectName)) {
@@ -244,8 +279,13 @@ object PublisherUtil {
 
             listener.logger.println("[Gamekins] Start checking solved status of quests for user ${user.fullName}")
             solvedQuests = checkQuests(run, property, parameters, listener)
-            generatedQuests = QuestFactory.generateNewQuests(user, property, parameters, listener,
-                files, maxQuests = parameters.currentQuestsCount)
+            //generatedQuests = QuestFactory.generateNewQuests(user, property, parameters, listener,
+            //    files, maxQuests = parameters.currentQuestsCount)
+
+            listener.logger.println("[Gamekins] Start checking solved status of quest tasks for user ${user.fullName}")
+            solvedQuestTasks = checkQuestTasks(run, property, parameters, listener)
+            generatedQuestTasks = QuestTaskFactory.generateNewQuestTasks(user, property, parameters, listener,
+                maxQuests = parameters.currentQuestsCount)
 
             solved += userSolved
             generated += userGenerated
@@ -258,7 +298,8 @@ object PublisherUtil {
         }
 
         return hashMapOf("generated" to generated, "solved" to solved, "solvedAchievements" to solvedAchievements,
-            "solvedQuests" to solvedQuests, "generatedQuests" to generatedQuests)
+            "solvedQuests" to solvedQuests, "generatedQuests" to generatedQuests,
+            "solvedQuestTasks" to solvedQuestTasks, "generatedQuestTasks" to generatedQuestTasks)
     }
 
     /**
@@ -419,7 +460,7 @@ object PublisherUtil {
      */
     fun updateStatistics(run: Run<*, *>, parameters: Parameters, generated: Int, solved: Int,
                          solvedAchievements: Int, solvedQuests: Int, generatedQuests: Int,
-                         listener: TaskListener = TaskListener.NULL) {
+                         solvedQuestTasks: Int, generatedQuestTasks: Int, listener: TaskListener = TaskListener.NULL) {
 
         //Get the current job and property
         val property: GameProperty?
@@ -450,6 +491,8 @@ object PublisherUtil {
                         solvedAchievements,
                         solvedQuests,
                         generatedQuests,
+                        solvedQuestTasks,
+                        generatedQuestTasks,
                         parameters.projectTests,
                         parameters.projectCoverage
                     ), listener)

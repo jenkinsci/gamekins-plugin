@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Gamekins contributors
+ * Copyright 2023 Gamekins contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,6 +84,8 @@ object EventHandler {
 
         text += generateQuestsText(list)
 
+        text += generateQuestTasksText(list)
+
         if (list.find { it is AchievementSolvedEvent } != null) {
             text += "Achievement(s) solved:\n"
             for (event in list.filterIsInstance<AchievementSolvedEvent>()) {
@@ -133,6 +135,38 @@ object EventHandler {
             text += "Quest(s) generated:\n"
             for (event in list.filterIsInstance<QuestGeneratedEvent>()) {
                 text += "- ${event.quest}\n"
+            }
+            text += "\n"
+        }
+
+        return text
+    }
+
+    /**
+     * Generates the text for all [Event]s based on QuestTasks.
+     */
+    private fun generateQuestTasksText(list: ArrayList<UserEvent>): String {
+        var text = ""
+        if (list.find { it is QuestTaskProgressEvent } != null) {
+            text += "Progress in Quest(s):\n"
+            for (event in list.filterIsInstance<QuestTaskProgressEvent>()) {
+                text += "- ${event.questTask}: ${event.currentNumber} of ${event.numberGoal} already done\n"
+            }
+            text += "\n"
+        }
+
+        if (list.find { it is QuestTaskSolvedEvent } != null) {
+            text += "Quest(s) solved:\n"
+            for (event in list.filterIsInstance<QuestTaskSolvedEvent>()) {
+                text += "- ${event.questTask}\n"
+            }
+            text += "\n"
+        }
+
+        if (list.find { it is QuestTaskGeneratedEvent } != null) {
+            text += "Quest(s) generated:\n"
+            for (event in list.filterIsInstance<QuestTaskGeneratedEvent>()) {
+                text += "- ${event.questTask}\n"
             }
             text += "\n"
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Gamekins contributors
+ * Copyright 2023 Gamekins contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -159,6 +159,7 @@ class GameJobPropertyDescriptor : JobPropertyDescriptor(GameJobProperty::class.j
             req.findAncestor(AbstractItem::class.java).getObject() as AbstractItem,
             formData.getBoolean(Constants.FormKeys.ACTIVATED),
             formData.getBoolean(Constants.FormKeys.SHOW_LEADERBOARD),
+            formData.getBoolean(Constants.FormKeys.SHOW_TASKS),
             formData.getBoolean(Constants.FormKeys.SHOW_STATISTICS),
             if (formData.getValue(Constants.FormKeys.CHALLENGES_COUNT) is Int)
                 formData.getInt(Constants.FormKeys.CHALLENGES_COUNT) else Constants.Default.CURRENT_CHALLENGES,

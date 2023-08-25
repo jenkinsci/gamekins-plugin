@@ -1,3 +1,19 @@
+/*
+ * Copyright 2023 Gamekins contributors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+
+ * http://www.apache.org/licenses/LICENSE-2.0
+
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.gamekins.challenge
 
 import hudson.FilePath
@@ -9,6 +25,12 @@ import org.gamekins.util.JacocoUtil
 import org.jsoup.nodes.Element
 import kotlin.math.abs
 
+/**
+ * Specific [Challenge] to motivate the user to cover a random branch of a specific class.
+ *
+ * @author Philipp Straubinger
+ * @since 0.6
+ */
 class BranchCoverageChallenge(data: Challenge.ChallengeGenerationData)
     : CoverageChallenge(data.selectedFile as SourceFileDetails, data.parameters.workspace) {
 
@@ -46,6 +68,9 @@ class BranchCoverageChallenge(data: Challenge.ChallengeGenerationData)
                 && other.lineContent == this.lineContent
     }
 
+    /**
+     * Returns the maximum number of branches if the lines is fully covered.
+     */
     fun getMaxCoveredBranchesIfFullyCovered(): Int {
         return if (solvedCoveredBranches == maxCoveredBranches) maxCoveredBranches else 0
     }
@@ -75,6 +100,12 @@ class BranchCoverageChallenge(data: Challenge.ChallengeGenerationData)
         return result
     }
 
+    /**
+     * Checks whether the [BranchCoverageChallenge] is solvable if the [run] was in the branch (taken from
+     * [parameters]), where it has been generated. The line must not be covered and still be in the class.
+     * The workspace is the folder with the code and execution rights, and the [listener] reports the events to the
+     * console output of Jenkins.
+     */
     override fun isSolvable(parameters: Constants.Parameters, run: Run<*, *>, listener: TaskListener): Boolean {
         if (details.parameters.branch != parameters.branch) return true
         if (!details.update(parameters).filesExists()) return false
@@ -92,6 +123,11 @@ class BranchCoverageChallenge(data: Challenge.ChallengeGenerationData)
         return elements.any { it.text().trim() == lineContent.trim() }
     }
 
+    /**
+     * The [BranchCoverageChallenge] is solved if at least one more branch of the line, according to the [details]
+     * JaCoCo files, is covered. The workspace is the folder with the code and execution rights, and the [listener]
+     * reports the events to the console output of Jenkins.
+     */
     override fun isSolved(parameters: Constants.Parameters, run: Run<*, *>, listener: TaskListener): Boolean {
         val jacocoSourceFile = JacocoUtil.getJacocoFileInMultiBranchProject(run, parameters,
             JacocoUtil.calculateCurrentFilePath(parameters.workspace, details.jacocoSourceFile,

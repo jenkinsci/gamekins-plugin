@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Gamekins contributors
+ * Copyright 2023 Gamekins contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -108,6 +108,8 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
         var solvedAchievements = 0
         var solvedQuests = 0
         var generatedQuests = 0
+        var solvedQuestTasks = 0
+        var generatedQuestTasks = 0
         for (user in User.getAll()) {
             val results = PublisherUtil.checkUser(user, run, ArrayList(files), parameters, result, listener)
             generated += (if (results["generated"] != null) results["generated"] else 0)!!
@@ -115,16 +117,20 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
             solvedAchievements += (if (results["solvedAchievements"] != null) results["solvedAchievements"] else 0)!!
             generatedQuests += (if (results["generatedQuests"] != null) results["generatedQuests"] else 0)!!
             solvedQuests += (if (results["solvedQuests"] != null) results["solvedQuests"] else 0)!!
+            generatedQuestTasks += (if (results["generatedQuestTasks"] != null) results["generatedQuestTasks"] else 0)!!
+            solvedQuestTasks += (if (results["solvedQuestTasks"] != null) results["solvedQuestTasks"] else 0)!!
         }
 
         listener.logger.println("[Gamekins] Solved $solved Challenges and generated $generated Challenges")
         listener.logger.println("[Gamekins] Solved $solvedAchievements Achievements")
         listener.logger.println("[Gamekins] Solved $solvedQuests Quests and generated $generatedQuests Quests")
+        listener.logger.println("[Gamekins] Solved $solvedQuestTasks Quest Tasks and " +
+                "generated $generatedQuestTasks Quest Tasks")
         listener.logger.println("[Gamekins] Update Statistics")
 
         //Updates the Statistics
         PublisherUtil.updateStatistics(run, parameters, generated, solved, solvedAchievements, solvedQuests,
-            generatedQuests, listener)
+            generatedQuests, solvedQuestTasks, generatedQuestTasks, listener)
 
         EventHandler.addEvent(BuildFinishedEvent(parameters.projectName, parameters.branch, run))
 

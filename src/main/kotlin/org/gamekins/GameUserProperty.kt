@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Gamekins contributors
+ * Copyright 2023 Gamekins contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import org.gamekins.achievement.Achievement
 import org.gamekins.achievement.ProgressAchievement
 import org.gamekins.challenge.CoverageChallenge
 import org.gamekins.challenge.quest.Quest
+import org.gamekins.questtask.QuestTask
 import org.gamekins.util.Constants
 import org.gamekins.util.Pair
 import org.gamekins.util.PropertyUtil
@@ -48,9 +49,11 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
     private var completedAchievements: HashMap<String, CopyOnWriteArrayList<Achievement>> = HashMap()
     private val completedChallenges: HashMap<String, CopyOnWriteArrayList<Challenge>> = HashMap()
     private var completedQuests: HashMap<String, CopyOnWriteArrayList<Quest>> = HashMap()
+    private var completedQuestTasks: HashMap<String, CopyOnWriteArrayList<QuestTask>> = HashMap()
     private var currentAvatar: String = Constants.Default.AVATAR
     private val currentChallenges: HashMap<String, CopyOnWriteArrayList<Challenge>> = HashMap()
     private var currentQuests: HashMap<String, CopyOnWriteArrayList<Quest>> = HashMap()
+    private var currentQuestTasks: HashMap<String, CopyOnWriteArrayList<QuestTask>> = HashMap()
     private var gitNames: CopyOnWriteArraySet<String>? = null
     private var lastLeaderboard: String = ""
     private var lastProject: String = ""
@@ -117,6 +120,20 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
         quests = currentQuests[projectName]!!
         quests.remove(quest)
         currentQuests[projectName] = quests
+    }
+
+    /**
+     * Sets a [questTask] of project [projectName] to complete and removes it from the [currentQuestTasks].
+     */
+    fun completeQuestTask(projectName: String, questTask: QuestTask) {
+        completedQuestTasks.computeIfAbsent(projectName) { CopyOnWriteArrayList() }
+        var questTasks: CopyOnWriteArrayList<QuestTask> = completedQuestTasks[projectName]!!
+        questTasks.add(questTask)
+        completedQuestTasks[projectName] = questTasks
+
+        questTasks = currentQuestTasks[projectName]!!
+        questTasks.remove(questTask)
+        currentQuestTasks[projectName] = questTasks
     }
 
     /**
@@ -253,6 +270,13 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
     }
 
     /**
+     * Returns the list of completed QuestTasks by [projectName].
+     */
+    fun getCompletedQuestTasks(projectName: String): CopyOnWriteArrayList<QuestTask> {
+        return completedQuestTasks[projectName]!!
+    }
+
+    /**
      * Returns the filename of the current avatar.
      */
     fun getCurrentAvatar(): String {
@@ -271,6 +295,13 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
      */
     fun getCurrentQuests(projectName: String): CopyOnWriteArrayList<Quest> {
         return currentQuests[projectName]!!
+    }
+
+    /**
+     * Returns the list of current QuestTasks by [projectName].
+     */
+    fun getCurrentQuestTasks(projectName: String): CopyOnWriteArrayList<QuestTask> {
+        return currentQuestTasks[projectName]!!
     }
 
     override fun getDisplayName(): String {
@@ -450,6 +481,17 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
     }
 
     /**
+     * Adds a new [QuestTask] to the user.
+     */
+    fun newQuestTask(projectName: String, questTask: QuestTask) {
+        if (projectName.isBlank()) return
+        currentQuestTasks.computeIfAbsent(projectName) { CopyOnWriteArrayList() }
+        val quests = currentQuestTasks[projectName]!!
+        quests.add(questTask)
+        currentQuestTasks[projectName] = quests
+    }
+
+    /**
      * Returns the XML representation of the user.
      */
     fun printToXML(projectName: String, indentation: String): String {
@@ -512,6 +554,20 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
             print.append(quest.printToXML("", "$indentation        ")).append("\n")
         }
         print.append(indentation).append("    </UnfinishedQuests>\n")
+
+        print.append(indentation).append("    <CurrentQuestTasks count=\"")
+            .append(getCurrentQuestTasks(projectName).size).append("\">\n")
+        for (quest in getCurrentQuestTasks(projectName)) {
+            print.append(quest.printToXML("$indentation        ")).append("\n")
+        }
+        print.append(indentation).append("    </CurrentQuestTasks>\n")
+
+        print.append(indentation).append("    <CompletedQuestTasks count=\"")
+            .append(getCompletedQuestTasks(projectName).size).append("\">\n")
+        for (quest in getCompletedQuestTasks(projectName)) {
+            print.append(quest.printToXML("$indentation        ")).append("\n")
+        }
+        print.append(indentation).append("    </CompletedQuestTasks>\n")
 
         print.append(indentation).append("    <Achievements count=\"")
             .append(getCompletedAchievements(projectName).size).append("\">\n")
@@ -605,6 +661,20 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
             }
         }
 
+        //QuestTasks
+        if (currentQuestTasks == null) currentQuestTasks = HashMap()
+        if (participation.size != 0 && currentQuestTasks.size == 0) {
+            participation.keys.forEach {
+                currentQuestTasks[it] = CopyOnWriteArrayList()
+            }
+        }
+        if (completedQuestTasks == null) completedQuestTasks = HashMap()
+        if (participation.size != 0 && completedQuestTasks.size == 0) {
+            participation.keys.forEach {
+                completedQuestTasks[it] = CopyOnWriteArrayList()
+            }
+        }
+
         return this
     }
 
@@ -623,6 +693,7 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
      * Rejects a given [challenge] of project [projectName] with a [reason].
      */
     fun rejectChallenge(projectName: String, challenge: Challenge, reason: String) {
+        challenge.setRejectedTime(System.currentTimeMillis())
         rejectedChallenges.computeIfAbsent(projectName) { CopyOnWriteArrayList() }
         val challenges = rejectedChallenges[projectName]!!
         challenges.add(Pair(challenge, reason))
@@ -690,6 +761,12 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
         val list = CopyOnWriteArrayList<Achievement>()
         GamePublisherDescriptor.achievements.forEach { list.add(it.clone()) }
         unsolvedAchievements[projectName] = list
+        completedQuests[projectName] = CopyOnWriteArrayList()
+        currentQuests[projectName] = CopyOnWriteArrayList()
+        rejectedQuests[projectName] = CopyOnWriteArrayList()
+        unfinishedQuests[projectName] = CopyOnWriteArrayList()
+        completedQuestTasks[projectName] = CopyOnWriteArrayList()
+        currentQuestTasks[projectName] = CopyOnWriteArrayList()
 
         progressAchievementExample[projectName] = CopyOnWriteArrayList()
     }
@@ -736,6 +813,8 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
         currentQuests.putIfAbsent(projectName, CopyOnWriteArrayList())
         rejectedQuests.putIfAbsent(projectName, CopyOnWriteArrayList())
         unfinishedQuests.putIfAbsent(projectName, CopyOnWriteArrayList())
+        completedQuestTasks.putIfAbsent(projectName, CopyOnWriteArrayList())
+        currentQuestTasks.putIfAbsent(projectName, CopyOnWriteArrayList())
     }
 
     /**

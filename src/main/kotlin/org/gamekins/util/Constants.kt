@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Gamekins contributors
+ * Copyright 2023 Gamekins contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.gamekins.util
 
+import com.github.javaparser.ParserConfiguration
 import hudson.FilePath
 import java.io.File
 import java.io.Serializable
@@ -44,6 +45,8 @@ object Constants {
         const val SHOW_STATISTICS = "showStatistics"
 
         const val SHOW_LEADERBOARD = "showLeaderboard"
+
+        const val SHOW_TASKS = "showTasks"
 
         const val SHOW_FOLDER_LEADERBOARD = "leaderboard"
 
@@ -197,6 +200,8 @@ object Constants {
     const val TRY_CLASS = "[Gamekins] Try class "
 
     const val NO_TEAM_TEAM_NAME = "---"
+
+    val JAVA_PARSER_LANGUAGE_LEVEL = ParserConfiguration.LanguageLevel.JAVA_17
 
     /**
      * Returns the path to the most recent jar file of the Sonar-Java-Plugin for SonarLint.

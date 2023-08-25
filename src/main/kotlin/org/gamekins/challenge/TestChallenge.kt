@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Gamekins contributors
+ * Copyright 2023 Gamekins contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -128,6 +128,10 @@ class TestChallenge(data: Challenge.ChallengeGenerationData) : Challenge {
         }
         print += "\"/>"
         return print
+    }
+
+    override fun setRejectedTime(time: Long) {
+        solved = time
     }
 
     override fun toString(): String {

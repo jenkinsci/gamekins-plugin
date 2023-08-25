@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Gamekins contributors
+ * Copyright 2023 Gamekins contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,6 +50,7 @@ class GameMultiBranchProperty
                                   @set:DataBoundSetter var activated: Boolean,
                                   @set:DataBoundSetter var showLeaderboard: Boolean,
                                   @set:DataBoundSetter var showStatistics: Boolean,
+                                  @set:DataBoundSetter var showTasks: Boolean,
                                   @set:DataBoundSetter var currentChallengesCount: Int,
                                   @set:DataBoundSetter var currentQuestsCount: Int,
                                   @set:DataBoundSetter var currentStoredChallengesCount: Int,
@@ -67,7 +68,7 @@ class GameMultiBranchProperty
      */
     init {
         statistics = Statistics(job!!)
-        PropertyUtil.reconfigure(job, showLeaderboard, showStatistics)
+        PropertyUtil.reconfigure(job, showLeaderboard, showTasks, showStatistics)
         if (currentChallengesCount <= 0) currentChallengesCount = Constants.Default.CURRENT_CHALLENGES
         if (currentQuestsCount <= 0) currentQuestsCount = Constants.Default.CURRENT_QUESTS
         if (currentStoredChallengesCount < 0) currentStoredChallengesCount = Constants.Default.STORED_CHALLENGES
@@ -113,6 +114,7 @@ class GameMultiBranchProperty
         if (searchCommitCount <= 0) searchCommitCount = Constants.Default.SEARCH_COMMIT_COUNT
         if (pitConfiguration.isNullOrEmpty()) pitConfiguration = Constants.Default.PIT_CONFIGURATION
         if (showPitOutput == null) showPitOutput = Constants.Default.SHOW_PIT_OUTPUT
+        if (showTasks == null) showTasks = showLeaderboard
 
         return this
     }
@@ -129,6 +131,7 @@ class GameMultiBranchProperty
             activated = formData.getBoolean(Constants.FormKeys.ACTIVATED)
             showStatistics = formData.getBoolean(Constants.FormKeys.SHOW_STATISTICS)
             showLeaderboard = formData.getBoolean(Constants.FormKeys.SHOW_LEADERBOARD)
+            showTasks = formData.getBoolean(Constants.FormKeys.SHOW_TASKS)
             if (formData.getValue(Constants.FormKeys.CHALLENGES_COUNT) is String)
                 currentChallengesCount = formData.getInt(Constants.FormKeys.CHALLENGES_COUNT)
             if (formData.getValue(Constants.FormKeys.QUEST_COUNT) is String)
@@ -142,7 +145,7 @@ class GameMultiBranchProperty
             showPitOutput = formData.getBoolean(Constants.FormKeys.SHOW_PIT_OUTPUT)
         }
         
-        PropertyUtil.reconfigure(owner!!, showLeaderboard, showStatistics)
+        PropertyUtil.reconfigure(owner!!, showLeaderboard, showTasks, showStatistics)
         return this
     }
 
@@ -291,6 +294,7 @@ class GameMultiBranchProperty
                 req.findAncestor(AbstractItem::class.java).getObject() as AbstractItem,
                 formData.getBoolean(Constants.FormKeys.ACTIVATED),
                 formData.getBoolean(Constants.FormKeys.SHOW_LEADERBOARD),
+                formData.getBoolean(Constants.FormKeys.SHOW_TASKS),
                 formData.getBoolean(Constants.FormKeys.SHOW_STATISTICS),
                 if (formData.getValue(Constants.FormKeys.CHALLENGES_COUNT) is Int)
                     formData.getInt(Constants.FormKeys.CHALLENGES_COUNT) else Constants.Default.CURRENT_CHALLENGES,

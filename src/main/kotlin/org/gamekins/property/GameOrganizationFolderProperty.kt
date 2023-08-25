@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Gamekins contributors
+ * Copyright 2023 Gamekins contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -112,6 +112,7 @@ class GameOrganizationFolderProperty private constructor()
                                 ?: project.addProperty(GameMultiBranchProperty(project,
                                     formData.getBoolean(Constants.FormKeys.ACTIVATED),
                                     formData.getBoolean(Constants.FormKeys.SHOW_LEADERBOARD),
+                                    formData.getBoolean(Constants.FormKeys.SHOW_TASKS),
                                     formData.getBoolean(Constants.FormKeys.SHOW_STATISTICS),
                                     formData.getInt(Constants.FormKeys.CHALLENGES_COUNT),
                                     formData.getInt(Constants.FormKeys.QUEST_COUNT),

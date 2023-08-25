@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Gamekins contributors
+ * Copyright 2023 Gamekins contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -106,6 +106,8 @@ class Statistics(job: AbstractItem) {
                     0,
                     0,
                     0,
+                    0,
+                    0,
                     JUnitUtil.getTestCount(null, abstractBuild),
                     0.0))
                 return
@@ -128,6 +130,8 @@ class Statistics(job: AbstractItem) {
                             workflowJob.name,
                             workflowRun.result,
                             workflowRun.startTimeInMillis,
+                            0,
+                            0,
                             0,
                             0,
                             0,
@@ -194,6 +198,8 @@ class Statistics(job: AbstractItem) {
                     0,
                     0,
                     0,
+                    0,
+                    0,
                     JUnitUtil.getTestCount(null, run),
                     0.0))
             }
@@ -221,6 +227,8 @@ class Statistics(job: AbstractItem) {
                     workflowJob.name,
                     workflowRun.result,
                     workflowRun.startTimeInMillis,
+                    0,
+                    0,
                     0,
                     0,
                     0,
@@ -322,10 +330,10 @@ class Statistics(job: AbstractItem) {
      */
     class RunEntry(val runNumber: Int, val branch: String, val result: Result?, private val startTime: Long,
                    var generatedChallenges: Int, private val solvedChallenges: Int, var sentChallenges: Int,
-                   private var solvedAchievements: Int,
-                   private var solvedQuests: Int, private var generatedQuests: Int, val testCount: Int,
-                   val coverage: Double)
-        : Comparable<RunEntry> {
+                   private var solvedAchievements: Int, private var solvedQuests: Int,
+                   private var generatedQuests: Int, private var solvedQuestTasks: Int,
+                   private var generatedQuestTasks: Int, val testCount: Int, val coverage: Double
+    ) : Comparable<RunEntry> {
 
         /**
          * Returns an XML representation of the [RunEntry].
@@ -337,6 +345,7 @@ class Statistics(job: AbstractItem) {
                     "\" solvedChallenges=\"" + solvedChallenges + "\" sentChallenges=\"" + sentChallenges +
                     "\" solvedAchievements=\"" + solvedAchievements +
                     "\" generatedQuests=\"" + generatedQuests + "\" solvedQuests=\"" + solvedQuests +
+                    "\" generatedQuestTasks=\"" + generatedQuestTasks + "\" solvedQuestTasks=\"" + solvedQuestTasks +
                     "\" tests=\"" + testCount + "\" coverage=\"" + coverage + "\"/>")
         }
 
@@ -348,6 +357,17 @@ class Statistics(job: AbstractItem) {
         override fun compareTo(other: RunEntry): Int {
             val result = Collator.getInstance().compare(branch, other.branch)
             return if (result == 0) runNumber.compareTo(other.runNumber) else result
+        }
+
+        /**
+         * Called by Jenkins after the object has been created from his XML representation. Used for data migration.
+         */
+        @Suppress("unused", "SENSELESS_COMPARISON")
+        private fun readResolve(): Any {
+            if (generatedQuestTasks == null) generatedQuestTasks = 0
+            if (solvedQuestTasks == null) solvedQuestTasks = 0
+
+            return this
         }
     }
 }

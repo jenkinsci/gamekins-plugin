@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Gamekins contributors
+ * Copyright 2023 Gamekins contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import org.gamekins.property.GameJobProperty
 import org.gamekins.property.GameMultiBranchProperty
 import org.gamekins.property.GameProperty
 import org.acegisecurity.userdetails.UserDetails
+import org.gamekins.TaskAction
 import org.jenkinsci.plugins.workflow.job.WorkflowJob
 import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject
 import java.io.IOException
@@ -259,11 +260,11 @@ object PropertyUtil {
      * have to be added via reflection.
      */
     @JvmStatic
-    fun reconfigure(owner: AbstractItem, showLeaderboard: Boolean, showStatistics: Boolean) {
+    fun reconfigure(owner: AbstractItem, showLeaderboard: Boolean, showTasks: Boolean, showStatistics: Boolean) {
         if (owner is WorkflowJob) {
-            reconfigureWorkFlowJob(owner, showLeaderboard, showStatistics)
+            reconfigureWorkFlowJob(owner, showLeaderboard, showTasks, showStatistics)
         } else if (owner is WorkflowMultiBranchProject || owner is AbstractMavenProject<*, *>) {
-            reconfigureAbstractItem(owner, showLeaderboard, showStatistics)
+            reconfigureAbstractItem(owner, showLeaderboard, showTasks, showStatistics)
         }
     }
 
@@ -271,18 +272,27 @@ object PropertyUtil {
      * Adds or removes a [LeaderboardAction] or [StatisticsAction] with the help of the according methods of the
      * [job].
      */
-    private fun reconfigureWorkFlowJob(job: WorkflowJob, showLeaderboard: Boolean, showStatistics: Boolean) {
+    private fun reconfigureWorkFlowJob(job: WorkflowJob, showLeaderboard: Boolean,
+                                       showTasks: Boolean, showStatistics: Boolean) {
 
         if (showLeaderboard) {
             job.addOrReplaceAction(LeaderboardAction(job))
         } else {
             job.removeAction(LeaderboardAction(job))
         }
+
+        if (showTasks) {
+            job.addOrReplaceAction(TaskAction(job))
+        } else {
+            job.removeAction(TaskAction(job))
+        }
+
         if (showStatistics) {
             job.addOrReplaceAction(StatisticsAction(job))
         } else {
             job.removeAction(StatisticsAction(job))
         }
+
         try {
             job.save()
         } catch (e: IOException) {
@@ -294,7 +304,8 @@ object PropertyUtil {
      * Adds or removes a [LeaderboardAction] or [StatisticsAction] with the help of the according methods of the
      * [job].
      */
-    private fun reconfigureAbstractItem(job: AbstractItem, showLeaderboard: Boolean, showStatistics: Boolean) {
+    private fun reconfigureAbstractItem(job: AbstractItem, showLeaderboard: Boolean,
+                                        showTasks: Boolean, showStatistics: Boolean) {
 
         try {
             val actionField = Actionable::class.java.getDeclaredField("actions")
@@ -306,6 +317,14 @@ object PropertyUtil {
             } else {
                 (actionField[job] as MutableList<*>).removeIf { action -> action is LeaderboardAction }
             }
+
+            if (showTasks) {
+                (actionField[job] as MutableList<*>).removeIf { action -> action is TaskAction }
+                (actionField[job] as MutableList<Action?>).add(TaskAction(job))
+            } else {
+                (actionField[job] as MutableList<*>).removeIf { action -> action is TaskAction }
+            }
+
             if (showStatistics) {
                 (actionField[job] as MutableList<*>).removeIf { action -> action is StatisticsAction }
                 (actionField[job] as MutableList<Action?>).add(StatisticsAction(job))
