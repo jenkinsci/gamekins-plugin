@@ -69,7 +69,9 @@ object GumTree {
         val mutatedMethod = getMutatedMethod(methodDeclaration, mutationData.mutatedMethod)
         var mutatedMethodDescription = if (methodDeclaration.node is ConstructorDeclaration) "()V"
         else  MethodNameConverter().getByteCodeRepresentation(methodDeclaration.node as MethodDeclaration)
-        if (mutatedMethodDescription == null || mutationData.mutatedMethod.contains("$")) {
+        if (mutatedMethodDescription == null
+            || mutationData.mutatedMethod.contains("$")
+            || mutationData.methodDescription.contains("$")) {
             mutatedMethodDescription = retrieveMethodDescriptionThrewPitReport(lineNumber, mutatedMethod, parameters)?: return null
         }
 
