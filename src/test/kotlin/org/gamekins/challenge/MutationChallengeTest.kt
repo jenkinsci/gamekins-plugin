@@ -50,7 +50,7 @@ class MutationChallengeTest : FeatureSpec({
         parameters.workspace = path
         parameters.jacocoResultsPath = shortJacocoPath
         parameters.jacocoCSVPath = shortJacocoCSVPath
-        data = MutationData(line)
+        data = MutationData(line, parameters)
         mockkStatic(JacocoUtil::class)
         mockkStatic(MutationUtil::class)
         val document = mockkClass(Document::class)
@@ -78,7 +78,7 @@ class MutationChallengeTest : FeatureSpec({
 
     feature("createCodeSnippet") {
         var codeChallenge = MutationChallenge(details, MutationData(
-            line.replace("<lineNumber>109</lineNumber>", "<lineNumber>0</lineNumber>"))
+            line.replace("<lineNumber>109</lineNumber>", "<lineNumber>0</lineNumber>"), parameters)
         )
         scenario("LineNumber is 0")
         {
@@ -86,7 +86,7 @@ class MutationChallengeTest : FeatureSpec({
         }
 
         codeChallenge = MutationChallenge(details, MutationData(
-            line.replace("<lineNumber>109</lineNumber>", "<lineNumber>-109</lineNumber>"))
+            line.replace("<lineNumber>109</lineNumber>", "<lineNumber>-109</lineNumber>"), parameters)
         )
         scenario("LineNumber negative")
         {
@@ -97,7 +97,7 @@ class MutationChallengeTest : FeatureSpec({
         every { file.exists() } returns false
         val codeDetails = mockkClass(SourceFileDetails::class)
         every { codeDetails.jacocoSourceFile } returns file
-        codeChallenge = MutationChallenge(codeDetails, MutationData(line))
+        codeChallenge = MutationChallenge(codeDetails, MutationData(line, parameters))
         scenario("jacocoSourceFile does not exist")
         {
             codeChallenge.getSnippet() shouldBe ""
@@ -109,7 +109,7 @@ class MutationChallengeTest : FeatureSpec({
         var elements = Pair("", "")
         every { JacocoUtil.getLinesInRange(any(), any(), any()) } returns elements
         every { codeDetails.parameters } returns parameters
-        codeChallenge = MutationChallenge(codeDetails, MutationData(line))
+        codeChallenge = MutationChallenge(codeDetails, MutationData(line, parameters))
         scenario("Lines are empty")
         {
             codeChallenge.getSnippet() shouldBe ""
@@ -118,7 +118,7 @@ class MutationChallengeTest : FeatureSpec({
         elements = Pair("Test", "")
         every { JacocoUtil.getLinesInRange(any(), any(), any()) } returns elements
         every { MutationUtil.getMutatedCode(any(), any()) } returns ""
-        codeChallenge = MutationChallenge(codeDetails, MutationData(line))
+        codeChallenge = MutationChallenge(codeDetails, MutationData(line, parameters))
         scenario("Without mutated line")
         {
             codeChallenge.getSnippet() shouldBe "Write or update tests so that they fail on the mutant described below.\n" +
@@ -129,7 +129,7 @@ class MutationChallengeTest : FeatureSpec({
         }
 
         every { MutationUtil.getMutatedCode(any(), any()) } returns "Mutant"
-        codeChallenge = MutationChallenge(codeDetails, MutationData(line))
+        codeChallenge = MutationChallenge(codeDetails, MutationData(line, parameters))
         scenario("With mutated line")
         {
             codeChallenge.getSnippet() shouldBe "Write or update tests so that they fail on the mutant described below.\n" +
@@ -176,7 +176,7 @@ class MutationChallengeTest : FeatureSpec({
                 "<lineNumber>109</lineNumber><mutator>org.pitest.mutationtest.engine.gregor.mutators.MathMutator</mutator>" +
                 "<indexes><index>7</index></indexes><blocks><block>0</block></blocks><killingTest/>" +
                 "<description>Replaced double multiplication with division</description></mutation>"
-        val data2 = MutationData(line2)
+        val data2 = MutationData(line2, parameters)
         challenge2 = MutationChallenge(details, data2)
         scenario("Different Data")
         {
@@ -204,7 +204,7 @@ class MutationChallengeTest : FeatureSpec({
                 "<killingTest>com.example.ComplexTest.[engine:junit-jupiter]/[class:com.example.ComplexTest]/" +
                 "[method:testAdd()]</killingTest>>" +
                 "<description>Replaced double multiplication with division</description></mutation>"
-        val killingData = MutationData(killingLine)
+        val killingData = MutationData(killingLine, parameters)
         val challenge2 = MutationChallenge(details, killingData)
         scenario("Has KillingTest")
         {
@@ -227,7 +227,7 @@ class MutationChallengeTest : FeatureSpec({
         }
 
         val newChallenge = MutationChallenge(details, MutationData(
-            line.replace("status='NO_COVERAGE'", "status='SURVIVED'"))
+            line.replace("status='NO_COVERAGE'", "status='SURVIVED'"), parameters)
         )
         scenario("Mutant has survived")
         {
@@ -275,7 +275,7 @@ class MutationChallengeTest : FeatureSpec({
         }
 
         parameters.workspace = testProjectPath
-        val mutant = MutationData(line.replace("detected='false'", "detected='true'"))
+        val mutant = MutationData(line.replace("detected='false'", "detected='true'"), parameters)
         every { MutationUtil.getMutant(any(), any()) } returns mutant
         scenario("Mutant detected")
         {
@@ -290,7 +290,7 @@ class MutationChallengeTest : FeatureSpec({
             challenge.isSolved(parameters, run, listener) shouldBe false
         }
 
-        var mutant = MutationData(line.replace("detected='false'", "detected='true'"))
+        var mutant = MutationData(line.replace("detected='false'", "detected='true'"), parameters)
         every { MutationUtil.executePIT(any(), any(), any()) } returns true
         every { MutationUtil.getMutant(any(), any()) } returns mutant
         scenario("Mutant is not covered")
@@ -298,7 +298,7 @@ class MutationChallengeTest : FeatureSpec({
             challenge.isSolved(parameters, run, listener) shouldBe false
         }
 
-        mutant = MutationData(line.replace("status='NO_COVERAGE'", "status='KILLED'"))
+        mutant = MutationData(line.replace("status='NO_COVERAGE'", "status='KILLED'"), parameters)
         every { MutationUtil.getMutant(any(), any()) } returns mutant
         scenario("Mutant not detected")
         {
@@ -308,7 +308,7 @@ class MutationChallengeTest : FeatureSpec({
 
         mutant = MutationData(line
             .replace("detected='false'", "detected='true'")
-            .replace("status='NO_COVERAGE'", "status='KILLED'"))
+            .replace("status='NO_COVERAGE'", "status='KILLED'"), parameters)
         every { MutationUtil.getMutant(any(), any()) } returns mutant
         scenario("Solved")
         {
@@ -357,7 +357,7 @@ class MutationChallengeTest : FeatureSpec({
             "<lineNumber>109</lineNumber><mutator>org.pitest.mutationtest.engine.gregor.mutators.MathMutator</mutator>" +
             "<indexes><index>7</index></indexes><blocks><block>0</block></blocks><killingTest/>" +
             "<description>Replaced double multiplication with division</description></mutation>"
-        val dataConstructor = MutationData(lineConstructor)
+        val dataConstructor = MutationData(lineConstructor, parameters)
         val challengeConstructor = MutationChallenge(details, dataConstructor)
         stringOutput = "Write a test to kill the mutant at line <b>109</b> of method <b>Complex()</b> in class " +
                 "<b>Challenge</b> in package <b>org.gamekins.challenge</b> (created for branch master)"

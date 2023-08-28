@@ -37,7 +37,7 @@ class BranchCoverageChallenge(data: Challenge.ChallengeGenerationData)
     private val currentCoveredBranches: Int
     private var lineContent: String = data.line!!.text()
     private var lineNumber: Int = data.line!!.attr("id").substring(1).toInt()
-    private val maxCoveredBranches: Int
+    val maxCoveredBranches: Int
     private var solvedCoveredBranches: Int = 0
     private var sourceCode = generateCompilationUnit(details.parameters,
         "${details.packageName}.${details.fileName}", "${details.fileName}.${details.fileExtension}")
@@ -125,6 +125,7 @@ class BranchCoverageChallenge(data: Challenge.ChallengeGenerationData)
         val document = JacocoUtil.generateDocument(jacocoSourceFile, jacocoCSVFile, listener) ?: return false
 
         val elements = document.select("span." + "pc")
+        elements.addAll(document.select("span." + "nc"))
 
         return elements.any { it.text().trim() == lineContent.trim() }
     }

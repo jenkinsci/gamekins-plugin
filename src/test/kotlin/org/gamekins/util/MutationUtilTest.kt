@@ -7,6 +7,7 @@ import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.string.shouldEndWith
 import io.mockk.every
 import io.mockk.mockkClass
+import io.mockk.mockkObject
 import io.mockk.unmockkAll
 import org.gamekins.file.SourceFileDetails
 import org.gamekins.test.TestUtils
@@ -30,9 +31,11 @@ class MutationUtilTest : FeatureSpec({
     val sourceFile = mockkClass(SourceFileDetails::class)
 
     beforeContainer {
-        data = MutationData(line)
+        data = MutationData(line, parameters)
         every { sourceFile.fileName } returns className
         every { sourceFile.packageName } returns packageName
+        mockkObject(MutationData.Companion)
+        every { MutationData.generateCompilationUnit(any(), any(), any()) } returns ""
     }
 
     beforeSpec {
@@ -84,31 +87,31 @@ class MutationUtilTest : FeatureSpec({
                 "<description>changed conditional boundary</description></mutation>"
         scenario("< to <=")
         {
-            MutationUtil.getMutatedCode("    if (imag &lt; 0.0) {", MutationData(mutationLine)) shouldBe
+            MutationUtil.getMutatedCode("    if (imag &lt; 0.0) {", MutationData(mutationLine, parameters)) shouldBe
                     "    if (imag &lt;= 0.0) {"
         }
 
         scenario("<= to <")
         {
-            MutationUtil.getMutatedCode("    if (decimal.scale() &lt;= 0) {", MutationData(mutationLine)) shouldBe
+            MutationUtil.getMutatedCode("    if (decimal.scale() &lt;= 0) {", MutationData(mutationLine, parameters)) shouldBe
                     "    if (decimal.scale() &lt; 0) {"
         }
 
         scenario("> to >=")
         {
-            MutationUtil.getMutatedCode("    while (input &gt; 0) {", MutationData(mutationLine)) shouldBe
+            MutationUtil.getMutatedCode("    while (input &gt; 0) {", MutationData(mutationLine, parameters)) shouldBe
                     "    while (input &gt;= 0) {"
         }
 
         scenario(">= to >")
         {
-            MutationUtil.getMutatedCode("    while (input &gt;= 0) {", MutationData(mutationLine)) shouldBe
+            MutationUtil.getMutatedCode("    while (input &gt;= 0) {", MutationData(mutationLine, parameters)) shouldBe
                     "    while (input &gt; 0) {"
         }
 
         scenario("Default case")
         {
-            MutationUtil.getMutatedCode("    while (input == 0) {", MutationData(mutationLine)) shouldBe ""
+            MutationUtil.getMutatedCode("    while (input == 0) {", MutationData(mutationLine, parameters)) shouldBe ""
         }
 
         //INCREMENTS
@@ -121,31 +124,31 @@ class MutationUtilTest : FeatureSpec({
                 "<description>Changed increment from 10 to -10</description></mutation>"
         scenario("++ to --")
         {
-            MutationUtil.getMutatedCode("    for (int i = 0; i &lt; 42; i++) {", MutationData(mutationLine)) shouldBe
+            MutationUtil.getMutatedCode("    for (int i = 0; i &lt; 42; i++) {", MutationData(mutationLine, parameters)) shouldBe
                     "    for (int i = 0; i &lt; 42; i--) {"
         }
 
         scenario("-- to ++")
         {
-            MutationUtil.getMutatedCode("    for (int i = 0; i &lt; 42; i--) {", MutationData(mutationLine)) shouldBe
+            MutationUtil.getMutatedCode("    for (int i = 0; i &lt; 42; i--) {", MutationData(mutationLine, parameters)) shouldBe
                     "    for (int i = 0; i &lt; 42; i++) {"
         }
 
         scenario("+= to -=")
         {
-            MutationUtil.getMutatedCode("    arbitraryInt += 10;", MutationData(mutationLine)) shouldBe
+            MutationUtil.getMutatedCode("    arbitraryInt += 10;", MutationData(mutationLine, parameters)) shouldBe
                     "    arbitraryInt -= 10;"
         }
 
         scenario("-= to +=")
         {
-            MutationUtil.getMutatedCode("    arbitraryInt -= 10;", MutationData(mutationLine)) shouldBe
+            MutationUtil.getMutatedCode("    arbitraryInt -= 10;", MutationData(mutationLine, parameters)) shouldBe
                     "    arbitraryInt += 10;"
         }
 
         scenario("Default case")
         {
-            MutationUtil.getMutatedCode("    arbitraryInt = 10;", MutationData(mutationLine)) shouldBe ""
+            MutationUtil.getMutatedCode("    arbitraryInt = 10;", MutationData(mutationLine, parameters)) shouldBe ""
         }
 
         //INVERT_NEGS
@@ -158,7 +161,7 @@ class MutationUtilTest : FeatureSpec({
                 "<description>removed negation</description></mutation>"
         scenario("Remove -")
         {
-            MutationUtil.getMutatedCode("      temp.append(trim(-imag, doubleLength));", MutationData(mutationLine)) shouldBe
+            MutationUtil.getMutatedCode("      temp.append(trim(-imag, doubleLength));", MutationData(mutationLine, parameters)) shouldBe
                     "      temp.append(trim(imag, doubleLength));"
         }
 
@@ -172,67 +175,67 @@ class MutationUtilTest : FeatureSpec({
                 "<description>Replaced double multiplication with division</description></mutation>"
         scenario("+ to -")
         {
-            MutationUtil.getMutatedCode("    return Math.sqrt(real * real + imag * imag);", MutationData(mutationLine)) shouldBe
+            MutationUtil.getMutatedCode("    return Math.sqrt(real * real + imag * imag);", MutationData(mutationLine, parameters)) shouldBe
                     "    return Math.sqrt(real * real - imag * imag);"
         }
 
         scenario("- to +")
         {
-            MutationUtil.getMutatedCode("    int d = b - c;", MutationData(mutationLine)) shouldBe
+            MutationUtil.getMutatedCode("    int d = b - c;", MutationData(mutationLine, parameters)) shouldBe
                     "    int d = b + c;"
         }
 
         scenario("* to /")
         {
-            MutationUtil.getMutatedCode("    return c * b / d;", MutationData(mutationLine)) shouldBe
+            MutationUtil.getMutatedCode("    return c * b / d;", MutationData(mutationLine, parameters)) shouldBe
                     "    return c / b / d;"
         }
 
         scenario("/ to *")
         {
-            MutationUtil.getMutatedCode("    double dArg = d / 2;", MutationData(mutationLine)) shouldBe
+            MutationUtil.getMutatedCode("    double dArg = d / 2;", MutationData(mutationLine, parameters)) shouldBe
                     "    double dArg = d * 2;"
         }
 
         scenario("% to *")
         {
-            MutationUtil.getMutatedCode("      if (input % 3 == 0) {", MutationData(mutationLine)) shouldBe
+            MutationUtil.getMutatedCode("      if (input % 3 == 0) {", MutationData(mutationLine, parameters)) shouldBe
                     "      if (input * 3 == 0) {"
         }
 
         scenario("&& to ||")
         {
-            MutationUtil.getMutatedCode("    return (num.equals(b.num) &amp;&amp; den.equals(b.den));", MutationData(mutationLine)) shouldBe
+            MutationUtil.getMutatedCode("    return (num.equals(b.num) &amp;&amp; den.equals(b.den));", MutationData(mutationLine, parameters)) shouldBe
                     "    return (num.equals(b.num) || den.equals(b.den));"
         }
 
         scenario("|| to &&")
         {
-            MutationUtil.getMutatedCode("    if (a == ZERO || b == ZERO) {", MutationData(mutationLine)) shouldBe
+            MutationUtil.getMutatedCode("    if (a == ZERO || b == ZERO) {", MutationData(mutationLine, parameters)) shouldBe
                     "    if (a == ZERO &amp;&amp; b == ZERO) {"
         }
 
         scenario("<< to >>")
         {
-            MutationUtil.getMutatedCode("        return currentSize &lt;= 4 ? 8 : (currentSize &lt;&lt; 1);", MutationData(mutationLine)) shouldBe
+            MutationUtil.getMutatedCode("        return currentSize &lt;= 4 ? 8 : (currentSize &lt;&lt; 1);", MutationData(mutationLine, parameters)) shouldBe
                     "        return currentSize &lt;= 4 ? 8 : (currentSize &gt;&gt; 1);"
         }
 
         scenario(">>> to <<<")
         {
-            MutationUtil.getMutatedCode("            int mid = lo &gt;&gt;&gt; 1;", MutationData(mutationLine)) shouldBe
+            MutationUtil.getMutatedCode("            int mid = lo &gt;&gt;&gt; 1;", MutationData(mutationLine, parameters)) shouldBe
                     "            int mid = lo &lt;&lt; 1;"
         }
 
         scenario(">> to <<")
         {
-            MutationUtil.getMutatedCode("        return currentSize &lt;= 4 ? 8 : (currentSize &gt;&gt; 1);", MutationData(mutationLine)) shouldBe
+            MutationUtil.getMutatedCode("        return currentSize &lt;= 4 ? 8 : (currentSize &gt;&gt; 1);", MutationData(mutationLine, parameters)) shouldBe
                     "        return currentSize &lt;= 4 ? 8 : (currentSize &lt;&lt; 1);"
         }
 
         scenario("Default case")
         {
-            MutationUtil.getMutatedCode("        return currentSize &lt;= 4", MutationData(mutationLine)) shouldBe ""
+            MutationUtil.getMutatedCode("        return currentSize &lt;= 4", MutationData(mutationLine, parameters)) shouldBe ""
         }
 
         //NEGATE_CONDITIONALS
@@ -245,43 +248,43 @@ class MutationUtilTest : FeatureSpec({
                 "<description>negated conditional</description></mutation>"
         scenario("< to >=")
         {
-            MutationUtil.getMutatedCode("    if (imag &lt; 0.0) {", MutationData(mutationLine)) shouldBe
+            MutationUtil.getMutatedCode("    if (imag &lt; 0.0) {", MutationData(mutationLine, parameters)) shouldBe
                     "    if (imag &gt;= 0.0) {"
         }
 
         scenario("<= to >")
         {
-            MutationUtil.getMutatedCode("    if (decimal.scale() &lt;= 0) {", MutationData(mutationLine)) shouldBe
+            MutationUtil.getMutatedCode("    if (decimal.scale() &lt;= 0) {", MutationData(mutationLine, parameters)) shouldBe
                     "    if (decimal.scale() &gt; 0) {"
         }
 
         scenario("> to <=")
         {
-            MutationUtil.getMutatedCode("    while (input &gt; 0) {", MutationData(mutationLine)) shouldBe
+            MutationUtil.getMutatedCode("    while (input &gt; 0) {", MutationData(mutationLine, parameters)) shouldBe
                     "    while (input &lt;= 0) {"
         }
 
         scenario(">= to <")
         {
-            MutationUtil.getMutatedCode("    while (input &gt;= 0) {", MutationData(mutationLine)) shouldBe
+            MutationUtil.getMutatedCode("    while (input &gt;= 0) {", MutationData(mutationLine, parameters)) shouldBe
                     "    while (input &lt; 0) {"
         }
 
         scenario("== to !=")
         {
-            MutationUtil.getMutatedCode("    if (a == ONE) {", MutationData(mutationLine)) shouldBe
+            MutationUtil.getMutatedCode("    if (a == ONE) {", MutationData(mutationLine, parameters)) shouldBe
                     "    if (a != ONE) {"
         }
 
         scenario("!= to ==")
         {
-            MutationUtil.getMutatedCode("    if (y.getClass() != this.getClass()) {", MutationData(mutationLine)) shouldBe
+            MutationUtil.getMutatedCode("    if (y.getClass() != this.getClass()) {", MutationData(mutationLine, parameters)) shouldBe
                     "    if (y.getClass() == this.getClass()) {"
         }
 
         scenario("Default case")
         {
-            MutationUtil.getMutatedCode("    if (y.getClass()) {", MutationData(mutationLine)) shouldBe "    if (!y.getClass()) {"
+            MutationUtil.getMutatedCode("    if (y.getClass()) {", MutationData(mutationLine, parameters)) shouldBe "    if (!y.getClass()) {"
         }
 
         //RETURN_VALS
@@ -297,7 +300,7 @@ class MutationUtilTest : FeatureSpec({
                 "<description>removed call to java/io/PrintStream::println</description></mutation>"
         scenario("Remove method call")
         {
-            MutationUtil.getMutatedCode("y.getClass()", MutationData(mutationLine)) shouldBe "Line removed"
+            MutationUtil.getMutatedCode("y.getClass()", MutationData(mutationLine, parameters)) shouldBe "Line removed"
         }
 
         //EMPTY_RETURNS
@@ -310,7 +313,7 @@ class MutationUtilTest : FeatureSpec({
                 "<description>replaced return value with &quot;&quot; for com/example/Complex::toString</description></mutation>"
         scenario("Return empty String")
         {
-            MutationUtil.getMutatedCode("    return toString(8);", MutationData(mutationLine)) shouldBe
+            MutationUtil.getMutatedCode("    return toString(8);", MutationData(mutationLine, parameters)) shouldBe
                     "    return &quot;&quot;;"
         }
 
@@ -323,7 +326,7 @@ class MutationUtilTest : FeatureSpec({
                 "<description>replaced return value with Collections.emptyMap for de/uni_passau/fim/se2/Main::performSearch</description></mutation>"
         scenario("Return empty map")
         {
-            MutationUtil.getMutatedCode("        return results;", MutationData(mutationLine)) shouldBe
+            MutationUtil.getMutatedCode("        return results;", MutationData(mutationLine, parameters)) shouldBe
                     "        return Collections.emptyMap();"
         }
 
@@ -336,7 +339,7 @@ class MutationUtilTest : FeatureSpec({
                 "<description>replaced return value with Stream.empty for de/uni_passau/fim/se2/metaheuristics/algorithms/RandomWalk::randomWalk</description></mutation>"
         scenario("Return empty Stream")
         {
-            MutationUtil.getMutatedCode("        return Stream.iterate(start, searchCanContinue, this::pickRandomNeighbor);", MutationData(mutationLine)) shouldBe
+            MutationUtil.getMutatedCode("        return Stream.iterate(start, searchCanContinue, this::pickRandomNeighbor);", MutationData(mutationLine, parameters)) shouldBe
                     "        return Stream.empty();"
         }
 
@@ -349,7 +352,7 @@ class MutationUtilTest : FeatureSpec({
                 "<description>replaced int return with 0 for de/uni_passau/fim/se2/test_prioritization/util/SlidingPair::characteristics</description></mutation>"
         scenario("Return 0")
         {
-            MutationUtil.getMutatedCode("        return characteristics;", MutationData(mutationLine)) shouldBe
+            MutationUtil.getMutatedCode("        return characteristics;", MutationData(mutationLine, parameters)) shouldBe
                     "        return 0;"
         }
 
@@ -364,7 +367,7 @@ class MutationUtilTest : FeatureSpec({
                 "<description>replaced boolean return with false for de/uni_passau/fim/se2/test_prioritization/util/SlidingPair::tryAdvance</description></mutation>"
         scenario("Return false")
         {
-            MutationUtil.getMutatedCode("        return true;", MutationData(mutationLine)) shouldBe
+            MutationUtil.getMutatedCode("        return true;", MutationData(mutationLine, parameters)) shouldBe
                     "        return false;"
         }
 
@@ -379,7 +382,7 @@ class MutationUtilTest : FeatureSpec({
                 "<description>replaced boolean return with true for de/uni_passau/fim/se2/test_prioritization/util/SlidingPair::tryAdvance</description></mutation>"
         scenario("Return true")
         {
-            MutationUtil.getMutatedCode("                return false;", MutationData(mutationLine)) shouldBe
+            MutationUtil.getMutatedCode("                return false;", MutationData(mutationLine, parameters)) shouldBe
                     "                return true;"
         }
 
@@ -394,13 +397,13 @@ class MutationUtilTest : FeatureSpec({
                 "<description>replaced return value with null for de/uni_passau/fim/se2/util/Pair::getFst</description></mutation>"
         scenario("Return null")
         {
-            MutationUtil.getMutatedCode("        return fst;", MutationData(mutationLine)) shouldBe
+            MutationUtil.getMutatedCode("        return fst;", MutationData(mutationLine, parameters)) shouldBe
                     "        return null;"
         }
 
         scenario("Lambda return null")
         {
-            MutationUtil.getMutatedCode("(argument) -> Object();", MutationData(mutationLine)) shouldBe
+            MutationUtil.getMutatedCode("(argument) -> Object();", MutationData(mutationLine, parameters)) shouldBe
                     "(argument) -> null;"
         }
 
@@ -413,7 +416,7 @@ class MutationUtilTest : FeatureSpec({
                 "<description>replaced double return with 0.0d for de/uni_passau/fim/se2/test_prioritization/fitness_functions/APLC\$1::applyAsDouble</description></mutation>"
         scenario("Return 0")
         {
-            MutationUtil.getMutatedCode("                return 1 - APLC.this.applyAsDouble(ordering);", MutationData(mutationLine)) shouldBe
+            MutationUtil.getMutatedCode("                return 1 - APLC.this.applyAsDouble(ordering);", MutationData(mutationLine, parameters)) shouldBe
                     "                return 0;"
         }
 
@@ -426,7 +429,7 @@ class MutationUtilTest : FeatureSpec({
                 "<description>replaced double return with 0.0d for de/uni_passau/fim/se2/test_prioritization/fitness_functions/APLC\$1::applyAsDouble</description></mutation>"
         scenario("UNKNOWN Mutator")
         {
-            MutationUtil.getMutatedCode("                return 1 - APLC.this.applyAsDouble(ordering);", MutationData(mutationLine)) shouldBe
+            MutationUtil.getMutatedCode("                return 1 - APLC.this.applyAsDouble(ordering);", MutationData(mutationLine, parameters)) shouldBe
                     ""
         }
     }
@@ -440,7 +443,7 @@ class MutationUtilTest : FeatureSpec({
                 "<indexes><index>5</index></indexes><blocks><block>0</block></blocks>" +
                 "<killingTest>de.uni_passau.fim.se2.util.PairTest.[engine:junit-jupiter]/[class:de.uni_passau.fim.se2.util.PairTest]/[method:testPairNull()]</killingTest>" +
                 "<description>replaced return value with null for de/uni_passau/fim/se2/util/Pair::getFst</description></mutation>"
-        var data = MutationData(mutationLine)
+        var data = MutationData(mutationLine, parameters)
         scenario("MutationData1")
         {
             data.detected shouldBe true
@@ -463,7 +466,7 @@ class MutationUtilTest : FeatureSpec({
                 "<mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator</mutator>" +
                 "<indexes><index>5</index></indexes><blocks><block>0</block></blocks><killingTest/>" +
                 "<description>replaced return value with null for de/uni_passau/fim/se2/util/Pair::getFst</description></mutation>"
-        data = MutationData(mutationLine)
+        data = MutationData(mutationLine, parameters)
         scenario("MutationData2")
         {
             data.detected shouldBe false
@@ -478,7 +481,7 @@ class MutationUtilTest : FeatureSpec({
                 "<mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator</mutator>" +
                 "<indexes><index>5</index></indexes><blocks><block>0</block></blocks><killingTest/>" +
                 "<description>replaced return value with null for de/uni_passau/fim/se2/util/Pair::getFst</description></mutation>"
-        data = MutationData(mutationLine)
+        data = MutationData(mutationLine, parameters)
         scenario("MutationData3")
         {
             data.status shouldBe MutationUtil.MutationStatus.NO_COVERAGE
@@ -491,7 +494,7 @@ class MutationUtilTest : FeatureSpec({
                 "<mutator>org.pitest.mutationtest.engine.gregor.mutators.returns.NullReturnValsMutator</mutator>" +
                 "<indexes><index>5</index></indexes><blocks><block>0</block></blocks><killingTest/>" +
                 "<description>replaced return value with null for de/uni_passau/fim/se2/util/Pair::getFst</description></mutation>"
-        data = MutationData(mutationLine)
+        data = MutationData(mutationLine, parameters)
         scenario("MuttionData3")
         {
             data.status shouldBe MutationUtil.MutationStatus.KILLED
@@ -507,7 +510,7 @@ class MutationUtilTest : FeatureSpec({
                 "<indexes><index>5</index></indexes><blocks><block>0</block></blocks>" +
                 "<killingTest>de.uni_passau.fim.se2.util.PairTest.[engine:junit-jupiter]/[class:de.uni_passau.fim.se2.util.PairTest]/[method:testPairNull()]</killingTest>" +
                 "<description>replaced return value with null for de/uni_passau/fim/se2/util/Pair::getFst</description></mutation>"
-        val data = MutationData(mutationLine)
+        val data = MutationData(mutationLine, parameters)
         scenario("Compare to null")
         {
             data.equals(null) shouldBe false
@@ -518,7 +521,7 @@ class MutationUtilTest : FeatureSpec({
             data.equals(mutationLine) shouldBe false
         }
 
-        var otherData = MutationData(mutationLine)
+        var otherData = MutationData(mutationLine, parameters)
         scenario("Compare to equivalent object")
         {
             (data == otherData) shouldBe true
@@ -533,7 +536,7 @@ class MutationUtilTest : FeatureSpec({
                 "<indexes><index>5</index></indexes><blocks><block>0</block></blocks>" +
                 "<killingTest>de.uni_passau.fim.se2.util.PairTest.[engine:junit-jupiter]/[class:de.uni_passau.fim.se2.util.PairTest]/[method:testPairNull()]</killingTest>" +
                 "<description>replaced return value with null for de/uni_passau/fim/se2/util/Pair::getFst</description></mutation>"
-        otherData = MutationData(otherMutationLine)
+        otherData = MutationData(otherMutationLine, parameters)
         scenario("Different sourceFile")
         {
             (data == otherData) shouldBe false
@@ -548,7 +551,7 @@ class MutationUtilTest : FeatureSpec({
                 "<indexes><index>5</index></indexes><blocks><block>0</block></blocks>" +
                 "<killingTest>de.uni_passau.fim.se2.util.PairTest.[engine:junit-jupiter]/[class:de.uni_passau.fim.se2.util.PairTest]/[method:testPairNull()]</killingTest>" +
                 "<description>replaced return value with null for de/uni_passau/fim/se2/util/Pair::getFst</description></mutation>"
-        otherData = MutationData(otherMutationLine)
+        otherData = MutationData(otherMutationLine, parameters)
         scenario("Different mutatedClass")
         {
             (data == otherData) shouldBe false
@@ -563,7 +566,7 @@ class MutationUtilTest : FeatureSpec({
                 "<indexes><index>5</index></indexes><blocks><block>0</block></blocks>" +
                 "<killingTest>de.uni_passau.fim.se2.util.PairTest.[engine:junit-jupiter]/[class:de.uni_passau.fim.se2.util.PairTest]/[method:testPairNull()]</killingTest>" +
                 "<description>replaced return value with null for de/uni_passau/fim/se2/util/Pair::getFst</description></mutation>"
-        otherData = MutationData(otherMutationLine)
+        otherData = MutationData(otherMutationLine, parameters)
         scenario("Different mutatedMethod")
         {
             (data == otherData) shouldBe false
@@ -578,7 +581,7 @@ class MutationUtilTest : FeatureSpec({
                 "<indexes><index>5</index></indexes><blocks><block>0</block></blocks>" +
                 "<killingTest>de.uni_passau.fim.se2.util.PairTest.[engine:junit-jupiter]/[class:de.uni_passau.fim.se2.util.PairTest]/[method:testPairNull()]</killingTest>" +
                 "<description>replaced return value with null for de/uni_passau/fim/se2/util/Pair::getFst</description></mutation>"
-        otherData = MutationData(otherMutationLine)
+        otherData = MutationData(otherMutationLine, parameters)
         scenario("Different methodDescription")
         {
             (data == otherData) shouldBe false
@@ -593,7 +596,7 @@ class MutationUtilTest : FeatureSpec({
                 "<indexes><index>5</index></indexes><blocks><block>0</block></blocks>" +
                 "<killingTest>de.uni_passau.fim.se2.util.PairTest.[engine:junit-jupiter]/[class:de.uni_passau.fim.se2.util.PairTest]/[method:testPairNull()]</killingTest>" +
                 "<description>replaced return value with null for de/uni_passau/fim/se2/util/Pair::getFst</description></mutation>"
-        otherData = MutationData(otherMutationLine)
+        otherData = MutationData(otherMutationLine, parameters)
         scenario("Different lineNumber")
         {
             (data == otherData) shouldBe false
@@ -608,7 +611,7 @@ class MutationUtilTest : FeatureSpec({
                 "<indexes><index>5</index></indexes><blocks><block>0</block></blocks>" +
                 "<killingTest>de.uni_passau.fim.se2.util.PairTest.[engine:junit-jupiter]/[class:de.uni_passau.fim.se2.util.PairTest]/[method:testPairNull()]</killingTest>" +
                 "<description>replaced return value with null for de/uni_passau/fim/se2/util/Pair::getFst</description></mutation>"
-        otherData = MutationData(otherMutationLine)
+        otherData = MutationData(otherMutationLine, parameters)
         scenario("Different mutator")
         {
             (data == otherData) shouldBe false
@@ -623,7 +626,7 @@ class MutationUtilTest : FeatureSpec({
                 "<indexes><index>5</index></indexes><blocks><block>0</block></blocks>" +
                 "<killingTest>de.uni_passau.fim.se2.util.PairTest.[engine:junit-jupiter]/[class:de.uni_passau.fim.se2.util.PairTest]/[method:testPairNull()]</killingTest>" +
                 "<description>replaced return value with 0 for de/uni_passau/fim/se2/util/Pair::getFst</description></mutation>"
-        otherData = MutationData(otherMutationLine)
+        otherData = MutationData(otherMutationLine, parameters)
         scenario("Different description")
         {
             (data == otherData) shouldBe false
@@ -638,7 +641,7 @@ class MutationUtilTest : FeatureSpec({
                 "<indexes><index>5</index></indexes><blocks><block>0</block></blocks>" +
                 "<killingTest>de.uni_passau.fim.se2.util.PairTest.[engine:junit-jupiter]/[class:de.uni_passau.fim.se2.util.PairTest]/[method:testPairNull()]</killingTest>" +
                 "<description>replaced return value with null for de/uni_passau/fim/se2/util/Pair::getFst</description></mutation>"
-        otherData = MutationData(otherMutationLine)
+        otherData = MutationData(otherMutationLine, parameters)
         scenario("Different detection status (irrelevant)")
         {
             (data == otherData) shouldBe true
@@ -653,7 +656,7 @@ class MutationUtilTest : FeatureSpec({
                 "<indexes><index>5</index></indexes><blocks><block>0</block></blocks>" +
                 "<killingTest>de.uni_passau.fim.se2.util.PairTest.[engine:junit-jupiter]/[class:de.uni_passau.fim.se2.util.PairTest]/[method:testPairNull()]</killingTest>" +
                 "<description>replaced return value with null for de/uni_passau/fim/se2/util/Pair::getFst</description></mutation>"
-        otherData = MutationData(otherMutationLine)
+        otherData = MutationData(otherMutationLine, parameters)
         scenario("Different status (irrelevant)")
         {
             (data == otherData) shouldBe true
@@ -668,7 +671,7 @@ class MutationUtilTest : FeatureSpec({
                 "<indexes><index>5</index></indexes><blocks><block>0</block></blocks>" +
                 "<killingTest>de.uni_passau.fim.se2.util.PairTest.[engine:junit-jupiter]/[class:de.uni_passau.fim.se2.util.PairTest]/[method:testPairNull()]</killingTest>" +
                 "<description>replaced return value with null for de/uni_passau/fim/se2/util/Pair::getFst</description></mutation>"
-        otherData = MutationData(otherMutationLine)
+        otherData = MutationData(otherMutationLine, parameters)
         scenario("Different numberOfTestsRun (irrelevant)")
         {
             (data == otherData) shouldBe true
@@ -683,7 +686,7 @@ class MutationUtilTest : FeatureSpec({
                 "<indexes><index>5</index></indexes><blocks><block>0</block></blocks>" +
                 "<killingTest>de.uni_passau.fim.se2.util.PairsTest.[engine:junit-jupiter]/[class:de.uni_passau.fim.se2.util.PairTest]/[method:testPairNull()]</killingTest>" +
                 "<description>replaced return value with null for de/uni_passau/fim/se2/util/Pair::getFst</description></mutation>"
-        otherData = MutationData(otherMutationLine)
+        otherData = MutationData(otherMutationLine, parameters)
         scenario("Different killingTest (irrelevant)")
         {
             (data == otherData) shouldBe true

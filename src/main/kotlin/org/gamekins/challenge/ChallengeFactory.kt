@@ -86,6 +86,8 @@ object ChallengeFactory {
             challenges.add(SmellChallenge(selectedClass, smell))
         }
 
+        challenges.removeIf { it is BranchCoverageChallenge && it.maxCoveredBranches == 1 }
+
         return challenges
     }
 
@@ -344,9 +346,8 @@ object ChallengeFactory {
             .filter { it.startsWith("<mutation ") }.filter { !it.contains("status='KILLED'") }
         if (mutants.isEmpty()) return null
 
-        val mutant = MutationUtil.MutationData(mutants[Random.nextInt(mutants.size)])
+        val mutant = MutationUtil.MutationData(mutants[Random.nextInt(mutants.size)], parameters)
         if (mutant.status == MutationUtil.MutationStatus.KILLED) return null
-        mutant.generateCompilationUnit(parameters)
         return MutationChallenge(fileDetails, mutant)
     }
 

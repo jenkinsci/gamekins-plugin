@@ -93,7 +93,7 @@ object MutationUtil {
 
         val mutants = arrayListOf<MutationData>()
         mutantLines.forEach { mutant ->
-            mutants.add(MutationData(mutant))
+            mutants.add(MutationData(mutant, parameters))
         }
 
         return mutants
@@ -110,13 +110,11 @@ object MutationUtil {
         if (!mutationReport.exists()) return null
         val mutants = mutationReport.readToString().split("\n").filter { it.startsWith("<mutation ") }
         if (mutants.isEmpty()) return null
-        //return mutants.map { MutationData(it) }.find { it == data } hier war schluss
-        var mutant = mutants.map { MutationData(it) }.find { it == data }
+        var mutant = mutants.map { MutationData(it, parameters) }.find { it == data }
         if (mutant == null) {
             val updatedData = GumTree.findMapping(data, parameters)
-            mutant = mutants.map { MutationData(it) }.find { it == updatedData }
+            mutant = mutants.map { MutationData(it, parameters) }.find { it == updatedData }
         }
-        mutant?.generateCompilationUnit(parameters)
         return mutant
     }
 
@@ -258,7 +256,7 @@ object MutationUtil {
         var sourceCode: String
     ) {
 
-        constructor(line: String) : this(
+        constructor(line: String, parameters: Parameters) : this(
             """detected='([a-z]*)'""".toRegex().find(line)!!.groupValues[1].toBoolean(),
             when ("""status='([A-Z_]*)'""".toRegex().find(line)!!.groupValues[1]) {
                 "NO_COVERAGE" -> MutationStatus.NO_COVERAGE
@@ -290,17 +288,19 @@ object MutationUtil {
             (if (line.contains("<killingTest/>")) "" else
                 """<killingTest>(.*)</killingTest>""".toRegex().find(line)!!.groupValues[1]),
             """<description>(.*)</description>""".toRegex().find(line)!!.groupValues[1],
-            ""
+            generateCompilationUnit(parameters,
+                """<sourceFile>(.*)</sourceFile>""".toRegex().find(line)!!.groupValues[1],
+                """<mutatedClass>(.*)</mutatedClass>""".toRegex().find(line)!!.groupValues[1])
         )
 
-        /**
-         * Generates the compilationUnit if it is null.
-         */
-        fun generateCompilationUnit(parameters: Parameters) {
-            if (sourceCode.isEmpty()) {
+        companion object {
+            /**
+             * Generates the compilationUnit.
+             */
+            fun generateCompilationUnit(parameters: Parameters, sourceFile: String, mutatedClass: String): String {
                 val compilationUnit = JavaParser.parse(sourceFile, mutatedClass, parameters)
                 LexicalPreservingPrinter.setup(compilationUnit)
-                sourceCode = LexicalPreservingPrinter.print(compilationUnit)
+                return LexicalPreservingPrinter.print(compilationUnit)
             }
         }
 
