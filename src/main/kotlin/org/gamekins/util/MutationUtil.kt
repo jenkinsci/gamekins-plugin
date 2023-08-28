@@ -16,7 +16,6 @@
 
 package org.gamekins.util
 
-import com.github.javaparser.ast.CompilationUnit
 import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinter
 import hudson.FilePath
 import hudson.model.TaskListener
@@ -79,6 +78,25 @@ object MutationUtil {
         if (parameters.showPitOutput) listener.logger.println(output)
         pom.write(oldPomContent, null)
         return true
+    }
+
+    fun getAllAliveMutantsOfClass(fileDetails: SourceFileDetails, parameters: Parameters, listener: TaskListener)
+    : List<MutationData> {
+        if (!executePIT(fileDetails, parameters, listener)) return listOf()
+
+        val mutationReport = FilePath(parameters.workspace.channel,
+            parameters.workspace.remote + Constants.Mutation.REPORT_PATH)
+        if (!mutationReport.exists()) return listOf()
+        val mutantLines = mutationReport.readToString().split("\n")
+            .filter { it.startsWith("<mutation ") }.filter { !it.contains("status='KILLED'") }
+        if (mutantLines.isEmpty()) return listOf()
+
+        val mutants = arrayListOf<MutationData>()
+        mutantLines.forEach { mutant ->
+            mutants.add(MutationData(mutant))
+        }
+
+        return mutants
     }
 
     /**

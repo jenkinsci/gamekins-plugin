@@ -269,6 +269,11 @@ object PublisherUtil {
             val userGenerated = ChallengeFactory.generateNewChallenges(
                 user, property, parameters, files, listener,
                 maxChallenges = parameters.currentChallengesCount)
+            /**val challenges = ChallengeFactory.generateAllPossibleChallengesForClass(files.filterIsInstance<SourceFileDetails>().find { it.fileName == "ArArchiveInputStream" }!!, parameters, user, listener)
+            challenges.forEach {challenge ->
+                property.newChallenge(parameters.projectName, challenge)
+            }
+            val userGenerated = challenges.size**/
 
             //Check if an achievement is solved
             listener.logger.println("[Gamekins] Start checking solved status of achievements for user ${user.fullName}")

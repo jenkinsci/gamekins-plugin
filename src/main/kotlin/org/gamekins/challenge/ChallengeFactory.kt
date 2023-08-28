@@ -60,6 +60,35 @@ object ChallengeFactory {
         return weightList[Random.nextInt(weightList.size)]
     }
 
+    fun generateAllPossibleChallengesForClass(selectedClass: SourceFileDetails, parameters: Parameters, user: User,
+                                              listener: TaskListener = TaskListener.NULL): List<Challenge> {
+        val challenges = arrayListOf<Challenge>()
+        var challengeGenerationData = ChallengeGenerationData(parameters, user, selectedClass, listener)
+
+        challenges.add(ClassCoverageChallenge(challengeGenerationData))
+
+        JacocoUtil.getLines(FilePath(selectedClass.jacocoSourceFile)).forEach { line ->
+            challengeGenerationData = ChallengeGenerationData(parameters, user, selectedClass, listener, line = line)
+            challenges.add(LineCoverageChallenge(challengeGenerationData))
+            challenges.add(BranchCoverageChallenge(challengeGenerationData))
+        }
+
+        JacocoUtil.getNotFullyCoveredMethodEntries(FilePath(selectedClass.jacocoMethodFile)).forEach { method ->
+            challengeGenerationData = ChallengeGenerationData(parameters, user, selectedClass, listener, method = method)
+            challenges.add(MethodCoverageChallenge(challengeGenerationData))
+        }
+
+        MutationUtil.getAllAliveMutantsOfClass(selectedClass, parameters, listener).forEach { mutant ->
+            challenges.add(MutationChallenge(selectedClass, mutant))
+        }
+
+        SmellUtil.getSmellsOfFile(selectedClass, listener).forEach { smell ->
+            challenges.add(SmellChallenge(selectedClass, smell))
+        }
+
+        return challenges
+    }
+
     /**
      * Generates a new [BuildChallenge] if the [result] was not [Result.SUCCESS] and returns true.
      */
