@@ -7,10 +7,7 @@ import io.kotest.core.spec.style.FeatureSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.string.shouldEndWith
-import io.mockk.every
-import io.mockk.mockkClass
-import io.mockk.mockkStatic
-import io.mockk.unmockkAll
+import io.mockk.*
 import org.gamekins.file.SourceFileDetails
 import org.gamekins.test.TestUtils
 import org.gamekins.util.Constants.Parameters
@@ -50,6 +47,8 @@ class MutationChallengeTest : FeatureSpec({
         parameters.workspace = path
         parameters.jacocoResultsPath = shortJacocoPath
         parameters.jacocoCSVPath = shortJacocoCSVPath
+        mockkObject(MutationData)
+        every { MutationData.generateCompilationUnit(any(), any(), any()) } returns ""
         data = MutationData(line, parameters)
         mockkStatic(JacocoUtil::class)
         mockkStatic(MutationUtil::class)
