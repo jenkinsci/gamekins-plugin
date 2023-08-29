@@ -23,6 +23,7 @@ import org.gamekins.file.SourceFileDetails
 import org.gamekins.gumTree.GumTree
 import org.gamekins.util.Constants
 import org.gamekins.util.JacocoUtil
+import org.gamekins.util.JacocoUtil.replaceSpecialEntities
 
 /**
  * Specific [Challenge] to motivate the user to cover a random line of a specific class.
@@ -34,7 +35,7 @@ class LineCoverageChallenge(data: Challenge.ChallengeGenerationData)
     : CoverageChallenge(data.selectedFile as SourceFileDetails, data.parameters.workspace) {
 
     private val coverageType: String = data.line!!.attr("class")
-    private var lineContent: String = data.line!!.text()
+    private var lineContent: String = replaceSpecialEntities(data.line!!.text())
     private var lineNumber: Int = data.line!!.attr("id").substring(1).toInt()
     private var sourceCode = generateCompilationUnit(details.parameters,
         "${details.packageName}.${details.fileName}", "${details.fileName}.${details.fileExtension}")
@@ -120,10 +121,9 @@ class LineCoverageChallenge(data: Challenge.ChallengeGenerationData)
 
         val document = JacocoUtil.generateDocument(jacocoSourceFile, jacocoCSVFile, listener) ?: return false
 
-        val elements = document.select("span." + "pc")
-        elements.addAll(document.select("span." + "nc"))
+        val elements = document.select("span." + "nc")
 
-        return elements.any { it.text().trim() == lineContent.trim() }
+        return elements.any { replaceSpecialEntities(it.text().trim()) == replaceSpecialEntities(lineContent.trim()) }
     }
 
     /**
@@ -147,7 +147,8 @@ class LineCoverageChallenge(data: Challenge.ChallengeGenerationData)
         val elements = document.select("span." + "fc")
         elements.addAll(document.select("span." + "pc"))
         for (element in elements) {
-            if (element.text().trim() == lineContent.trim() && element.attr("id").substring(1).toInt() == lineNumber) {
+            if (replaceSpecialEntities(element.text().trim()) == replaceSpecialEntities(lineContent.trim())
+                && element.attr("id").substring(1).toInt() == lineNumber) {
                 super.setSolved(System.currentTimeMillis())
                 solvedCoverage = JacocoUtil.getCoverageInPercentageFromJacoco(details.fileName, jacocoCSVFile)
                 return true

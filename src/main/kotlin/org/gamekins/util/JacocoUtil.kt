@@ -94,10 +94,10 @@ object JacocoUtil {
      * Chooses a random not fully covered line of the given [classDetails]. Returns null if there are no such lines.
      */
     @JvmStatic
-    fun chooseRandomLine(classDetails: SourceFileDetails, workspace: FilePath, partiallyOnly: Boolean = false)
+    fun chooseRandomLine(classDetails: SourceFileDetails, workspace: FilePath, partially: Boolean = false)
     : Element? {
         val elements = getLines(calculateCurrentFilePath(
-                workspace, classDetails.jacocoSourceFile, classDetails.parameters.remote), partiallyOnly)
+                workspace, classDetails.jacocoSourceFile, classDetails.parameters.remote), partially)
         return if (elements.isEmpty()) null else elements[Random.nextInt(elements.size)]
     }
 
@@ -217,7 +217,8 @@ object JacocoUtil {
     @JvmStatic
     fun getCoveredBranches(csv: FilePath): Int {
         val content = csv.readToString()
-        val lines = content.split("\n".toRegex()).filter { line -> line.isNotEmpty() }
+        val lines = ArrayList(content.split("\n".toRegex()).filter { line -> line.isNotEmpty() })
+        lines.removeFirst()
         var coveredLines = 0
         for (coverageLine in lines) {
             val entries = coverageLine.split(",".toRegex())
@@ -230,7 +231,8 @@ object JacocoUtil {
     @JvmStatic
     fun getCoveredLines(csv: FilePath): Int {
         val content = csv.readToString()
-        val lines = content.split("\n".toRegex()).filter { line -> line.isNotEmpty() }
+        val lines = ArrayList(content.split("\n".toRegex()).filter { line -> line.isNotEmpty() })
+        lines.removeFirst()
         var coveredLines = 0
         for (coverageLine in lines) {
             val entries = coverageLine.split(",".toRegex())
@@ -324,10 +326,13 @@ object JacocoUtil {
      */
     @JvmStatic
     @Throws(IOException::class, InterruptedException::class)
-    fun getLines(jacocoSourceFile: FilePath, partiallyOnly: Boolean = false): Elements {
+    fun getLines(jacocoSourceFile: FilePath, partially: Boolean = false): Elements {
         val document = Jsoup.parse(jacocoSourceFile.readToString())
-        val elements = document.select("span." + "pc")
-        if (!partiallyOnly) elements.addAll(document.select("span." + "nc"))
+        val elements = if (partially) {
+            document.select("span." + "pc")
+        } else {
+            document.select("span." + "nc")
+        }
         elements.removeIf { e: Element ->
             (e.text().trim() == "{" || e.text().trim() == "}"
                     || e.text().trim() == "(" || e.text().trim() == ")"
@@ -453,7 +458,7 @@ object JacocoUtil {
     /**
      * Checks whether the given [line] is a getter or setter. The ordered list of [lines] must be JaCoCo *.java.html
      * file split by \n. It searches in the list of [lines] for the correct [line] and then goes back in the ordered
-     * list one time (or multiple times if the previous line only contains white spaces or a {). If the line is a
+     * list one time (or multiple times if the previous line only contains blanks or a {). If the line is a
      * method declaration, it contains get/set/is and the name is equal to the call in the [line], it is a getter
      * or setter.
      */
@@ -485,6 +490,17 @@ object JacocoUtil {
         }
 
         return false
+    }
+
+    /**
+     * Replaces special entities with HTML codes. Jenkins does that automatically when saving the current state.
+     */
+    fun replaceSpecialEntities(string: String): String {
+        return string.replace("&&", "&amp;&amp;").replace("& ", "&amp; ")
+            .replace("<", "&lt;")
+            .replace(">", "&gt;")
+            .replace("\"", "&quot;")
+            .replace("\'", "&#39;")
     }
 
     /**

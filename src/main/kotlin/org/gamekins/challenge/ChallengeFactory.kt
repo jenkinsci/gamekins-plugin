@@ -60,6 +60,9 @@ object ChallengeFactory {
         return weightList[Random.nextInt(weightList.size)]
     }
 
+    /**
+     * Generates all possible challenges for a specific class in the project.
+     */
     fun generateAllPossibleChallengesForClass(selectedClass: SourceFileDetails, parameters: Parameters, user: User,
                                               listener: TaskListener = TaskListener.NULL): List<Challenge> {
         val challenges = arrayListOf<Challenge>()
@@ -70,6 +73,10 @@ object ChallengeFactory {
         JacocoUtil.getLines(FilePath(selectedClass.jacocoSourceFile)).forEach { line ->
             challengeGenerationData = ChallengeGenerationData(parameters, user, selectedClass, listener, line = line)
             challenges.add(LineCoverageChallenge(challengeGenerationData))
+        }
+
+        JacocoUtil.getLines(FilePath(selectedClass.jacocoSourceFile), partially = true).forEach { line ->
+            challengeGenerationData = ChallengeGenerationData(parameters, user, selectedClass, listener, line = line)
             challenges.add(BranchCoverageChallenge(challengeGenerationData))
         }
 
@@ -85,8 +92,6 @@ object ChallengeFactory {
         SmellUtil.getSmellsOfFile(selectedClass, listener).forEach { smell ->
             challenges.add(SmellChallenge(selectedClass, smell))
         }
-
-        challenges.removeIf { it is BranchCoverageChallenge && it.maxCoveredBranches == 1 }
 
         return challenges
     }
@@ -311,7 +316,7 @@ object ChallengeFactory {
                 }
                 BranchCoverageChallenge::class.java -> {
                     data.line = JacocoUtil.chooseRandomLine(data.selectedFile, data.parameters.workspace,
-                        partiallyOnly = true)
+                        partially = true)
                     if (data.line == null) null else challengeClass
                         .getConstructor(ChallengeGenerationData::class.java)
                         .newInstance(data)

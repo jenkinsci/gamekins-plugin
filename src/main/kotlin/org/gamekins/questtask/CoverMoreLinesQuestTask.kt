@@ -44,7 +44,8 @@ class CoverMoreLinesQuestTask(linesNumber: Int, csvFile: FilePath): QuestTask(li
         user: User
     ): Boolean {
         val currentCoveredLines = JacocoUtil.getCoveredLines(
-            FilePath(parameters.workspace.channel, parameters.workspace.remote + "/" + parameters.jacocoCSVPath))
+            FilePath(parameters.workspace.channel,
+                parameters.workspace.remote + "/" + parameters.jacocoCSVPath.replace("**/", "")))
         currentNumber = currentCoveredLines - startNumberOfLines
         if (currentNumber >= numberGoal) {
             solved = System.currentTimeMillis()

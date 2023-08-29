@@ -2,7 +2,7 @@
 
 <j:jelly xmlns:j="jelly:core" xmlns:l="/lib/layout" xmlns:st="jelly:stapler">
 
-    <l:layout title="Leaderboard">
+    <l:layout title="Challenges">
 
         <link rel="stylesheet" href="${rootURL}/plugin/gamekins/css/prettify.css" type="text/css"/>
         <script src="${rootURL}/plugin/gamekins/vendor/prettify.js" type="text/javascript"/>

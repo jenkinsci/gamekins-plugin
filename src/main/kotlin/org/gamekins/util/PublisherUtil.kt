@@ -101,7 +101,7 @@ object PublisherUtil {
                 EventHandler.addEvent(
                     QuestUnsolvableEvent(parameters.projectName, parameters.branch, property.getUser(), quest)
                 )
-                listener.logger.println("[Gamekins] Quest $quest can not be solved anymore")
+                listener.logger.println("[Gamekins] Quest $quest cannot be solved any more")
             }
         }
 
@@ -109,7 +109,7 @@ object PublisherUtil {
     }
 
     /**
-     * Checks whether the quests tasks of a user are solved.
+     * Checks whether the quest tasks of a user are solved.
      */
     private fun checkQuestTasks(
         run: Run<*, *>,
@@ -153,7 +153,7 @@ object PublisherUtil {
                 EventHandler.addEvent(ChallengeUnsolvableEvent(parameters.projectName, parameters.branch,
                     property.getUser(), challenge))
                 listener.logger.println("[Gamekins] Challenge ${challenge?.toEscapedString()} " +
-                        "can not be solved anymore")
+                        "cannot be solved any more")
             }
         }
     }
@@ -192,7 +192,7 @@ object PublisherUtil {
                 EventHandler.addEvent(ChallengeUnsolvableEvent(parameters.projectName, parameters.branch,
                     property.getUser(), challenge))
                 listener.logger.println("[Gamekins] Challenge ${challenge?.toEscapedString()} " +
-                        "can not be solved anymore")
+                        "cannot be solved any more")
             }
         }
     }
