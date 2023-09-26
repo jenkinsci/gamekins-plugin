@@ -154,6 +154,7 @@ class AchievementUtilTest: FeatureSpec({
         {
             AchievementUtil.getBranchesInLine(files, parameters, run, property, TaskListener.NULL) shouldBe 3
         }
+        every { property.getCompletedChallenges(any()) } returns CopyOnWriteArrayList(listOf(challenge))
     }
 
     feature("getLinesOfCode") {

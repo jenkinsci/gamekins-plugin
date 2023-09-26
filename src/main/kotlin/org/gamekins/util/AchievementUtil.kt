@@ -122,6 +122,7 @@ object AchievementUtil {
     /**
      * Returns the coverage of the most CoverageChallenge with the highest coverage as rounded percentage.
      */
+    @JvmStatic
     fun getMaxClassCoverage(classes: ArrayList<FileDetails>, parameters: Parameters,
                             run: Run<*, *>, property: GameUserProperty, listener: TaskListener): Int {
 
