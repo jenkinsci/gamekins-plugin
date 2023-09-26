@@ -66,7 +66,7 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
     private var storedChallenges: HashMap<String, CopyOnWriteArrayList<Challenge>> = HashMap()
     private var unfinishedQuests: HashMap<String, CopyOnWriteArrayList<Quest>> = HashMap()
     private var unsolvedAchievements: HashMap<String, CopyOnWriteArrayList<Achievement>> = HashMap()
-    public var progressAchievementExample: HashMap<String, CopyOnWriteArrayList<ProgressAchievement>> = HashMap()
+    private var progressAchievements: HashMap<String, CopyOnWriteArrayList<ProgressAchievement>> = HashMap()
 
     /**
      * Adds an additional [score] to one project [projectName], since one user can participate in multiple projects.
@@ -157,10 +157,10 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
         rsp.contentType = Constants.TYPE_PLAIN
         val printer = rsp.writer
         if (projectName.isEmpty() || completedAchievements[projectName] == null
-            || unsolvedAchievements[projectName] == null) {
+            || unsolvedAchievements[projectName] == null || progressAchievements[projectName] == null) {
             printer.print(0)
         } else {
-            printer.print(completedAchievements[projectName]!!.size + unsolvedAchievements[projectName]!!.size)
+            printer.print(completedAchievements[projectName]!!.size + unsolvedAchievements[projectName]!!.size + progressAchievements[projectName]!!.size)
         }
         printer.flush()
     }
@@ -208,20 +208,12 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
         printer.flush()
     }
 
-    fun doGetProgressAchievementExample(rsp: StaplerResponse, @QueryParameter projectName: String) {
-        val json = jacksonObjectMapper().writeValueAsString(progressAchievementExample[projectName])
+    fun doGetProgressAchievements(rsp: StaplerResponse, @QueryParameter projectName: String) {
+        val json = jacksonObjectMapper().writeValueAsString(progressAchievements[projectName])
         rsp.contentType = Constants.TYPE_JSON
         val printer = rsp.writer
         printer.print(json)
         printer.flush()
-
-        /*
-        rsp.contentType = "text/plain"
-        val printer = rsp.writer
-        rsp.characterEncoding = "US-ASCII"
-        printer.print(getProgressAchievementExample(projectName))
-        printer.flush()
-         */
     }
 
     /**
@@ -415,8 +407,8 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
         return unsolvedAchievements[projectName]!!
     }
 
-    fun getProgressAchievementExample(projectName: String) : Int {
-        return progressAchievementExample[projectName]!![0].progress
+    fun getProgressAchievements(projectName: String): CopyOnWriteArrayList<ProgressAchievement> {
+        return progressAchievements[projectName]!!
     }
 
     override fun getUrlName(): String {
@@ -767,8 +759,6 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
         unfinishedQuests[projectName] = CopyOnWriteArrayList()
         completedQuestTasks[projectName] = CopyOnWriteArrayList()
         currentQuestTasks[projectName] = CopyOnWriteArrayList()
-
-        progressAchievementExample[projectName] = CopyOnWriteArrayList()
     }
 
     /**
@@ -809,6 +799,7 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
         storedChallenges.putIfAbsent(projectName, CopyOnWriteArrayList())
         unsolvedAchievements.putIfAbsent(projectName, CopyOnWriteArrayList(GamePublisherDescriptor.achievements))
         completedAchievements.putIfAbsent(projectName, CopyOnWriteArrayList())
+        progressAchievements.putIfAbsent(projectName, CopyOnWriteArrayList(GamePublisherDescriptor.progressAchievements))
         completedQuests.putIfAbsent(projectName, CopyOnWriteArrayList())
         currentQuests.putIfAbsent(projectName, CopyOnWriteArrayList())
         rejectedQuests.putIfAbsent(projectName, CopyOnWriteArrayList())
@@ -863,19 +854,23 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
             list = CopyOnWriteArrayList(list.distinct())
             unsolvedAchievements[project] = list
 
-            val listProgAchiev = CopyOnWriteArrayList<ProgressAchievement>()
-            listProgAchiev.add(ProgressAchievement("/plugin/gamekins/achievements/blackwhite/hourglass.png", listOf(10, 50, 100),
-                "org.gamekins.util.AchievementUtil::coverLineWithXBranches",
-                "Start a successful build with less than one minute duration", "Title", 42, HashMap()))
-            listProgAchiev.add(ProgressAchievement("/plugin/gamekins/achievements/blackwhite/hourglass.png", listOf(3, 15, 60),
-                "org.gamekins.util.AchievementUtil::coverLineWithXBranches",
-                "Have one test in your project", "Other Title", 7, HashMap()))
-            listProgAchiev.add(ProgressAchievement("/plugin/gamekins/achievements/blackwhite/hourglass.png", listOf(1, 2, 3),
-                "org.gamekins.util.AchievementUtil::coverLineWithXBranches",
-                "Have one test in your project", "Other Title", 0, HashMap()))
-            progressAchievementExample = HashMap()
-            progressAchievementExample[project] = listProgAchiev
+            for (achievement in GamePublisherDescriptor.progressAchievements) {
+                val ach = progressAchievements[project]!!.find { it == achievement }
+                if (ach == null) {
+                    val list = progressAchievements[project]!!
+                    list.add(achievement.clone())
+                    progressAchievements[project] = list
+                } else if (ach.fullyQualifiedFunctionName != achievement.fullyQualifiedFunctionName
+                            || !ach.milestones.containsAll(achievement.milestones)
+                            || !achievement.milestones.containsAll(ach.milestones)
+                            || ach.badgePath != achievement.badgePath) {
 
+                    val list = progressAchievements[project]!!
+                    list.remove(ach)
+                    list.add(achievement.clone())
+                    progressAchievements[project] = list
+                }
+            }
         }
     }
 

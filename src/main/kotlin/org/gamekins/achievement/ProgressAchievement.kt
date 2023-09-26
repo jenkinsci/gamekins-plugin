@@ -6,13 +6,12 @@ import org.gamekins.GameUserProperty
 import org.gamekins.LeaderboardAction
 import org.gamekins.file.FileDetails
 import org.gamekins.util.Constants
-import java.util.HashMap
 import kotlin.reflect.KCallable
 import kotlin.reflect.KClass
 
-class ProgressAchievement(var badgeBasePath: String, val milestones: List<Int>,
+class ProgressAchievement(var badgePath: String, val milestones: List<Int>,
                           val fullyQualifiedFunctionName: String, val description: String, val title: String,
-                          var progress : Int, val additionalParameters: HashMap<String, String>) {
+                          var progress : Int) {
 
     @Transient private lateinit var callClass: KClass<out Any>
     @Transient private lateinit var callFunction: KCallable<*>
@@ -22,13 +21,10 @@ class ProgressAchievement(var badgeBasePath: String, val milestones: List<Int>,
     }
 
     fun clone(): ProgressAchievement {
-        return clone(this)
-    }
-
-    fun clone(ach: ProgressAchievement): ProgressAchievement {
-        val achievement = ProgressAchievement(badgeBasePath, milestones.toList(),
-            fullyQualifiedFunctionName, description, title, progress, additionalParameters)
-        return achievement
+        return ProgressAchievement(
+            badgePath, milestones.toList(),
+            fullyQualifiedFunctionName, description, title, progress
+        )
     }
 
     override fun equals(other: Any?): Boolean {
@@ -38,7 +34,7 @@ class ProgressAchievement(var badgeBasePath: String, val milestones: List<Int>,
     }
 
     override fun hashCode(): Int {
-        var result = badgeBasePath.hashCode()
+        var result = badgePath.hashCode()
         result = 31 * result + fullyQualifiedFunctionName.hashCode()
         result = 31 * result + description.hashCode()
         result = 31 * result + title.hashCode()
@@ -79,44 +75,18 @@ class ProgressAchievement(var badgeBasePath: String, val milestones: List<Int>,
     }
 
     /**
-     * Sets a new [badgePath].
-     */
-    fun updateBadgePath(badgePath: String) {
-        this.badgeBasePath = badgePath
-    }
-
-    /**
      * Updates progress made and returns true if a milestone is reached.
      */
     fun progress(
         files: ArrayList<FileDetails>, parameters: Constants.Parameters, run: Run<*, *>,
         property: GameUserProperty, listener: TaskListener = TaskListener.NULL): Boolean {
-        val array = arrayOf(callClass.objectInstance, files, parameters, run, property, listener,
-            additionalParameters)
-        //val result: Int = callFunction.call(*array) as Int
-        val result: Int = parameters.projectTests
-        if (result != progress)
+        val array = arrayOf(callClass.objectInstance, files, parameters, run, property, listener)
+        val result: Int = callFunction.call(*array) as Int
+        if (result > progress)
         {
             progress = result
             return true
         }
         return false
-    }
-
-    fun getActiveMilestone() : Int {
-        for (i in 0..milestones.size) {
-            if (progress < milestones[i])
-            {
-                return i
-            }
-        }
-        return milestones.size
-    }
-
-    fun getMilestonePercentage(milestone: Int) : Int {
-        if (milestone > 0)
-            return ((progress - milestones[milestone - 1]) / milestones[milestone]) * 100
-        else
-            return progress / milestones[milestone] * 100
     }
 }

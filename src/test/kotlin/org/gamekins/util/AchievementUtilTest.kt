@@ -133,6 +133,29 @@ class AchievementUtilTest: FeatureSpec({
         every { property.getCompletedChallenges(any()) } returns CopyOnWriteArrayList(listOf(challenge))
     }
 
+    feature("getBranchesInLine") {
+        scenario("No Challenges")
+        {
+            AchievementUtil.getBranchesInLine(files, parameters, run, property, TaskListener.NULL) shouldBe 0
+        }
+
+        val branchChallenge = mockkClass(BranchCoverageChallenge::class)
+        every { property.getCompletedChallenges(any()) } returns CopyOnWriteArrayList(listOf(branchChallenge))
+        every { branchChallenge.getMaxCoveredBranchesIfFullyCovered() } returns 2
+        scenario("One Challenge")
+        {
+            AchievementUtil.getBranchesInLine(files, parameters, run, property, TaskListener.NULL) shouldBe 2
+        }
+
+        val branchChallenge2 = mockkClass(BranchCoverageChallenge::class)
+        every { property.getCompletedChallenges(any()) } returns CopyOnWriteArrayList(listOf(branchChallenge, branchChallenge2))
+        every { branchChallenge2.getMaxCoveredBranchesIfFullyCovered() } returns 3
+        scenario("Two Challenges")
+        {
+            AchievementUtil.getBranchesInLine(files, parameters, run, property, TaskListener.NULL) shouldBe 3
+        }
+    }
+
     feature("getLinesOfCode") {
         var filePath : FilePath
 
@@ -266,6 +289,24 @@ class AchievementUtilTest: FeatureSpec({
             AchievementUtil.haveClassWithXCoverage(files, parameters, run, property, TaskListener.NULL,
                 additionalParameters) shouldBe false
         }
+    }
+
+    feature("getMaxClassCoverage") {
+        every { challenge.solvedCoverage } returns 0.7
+        scenario("One Challenge")
+        {
+            AchievementUtil.getMaxClassCoverage(files, parameters, run, property, TaskListener.NULL) shouldBe 70
+        }
+
+        val challenge2 = mockkClass(ClassCoverageChallenge::class)
+        every { challenge2.solvedCoverage } returns 0.9
+        every { property.getCompletedChallenges(any()) } returns CopyOnWriteArrayList(listOf(challenge, challenge2))
+        scenario("Two Challenges")
+        {
+            AchievementUtil.getMaxClassCoverage(files, parameters, run, property, TaskListener.NULL) shouldBe 90
+        }
+
+        every { property.getCompletedChallenges(any()) } returns CopyOnWriteArrayList(listOf(challenge))
     }
 
     feature("haveXClassesWithYCoverage") {
@@ -422,6 +463,11 @@ class AchievementUtilTest: FeatureSpec({
         }
     }
 
+    feature("getProjectCoverage") {
+        parameters.projectCoverage = 0.81
+        AchievementUtil.getProjectCoverage(files, parameters, run, property, TaskListener.NULL) shouldBe 81
+    }
+
     feature("haveXProjectTests") {
         additionalParameters.clear()
         parameters.projectTests = 101
@@ -444,6 +490,11 @@ class AchievementUtilTest: FeatureSpec({
             AchievementUtil.haveXProjectTests(files, parameters, run, property, TaskListener.NULL,
                 additionalParameters) shouldBe false
         }
+    }
+
+    feature("getProjectTestCount") {
+        parameters.projectTests = 101
+        AchievementUtil.getProjectTestCount(files, parameters, run, property, TaskListener.NULL) shouldBe 101
     }
 
     feature("improveClassCoverageByX") {
@@ -663,6 +714,10 @@ class AchievementUtilTest: FeatureSpec({
         }
     }
 
+    feature("getSolvedChallengesCount") {
+        AchievementUtil.getSolvedChallengesCount(files, parameters, run, property, TaskListener.NULL) shouldBe 1
+    }
+
     feature("solveXAtOnce") {
         additionalParameters.clear()
         scenario("No amount specified")
@@ -691,5 +746,9 @@ class AchievementUtilTest: FeatureSpec({
             AchievementUtil.solveXAtOnce(files, parameters, run, property, TaskListener.NULL,
                 additionalParameters) shouldBe false
         }
+    }
+
+    feature("getSolvedChallengesSimultaneouslyCount") {
+        AchievementUtil.getSolvedChallengesSimultaneouslyCount(files, parameters, run, property, TaskListener.NULL) shouldBe 1
     }
 })

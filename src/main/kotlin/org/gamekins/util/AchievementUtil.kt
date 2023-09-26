@@ -25,7 +25,6 @@ import org.gamekins.GameUserProperty
 import org.gamekins.challenge.BranchCoverageChallenge
 import org.gamekins.challenge.BuildChallenge
 import org.gamekins.challenge.CoverageChallenge
-import org.gamekins.challenge.LineCoverageChallenge
 import org.gamekins.file.FileDetails
 import org.gamekins.util.Constants.Parameters
 import java.util.HashMap
@@ -56,6 +55,16 @@ object AchievementUtil {
                         && it.getMaxCoveredBranchesIfFullyCovered() < (additionalParameters["maxBranches"]?.toInt()
                     ?: Int.MAX_VALUE))
             }
+    }
+
+    /**
+     * Searches for a solved LineCoverageChallenge and returns its amount of covered branches.
+     */
+    fun getBranchesInLine(classes: ArrayList<FileDetails>, parameters: Parameters,
+                       run: Run<*, *>, property: GameUserProperty, listener: TaskListener): Int {
+        return property.getCompletedChallenges(parameters.projectName)
+            .filterIsInstance<BranchCoverageChallenge>()
+            .maxOfOrNull { it.getMaxCoveredBranchesIfFullyCovered() }?.toInt() ?: 0
     }
 
     /**
@@ -108,6 +117,17 @@ object AchievementUtil {
         return property.getCompletedChallenges(parameters.projectName)
             .filterIsInstance<CoverageChallenge>()
             .any { it.solvedCoverage >= (additionalParameters["haveCoverage"]?.toDouble() ?: Double.MAX_VALUE) }
+    }
+
+    /**
+     * Returns the coverage of the most CoverageChallenge with the highest coverage as rounded percentage.
+     */
+    fun getMaxClassCoverage(classes: ArrayList<FileDetails>, parameters: Parameters,
+                            run: Run<*, *>, property: GameUserProperty, listener: TaskListener): Int {
+
+        return property.getCompletedChallenges(parameters.projectName)
+            .filterIsInstance<CoverageChallenge>()
+            .maxOfOrNull { (it.solvedCoverage * 100) }?.toInt() ?: 0
     }
 
     /**
@@ -174,6 +194,15 @@ object AchievementUtil {
     }
 
     /**
+     * Returns the project coverage.
+     */
+    fun getProjectCoverage(classes: ArrayList<FileDetails>, parameters: Parameters,
+                           run: Run<*, *>, property: GameUserProperty, listener: TaskListener): Int {
+
+        return (parameters.projectCoverage * 100).toInt()
+    }
+
+    /**
      * Solves the achievements with description: Have X tests in your project. Needs the key 'haveTests'
      * in the map [additionalParameters] with a positive Int value.
      */
@@ -182,6 +211,15 @@ object AchievementUtil {
                           additionalParameters: HashMap<String, String>): Boolean {
 
         return parameters.projectTests >= (additionalParameters["haveTests"]?.toInt() ?: Int.MAX_VALUE)
+    }
+
+    /**
+     * Returns the amount of tests in the project.
+     */
+    fun getProjectTestCount(classes: ArrayList<FileDetails>, parameters: Parameters,
+                        run: Run<*, *>, property: GameUserProperty, listener: TaskListener): Int {
+
+        return parameters.projectTests
     }
 
     /**
@@ -269,6 +307,15 @@ object AchievementUtil {
     }
 
     /**
+     * Returns the amount of solved challenges in the project.
+     */
+    fun getSolvedChallengesCount(classes: ArrayList<FileDetails>, parameters: Parameters,
+                                 run: Run<*, *>, property: GameUserProperty, listener: TaskListener): Int {
+
+        return property.getCompletedChallenges(parameters.projectName).size
+    }
+
+    /**
      * Solves the achievements with description: Solve X Challenges with one Jenkins build. Needs the key 'solveNumber'
      * in the map [additionalParameters] with a positive Int value.
      */
@@ -277,5 +324,14 @@ object AchievementUtil {
                      additionalParameters: HashMap<String, String>): Boolean {
 
         return parameters.solved >= (additionalParameters["solveNumber"]?.toInt() ?: Int.MAX_VALUE)
+    }
+
+    /**
+     * Returns the amount of challenges solved in this run
+     */
+    fun getSolvedChallengesSimultaneouslyCount(classes: ArrayList<FileDetails>, parameters: Parameters, run: Run<*, *>,
+                                               property: GameUserProperty, listener: TaskListener): Int {
+
+        return parameters.solved
     }
 }

@@ -43,6 +43,19 @@ object AchievementInitializer {
         return initializeAchievementsWithContent(jsonContent)
     }
 
+    @JvmStatic
+    fun initializeProgressAchievements(fileName: String): List<ProgressAchievement> {
+        var json = javaClass.classLoader.getResource(fileName)
+        if (json == null && fileName.startsWith("/")) {
+            json = javaClass.classLoader.getResource(fileName.removePrefix("/"))
+        }
+        if (json == null) {
+            throw Exception("Stuff is still null")
+        }
+        val jsonContent = json.readText()
+        return initializeProgressAchievementsWithContent(jsonContent)
+    }
+
     /**
      * Initializes the [Achievement] specified by the json content given via [fileContent]. [fileContent] must be a
      * valid json String.
@@ -64,6 +77,21 @@ object AchievementInitializer {
         }
     }
 
+    @JvmStatic
+    fun initializeProgressAchievementsWithContent(fileContent: String): List<ProgressAchievement> {
+        val data: List<ProgressAchievementData> = jacksonObjectMapper().readValue(
+            fileContent,
+            jacksonObjectMapper().typeFactory.constructCollectionType(List::class.java, ProgressAchievementData::class.java)
+        )
+
+        return data.map {
+            ProgressAchievement(
+                it.badgePath, it.milestones, it.fullyQualifiedFunctionName,
+                it.description, it.title,0
+            )
+        }
+    }
+
     /**
      * Data class for mapping the json to an [Achievement]
      *
@@ -77,4 +105,10 @@ object AchievementInitializer {
                                val fullyQualifiedFunctionName: String,
                                val secret: Boolean,
                                val additionalParameters: HashMap<String, String>)
+
+    data class ProgressAchievementData(val badgePath: String,
+                                       val milestones: List<Int>,
+                                       val description: String,
+                                       val title: String,
+                                       val fullyQualifiedFunctionName: String)
 }
