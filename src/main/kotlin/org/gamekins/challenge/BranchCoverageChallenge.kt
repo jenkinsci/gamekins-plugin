@@ -20,10 +20,10 @@ import hudson.FilePath
 import hudson.model.Run
 import hudson.model.TaskListener
 import org.gamekins.file.SourceFileDetails
+import org.gamekins.gumTree.GumTree
 import org.gamekins.util.Constants
 import org.gamekins.util.JacocoUtil
 import org.jsoup.nodes.Element
-import kotlin.math.abs
 
 /**
  * Specific [Challenge] to motivate the user to cover a random branch of a specific class.
@@ -35,10 +35,12 @@ class BranchCoverageChallenge(data: Challenge.ChallengeGenerationData)
     : CoverageChallenge(data.selectedFile as SourceFileDetails, data.parameters.workspace) {
 
     private val currentCoveredBranches: Int
-    private val lineContent: String = data.line!!.text()
-    private val lineNumber: Int = data.line!!.attr("id").substring(1).toInt()
+    private var lineContent: String = data.line!!.text()
+    private var lineNumber: Int = data.line!!.attr("id").substring(1).toInt()
     private val maxCoveredBranches: Int
     private var solvedCoveredBranches: Int = 0
+    private var sourceCode = generateCompilationUnit(details.parameters,
+        "${details.packageName}.${details.fileName}", "${details.fileName}.${details.fileExtension}")
 
     init {
         codeSnippet = LineCoverageChallenge.createCodeSnippet(details, lineNumber,  data.parameters.workspace)
@@ -110,6 +112,10 @@ class BranchCoverageChallenge(data: Challenge.ChallengeGenerationData)
         if (details.parameters.branch != parameters.branch) return true
         if (!details.update(parameters).filesExists()) return false
 
+        if (GumTree.findMapping(sourceCode,
+                "${details.packageName}.${details.fileName}",
+                "${details.fileName}.${details.fileExtension}", lineNumber, parameters) == 0) return false
+
         val jacocoSourceFile = JacocoUtil.calculateCurrentFilePath(parameters.workspace, details.jacocoSourceFile,
             details.parameters.remote)
         val jacocoCSVFile = JacocoUtil.calculateCurrentFilePath(parameters.workspace, details.jacocoCSVFile,
@@ -129,6 +135,9 @@ class BranchCoverageChallenge(data: Challenge.ChallengeGenerationData)
      * reports the events to the console output of Jenkins.
      */
     override fun isSolved(parameters: Constants.Parameters, run: Run<*, *>, listener: TaskListener): Boolean {
+        details.update(parameters)
+        updateLine(parameters, parameters.workspace)
+
         val jacocoSourceFile = JacocoUtil.getJacocoFileInMultiBranchProject(run, parameters,
             JacocoUtil.calculateCurrentFilePath(parameters.workspace, details.jacocoSourceFile,
                 details.parameters.remote), details.parameters.branch)
@@ -146,23 +155,24 @@ class BranchCoverageChallenge(data: Challenge.ChallengeGenerationData)
             }
         }
 
-        elements.removeIf { it.text().trim() != lineContent.trim() }
-        if (elements.isNotEmpty()) {
-            if (elements.size == 1 && elements[0].attr("class") != "nc") {
-                return setSolved(elements[0], jacocoCSVFile)
-            } else {
-                val nearestElement = elements.minByOrNull { abs(lineNumber - it.attr("id").substring(1).toInt()) }
-                if (nearestElement != null && nearestElement.attr("class") != "nc") {
-                    return setSolved(nearestElement, jacocoCSVFile)
-                }
-            }
-        }
-
         return false
     }
 
     override fun isToolTip(): Boolean {
         return true
+    }
+
+    /**
+     * Called by Jenkins after the object has been created from his XML representation. Used for data migration.
+     */
+    @Suppress("unused")
+    private fun readResolve(): Any {
+        if (sourceCode.isNullOrEmpty()) {
+            sourceCode = generateCompilationUnit(details.parameters,
+                "${details.packageName}.${details.fileName}", "${details.fileName}.${details.fileExtension}")
+        }
+
+        return this
     }
 
     /**
@@ -193,5 +203,24 @@ class BranchCoverageChallenge(data: Challenge.ChallengeGenerationData)
                 + "of $maxCoveredBranches covered) of line " + "<b>" + lineNumber + "</b> in class <b>"
                 + details.fileName + "</b> in package <b>" + details.packageName + "</b> (created for branch "
                 + details.parameters.branch + ")")
+    }
+
+    /**
+     * Updates [lineNumber], [lineContent], [sourceCode] and [codeSnippet] based on the GumTree implementation if
+     * there was a change since the last build.
+     */
+    private fun updateLine(parameters: Constants.Parameters, workspace: FilePath) {
+        val newLineNumber = GumTree.findMapping(sourceCode,
+            "${details.packageName}.${details.fileName}",
+            "${details.fileName}.${details.fileExtension}", lineNumber, parameters)
+        if (newLineNumber == 0) return
+        lineNumber = newLineNumber
+        val javaHtmlPath = JacocoUtil.calculateCurrentFilePath(
+            workspace, details.jacocoSourceFile, details.parameters.remote
+        )
+        lineContent = JacocoUtil.getLinesInRange(javaHtmlPath, lineNumber, 0).first
+        codeSnippet = LineCoverageChallenge.createCodeSnippet(details, lineNumber, workspace)
+        sourceCode = generateCompilationUnit(details.parameters,
+            "${details.packageName}.${details.fileName}", "${details.fileName}.${details.fileExtension}")
     }
 }

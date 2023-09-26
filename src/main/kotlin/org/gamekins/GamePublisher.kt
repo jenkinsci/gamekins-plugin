@@ -175,6 +175,7 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
             .searchCommitCount
         parameters.pitConfiguration = build.project.getProperty(GameJobProperty::class.java)
             .pitConfiguration
+        parameters.showPitOutput = build.project.getProperty(GameJobProperty::class.java).showPitOutput
         executePublisher(build, parameters, build.result, listener)
         return true
     }

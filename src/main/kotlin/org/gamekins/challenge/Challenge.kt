@@ -16,12 +16,14 @@
 
 package org.gamekins.challenge
 
+import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinter
 import hudson.model.Run
 import hudson.model.TaskListener
 import hudson.model.User
 import org.gamekins.statistics.Statistics
 import org.gamekins.LeaderboardAction
 import org.gamekins.file.FileDetails
+import org.gamekins.gumTree.JavaParser
 import org.gamekins.util.Constants.Parameters
 import org.gamekins.util.JacocoUtil.CoverageMethod
 import org.jsoup.nodes.Element
@@ -46,6 +48,16 @@ interface Challenge {
         set(v) = Unit
 
     override fun equals(other: Any?): Boolean
+
+    /**
+     * Generates the compilationUnit. The [sourceFile] here is the name of the Java file (e.g., Test.java) and
+     * className is the fully qualified name of the class (e.g., org.example.Test).
+     */
+    fun generateCompilationUnit(parameters: Parameters, className: String, sourceFile: String): String {
+        val compilationUnit = JavaParser.parse(sourceFile, className, parameters)
+        LexicalPreservingPrinter.setup(compilationUnit)
+        return LexicalPreservingPrinter.print(compilationUnit)
+    }
 
     /**
      * Returns the constants provided during creation. Must include entries for "projectName", "branch", "workspace",

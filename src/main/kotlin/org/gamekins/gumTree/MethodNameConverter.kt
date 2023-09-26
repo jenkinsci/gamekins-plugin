@@ -12,7 +12,7 @@ import java.util.*
  * e.g. void foo(int[] ints, String str) into ([ILjava/lang/String;)V
  *
  * @author Michael Gruener
- * @since versionNumber
+ * @since 0.6
  */
 class MethodNameConverter {
 

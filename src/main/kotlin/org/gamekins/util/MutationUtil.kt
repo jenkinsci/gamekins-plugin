@@ -95,7 +95,7 @@ object MutationUtil {
         //return mutants.map { MutationData(it) }.find { it == data } hier war schluss
         var mutant = mutants.map { MutationData(it) }.find { it == data }
         if (mutant == null) {
-            val updatedData = GumTree().findMapping(data, parameters)
+            val updatedData = GumTree.findMapping(data, parameters)
             mutant = mutants.map { MutationData(it) }.find { it == updatedData }
         }
         mutant?.generateCompilationUnit(parameters)
@@ -157,8 +157,7 @@ object MutationUtil {
                     "&gt;=".toRegex().containsMatchIn(snippet) -> snippet.replace("&gt;=", "&lt;")
                     "==".toRegex().containsMatchIn(snippet) -> snippet.replace("==", "!=")
                     "!=".toRegex().containsMatchIn(snippet) -> snippet.replace("!=", "==")
-                    //TODO: if (classTrackers.containsKey(pClassName)) {
-                    else -> ""
+                    else -> snippet.replace("if\\s+\\(".toRegex(), "if (!")
                 }
             }
             //TODO: Complete (Not used per default)

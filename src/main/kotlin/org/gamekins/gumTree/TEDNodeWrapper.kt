@@ -4,7 +4,7 @@ package org.gamekins.gumTree
  * A wrapper for the nodes of the ast to work with in the ted-algorithm.
  *
  * @author Michael Gruener
- * @since versionNumber
+ * @since 0.6
  */
 class TEDNodeWrapper(
     var children: MutableList<TEDNodeWrapper>,

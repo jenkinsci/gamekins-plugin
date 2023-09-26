@@ -16,6 +16,8 @@
 
 package org.gamekins.challenge
 
+import com.github.javaparser.ast.CompilationUnit
+import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinter
 import hudson.FilePath
 import hudson.model.Result
 import hudson.model.TaskListener
@@ -34,6 +36,7 @@ import org.gamekins.GamePublisherDescriptor
 import org.gamekins.achievement.AchievementInitializer
 import org.gamekins.event.EventHandler
 import org.gamekins.file.SourceFileDetails
+import org.gamekins.gumTree.JavaParser
 import org.gamekins.util.JUnitUtil
 import org.gamekins.util.Constants.Parameters
 import org.jsoup.nodes.Document
@@ -110,6 +113,14 @@ class ChallengeFactoryTest : FeatureSpec({
         every { newDetails.jacocoMethodFile } returns details.jacocoMethodFile
         every { newDetails.parameters } returns details.parameters
         every { newDetails.packageName } returns details.packageName
+        every { newDetails.fileExtension } returns details.fileExtension
+
+        val compilationUnit = mockkClass(CompilationUnit::class)
+        mockkStatic(JavaParser::class)
+        mockkStatic(LexicalPreservingPrinter::class)
+        every { JavaParser.parse(any(), any(), any()) } returns compilationUnit
+        every { LexicalPreservingPrinter.setup(any()) } returns null
+        every { LexicalPreservingPrinter.print(any()) } returns ""
     }
 
     afterSpec {
