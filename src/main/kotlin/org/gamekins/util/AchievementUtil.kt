@@ -106,6 +106,11 @@ object AchievementUtil {
         return retVal
     }
 
+    fun getBuildDurationInSeconds(classes: ArrayList<FileDetails>, parameters: Parameters,
+                                  run: Run<*, *>, property: GameUserProperty, listener: TaskListener): Int {
+        return 42//TODO
+    }
+
     /**
      * Solves the achievements with description: Solve a CoverageChallenge with at least X% coverage in the required
      * class. Needs the key 'haveCoverage' in the map [additionalParameters] with a positive Double value.

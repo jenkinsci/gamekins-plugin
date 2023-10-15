@@ -145,8 +145,100 @@ function loadAchievements() {
                 }
             })
 
+            new Ajax.Request(window.location.href + "getBadgeAchievements", {
+                parameters: parameters,
+                onComplete: function (rsp) {
+                    console.log(rsp.responseText)
+
+                    let list = JSON.parse(rsp.responseText)
+
+                    for(let i = 0; i < list.length; i++) {
+                        let badgeAchievements = document.getElementById("newAchievements")
+                        createBadgeAchievement(badgeAchievements, list[i])
+                    }
+
+                }
+            })
+
         }
     })
+
+    function createBadgeAchievement(parent, achievement) {
+
+        let table = document.createElement("table")
+        table.style.border = "2px solid grey"
+        table.style.width = "50%"
+        table.style.marginLeft = "auto"
+        table.style.marginRight = "auto"
+        table.style.tableLayout = "fixed"
+
+        let tr1 = document.createElement("tr")
+        let td1 = document.createElement("td")
+
+        td1.colSpan = 2
+        td1.style.verticalAlign = "bottom"
+        td1.style.textAlign = "left"
+        let b = document.createElement("b")
+        b.innerText = achievement.title
+        td1.appendChild(b)
+        tr1.appendChild(td1)
+        table.appendChild(tr1)
+
+        let tr2 = document.createElement("tr")
+        let td2 = document.createElement("td")
+
+        td2.colSpan = 2
+        td2.style.verticalAlign = "bottom"
+        td2.style.textAlign = "left"
+
+        td2.innerText = achievement.description
+
+        tr2.appendChild(td2)
+        table.appendChild(tr2)
+
+        let badgeRow = document.createElement("tr")
+        let badgeCell
+        let img
+        let newRow = false
+
+        for (let i = 0; i < achievement.badgePaths.length; i++) {
+            badgeCell = document.createElement("td")
+            img = document.createElement("img")
+            let src = document.getElementsByTagName("img")[0].src
+            let base = src.substring(0, src.indexOf("static"))
+            let endSplit = src.substring(src.indexOf("static")).split("/")
+            img.src = base + "static/" + endSplit[1] + achievement.badgePaths[i]
+            img.style.maxWidth = "100%"
+            img.style.maxHeight = "100%"
+
+            badgeCell.appendChild(img)
+
+            let div = document.createElement("div")
+            let lowerBound = document.createElement("div")
+            lowerBound.innerText = "Lower boundry: " + achievement.lowerBounds[i]
+            div.appendChild(lowerBound)
+            if (i + 1 < achievement.lowerBounds.length) {
+                let upperBound = document.createElement("div")
+                upperBound.innerText += "Upper boundry: " + achievement.lowerBounds[i + 1]
+                div.appendChild(upperBound)
+            }
+            let amount = document.createElement("div")
+            amount.innerText += "Amount: " + achievement.badgeCounts[i]
+            div.appendChild(amount)
+
+            badgeCell.appendChild(div)
+
+            badgeRow.appendChild(badgeCell)
+            if (newRow) {
+                table.appendChild(badgeRow)
+                badgeRow = document.createElement("tr")
+            }
+            newRow = !newRow
+        }
+        table.appendChild(badgeRow)
+
+        parent.appendChild(table)
+    }
 
     function createProgressAchievement(parent, achievement, displayBars) {
         let milestones = achievement.milestones

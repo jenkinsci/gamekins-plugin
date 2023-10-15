@@ -23,6 +23,7 @@ import org.gamekins.challenge.DummyChallenge
 import org.gamekins.statistics.Statistics
 import net.sf.json.JSONObject
 import org.gamekins.achievement.Achievement
+import org.gamekins.achievement.BadgeAchievement
 import org.gamekins.achievement.ProgressAchievement
 import org.gamekins.challenge.CoverageChallenge
 import org.gamekins.challenge.quest.Quest
@@ -67,6 +68,7 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
     private var unfinishedQuests: HashMap<String, CopyOnWriteArrayList<Quest>> = HashMap()
     private var unsolvedAchievements: HashMap<String, CopyOnWriteArrayList<Achievement>> = HashMap()
     private var progressAchievements: HashMap<String, CopyOnWriteArrayList<ProgressAchievement>> = HashMap()
+    private var badgeAchievements: HashMap<String, CopyOnWriteArrayList<BadgeAchievement>> = HashMap()
 
     /**
      * Adds an additional [score] to one project [projectName], since one user can participate in multiple projects.
@@ -157,10 +159,12 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
         rsp.contentType = Constants.TYPE_PLAIN
         val printer = rsp.writer
         if (projectName.isEmpty() || completedAchievements[projectName] == null
-            || unsolvedAchievements[projectName] == null || progressAchievements[projectName] == null) {
+            || unsolvedAchievements[projectName] == null || progressAchievements[projectName] == null
+            || badgeAchievements[projectName] == null) {
             printer.print(0)
         } else {
-            printer.print(completedAchievements[projectName]!!.size + unsolvedAchievements[projectName]!!.size + progressAchievements[projectName]!!.size)
+            printer.print(completedAchievements[projectName]!!.size + unsolvedAchievements[projectName]!!.size
+                    + progressAchievements[projectName]!!.size + badgeAchievements[projectName]!!.size)
         }
         printer.flush()
     }
@@ -210,6 +214,14 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
 
     fun doGetProgressAchievements(rsp: StaplerResponse, @QueryParameter projectName: String) {
         val json = jacksonObjectMapper().writeValueAsString(progressAchievements[projectName])
+        rsp.contentType = Constants.TYPE_JSON
+        val printer = rsp.writer
+        printer.print(json)
+        printer.flush()
+    }
+
+    fun doGetBadgeAchievements(rsp: StaplerResponse, @QueryParameter projectName: String) {
+        val json = jacksonObjectMapper().writeValueAsString(badgeAchievements[projectName])
         rsp.contentType = Constants.TYPE_JSON
         val printer = rsp.writer
         printer.print(json)
@@ -409,6 +421,10 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
 
     fun getProgressAchievements(projectName: String): CopyOnWriteArrayList<ProgressAchievement> {
         return progressAchievements[projectName]!!
+    }
+
+    fun getBadgeAchievements(projectName: String): CopyOnWriteArrayList<BadgeAchievement> {
+        return badgeAchievements[projectName]!!
     }
 
     override fun getUrlName(): String {
@@ -800,6 +816,7 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
         unsolvedAchievements.putIfAbsent(projectName, CopyOnWriteArrayList(GamePublisherDescriptor.achievements))
         completedAchievements.putIfAbsent(projectName, CopyOnWriteArrayList())
         progressAchievements.putIfAbsent(projectName, CopyOnWriteArrayList(GamePublisherDescriptor.progressAchievements))
+        badgeAchievements.putIfAbsent(projectName, CopyOnWriteArrayList(GamePublisherDescriptor.badgeAchievements))
         completedQuests.putIfAbsent(projectName, CopyOnWriteArrayList())
         currentQuests.putIfAbsent(projectName, CopyOnWriteArrayList())
         rejectedQuests.putIfAbsent(projectName, CopyOnWriteArrayList())
@@ -869,6 +886,25 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
                     list.remove(ach)
                     list.add(achievement.clone())
                     progressAchievements[project] = list
+                }
+            }
+
+            for (achievement in GamePublisherDescriptor.badgeAchievements) {
+                val ach = badgeAchievements[project]!!.find { it == achievement }
+                if (ach == null) {
+                    val list = badgeAchievements[project]!!
+                    list.add(achievement.clone())
+                    badgeAchievements[project] = list
+                } else if (ach.fullyQualifiedFunctionName != achievement.fullyQualifiedFunctionName
+                    || !ach.lowerBounds.containsAll(achievement.lowerBounds)
+                    || !achievement.lowerBounds.containsAll(ach.lowerBounds)
+                    || !ach.badgePaths.containsAll(achievement.badgePaths)
+                    || !achievement.badgePaths.containsAll(ach.badgePaths)) {
+
+                    val list = badgeAchievements[project]!!
+                    list.remove(ach)
+                    list.add(achievement.clone())
+                    badgeAchievements[project] = list
                 }
             }
         }

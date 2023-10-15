@@ -62,6 +62,7 @@ object PublisherUtil {
             }
         }
         property.getProgressAchievements(parameters.projectName).forEach { it.progress(files, parameters, run, property) }
+        property.getBadgeAchievements(parameters.projectName).forEach { it.update(files, parameters, run, property) }
 
         return solved
     }

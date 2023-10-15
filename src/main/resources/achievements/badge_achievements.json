@@ -1,0 +1,17 @@
+[
+  {
+    "badgePaths": [
+      "/plugin/gamekins/achievements/colour/auge-colour.png",
+      "/plugin/gamekins/achievements/colour/hourglass-colour.png",
+      "/plugin/gamekins/achievements/colour/hourglass-colour.png",
+      "/plugin/gamekins/achievements/colour/coffee-colour.png",
+      "/plugin/gamekins/achievements/colour/coffee-break-colour.png",
+      "/plugin/gamekins/achievements/colour/lunch-time-colour.png",
+      "/plugin/gamekins/achievements/colour/support-colour.png"
+    ],
+    "description": "Start a successful build within the bounds",
+    "title": "Builds",
+    "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::getBuildDurationInSeconds",
+    "lowerBounds": [0, 10, 60, 300, 900, 1800, 3600]
+  }
+]

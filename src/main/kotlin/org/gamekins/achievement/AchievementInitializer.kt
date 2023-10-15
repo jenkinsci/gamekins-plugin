@@ -49,11 +49,18 @@ object AchievementInitializer {
         if (json == null && fileName.startsWith("/")) {
             json = javaClass.classLoader.getResource(fileName.removePrefix("/"))
         }
-        if (json == null) {
-            throw Exception("Stuff is still null")
-        }
         val jsonContent = json.readText()
         return initializeProgressAchievementsWithContent(jsonContent)
+    }
+
+    @JvmStatic
+    fun initializeBadgeAchievements(fileName: String): List<BadgeAchievement> {
+        var json = javaClass.classLoader.getResource(fileName)
+        if (json == null && fileName.startsWith("/")) {
+            json = javaClass.classLoader.getResource(fileName.removePrefix("/"))
+        }
+        val jsonContent = json.readText()
+        return initializeBadgeAchievementsWithContent(jsonContent)
     }
 
     /**
@@ -92,6 +99,25 @@ object AchievementInitializer {
         }
     }
 
+    @JvmStatic
+    fun initializeBadgeAchievementsWithContent(fileContent: String): List<BadgeAchievement> {
+        val data: List<BadgeAchievementData> = jacksonObjectMapper().readValue(
+            fileContent,
+            jacksonObjectMapper().typeFactory.constructCollectionType(List::class.java, BadgeAchievementData::class.java)
+        )
+
+        return data.map {
+            val badgeCounts = mutableListOf<Int>()
+            for (i in it.lowerBounds) {
+                badgeCounts.add(0)
+            }
+            BadgeAchievement(
+                it.badgePaths, it.lowerBounds, it.fullyQualifiedFunctionName,
+                it.description, it.title, badgeCounts
+            )
+        }
+    }
+
     /**
      * Data class for mapping the json to an [Achievement]
      *
@@ -111,4 +137,10 @@ object AchievementInitializer {
                                        val description: String,
                                        val title: String,
                                        val fullyQualifiedFunctionName: String)
+
+    data class BadgeAchievementData(val badgePaths: List<String>,
+                                    val lowerBounds: List<Int>,
+                                    val description: String,
+                                    val title: String,
+                                    val fullyQualifiedFunctionName: String)
 }
