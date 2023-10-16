@@ -11,7 +11,7 @@ import kotlin.reflect.KClass
 
 class ProgressAchievement(var badgePath: String, val milestones: List<Int>,
                           val fullyQualifiedFunctionName: String, val description: String, val title: String,
-                          var progress : Int) {
+                          var progress : Int, val unit: String) {
 
     @Transient private lateinit var callClass: KClass<out Any>
     @Transient private lateinit var callFunction: KCallable<*>
@@ -23,7 +23,7 @@ class ProgressAchievement(var badgePath: String, val milestones: List<Int>,
     fun clone(): ProgressAchievement {
         return ProgressAchievement(
             badgePath, milestones.toList(),
-            fullyQualifiedFunctionName, description, title, progress
+            fullyQualifiedFunctionName, description, title, progress, unit
         )
     }
 

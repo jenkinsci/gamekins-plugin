@@ -207,19 +207,27 @@ function loadAchievements() {
             let src = document.getElementsByTagName("img")[0].src
             let base = src.substring(0, src.indexOf("static"))
             let endSplit = src.substring(src.indexOf("static")).split("/")
-            img.src = base + "static/" + endSplit[1] + achievement.badgePaths[i]
+            if (achievement.badgeCounts[i] == 0) {
+                img.src = base + "static/" + endSplit[1] + achievement.badgePaths[i].replace("colour", "blackwhite").replace("-colour.png", ".png")
+            }
+            else {
+                img.src = base + "static/" + endSplit[1] + achievement.badgePaths[i]
+            }
             img.style.maxWidth = "100%"
             img.style.maxHeight = "100%"
 
             badgeCell.appendChild(img)
 
             let div = document.createElement("div")
+            let title = document.createElement("div")
+            title.innerText = achievement.titles[i]
+            div.appendChild(title)
             let lowerBound = document.createElement("div")
-            lowerBound.innerText = "Lower boundry: " + achievement.lowerBounds[i]
+            lowerBound.innerText = "Lower boundry: " + achievement.lowerBounds[i] + achievement.unit
             div.appendChild(lowerBound)
             if (i + 1 < achievement.lowerBounds.length) {
                 let upperBound = document.createElement("div")
-                upperBound.innerText += "Upper boundry: " + achievement.lowerBounds[i + 1]
+                upperBound.innerText += "Upper boundry: " + achievement.lowerBounds[i + 1] + achievement.unit
                 div.appendChild(upperBound)
             }
             let amount = document.createElement("div")
@@ -375,7 +383,7 @@ function loadAchievements() {
 
                 progContainer.appendChild(progBar)
                 cell.appendChild(progContainer)
-                cell.append(milestones[i])
+                cell.append(milestones[i] + achievement.unit)
                 cell.style.textAlign = "right"
                 tr2.appendChild(cell)
             }

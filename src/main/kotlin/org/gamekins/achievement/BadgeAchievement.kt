@@ -11,7 +11,7 @@ import kotlin.reflect.KClass
 
 class BadgeAchievement(var badgePaths: List<String>, val lowerBounds: List<Int>,
                        val fullyQualifiedFunctionName: String, val description: String, val title: String,
-                       var badgeCounts : MutableList<Int>) {
+                       var badgeCounts : MutableList<Int>, val unit: String, var titles: List<String>) {
 
     @Transient private lateinit var callClass: KClass<out Any>
     @Transient private lateinit var callFunction: KCallable<*>
@@ -23,7 +23,7 @@ class BadgeAchievement(var badgePaths: List<String>, val lowerBounds: List<Int>,
     fun clone(): BadgeAchievement {
         return BadgeAchievement(
             badgePaths.toList(), lowerBounds.toList(),
-            fullyQualifiedFunctionName, description, title, badgeCounts.toMutableList()
+            fullyQualifiedFunctionName, description, title, badgeCounts.toMutableList(), unit, titles.toMutableList()
         )
     }
 

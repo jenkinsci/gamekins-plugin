@@ -880,7 +880,8 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
                 } else if (ach.fullyQualifiedFunctionName != achievement.fullyQualifiedFunctionName
                             || !ach.milestones.containsAll(achievement.milestones)
                             || !achievement.milestones.containsAll(ach.milestones)
-                            || ach.badgePath != achievement.badgePath) {
+                            || ach.badgePath != achievement.badgePath
+                            || achievement.unit != ach.unit) {
 
                     val list = progressAchievements[project]!!
                     list.remove(ach)
@@ -899,7 +900,11 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
                     || !ach.lowerBounds.containsAll(achievement.lowerBounds)
                     || !achievement.lowerBounds.containsAll(ach.lowerBounds)
                     || !ach.badgePaths.containsAll(achievement.badgePaths)
-                    || !achievement.badgePaths.containsAll(ach.badgePaths)) {
+                    || !achievement.badgePaths.containsAll(ach.badgePaths)
+                    || achievement.unit != ach.unit
+                    || !ach.titles.containsAll(achievement.titles)
+                    || !achievement.titles.containsAll(ach.titles)
+                ) {
 
                     val list = badgeAchievements[project]!!
                     list.remove(ach)

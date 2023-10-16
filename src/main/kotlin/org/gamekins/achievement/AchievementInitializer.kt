@@ -90,11 +90,10 @@ object AchievementInitializer {
             fileContent,
             jacksonObjectMapper().typeFactory.constructCollectionType(List::class.java, ProgressAchievementData::class.java)
         )
-
         return data.map {
             ProgressAchievement(
                 it.badgePath, it.milestones, it.fullyQualifiedFunctionName,
-                it.description, it.title,0
+                it.description, it.title,0, it.unit
             )
         }
     }
@@ -113,7 +112,7 @@ object AchievementInitializer {
             }
             BadgeAchievement(
                 it.badgePaths, it.lowerBounds, it.fullyQualifiedFunctionName,
-                it.description, it.title, badgeCounts
+                it.description, it.title, badgeCounts, it.unit, it.titles
             )
         }
     }
@@ -136,11 +135,14 @@ object AchievementInitializer {
                                        val milestones: List<Int>,
                                        val description: String,
                                        val title: String,
-                                       val fullyQualifiedFunctionName: String)
+                                       val fullyQualifiedFunctionName: String,
+                                       var unit: String)
 
     data class BadgeAchievementData(val badgePaths: List<String>,
                                     val lowerBounds: List<Int>,
                                     val description: String,
                                     val title: String,
-                                    val fullyQualifiedFunctionName: String)
+                                    val fullyQualifiedFunctionName: String,
+                                    var unit: String,
+                                    val titles: List<String>)
 }

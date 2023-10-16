@@ -12,6 +12,16 @@
     "description": "Start a successful build within the bounds",
     "title": "Builds",
     "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::getBuildDurationInSeconds",
-    "lowerBounds": [0, 10, 60, 300, 900, 1800, 3600]
+    "lowerBounds": [0, 10, 60, 300, 900, 1800, 3600],
+    "unit": "s",
+    "titles": [
+      "Don't blink!",
+      "Just wait for it",
+      "Five more minutes...",
+      "Grab a cup of coffee",
+      "Coffee break",
+      "Lunch break",
+      "Upgrades, People, Upgrades"
+    ]
   }
 ]
