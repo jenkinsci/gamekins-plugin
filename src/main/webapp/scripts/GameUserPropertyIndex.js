@@ -223,11 +223,11 @@ function loadAchievements() {
             title.innerText = achievement.titles[i]
             div.appendChild(title)
             let lowerBound = document.createElement("div")
-            lowerBound.innerText = "Lower boundry: " + achievement.lowerBounds[i] + achievement.unit
+            lowerBound.innerText = "Lower boundary: " + achievement.lowerBounds[i] + achievement.unit
             div.appendChild(lowerBound)
             if (i + 1 < achievement.lowerBounds.length) {
                 let upperBound = document.createElement("div")
-                upperBound.innerText += "Upper boundry: " + achievement.lowerBounds[i + 1] + achievement.unit
+                upperBound.innerText += "Upper boundary: " + achievement.lowerBounds[i + 1] + achievement.unit
                 div.appendChild(upperBound)
             }
             let amount = document.createElement("div")

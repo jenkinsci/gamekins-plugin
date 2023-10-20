@@ -81,12 +81,12 @@ class BadgeAchievement(var badgePaths: List<String>, val lowerBounds: List<Int>,
         files: ArrayList<FileDetails>, parameters: Constants.Parameters, run: Run<*, *>,
         property: GameUserProperty, listener: TaskListener = TaskListener.NULL): Boolean {
         val array = arrayOf(callClass.objectInstance, files, parameters, run, property, listener)
-        val result: Int = callFunction.call(*array) as Int
+        val result: Long = callFunction.call(*array) as Long
 
         lowerBounds.reversed()
 
         for (lowerBound in lowerBounds.reversed()) {
-            if (result > lowerBound) {
+            if (result > lowerBound.times(1000)) {
                 badgeCounts[lowerBounds.indexOf(lowerBound)]++
                 return true
             }
