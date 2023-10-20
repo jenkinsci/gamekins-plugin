@@ -107,12 +107,12 @@ object AchievementUtil {
     }
 
     /**
-     * Returns the duration of the build in milliseconds
+     * Returns the duration of the build in seconds
      */
     fun getBuildDurationInSeconds(classes: ArrayList<FileDetails>, parameters: Parameters,
                                   run: Run<*, *>, property: GameUserProperty, listener: TaskListener): Long {
-        return if (run.duration != 0L) run.duration else
-            max(0, System.currentTimeMillis() - run.startTimeInMillis)
+        return (if (run.duration != 0L) run.duration else
+            max(0, System.currentTimeMillis() - run.startTimeInMillis)) / 1000
     }
 
     /**
