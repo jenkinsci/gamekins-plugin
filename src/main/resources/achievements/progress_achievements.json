@@ -38,13 +38,5 @@
     "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::getSolvedChallengesCount",
     "milestones": [1, 3, 10, 20, 50, 100],
     "unit": ""
-  },
-  {
-    "badgePath": "/plugin/gamekins/achievements/colour/multitasking-colour.png",
-    "description": "Solve as many challenges as possible at once",
-    "title": "Multitasking",
-    "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::getSolvedChallengesSimultaneouslyCount",
-    "milestones": [3, 4],
-    "unit": ""
   }
 ]

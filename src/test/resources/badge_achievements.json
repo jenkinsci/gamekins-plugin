@@ -1,0 +1,17 @@
+[
+  {
+    "badgePaths": [
+      "/plugin/gamekins/achievements/colour/multitasking-colour.png",
+      "/plugin/gamekins/achievements/colour/coordinator-colour.png"
+    ],
+    "description": "Solve as many challenges as possible at once",
+    "title": "Multitasking",
+    "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::getSolvedChallengesSimultaneouslyCount",
+    "lowerBounds": [3, 4],
+    "unit": "",
+    "titles": [
+      "Multitasker",
+      "Impossible Multitasker"
+    ]
+  }
+]
