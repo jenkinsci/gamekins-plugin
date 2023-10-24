@@ -14,8 +14,11 @@
                 <a id="leaderboardLink" style="display: block; text-align: center"/>
             </div>
             <br/>
-            <div id ="newAchievements">
-                <h2 id="newAchievementsHeader" style="display: block; text-align: center">New Achievements</h2>
+            <div id ="badgeAchievements">
+                <h2 id="badgeAchievementsHeader" style="display: block; text-align: center">Badge Achievements</h2>
+            </div>
+            <div id ="progressAchievements">
+                <h2 id="badgeAchievementsHeader" style="display: block; text-align: center">Progress Achievements</h2>
             </div>
             <div id="completedAchievements">
                 <h2 id="completedAchievementsHeader" style="display: block; text-align: center">Completed Achievements</h2>

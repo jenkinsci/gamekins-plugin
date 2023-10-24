@@ -138,7 +138,7 @@ function loadAchievements() {
                     let list = JSON.parse(rsp.responseText)
 
                     for(let i = 0; i < list.length; i++) {
-                        let progressAchievements = document.getElementById("newAchievements")
+                        let progressAchievements = document.getElementById("progressAchievements")
                         createProgressAchievement(progressAchievements, list[i], currentUser)
                     }
 
@@ -153,7 +153,7 @@ function loadAchievements() {
                     let list = JSON.parse(rsp.responseText)
 
                     for(let i = 0; i < list.length; i++) {
-                        let badgeAchievements = document.getElementById("newAchievements")
+                        let badgeAchievements = document.getElementById("badgeAchievements")
                         createBadgeAchievement(badgeAchievements, list[i])
                     }
 
@@ -175,7 +175,7 @@ function loadAchievements() {
         let tr1 = document.createElement("tr")
         let td1 = document.createElement("td")
 
-        td1.colSpan = 2
+        td1.colSpan = achievement.badgePaths.length
         td1.style.verticalAlign = "bottom"
         td1.style.textAlign = "left"
         let b = document.createElement("b")
@@ -187,7 +187,7 @@ function loadAchievements() {
         let tr2 = document.createElement("tr")
         let td2 = document.createElement("td")
 
-        td2.colSpan = 2
+        td2.colSpan = achievement.badgePaths.length
         td2.style.verticalAlign = "bottom"
         td2.style.textAlign = "left"
 
@@ -199,7 +199,6 @@ function loadAchievements() {
         let badgeRow = document.createElement("tr")
         let badgeCell
         let img
-        let newRow = false
 
         for (let i = 0; i < achievement.badgePaths.length; i++) {
             badgeCell = document.createElement("td")
@@ -207,7 +206,7 @@ function loadAchievements() {
             let src = document.getElementsByTagName("img")[0].src
             let base = src.substring(0, src.indexOf("static"))
             let endSplit = src.substring(src.indexOf("static")).split("/")
-            if (achievement.badgeCounts[i] == 0) {
+            if (achievement.badgeCounts[i] === 0) {
                 img.src = base + "static/" + endSplit[1] + achievement.badgePaths[i].replace("colour", "blackwhite").replace("-colour.png", ".png")
             }
             else {
@@ -216,8 +215,21 @@ function loadAchievements() {
             img.style.maxWidth = "100%"
             img.style.maxHeight = "100%"
 
+            img.id = achievement.title.replaceAll(" ", "") + i
+            img.setAttribute('data-achievementName', achievement.title.replace(" ", ""))
+            img.setAttribute('data-title', achievement.titles[i])
+            img.setAttribute('data-lowerBound', achievement.lowerBounds[i])
+            img.setAttribute('data-amount', achievement.badgeCounts[i])
+            if (i + 1 < achievement.lowerBounds.length) {
+                img.setAttribute('data-upperBound', achievement.badgeCounts[i])
+            } else {
+                img.setAttribute('data-upperBound', "---")
+            }
+            img.setAttribute('data-unit', achievement.unit)
+
             badgeCell.appendChild(img)
 
+            /*
             let div = document.createElement("div")
             let title = document.createElement("div")
             title.innerText = achievement.titles[i]
@@ -235,17 +247,34 @@ function loadAchievements() {
             div.appendChild(amount)
 
             badgeCell.appendChild(div)
+             */
 
             badgeRow.appendChild(badgeCell)
-            if (newRow) {
-                table.appendChild(badgeRow)
-                badgeRow = document.createElement("tr")
-            }
-            newRow = !newRow
         }
         table.appendChild(badgeRow)
 
+        let tr3 = document.createElement("tr")
+        let td3 = document.createElement("td")
+
+        let div = document.createElement("div")
+        div.id = achievement.title.replace(" ", "")
+
+        td3.colSpan = achievement.badgePaths.length
+
+        td3.appendChild(div)
+
+        tr3.appendChild(td3)
+        table.appendChild(tr3)
+
         parent.appendChild(table)
+
+
+        jQuery3("img").click(function () {
+            var inputElement = jQuery3(this).attr('id')
+            console.log("Click")
+            unclickBadge()
+            clickBadge(inputElement)
+        });
     }
 
     function createProgressAchievement(parent, achievement, displayBars) {
@@ -462,4 +491,43 @@ function loadAchievements() {
         table.appendChild(tr2)
         parent.appendChild(table)
     }
+}
+function unclickBadge() {
+    let badges = document.getElementsByTagName("img")
+    for (let i = 0; i < badges.length; i++) {
+        badges[i].style.boxShadow = ""
+    }
+}
+
+function clickBadge(inputElement) {
+    console.log("Click: 0")
+    let badge = document.getElementById(inputElement)
+    badge.style.boxShadow = "0 0 1px 1px #292b2c"
+
+    console.log("Click: " + inputElement)
+    console.log("Click: " + badge.getAttribute("data-achievementName"))
+
+    let div = document.getElementById(badge.getAttribute("data-achievementName"))
+    while (div.firstChild) {
+        div.removeChild(div.lastChild);
+    }
+    console.log("Click: 1")
+
+    let title = document.createElement("div")
+    title.innerText = badge.getAttribute("data-title")
+    div.appendChild(title)
+    let lowerBound = document.createElement("div")
+    lowerBound.innerText = "Lower boundary: " + badge.getAttribute("data-lowerBound") + badge.getAttribute("data-unit")
+    div.appendChild(lowerBound)
+    console.log("Click: 2")
+    if (badge.getAttribute("data-upperBound") !== "---") {
+        let upperBound = document.createElement("div")
+        upperBound.innerText += "Upper boundary: " + badge.getAttribute("data-upperBound") + badge.getAttribute("data-unit")
+        div.appendChild(upperBound)
+    }
+    console.log("Click: 3")
+    let amount = document.createElement("div")
+    amount.innerText += "Amount: " + jQuery("#" + inputElement).data("amount")
+    div.appendChild(amount)
+    console.log("Click: 4")
 }
