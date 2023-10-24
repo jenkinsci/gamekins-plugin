@@ -339,9 +339,10 @@ object AchievementUtil {
     /**
      * Returns the amount of challenges solved in this run
      */
+    @JvmStatic
     fun getSolvedChallengesSimultaneouslyCount(classes: ArrayList<FileDetails>, parameters: Parameters, run: Run<*, *>,
-                                               property: GameUserProperty, listener: TaskListener): Int {
+                                               property: GameUserProperty, listener: TaskListener): Long {
 
-        return parameters.solved
+        return parameters.solved.toLong()
     }
 }

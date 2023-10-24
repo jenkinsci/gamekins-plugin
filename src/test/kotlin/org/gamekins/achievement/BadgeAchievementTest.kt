@@ -91,7 +91,7 @@ class BadgeAchievementTest: FeatureSpec({
         every { AchievementUtil.getSolvedChallengesSimultaneouslyCount(any(), any(), any(), any(), any()) } returns 4
         scenario("Requirements met for second badge")
         {
-            achievement.update(files, parameters, run, property, TaskListener.NULL) shouldBe false
+            achievement.update(files, parameters, run, property, TaskListener.NULL) shouldBe true
             badgeCountExpected2++
             achievement.badgeCounts[0] shouldBe badgeCountExpected1
             achievement.badgeCounts[1] shouldBe badgeCountExpected2

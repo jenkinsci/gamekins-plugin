@@ -86,7 +86,7 @@ class BadgeAchievement(var badgePaths: List<String>, val lowerBounds: List<Int>,
         lowerBounds.reversed()
 
         for (lowerBound in lowerBounds.reversed()) {
-            if (result > lowerBound) {
+            if (result >= lowerBound) {
                 badgeCounts[lowerBounds.indexOf(lowerBound)]++
                 return true
             }
