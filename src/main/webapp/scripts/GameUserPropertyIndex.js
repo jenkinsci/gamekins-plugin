@@ -139,6 +139,7 @@ function loadAchievements() {
                     for(let i = 0; i < list.length; i++) {
                         let progressAchievements = document.getElementById("progressAchievements")
                         createProgressAchievement(progressAchievements, list[i], currentUser)
+                        progressAchievements.appendChild(document.createElement("br"))
                     }
 
                 }
@@ -153,11 +154,12 @@ function loadAchievements() {
                     for(let i = 0; i < list.length; i++) {
                         let badgeAchievements = document.getElementById("badgeAchievements")
                         createBadgeAchievement(badgeAchievements, list[i])
+                        badgeAchievements.appendChild(document.createElement("br"))
                     }
 
                     jQuery3("img").click(function () {
                                 var inputElement = jQuery3(this).attr('id')
-                                unclickBadge()
+                                unclickBadge(inputElement)
                                 clickBadge(inputElement)
                             });
                 }
@@ -219,7 +221,6 @@ function loadAchievements() {
             img.style.maxHeight = "100%"
 
             img.style.cursor = "pointer"
-            img.setAttribute("data-isSelected", false)
 
             img.id = achievement.title.replaceAll(" ", "") + i
             img.setAttribute('data-achievementName', achievement.title.replace(" ", ""))
@@ -283,7 +284,7 @@ function loadAchievements() {
         let base = src.substring(0, src.indexOf("static"))
         let endSplit = src.substring(src.indexOf("static")).split("/")
         if (achievement.progress <= 0) {
-            img.src = base + "static/" + endSplit[1] + achievement.badgePath
+            img.src = base + "static/" + endSplit[1] + achievement.badgePath.replace("-colour.png", ".png").replace("colour", "blackwhite")
         } else {
             img.src = base + "static/" + endSplit[1] + achievement.badgePath
             img.style.maxWidth = "100%"
@@ -358,6 +359,7 @@ function loadAchievements() {
         let td2 = document.createElement("td")
         td2.style.verticalAlign = "bottom"
         td2.style.textAlign = "left"
+        td2.colSpan = achievement.milestones.length
         let b = document.createElement("b")
         b.innerText = achievement.title
         td2.appendChild(b)
@@ -377,7 +379,7 @@ function loadAchievements() {
                     progBar.setAttribute("aria-valuemin", "0")
                     progBar.style.width = (achievement.progress / milestones[i]) * 100 + "%"
                     if (achievement.progress <= milestones[i] && achievement.progress > 0) {
-                        progBar.innerText = achievement.progress
+                        progBar.innerText = achievement.progress + achievement.unit
                     }
                 }
                 else {
@@ -473,11 +475,13 @@ function loadAchievements() {
         parent.appendChild(table)
     }
 }
-function unclickBadge() {
-    let badges = document.getElementsByTagName("img")
+function unclickBadge(inputElement) {
+    let badge = document.getElementById(inputElement)
+    let badges = badge.parentElement.parentElement.getElementsByTagName("img")
     for (let i = 0; i < badges.length; i++) {
-        badges[i].style.boxShadow = ""
-        badges[i].setAttribute("data-isSelected", false)
+        if (badges[i].id != inputElement) {
+            badges[i].style.boxShadow = ""
+        }
     }
 }
 
@@ -489,11 +493,8 @@ function clickBadge(inputElement) {
         div.removeChild(div.lastChild);
     }
 
-    console.log("Click1" + badge.getAttribute("data.isSelected"))
-    if (!badge.getAttribute("data.isSelected")) {
-    console.log("Click2")
-    badge.style.boxShadow = "0 0 1px 1px #292b2c"
-    badge.setAttribute("data-isSelected", true)
+    if (badge.style.boxShadow == "") {
+        badge.style.boxShadow = "0 0 1px 1px #292b2c"
 
         let title = document.createElement("b")
         title.innerText = badge.getAttribute("data-title")
@@ -509,7 +510,9 @@ function clickBadge(inputElement) {
         }
 
         let amount = document.createElement("div")
-        amount.innerText += "Amount: " + jQuery("#" + inputElement).data("amount")
+        amount.innerText += "Amount: " + jQuery3("#" + inputElement).data("amount")
         div.appendChild(amount)
+    } else {
+        badge.style.boxShadow = ""
     }
 }

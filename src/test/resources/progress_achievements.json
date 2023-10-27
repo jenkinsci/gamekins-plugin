@@ -18,7 +18,7 @@
   {
     "badgePath": "/plugin/gamekins/achievements/colour/checklist-colour.png",
     "description": "Cover the project as much as possible",
-    "title": "No One left behind",
+    "title": "Leave no one behind",
     "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::getProjectCoverage",
     "milestones": [50, 66, 80, 90, 100],
     "unit": "%"
