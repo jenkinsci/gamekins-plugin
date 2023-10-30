@@ -14,13 +14,13 @@
     <properties>
         <!-- Baseline Jenkins version you use to build the plugin. Users must have this version or newer to run. -->
         <jenkins.version>2.387.3</jenkins.version>
-        <java.level>11</java.level>
-        <kotlin.version>1.9.0</kotlin.version>
+        <kotlin.version>1.9.10</kotlin.version>
+        <maven.compiler.release>17</maven.compiler.release>
         <maven.compiler.debug>true</maven.compiler.debug>
         <maven.compiler.debuglevel>lines,source</maven.compiler.debuglevel>
         <animal.sniffer.version>1.20</animal.sniffer.version>
         <hpi-plugin.version>3.35</hpi-plugin.version>
-	<githubSuffix>jenkinsci/gamekins-plugin</githubSuffix>
+        <githubSuffix>jenkinsci/gamekins-plugin</githubSuffix>
         <!-- <maven.test.skip>true</maven.test.skip> -->
         <!-- Other properties you may want to use:
           ~ jenkins-test-harness.version: Jenkins Test Harness version you use to test the plugin. For Jenkins version >= 1.580.1 use JTH 2.0 or higher.
@@ -97,7 +97,6 @@
             <version>${kotlin.version}</version>
             <scope>compile</scope>
         </dependency>
-
 
         <!-- Jenkins dependencies -->
         <dependency>
@@ -503,7 +502,7 @@
                                 <source>target/generated-sources/kapt</source>
                                 <source>target/generated-sources/kaptKotlin</source>
                             </sourceDirs>
-                            <jvmTarget>11</jvmTarget>
+                            <jvmTarget>${maven.compiler.release}</jvmTarget>
                         </configuration>
                     </execution>
 
@@ -522,7 +521,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <jvmTarget>11</jvmTarget>
+                    <jvmTarget>${maven.compiler.release}</jvmTarget>
                 </configuration>
             </plugin>
             <plugin>
