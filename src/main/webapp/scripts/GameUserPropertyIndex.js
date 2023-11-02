@@ -91,7 +91,7 @@ function loadAchievements() {
 
                     if (currentUser) {
                         let header = document.getElementById("completedAchievementsHeader")
-                        header.innerText = "Completed Achievements" + " (" + list.length + "/" + totalCount + ")"
+                        header.innerText = "Other Completed Achievements" + " (" + list.length + "/" + totalCount + ")"
                     }
                 }
             })
@@ -299,11 +299,11 @@ function loadAchievements() {
             let starPath;
             if (active >= 3) {
                 starPath = base + "static/" + endSplit[1] + achievement.badgePath
-                    .substring(0, achievement.badgePath.lastIndexOf("/")).replace("colour", "stars") + "/043-badge.png"
+                    .substring(0, achievement.badgePath.lastIndexOf("/")).replace("colour", "stars") + "/StarGold.png"
                 active -= 3
             } else {
                 starPath = base + "static/" + endSplit[1] + achievement.badgePath
-                    .substring(0, achievement.badgePath.lastIndexOf("/")).replace("colour", "stars") + "/004-badge.png"
+                    .substring(0, achievement.badgePath.lastIndexOf("/")).replace("colour", "stars") + "/StarSilver.png"
             }
 
             let starMiddle = document.createElement("img")
@@ -374,6 +374,9 @@ function loadAchievements() {
                 progContainer.classList.add("progress")
                 let progBar = document.createElement("div")
                 progBar.classList.add("progress-bar")
+                progBar.classList.add("overflow-visible")
+                progBar.classList.add("text-dark")
+                progBar.classList.add("bg-info")
                 progBar.setAttribute("role", "progressbar")
                 if (i === 0) {
                     progBar.setAttribute("aria-valuemin", "0")
@@ -385,8 +388,8 @@ function loadAchievements() {
                 else {
                     progBar.setAttribute("aria-valuemin", milestones[i - 1].toString())
                     progBar.style.width = ((achievement.progress - milestones[i - 1]) / (milestones[i] - milestones[i - 1])) * 100 + "%"
-                    if (achievement.progress <= milestones[i] && achievement.progress > milestones[i - 1]) {
-                        progBar.innerText = achievement.progress
+                    if ((achievement.progress <= milestones[i] || i == milestones.length-1) && achievement.progress > milestones[i - 1]) {
+                        progBar.innerText = achievement.progress + achievement.unit
                     }
                 }
                 progBar.setAttribute("aria-valuenow", achievement.progress.toString())

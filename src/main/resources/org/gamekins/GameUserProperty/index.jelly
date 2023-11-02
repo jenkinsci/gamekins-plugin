@@ -5,7 +5,7 @@
             <st:include page="sidepanel.jelly" it="${it.user}" optional="true" />
         </l:side-panel>
         <l:main-panel>
-            <st:adjunct includes="io.jenkins.plugins.bootstrap4"/>
+            <st:adjunct includes="io.jenkins.plugins.bootstrap5"/>
             <div>
                 <label for="projects" style="display: block; text-align: center">Choose your project</label>
                 <select id="projects" style="display: block; margin-left: auto; margin-right: auto"/>
