@@ -277,6 +277,27 @@ object AchievementUtil {
     }
 
     /**
+     * Returns the improvement in project coverage from the last build to this one
+     */
+    fun getProjectCoverageImprovement(classes: ArrayList<FileDetails>, parameters: Parameters,
+                                      run: Run<*, *>, property: GameUserProperty, listener: TaskListener,
+                                      additionalParameters: HashMap<String, String>): Double {
+        val mapUser: User? = GitUtil.mapUser(
+            parameters.workspace.act(
+                GitUtil.HeadCommitCallable(parameters.remote)
+            ).authorIdent, User.getAll()
+        )
+        if (mapUser == property.getUser()) {
+            val lastRun = PropertyUtil.retrieveGamePropertyFromRun(run)?.getStatistics()
+                ?.getLastRun(parameters.branch)
+            if (lastRun != null) {
+                return (parameters.projectCoverage.minus(lastRun.coverage))
+            }
+        }
+        return 0.0
+    }
+
+    /**
      * Solves the achievements with description: Solve a Challenge a maximum of X hours after generation. Needs the
      * key 'timeDifference' and 'minTimeDifference' in the map [additionalParameters] with a positive Long value.
      */

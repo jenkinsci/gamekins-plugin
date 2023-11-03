@@ -38,5 +38,24 @@
       "Multitasker",
       "Impossible Multitasker"
     ]
+  },
+  {
+    "badgePaths": [
+      "/plugin/gamekins/achievements/colour/helping-hand-colour.png",
+      "/plugin/gamekins/achievements/colour/performance-colour.png",
+      "/plugin/gamekins/achievements/colour/arrows-colour.png",
+      "/plugin/gamekins/achievements/colour/responsibility-colour.png"
+    ],
+    "description": "Improve the project coverage",
+    "title": "Cover your back",
+    "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::getProjectCoverageImprovement",
+    "lowerBounds": [0.001, 0.005, 0.01, 0.02],
+    "unit": "%",
+    "titles": [
+      "Helpful",
+      "Improvement",
+      "Progress",
+      "That is engagement!"
+    ]
   }
 ]
