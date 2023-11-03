@@ -76,12 +76,8 @@ function loadAchievements() {
                         div.removeChild(div.lastChild)
                     }
 
-                    if (list.length === 0 && currentUser) {
-                        let header = document.createElement("h5")
-                        header.style.display = "block"
-                        header.style.textAlign = "center"
-                        header.innerText = "You have not solved any achievements yet"
-                        div.appendChild(header)
+                    if (list.length === 0) {
+                        div.style.display = "none"
                     } else {
                         for(let i = 0; i < list.length; i++) {
                             createAchievement(div, list[i], false)
