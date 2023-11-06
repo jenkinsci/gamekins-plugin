@@ -112,7 +112,7 @@ object AchievementInitializer {
             }
             BadgeAchievement(
                 it.badgePaths, it.lowerBounds, it.fullyQualifiedFunctionName,
-                it.description, it.title, badgeCounts, it.unit, it.titles
+                it.description, it.title, badgeCounts, it.unit, it.titles, it.ascending
             )
         }
     }
@@ -139,10 +139,11 @@ object AchievementInitializer {
                                        var unit: String)
 
     data class BadgeAchievementData(val badgePaths: List<String>,
-                                    val lowerBounds: List<Int>,
+                                    val lowerBounds: List<Double>,
                                     val description: String,
                                     val title: String,
                                     val fullyQualifiedFunctionName: String,
                                     var unit: String,
-                                    val titles: List<String>)
+                                    val titles: List<String>,
+                                    val ascending: Boolean)
 }

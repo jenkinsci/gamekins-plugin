@@ -9,9 +9,10 @@ import org.gamekins.util.Constants
 import kotlin.reflect.KCallable
 import kotlin.reflect.KClass
 
-class BadgeAchievement(var badgePaths: List<String>, val lowerBounds: List<Int>,
+class BadgeAchievement(var badgePaths: List<String>, val lowerBounds: List<Double>,
                        val fullyQualifiedFunctionName: String, val description: String, val title: String,
-                       var badgeCounts : MutableList<Int>, val unit: String, var titles: List<String>) {
+                       var badgeCounts : MutableList<Int>, val unit: String, var titles: List<String>,
+                       var ascending: Boolean) {
 
     @Transient private lateinit var callClass: KClass<out Any>
     @Transient private lateinit var callFunction: KCallable<*>
@@ -22,8 +23,8 @@ class BadgeAchievement(var badgePaths: List<String>, val lowerBounds: List<Int>,
 
     fun clone(): BadgeAchievement {
         return BadgeAchievement(
-            badgePaths.toList(), lowerBounds.toList(),
-            fullyQualifiedFunctionName, description, title, badgeCounts.toMutableList(), unit, titles.toMutableList()
+            badgePaths.toList(), lowerBounds.toList(), fullyQualifiedFunctionName, description, title,
+            badgeCounts.toMutableList(), unit, titles.toMutableList(), ascending
         )
     }
 
@@ -86,7 +87,7 @@ class BadgeAchievement(var badgePaths: List<String>, val lowerBounds: List<Int>,
         lowerBounds.reversed()
 
         for (lowerBound in lowerBounds.reversed()) {
-            if (result >= lowerBound) {
+            if ((ascending && result >= lowerBound) || (!ascending && result <= lowerBound)) {
                 badgeCounts[lowerBounds.indexOf(lowerBound)]++
                 return true
             }
