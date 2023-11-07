@@ -27,6 +27,7 @@ import org.gamekins.challenge.BuildChallenge
 import org.gamekins.challenge.CoverageChallenge
 import org.gamekins.file.FileDetails
 import org.gamekins.util.Constants.Parameters
+import java.util.Collections
 import java.util.HashMap
 import kotlin.math.max
 
@@ -107,12 +108,12 @@ object AchievementUtil {
     }
 
     /**
-     * Returns the duration of the build in seconds
+     * Returns the duration of the build in seconds a single Double in a list for compatibility
      */
     fun getBuildDurationInSeconds(classes: ArrayList<FileDetails>, parameters: Parameters,
-                                  run: Run<*, *>, property: GameUserProperty, listener: TaskListener): Long {
-        return (if (run.duration != 0L) run.duration else
-            max(0, System.currentTimeMillis() - run.startTimeInMillis)) / 1000
+                                  run: Run<*, *>, property: GameUserProperty, listener: TaskListener): List<Double> {
+        return listOf((if (run.duration != 0L) run.duration.toDouble() else
+            max(0, System.currentTimeMillis() - run.startTimeInMillis)).toDouble() / 1000)
     }
 
     /**
@@ -251,6 +252,17 @@ object AchievementUtil {
     }
 
     /**
+     * Returns the amounts of improvement on solved ClassCoverageChallenges completed this run
+     */
+    fun getClassCoverageImprovements(classes: ArrayList<FileDetails>, parameters: Parameters,
+                                     run: Run<*, *>, property: GameUserProperty, listener: TaskListener): List<Double> {
+        return property.getCompletedChallenges(parameters.projectName)
+            .filterIsInstance<CoverageChallenge>()
+            .filter { it.getSolved() >= run.startTimeInMillis }
+            .map { (it.solvedCoverage - it.coverage) }
+    }
+
+    /**
      * Solves the achievements with description: Improve the coverage of the project by X%. Needs the
      * key 'haveCoverage' in the map [additionalParameters] with a positive Double value.
      * Optional parameter 'maxCoverage' with a positive and exclusive Int value.
@@ -277,11 +289,10 @@ object AchievementUtil {
     }
 
     /**
-     * Returns the improvement in project coverage from the last build to this one
+     * Returns the improvement in project coverage from the last build to this one as a single Double in a list for compatibility
      */
-    fun getProjectCoverageImprovement(classes: ArrayList<FileDetails>, parameters: Parameters,
-                                      run: Run<*, *>, property: GameUserProperty, listener: TaskListener,
-                                      additionalParameters: HashMap<String, String>): Double {
+    fun getProjectCoverageImprovement(classes: ArrayList<FileDetails>, parameters: Parameters, run: Run<*, *>,
+                                      property: GameUserProperty, listener: TaskListener): List<Double> {
         val mapUser: User? = GitUtil.mapUser(
             parameters.workspace.act(
                 GitUtil.HeadCommitCallable(parameters.remote)
@@ -291,10 +302,10 @@ object AchievementUtil {
             val lastRun = PropertyUtil.retrieveGamePropertyFromRun(run)?.getStatistics()
                 ?.getLastRun(parameters.branch)
             if (lastRun != null) {
-                return (parameters.projectCoverage.minus(lastRun.coverage))
+                return listOf(parameters.projectCoverage.minus(lastRun.coverage))
             }
         }
-        return 0.0
+        return listOf(0.0)
     }
 
     /**
@@ -311,6 +322,16 @@ object AchievementUtil {
                         && (it.getSolved() - it.getCreated()).div(1000) >
                         (additionalParameters["minTimeDifference"]?.toLong() ?: Long.MAX_VALUE))
             }
+    }
+
+    /**
+     * Returns a List of the amounts of time it took to solve each challenge completed this run
+     */
+    fun getSolvedChallengeInSeconds(classes: ArrayList<FileDetails>, parameters: Parameters,
+                                 run: Run<*, *>, property: GameUserProperty, listener: TaskListener): List<Double> {
+        return property.getCompletedChallenges(parameters.projectName)
+            .filter { it.getSolved() >= run.startTimeInMillis }
+            .map { (it.getSolved() - it.getCreated()).div(1000).toDouble() }
     }
 
     /**
@@ -358,12 +379,12 @@ object AchievementUtil {
     }
 
     /**
-     * Returns the amount of challenges solved in this run
+     * Returns the amount of challenges solved in this run a single Double in a list for compatibility
      */
     @JvmStatic
     fun getSolvedChallengesSimultaneouslyCount(classes: ArrayList<FileDetails>, parameters: Parameters, run: Run<*, *>,
-                                               property: GameUserProperty, listener: TaskListener): Long {
+                                               property: GameUserProperty, listener: TaskListener): List<Double> {
 
-        return parameters.solved.toLong()
+        return listOf(parameters.solved.toDouble())
     }
 }

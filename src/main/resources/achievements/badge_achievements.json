@@ -22,7 +22,8 @@
       "Coffee break",
       "Lunch break",
       "Upgrades, People, Upgrades"
-    ]
+    ],
+    "ascending": true
   },
   {
     "badgePaths": [
@@ -37,7 +38,8 @@
     "titles": [
       "Multitasker",
       "Impossible Multitasker"
-    ]
+    ],
+    "ascending": true
   },
   {
     "badgePaths": [
@@ -56,6 +58,49 @@
       "Improvement",
       "Progress",
       "That is engagement!"
-    ]
+    ],
+    "ascending": true
+  },
+  {
+    "badgePaths": [
+      "/plugin/gamekins/achievements/colour/24-hours-colour.png",
+      "/plugin/gamekins/achievements/colour/working-hours-colour.png",
+      "/plugin/gamekins/achievements/colour/thumb-up-colour.png",
+      "/plugin/gamekins/achievements/colour/running-colour.png",
+      "/plugin/gamekins/achievements/colour/cowboy-colour.png"
+    ],
+    "description": "Solve a Challenge within the specified time frame after generation",
+    "title": "Beat the clock",
+    "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::getSolvedChallengeInSeconds",
+    "lowerBounds": [86400, 28800, 7200, 3600, 900],
+    "unit": "s",
+    "titles": [
+      "It took me one day",
+      "All I could do in one working day",
+      "Not that difficult",
+      "Road Runner",
+      "Lucky Luke"
+    ],
+    "ascending": false
+  },
+  {
+    "badgePaths": [
+      "/plugin/gamekins/achievements/colour/steak-colour.png",
+      "/plugin/gamekins/achievements/colour/quarter-colour.png",
+      "/plugin/gamekins/achievements/colour/half-colour.png",
+      "/plugin/gamekins/achievements/colour/keyboard-colour.png"
+    ],
+    "description": "Solve ClassCoverageChallenges within the bounds",
+    "title": "Cover your bases",
+    "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::getClassCoverageImprovements",
+    "lowerBounds": [0.1, 0.25, 0.5, 1.0],
+    "unit": "%",
+    "titles": [
+      "Well done!",
+      "That was a quarter!",
+      "Well, that class was not really tested yet",
+      "Fresh out of the keyboard"
+    ],
+    "ascending": true
   }
 ]

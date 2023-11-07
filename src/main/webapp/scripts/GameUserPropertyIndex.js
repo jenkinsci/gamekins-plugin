@@ -229,6 +229,7 @@ function loadAchievements() {
                 img.setAttribute('data-upperBound', "---")
             }
             img.setAttribute('data-unit', achievement.unit)
+            img.setAttribute('data-ascending', achievement.ascending)
 
             badgeCell.appendChild(img)
 
@@ -499,12 +500,20 @@ function clickBadge(inputElement) {
         title.innerText = badge.getAttribute("data-title")
         div.appendChild(title)
         let lowerBound = document.createElement("div")
-        lowerBound.innerText = "Lower boundary: " + badge.getAttribute("data-lowerBound") + badge.getAttribute("data-unit")
+        if (badge.getAttribute("data-ascending") === "true") {
+            lowerBound.innerText = "Lower boundary: " + badge.getAttribute("data-lowerBound") + badge.getAttribute("data-unit")
+        } else {
+            lowerBound.innerText = "Upper boundary: " + badge.getAttribute("data-lowerBound") + badge.getAttribute("data-unit")
+        }
         div.appendChild(lowerBound)
 
         if (badge.getAttribute("data-upperBound") !== "---") {
             let upperBound = document.createElement("div")
-            upperBound.innerText += "Upper boundary: " + badge.getAttribute("data-upperBound") + badge.getAttribute("data-unit")
+            if (badge.getAttribute("data-ascending") === "true") {
+                upperBound.innerText += "Upper boundary: " + badge.getAttribute("data-upperBound") + badge.getAttribute("data-unit")
+            } else {
+                upperBound.innerText += "Lower boundary: " + badge.getAttribute("data-upperBound") + badge.getAttribute("data-unit")
+            }
             div.appendChild(upperBound)
         }
 

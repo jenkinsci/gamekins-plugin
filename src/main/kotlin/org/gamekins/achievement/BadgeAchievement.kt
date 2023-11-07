@@ -76,22 +76,25 @@ class BadgeAchievement(var badgePaths: List<String>, val lowerBounds: List<Doubl
     }
 
     /**
-     * Updates progress made and returns true if a badge is earned.
+     * Updates progress made and returns true if atleast one badge is earned.
      */
     fun update(
         files: ArrayList<FileDetails>, parameters: Constants.Parameters, run: Run<*, *>,
         property: GameUserProperty, listener: TaskListener = TaskListener.NULL): Boolean {
         val array = arrayOf(callClass.objectInstance, files, parameters, run, property, listener)
-        val result: Long = callFunction.call(*array) as Long
+        val results: List<Double> = callFunction.call(*array) as List<Double>
 
-        lowerBounds.reversed()
+        var wasUpdated = false
 
-        for (lowerBound in lowerBounds.reversed()) {
-            if ((ascending && result >= lowerBound) || (!ascending && result <= lowerBound)) {
-                badgeCounts[lowerBounds.indexOf(lowerBound)]++
-                return true
+        for (result in results) {
+            for (lowerBound in lowerBounds.reversed()) {
+                if ((ascending && result >= lowerBound) || (!ascending && result <= lowerBound)) {
+                    badgeCounts[lowerBounds.indexOf(lowerBound)]++
+                    wasUpdated = true
+                    break
+                }
             }
         }
-        return false
+        return wasUpdated
     }
 }
