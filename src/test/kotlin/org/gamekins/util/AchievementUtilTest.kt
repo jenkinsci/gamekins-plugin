@@ -750,6 +750,6 @@ class AchievementUtilTest: FeatureSpec({
     }
 
     feature("getSolvedChallengesSimultaneouslyCount") {
-        AchievementUtil.getSolvedChallengesSimultaneouslyCount(files, parameters, run, property, TaskListener.NULL) shouldBe 1
+        AchievementUtil.getSolvedChallengesSimultaneouslyCount(files, parameters, run, property, TaskListener.NULL) shouldBe listOf(1.0)
     }
 })
