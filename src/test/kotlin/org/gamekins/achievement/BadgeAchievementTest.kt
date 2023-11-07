@@ -79,7 +79,7 @@ class BadgeAchievementTest: FeatureSpec({
         var badgeCountExpected1 = 0
         var badgeCountExpected2 = 0
 
-        every { AchievementUtil.getSolvedChallengesSimultaneouslyCount(any(), any(), any(), any(), any()) } returns 3
+        every { AchievementUtil.getSolvedChallengesSimultaneouslyCount(any(), any(), any(), any(), any()) } returns listOf(3.0)
         scenario("Requirements met for first badge")
         {
             achievement.update(files, parameters, run, property, TaskListener.NULL) shouldBe true
@@ -88,7 +88,7 @@ class BadgeAchievementTest: FeatureSpec({
             achievement.badgeCounts[1] shouldBe badgeCountExpected2
         }
 
-        every { AchievementUtil.getSolvedChallengesSimultaneouslyCount(any(), any(), any(), any(), any()) } returns 4
+        every { AchievementUtil.getSolvedChallengesSimultaneouslyCount(any(), any(), any(), any(), any()) } returns listOf(4.0)
         scenario("Requirements met for second badge")
         {
             achievement.update(files, parameters, run, property, TaskListener.NULL) shouldBe true
@@ -97,7 +97,7 @@ class BadgeAchievementTest: FeatureSpec({
             achievement.badgeCounts[1] shouldBe badgeCountExpected2
         }
 
-        every { AchievementUtil.getSolvedChallengesSimultaneouslyCount(any(), any(), any(), any(), any()) } returns 0
+        every { AchievementUtil.getSolvedChallengesSimultaneouslyCount(any(), any(), any(), any(), any()) } returns listOf(0.0)
         scenario("Requirements not met")
         {
             achievement.update(files, parameters, run, property, TaskListener.NULL) shouldBe false
