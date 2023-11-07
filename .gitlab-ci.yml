@@ -1,6 +1,6 @@
 # Kotlin kapt is not compatible with Java 16:
 # https://youtrack.jetbrains.com/issue/KT-45545
-image: maven:3-openjdk-15
+image: maven:3-openjdk-17
 
 variables:
   # This will supress any download for dependencies and plugins or upload messages which would clutter the console log.
