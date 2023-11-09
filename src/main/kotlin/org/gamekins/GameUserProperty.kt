@@ -159,12 +159,10 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
         rsp.contentType = Constants.TYPE_PLAIN
         val printer = rsp.writer
         if (projectName.isEmpty() || completedAchievements[projectName] == null
-            || unsolvedAchievements[projectName] == null || progressAchievements[projectName] == null
-            || badgeAchievements[projectName] == null) {
+            || unsolvedAchievements[projectName] == null) {
             printer.print(0)
         } else {
-            printer.print(completedAchievements[projectName]!!.size + unsolvedAchievements[projectName]!!.size
-                    + progressAchievements[projectName]!!.size + badgeAchievements[projectName]!!.size)
+            printer.print(completedAchievements[projectName]!!.size + unsolvedAchievements[projectName]!!.size)
         }
         printer.flush()
     }
@@ -601,12 +599,21 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
             }
         }
 
-        //Add new achievements
+        //Add new achievements and remove deleted ones that have not been solved before
         participation.keys.forEach { project ->
             GamePublisherDescriptor.achievements
                 .filter { !completedAchievements[project]!!.contains(it)
                         && !unsolvedAchievements[project]!!.contains(it) }
                 .forEach { unsolvedAchievements[project]!!.add(it.clone()) }
+            GamePublisherDescriptor.progressAchievements
+                .filter { !progressAchievements[project]!!.contains(it) }
+                .forEach { progressAchievements[project]!!.add(it.clone()) }
+            GamePublisherDescriptor.badgeAchievements
+                .filter { !badgeAchievements[project]!!.contains(it) }
+                .forEach { badgeAchievements[project]!!.add(it.clone()) }
+            unsolvedAchievements[project]!!.removeIf { !GamePublisherDescriptor.achievements.contains(it) }
+            progressAchievements[project]!!.removeIf { it.progress <= 0 && !GamePublisherDescriptor.progressAchievements.contains(it) }
+            badgeAchievements[project]!!.removeIf { it.badgeCounts.all { badgeCount -> badgeCount <= 0 } && !GamePublisherDescriptor.badgeAchievements.contains(it) }
         }
 
         //Update achievements with changed fullyQualifiedFunctionName or secret
@@ -873,15 +880,11 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
 
             for (achievement in GamePublisherDescriptor.progressAchievements) {
                 val ach = progressAchievements[project]!!.find { it == achievement }
-                if (ach == null) {
-                    val list = progressAchievements[project]!!
-                    list.add(achievement.clone())
-                    progressAchievements[project] = list
-                } else if (ach.fullyQualifiedFunctionName != achievement.fullyQualifiedFunctionName
+                if (ach != null &&(ach.fullyQualifiedFunctionName != achievement.fullyQualifiedFunctionName
                             || !ach.milestones.containsAll(achievement.milestones)
                             || !achievement.milestones.containsAll(ach.milestones)
                             || ach.badgePath != achievement.badgePath
-                            || achievement.unit != ach.unit) {
+                            || achievement.unit != ach.unit)) {
 
                     val list = progressAchievements[project]!!
                     list.remove(ach)
@@ -890,21 +893,17 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
                 }
             }
 
+
             for (achievement in GamePublisherDescriptor.badgeAchievements) {
                 val ach = badgeAchievements[project]!!.find { it == achievement }
-                if (ach == null) {
-                    val list = badgeAchievements[project]!!
-                    list.add(achievement.clone())
-                    badgeAchievements[project] = list
-                } else if (ach.fullyQualifiedFunctionName != achievement.fullyQualifiedFunctionName
+                if (ach != null && (ach.fullyQualifiedFunctionName != achievement.fullyQualifiedFunctionName
                     || !ach.lowerBounds.containsAll(achievement.lowerBounds)
                     || !achievement.lowerBounds.containsAll(ach.lowerBounds)
                     || !ach.badgePaths.containsAll(achievement.badgePaths)
                     || !achievement.badgePaths.containsAll(ach.badgePaths)
                     || achievement.unit != ach.unit
                     || !ach.titles.containsAll(achievement.titles)
-                    || !achievement.titles.containsAll(ach.titles)
-                ) {
+                    || !achievement.titles.containsAll(ach.titles))) {
 
                     val list = badgeAchievements[project]!!
                     list.remove(ach)
