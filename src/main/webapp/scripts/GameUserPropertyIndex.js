@@ -251,9 +251,6 @@ function loadAchievements() {
         table.appendChild(tr3)
 
         parent.appendChild(table)
-
-
-
     }
 
     function createProgressAchievement(parent, achievement, displayBars) {
@@ -369,6 +366,8 @@ function loadAchievements() {
                 let cell = document.createElement("td")
                 let progContainer = document.createElement("div")
                 progContainer.classList.add("progress")
+                progContainer.classList.add("bg-light")
+                progContainer.style.height = "1rem"
                 let progBar = document.createElement("div")
                 progBar.classList.add("progress-bar")
                 progBar.classList.add("overflow-visible")
