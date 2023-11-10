@@ -19,7 +19,7 @@ pipeline {
     }
     post {
         always {
-            gamekins jacocoCSVPath: '**/target/site/jacoco/jacoco.csv', jacocoResultsPath: '**/target/site/jacoco/', searchCommitCount: 50
+            gamekins jacocoCSVPath: '**/target/site/jacoco/jacoco.csv', jacocoResultsPath: '**/target/site/jacoco/'
         }
     }
 }
