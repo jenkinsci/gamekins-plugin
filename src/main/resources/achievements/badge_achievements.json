@@ -3,7 +3,7 @@
     "badgePaths": [
       "/plugin/gamekins/achievements/colour/auge-colour.png",
       "/plugin/gamekins/achievements/colour/hourglass-colour.png",
-      "/plugin/gamekins/achievements/colour/hourglass-colour.png",
+      "/plugin/gamekins/achievements/colour/chat-colour.png",
       "/plugin/gamekins/achievements/colour/coffee-colour.png",
       "/plugin/gamekins/achievements/colour/coffee-break-colour.png",
       "/plugin/gamekins/achievements/colour/lunch-time-colour.png",
@@ -17,7 +17,7 @@
     "titles": [
       "Don't blink!",
       "Just wait for it",
-      "Five more minutes...",
+      "Check your phone",
       "Grab a cup of coffee",
       "Coffee break",
       "Lunch break",
