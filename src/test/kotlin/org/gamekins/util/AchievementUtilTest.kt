@@ -268,6 +268,26 @@ class AchievementUtilTest: FeatureSpec({
         }
     }
 
+    feature("getBuildDurationInSeconds") {
+        var out: List<Double>
+        every { run.duration } returns 1000
+        scenario("Run has duration")
+        {
+            out = AchievementUtil.getBuildDurationInSeconds(files, parameters, run, property, TaskListener.NULL)
+            out.size shouldBe 1
+            out[0] shouldBe 1
+        }
+
+        every { run.duration } returns 0
+        every {run.startTimeInMillis } returns System.currentTimeMillis() - 2000
+        scenario("Run duration calculated")
+        {
+            out = AchievementUtil.getBuildDurationInSeconds(files, parameters, run, property, TaskListener.NULL)
+            out.size shouldBe 1
+            out[0].toInt() shouldBe 2
+        }
+    }
+
     feature("haveClassWithXCoverage") {
         additionalParameters.clear()
         every { challenge.solvedCoverage } returns 0.9
@@ -552,6 +572,26 @@ class AchievementUtilTest: FeatureSpec({
         }
     }
 
+    feature("getClassCoverageImprovements") {
+        var out: List<Double>
+
+        every {run.startTimeInMillis } returns System.currentTimeMillis() - 1000
+
+        every { challenge.getSolved() } returns run.startTimeInMillis - 1
+        scenario("No newly solved ClassCoverageChallenge")
+        {
+            out = AchievementUtil.getClassCoverageImprovements(files, parameters, run, property, TaskListener.NULL)
+            out.size shouldBe 0
+        }
+
+        every { challenge.getSolved() } returns run.startTimeInMillis + 1
+        scenario("Newly solved ClassCoverageChallenge")
+        {
+            out = AchievementUtil.getClassCoverageImprovements(files, parameters, run, property, TaskListener.NULL)
+            out.size shouldBe 1
+        }
+    }
+
     feature("improveProjectCoverageByX") {
         additionalParameters.clear()
         mockkStatic(GitUtil::class)
@@ -634,6 +674,46 @@ class AchievementUtilTest: FeatureSpec({
         }
     }
 
+    feature("getProjectCoverageImprovement") {
+        var out: List<Double>
+
+        val job = mockkClass(WorkflowJob::class)
+        val jobProperty = mockkClass(GameJobProperty::class)
+        val statistics = mockkClass(Statistics::class)
+        parameters.branch = "master"
+        every { run.parent } returns job
+        every { job.parent } returns mockkClass(ItemGroup::class)
+        every { job.getProperty(any()) } returns jobProperty
+        every { jobProperty.getStatistics() } returns statistics
+        every { statistics.getLastRun("master") } returns null
+        scenario("No Run before this one")
+        {
+            out = AchievementUtil.getProjectCoverageImprovement(files, parameters, run, property, TaskListener.NULL)
+            out.size shouldBe 1
+            out[0] shouldBe 0.0
+        }
+
+        val runEntry = mockkClass(Statistics.RunEntry::class)
+        parameters.projectCoverage = 0.7
+        every { runEntry.coverage } returns 0.6
+        every { statistics.getLastRun("master") } returns runEntry
+        scenario("0.1 Improvement")
+        {
+            out = AchievementUtil.getProjectCoverageImprovement(files, parameters, run, property, TaskListener.NULL)
+            out.size shouldBe 1
+            out[0] shouldBe 0.7 - 0.6
+        }
+
+        parameters.projectCoverage = 0.8
+        every { runEntry.coverage } returns 0.4
+        scenario("0.4 Improvement")
+        {
+            out = AchievementUtil.getProjectCoverageImprovement(files, parameters, run, property, TaskListener.NULL)
+            out.size shouldBe 1
+            out[0] shouldBe 0.8 - 0.4
+        }
+    }
+
     feature("solveChallengeInXSeconds") {
         additionalParameters.clear()
         every { challenge.getSolved() } returns 100000000
@@ -670,6 +750,26 @@ class AchievementUtilTest: FeatureSpec({
         {
             AchievementUtil.solveChallengeInXSeconds(files, parameters, run, property, TaskListener.NULL,
                 additionalParameters) shouldBe true
+        }
+    }
+
+    feature("getSolvedChallengeInSeconds") {
+        var out: List<Double>
+
+        every {run.startTimeInMillis } returns System.currentTimeMillis() - 1000
+
+        every { challenge.getSolved() } returns run.startTimeInMillis - 1
+        scenario("No newly solved Challenge")
+        {
+            out = AchievementUtil.getSolvedChallengeInSeconds(files, parameters, run, property, TaskListener.NULL)
+            out.size shouldBe 0
+        }
+
+        every { challenge.getSolved() } returns run.startTimeInMillis + 1
+        scenario("Newly solved Challenge")
+        {
+            out = AchievementUtil.getSolvedChallengeInSeconds(files, parameters, run, property, TaskListener.NULL)
+            out.size shouldBe 1
         }
     }
 

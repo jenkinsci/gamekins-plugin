@@ -27,7 +27,6 @@ import org.gamekins.challenge.BuildChallenge
 import org.gamekins.challenge.CoverageChallenge
 import org.gamekins.file.FileDetails
 import org.gamekins.util.Constants.Parameters
-import java.util.Collections
 import java.util.HashMap
 import kotlin.math.max
 
@@ -112,7 +111,7 @@ object AchievementUtil {
      */
     fun getBuildDurationInSeconds(classes: ArrayList<FileDetails>, parameters: Parameters,
                                   run: Run<*, *>, property: GameUserProperty, listener: TaskListener): List<Double> {
-        return listOf((if (run.duration != 0L) run.duration.toDouble() else
+        return listOf((if (run.duration != 0L) run.duration else
             max(0, System.currentTimeMillis() - run.startTimeInMillis)).toDouble() / 1000)
     }
 
