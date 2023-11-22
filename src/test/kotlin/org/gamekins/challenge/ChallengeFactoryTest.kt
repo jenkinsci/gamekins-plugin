@@ -179,7 +179,7 @@ class ChallengeFactoryTest : FeatureSpec({
         }
 
         val newDetails = mockkClass(SourceFileDetails::class)
-        //every { newDetails.changedByUsers } returns hashSetOf(GitUtil.GameUser(user))
+        every { newDetails.changedByUsers } returns hashSetOf(GitUtil.GameUser(user))
         mockkStatic(ChallengeFactory::class)
         every { ChallengeFactory.generateChallenge(any(), any(), any(), any()) } returns mockkClass(TestChallenge::class)
         xscenario("Inconsistent results needs to be checked")//TODO complete rewrite of scenario, seems to only work due to mockkExceptions
