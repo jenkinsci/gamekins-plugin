@@ -53,9 +53,9 @@ object QuestFactory {
             listener.logger.println("[Gamekins] Start generating quests for user ${user.fullName}")
 
             val userClasses = ArrayList(files)
-            userClasses.removeIf { details: FileDetails ->
+            /*userClasses.removeIf { details: FileDetails ->
                 !details.changedByUsers.contains(GitUtil.GameUser(user))
-            }
+            }*/
 
             listener.logger.println("[Gamekins] Found ${userClasses.size} last changed files of user ${user.fullName}")
 

@@ -336,9 +336,9 @@ object ChallengeFactory {
             listener.logger.println("[Gamekins] Start generating challenges for user ${user.fullName}")
 
             val userFiles = ArrayList(files)
-            userFiles.removeIf { details: FileDetails ->
+            /*userFiles.removeIf { details: FileDetails ->
                 !details.changedByUsers.contains(GitUtil.GameUser(user))
-            }
+            }*/
 
             listener.logger.println("[Gamekins] Found ${userFiles.size} last changed files of user ${user.fullName}")
 

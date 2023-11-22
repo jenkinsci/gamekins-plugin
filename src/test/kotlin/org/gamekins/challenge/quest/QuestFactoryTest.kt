@@ -76,7 +76,7 @@ class QuestFactoryTest : FeatureSpec({
 
         val detail = mockkClass(FileDetails::class)
         val gameUser = GitUtil.GameUser(user)
-        every { detail.changedByUsers } returns hashSetOf(gameUser)
+      //  every { detail.changedByUsers } returns hashSetOf(gameUser)
         classes.add(detail)
         every { QuestFactory.generateQuest(any(), any(), any(), any(), any()) } returns Quest(Constants.NO_QUEST, arrayListOf())
         scenario("Could not generate new Quests")

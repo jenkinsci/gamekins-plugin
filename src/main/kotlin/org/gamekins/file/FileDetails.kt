@@ -39,7 +39,7 @@ import java.nio.charset.Charset
 abstract class FileDetails(var parameters: Parameters, val filePath: String)
     : Serializable, ClientInputFile {
 
-    val changedByUsers: HashSet<GitUtil.GameUser> = hashSetOf()
+   // val changedByUsers: HashSet<GitUtil.GameUser> = hashSetOf()
     val file: File
     val fileName: String
     val fileExtension: String
@@ -64,7 +64,7 @@ abstract class FileDetails(var parameters: Parameters, val filePath: String)
      * Adds a new [user], who has recently changed the class.
      */
     fun addUser(user: GitUtil.GameUser) {
-        changedByUsers.add(user)
+       // changedByUsers.add(user)
     }
 
     override fun equals(other: Any?): Boolean {

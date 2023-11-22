@@ -300,7 +300,6 @@ object GitUtil {
                                   listener: TaskListener, user: GameUser, users: ArrayList<GameUser>
     ): List<TestFileDetails> {
         return getLastChangedTests(commitHash, parameters, listener, users)
-            .filter { it.changedByUsers.contains(user) }
     }
 
     /**
