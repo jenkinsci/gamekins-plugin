@@ -11,6 +11,7 @@ import net.sf.json.JSONArray
 import net.sf.json.JSONObject
 import net.sf.json.JsonConfig
 import net.sf.json.util.CycleDetectionStrategy
+import net.sf.json.util.PropertyFilter
 import org.gamekins.event.EventHandler
 import org.gamekins.util.ActionUtil
 import org.gamekins.util.Constants
@@ -25,6 +26,15 @@ import java.util.concurrent.CopyOnWriteArrayList
 
 @Extension
 class CustomAPI : RootAction {
+
+    private val lJsonConfig = JsonConfig();
+
+    init {
+        lJsonConfig.isAllowNonStringKeys = true;
+        lJsonConfig.cycleDetectionStrategy = CycleDetectionStrategy.NOPROP
+        lJsonConfig.excludes = arrayOf("File")
+        lJsonConfig.jsonPropertyFilter = PropertyFilter { _, name, _ -> name ==  "changedByUsers" }
+    }
 
     override fun getIconFileName(): String? {
         return null
@@ -71,16 +81,6 @@ class CustomAPI : RootAction {
         val property = user.getProperty(GameUserProperty::class.java)
             ?: throw FormValidation.error(Constants.Error.RETRIEVING_PROPERTY)
         val myJsonObjects = property.getCompletedChallenges(job)
-
-        /*val response = JSONArray()
-        myJsonObjects.forEach { response.add(it) }*/
-
-
-        val lJsonConfig = JsonConfig();
-        lJsonConfig.isAllowNonStringKeys = true;
-        lJsonConfig.cycleDetectionStrategy = CycleDetectionStrategy.NOPROP
-        lJsonConfig.excludes = arrayOf("File")
-
 
         val responseJson = JSONObject()
         responseJson.accumulate("completedChallenges", myJsonObjects, lJsonConfig)
@@ -164,14 +164,8 @@ class CustomAPI : RootAction {
             ?: throw FormValidation.error(Constants.Error.RETRIEVING_PROPERTY)
         val myJsonObjects = property.getCurrentChallenges(job)
 
-        val lJsonConfig = JsonConfig();
-        lJsonConfig.isAllowNonStringKeys = true;
-        lJsonConfig.cycleDetectionStrategy = CycleDetectionStrategy.NOPROP
-        lJsonConfig.excludes = arrayOf("File")
-
         val responseJson = JSONObject()
         responseJson.accumulate("currentChallenges", myJsonObjects, lJsonConfig)
-       // responseJson["currentChallenges"] = Gson().toJsonTree(myJsonObjects).asJsonObject
 
         return JsonHttpResponse(responseJson, 200)
     }
@@ -209,14 +203,6 @@ class CustomAPI : RootAction {
             ?: throw FormValidation.error(Constants.Error.RETRIEVING_PROPERTY)
 
         val myJsonObjects = property.getRejectedChallenges(job)
-       /* val response = JSONArray()
-        myJsonObjects.forEach { response.add(it) }
-*/
-        val lJsonConfig = JsonConfig();
-        lJsonConfig.isAllowNonStringKeys = true;
-        lJsonConfig.cycleDetectionStrategy = CycleDetectionStrategy.NOPROP
-        lJsonConfig.excludes = arrayOf("File")
-
 
         val responseJson = JSONObject()
         responseJson.accumulate("rejectedChallenges", myJsonObjects, lJsonConfig)
@@ -237,14 +223,6 @@ class CustomAPI : RootAction {
             ?: throw FormValidation.error(Constants.Error.RETRIEVING_PROPERTY)
 
         val myJsonObjects = property.getStoredChallenges(job)
-       /* val response = JSONArray()
-        myJsonObjects.forEach { response.add(it) }*/
-
-        val lJsonConfig = JsonConfig();
-        lJsonConfig.isAllowNonStringKeys = true;
-        lJsonConfig.cycleDetectionStrategy = CycleDetectionStrategy.NOPROP
-        lJsonConfig.excludes = arrayOf("File")
-
 
         val responseJson = JSONObject()
         responseJson.accumulate("storedChallenges", myJsonObjects, lJsonConfig)
