@@ -16,6 +16,7 @@
 
 package org.gamekins.file
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import hudson.FilePath
 import org.gamekins.util.Constants.Parameters
 import org.gamekins.util.GitUtil
@@ -36,6 +37,7 @@ import java.nio.charset.Charset
  * @author Philipp Straubinger
  * @since 0.4
  */
+@JsonIgnoreProperties(value = ["changedByUsers"])
 abstract class FileDetails(var parameters: Parameters, val filePath: String)
     : Serializable, ClientInputFile {
 
