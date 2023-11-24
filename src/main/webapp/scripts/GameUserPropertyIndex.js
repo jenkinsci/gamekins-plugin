@@ -365,14 +365,35 @@ function loadAchievements() {
             for(let i = 0; i < milestones.length; i++) {
                 let cell = document.createElement("td")
                 let progContainer = document.createElement("div")
-                progContainer.classList.add("progress")
-                progContainer.classList.add("bg-light")
+                //progContainer.classList.add("progress")
+                //progContainer.classList.add("bg-light")
+
+
+                progContainer.style.display = "flex"
                 progContainer.style.height = "1rem"
+                progContainer.style.overflow = "hidden"
+                progContainer.style.lineHeight = "0"
+                progContainer.style.fontSize = "0.75rem"
+                progContainer.style.backgroundColor = "#f8f9fa"
+                progContainer.style.borderRadius = "0.25rem"
+
                 let progBar = document.createElement("div")
-                progBar.classList.add("progress-bar")
-                progBar.classList.add("overflow-visible")
-                progBar.classList.add("text-dark")
-                progBar.classList.add("bg-info")
+                //progBar.classList.add("progress-bar")
+                //progBar.classList.add("overflow-visible")
+                //progBar.classList.add("text-dark")
+                //progBar.classList.add("bg-info")
+
+                progBar.style.display = "flex"
+                progBar.style.flexDirection = "column"
+                progBar.style.justifyContent = "center"
+                progBar.style.overflow = "visible"
+                progBar.style.color = "#343a40"
+                progBar.style.textAlign = "center"
+                progBar.style.whiteSpace = "nowrap"
+                progBar.style.backgroundColor = "#0dcaf0"
+                progBar.style.transition = "width 0.6s ease"
+
+
                 progBar.setAttribute("role", "progressbar")
                 if (i === 0) {
                     progBar.setAttribute("aria-valuemin", "0")
