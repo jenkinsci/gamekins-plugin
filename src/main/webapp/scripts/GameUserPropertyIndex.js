@@ -374,7 +374,7 @@ function loadAchievements() {
                 progContainer.style.overflow = "hidden"
                 progContainer.style.lineHeight = "0"
                 progContainer.style.fontSize = "0.75rem"
-                progContainer.style.backgroundColor = "#f8f9fa"
+                progContainer.style.backgroundColor = "#d3d3d3"
                 progContainer.style.borderRadius = "0.25rem"
 
                 let progBar = document.createElement("div")
