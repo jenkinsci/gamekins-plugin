@@ -23,6 +23,14 @@ import org.kohsuke.stapler.verb.GET
 import org.kohsuke.stapler.verb.POST
 import java.util.concurrent.CopyOnWriteArrayList
 
+import io.ktor.application.*
+import io.ktor.features.*
+import io.ktor.http.cio.websocket.*
+import io.ktor.routing.*
+import io.ktor.server.engine.*
+import io.ktor.server.netty.*
+import io.ktor.websocket.*
+import kotlinx.coroutines.*
 
 @Extension
 class CustomAPI : RootAction {
@@ -100,11 +108,6 @@ class CustomAPI : RootAction {
         val property = user.getProperty(GameUserProperty::class.java)
             ?: throw FormValidation.error(Constants.Error.RETRIEVING_PROPERTY)
         val myJsonObjects = property.getCompletedQuests(job)
-
-       /* val response = JSONArray()
-        myJsonObjects.forEach { response.add(it) }
-        val responseJson = JSONObject()
-        responseJson["completedQuests"] = myJsonObjects*/
 
         return Gson().toJson(myJsonObjects)
     }
@@ -552,6 +555,22 @@ class CustomAPI : RootAction {
         responseJson["statistics"] = StatisticsAction(lJob).getStatistics()
 
         return JsonHttpResponse(responseJson, 200)
+    }
+
+    /**
+     * startSocket [projectName].
+     */
+    @POST
+    @WebMethod(name = ["startSocket"])
+    fun startSocket(): JsonHttpResponse {
+        try {
+            WebSocketServer.startServer()
+        }catch (e: Exception){
+            println(e)
+        }
+
+        val response = JSONObject()
+        return JsonHttpResponse(response, 200)
     }
 
 }

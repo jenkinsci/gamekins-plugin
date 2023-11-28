@@ -18,7 +18,9 @@ package org.gamekins.event.build
 
 import hudson.model.Run
 import hudson.model.User
+import kotlinx.coroutines.runBlocking
 import org.gamekins.GameUserProperty
+import org.gamekins.WebSocketServer
 import org.gamekins.event.EventHandler
 import org.gamekins.event.user.*
 import org.gamekins.util.MailUtil
@@ -34,6 +36,11 @@ class BuildFinishedEvent(projectName: String, branch: String, build: Run<*, *>)
     : BuildEvent(projectName, branch, build) {
 
     override fun run() {
+
+        runBlocking {
+            WebSocketServer.sendMessage("Build has finished")
+        }
+
         val events = EventHandler.events
             .filterIsInstance<UserEvent>()
             .filter { it.projectName == this.projectName && it.branch == this.branch }
@@ -47,8 +54,14 @@ class BuildFinishedEvent(projectName: String, branch: String, build: Run<*, *>)
 
         for ((user, list) in userEvents) {
             if (user.getProperty(GameUserProperty::class.java).getNotifications()) {
+               val lEmailText = EventHandler.generateMailText(projectName, build, user, list)
                 MailUtil.sendMail(user, "Gamekins results", "results@gamekins.org", "Gamekins",
-                    EventHandler.generateMailText(projectName, build, user, list))
+                    lEmailText)
+
+                runBlocking {
+                    WebSocketServer.sendMessage(lEmailText)
+                }
+
             }
         }
 
