@@ -18,6 +18,8 @@ package org.gamekins.event
 
 import hudson.model.Run
 import hudson.model.User
+import kotlinx.coroutines.runBlocking
+import org.gamekins.WebSocketServer
 import org.gamekins.event.user.*
 import org.gamekins.util.MailUtil
 import java.util.concurrent.CopyOnWriteArrayList
@@ -52,6 +54,10 @@ object EventHandler {
                 text += "- ${event.challenge.toEscapedString()}\n"
             }
             text += "\n"
+
+            runBlocking {
+                WebSocketServer.sendMessage("Challenge(s) solved")
+            }
         }
 
         if (list.find { it is ChallengeUnsolvableEvent } != null) {
@@ -60,14 +66,23 @@ object EventHandler {
                 text += "- ${event.challenge.toEscapedString()}\n"
             }
             text += "\n"
+
+            runBlocking {
+                WebSocketServer.sendMessage("New unsolvable Challenge(s)")
+            }
         }
 
         if (list.find { it is ChallengeGeneratedEvent } != null) {
             text += "Challenge(s) generated:\n"
             for (event in list.filterIsInstance<ChallengeGeneratedEvent>()) {
                 text += "- ${event.challenge.toEscapedString()}\n"
+
             }
             text += "\n"
+
+            runBlocking {
+                WebSocketServer.sendMessage("Challenge(s) generated")
+            }
         }
 
         return text
@@ -113,6 +128,10 @@ object EventHandler {
                 text += "- ${event.quest}: ${event.questStep}\n"
             }
             text += "\n"
+
+            runBlocking {
+                WebSocketServer.sendMessage("Quest step(s) solved")
+            }
         }
 
         if (list.find { it is QuestSolvedEvent } != null) {
@@ -121,6 +140,10 @@ object EventHandler {
                 text += "- ${event.quest}\n"
             }
             text += "\n"
+
+            runBlocking {
+                WebSocketServer.sendMessage("Quest(s) solved:")
+            }
         }
 
         if (list.find { it is QuestUnsolvableEvent } != null) {
@@ -129,6 +152,10 @@ object EventHandler {
                 text += "- ${event.quest}\n"
             }
             text += "\n"
+
+            runBlocking {
+                WebSocketServer.sendMessage("New unsolvable Quest(s)")
+            }
         }
 
         if (list.find { it is QuestGeneratedEvent } != null) {
@@ -137,6 +164,10 @@ object EventHandler {
                 text += "- ${event.quest}\n"
             }
             text += "\n"
+
+            runBlocking {
+                WebSocketServer.sendMessage("Quest(s) generated")
+            }
         }
 
         return text
@@ -153,6 +184,10 @@ object EventHandler {
                 text += "- ${event.questTask}: ${event.currentNumber} of ${event.numberGoal} already done\n"
             }
             text += "\n"
+
+            runBlocking {
+                WebSocketServer.sendMessage("Progress in Quest(s)")
+            }
         }
 
         if (list.find { it is QuestTaskSolvedEvent } != null) {
@@ -161,6 +196,10 @@ object EventHandler {
                 text += "- ${event.questTask}\n"
             }
             text += "\n"
+
+            runBlocking {
+                WebSocketServer.sendMessage("Quest(s) solved")
+            }
         }
 
         if (list.find { it is QuestTaskGeneratedEvent } != null) {
@@ -169,6 +208,10 @@ object EventHandler {
                 text += "- ${event.questTask}\n"
             }
             text += "\n"
+
+            runBlocking {
+                WebSocketServer.sendMessage("Quest(s) generated")
+            }
         }
 
         return text

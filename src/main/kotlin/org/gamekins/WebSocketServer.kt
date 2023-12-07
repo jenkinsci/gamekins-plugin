@@ -46,7 +46,7 @@ object WebSocketServer {
     private fun Application.extracted() {
         install(WebSockets)
         routing {
-            webSocket("/send") {
+            webSocket("/jenkins/send") {
                 println("WebSocket connection established")
                 connections.add(this.outgoing)
 

@@ -6,7 +6,15 @@ import hudson.model.Job
 import hudson.model.RootAction
 import hudson.model.User
 import hudson.util.FormValidation
+import io.ktor.application.*
+import io.ktor.features.*
+import io.ktor.http.cio.websocket.*
+import io.ktor.routing.*
+import io.ktor.server.engine.*
+import io.ktor.server.netty.*
+import io.ktor.websocket.*
 import jenkins.model.Jenkins
+import kotlinx.coroutines.*
 import net.sf.json.JSONArray
 import net.sf.json.JSONObject
 import net.sf.json.JsonConfig
@@ -23,25 +31,16 @@ import org.kohsuke.stapler.verb.GET
 import org.kohsuke.stapler.verb.POST
 import java.util.concurrent.CopyOnWriteArrayList
 
-import io.ktor.application.*
-import io.ktor.features.*
-import io.ktor.http.cio.websocket.*
-import io.ktor.routing.*
-import io.ktor.server.engine.*
-import io.ktor.server.netty.*
-import io.ktor.websocket.*
-import kotlinx.coroutines.*
-
 @Extension
 class CustomAPI : RootAction {
 
-    private val lJsonConfig = JsonConfig();
+    private val lJsonConfig = JsonConfig()
 
     init {
-        lJsonConfig.isAllowNonStringKeys = true;
+        lJsonConfig.isAllowNonStringKeys = true
         lJsonConfig.cycleDetectionStrategy = CycleDetectionStrategy.NOPROP
         lJsonConfig.excludes = arrayOf("File")
-        lJsonConfig.jsonPropertyFilter = PropertyFilter { _, name, _ -> name ==  "changedByUsers" }
+        lJsonConfig.jsonPropertyFilter = PropertyFilter { _, name, _ -> name == "changedByUsers" }
     }
 
     override fun getIconFileName(): String? {
@@ -125,11 +124,8 @@ class CustomAPI : RootAction {
             ?: throw FormValidation.error(Constants.Error.RETRIEVING_PROPERTY)
         val myJsonObjects = property.getCompletedQuestTasks(job)
 
-        val response = JSONArray()
-        myJsonObjects.forEach { response.add(it) }
         val responseJson = JSONObject()
-        responseJson["completedQuestTasks"] = myJsonObjects
-
+        responseJson.accumulate("completedQuestTasks", myJsonObjects, lJsonConfig)
         return JsonHttpResponse(responseJson, 200)
     }
 
@@ -146,10 +142,8 @@ class CustomAPI : RootAction {
             ?: throw FormValidation.error(Constants.Error.RETRIEVING_PROPERTY)
         val myJsonObjects = property.getCurrentQuests(job)
 
-        val response = JSONArray()
-        myJsonObjects.forEach { response.add(it) }
         val responseJson = JSONObject()
-        responseJson["currentQuests"] = myJsonObjects
+        responseJson.accumulate("currentQuests", myJsonObjects, lJsonConfig)
 
         return JsonHttpResponse(responseJson, 200)
     }
@@ -238,9 +232,9 @@ class CustomAPI : RootAction {
      */
     @POST
     @WebMethod(name = ["storeChallenge"])
-    fun storeChallenge(@JsonBody body: StoreChallenge ): JsonHttpResponse {
+    fun storeChallenge(@JsonBody body: StoreChallenge): JsonHttpResponse {
 
-        val job: Job<*, *> = Jenkins.get().getItemByFullName(body.job) as Job<*, *>;
+        val job: Job<*, *> = Jenkins.get().getItemByFullName(body.job) as Job<*, *>
 
         val response = JSONObject()
         response["message"] = ActionUtil.doStoreChallenge(job, body.challengeName)
@@ -252,9 +246,9 @@ class CustomAPI : RootAction {
      */
     @POST
     @WebMethod(name = ["restoreChallenge"])
-    fun restoreChallenge(@JsonBody body: StoreChallenge ): JsonHttpResponse {
+    fun restoreChallenge(@JsonBody body: StoreChallenge): JsonHttpResponse {
 
-        val job: Job<*, *> = Jenkins.get().getItemByFullName(body.job) as Job<*, *>;
+        val job: Job<*, *> = Jenkins.get().getItemByFullName(body.job) as Job<*, *>
 
         val response = JSONObject()
         response["message"] = ActionUtil.doRestoreChallenge(job, body.challengeName)
@@ -266,9 +260,9 @@ class CustomAPI : RootAction {
      */
     @POST
     @WebMethod(name = ["unshelveChallenge"])
-    fun unshelveChallenge(@JsonBody body: StoreChallenge ): JsonHttpResponse {
+    fun unshelveChallenge(@JsonBody body: StoreChallenge): JsonHttpResponse {
 
-        val job: Job<*, *> = Jenkins.get().getItemByFullName(body.job) as Job<*, *>;
+        val job: Job<*, *> = Jenkins.get().getItemByFullName(body.job) as Job<*, *>
 
         val response = JSONObject()
         response["message"] = ActionUtil.doUndoStoreChallenge(job, body.challengeName)
@@ -280,9 +274,9 @@ class CustomAPI : RootAction {
      */
     @POST
     @WebMethod(name = ["rejectChallenge"])
-    fun rejectChallenge(@JsonBody body: StoreChallenge ): JsonHttpResponse {
+    fun rejectChallenge(@JsonBody body: StoreChallenge): JsonHttpResponse {
 
-        val job: Job<*, *> = Jenkins.get().getItemByFullName(body.job) as Job<*, *>;
+        val job: Job<*, *> = Jenkins.get().getItemByFullName(body.job) as Job<*, *>
 
         val response = JSONObject()
         response["message"] = ActionUtil.doRejectChallenge(job, body.challengeName, body.reason)
@@ -419,7 +413,7 @@ class CustomAPI : RootAction {
         val property = user.getProperty(GameUserProperty::class.java)
             ?: throw FormValidation.error(Constants.Error.RETRIEVING_PROPERTY)
 
-        val myJsonObjects = property.getDisplayName()
+        val myJsonObjects = property.displayName
         val response = JSONArray()
         myJsonObjects.forEach { response.add(it) }
         val responseJson = JSONObject()
@@ -497,7 +491,7 @@ class CustomAPI : RootAction {
         val projectEvents = CopyOnWriteArrayList(EventHandler.events)
 
         projectEvents
-            .filter { it.projectName == job}
+            .filter { it.projectName == job }
             .forEach { EventHandler.events.remove(it) }
 
         val myJsonObjects = arrayListOf(projectEvents)
@@ -515,7 +509,7 @@ class CustomAPI : RootAction {
     @WebMethod(name = ["getUsers"])
     fun getUsers(@QueryParameter("job") job: String): JsonHttpResponse {
 
-        val lJob: Job<*, *> = Jenkins.get().getItemByFullName(job) as Job<*, *>;
+        val lJob: Job<*, *> = Jenkins.get().getItemByFullName(job) as Job<*, *>
         val myJsonObjects = ActionUtil.getUserDetails(lJob)
 
         val response = JSONArray()
@@ -532,7 +526,7 @@ class CustomAPI : RootAction {
     @WebMethod(name = ["getTeams"])
     fun getTeams(@QueryParameter("job") job: String): JsonHttpResponse {
 
-        val lJob: Job<*, *> = Jenkins.get().getItemByFullName(job) as Job<*, *>;
+        val lJob: Job<*, *> = Jenkins.get().getItemByFullName(job) as Job<*, *>
         val myJsonObjects = ActionUtil.getTeamDetails(lJob)
 
         val response = JSONArray()
@@ -549,7 +543,7 @@ class CustomAPI : RootAction {
     @WebMethod(name = ["getStatistics"])
     fun getStatistics(@QueryParameter("job") job: String): JsonHttpResponse {
 
-        val lJob: Job<*, *> = Jenkins.get().getItemByFullName(job) as Job<*, *>;
+        val lJob: Job<*, *> = Jenkins.get().getItemByFullName(job) as Job<*, *>
 
         val responseJson = JSONObject()
         responseJson["statistics"] = StatisticsAction(lJob).getStatistics()
@@ -565,12 +559,27 @@ class CustomAPI : RootAction {
     fun startSocket(): JsonHttpResponse {
         try {
             WebSocketServer.startServer()
-        }catch (e: Exception){
+        } catch (e: Exception) {
             println(e)
         }
 
         val response = JSONObject()
         return JsonHttpResponse(response, 200)
+    }
+
+    /**
+     * Returns the limit of stored challenges of [projectName].
+     */
+    @GET
+    @WebMethod(name = ["getStoredChallengesLimit"])
+    fun getStoredChallengesLimit(@QueryParameter("job") job: String): JsonHttpResponse {
+
+        val lJob: Job<*, *> = Jenkins.get().getItemByFullName(job) as Job<*, *>
+
+        val responseJson = JSONObject()
+        responseJson["limit"] = TaskAction(lJob).getStoredChallengesLimit()
+
+        return JsonHttpResponse(responseJson, 200)
     }
 
 }
