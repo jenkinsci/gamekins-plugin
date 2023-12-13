@@ -61,8 +61,16 @@ object PublisherUtil {
                 solved++
             }
         }
-        property.getProgressAchievements(parameters.projectName).forEach { it.progress(files, parameters, run, property) }
-        property.getBadgeAchievements(parameters.projectName).forEach { it.update(files, parameters, run, property) }
+        property.getProgressAchievements(parameters.projectName).forEach { pa ->
+            val before = pa.milestones.indexOfLast { it <= pa.progress } + 1
+            pa.progress(files, parameters, run, property)
+            solved += (pa.milestones.indexOfLast { it <= pa.progress } + 1) - before
+        }
+        property.getBadgeAchievements(parameters.projectName).forEach {
+            val before = it.badgeCounts.sum()
+            it.update(files, parameters, run, property)
+            solved += it.badgeCounts.sum() - before
+        }
 
         return solved
     }

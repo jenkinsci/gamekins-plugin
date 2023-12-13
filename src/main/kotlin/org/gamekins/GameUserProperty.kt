@@ -417,12 +417,27 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
         return unsolvedAchievements[projectName]!!
     }
 
+    /**
+     * Returns the list of progress achievements
+     */
     fun getProgressAchievements(projectName: String): CopyOnWriteArrayList<ProgressAchievement> {
         return progressAchievements[projectName]!!
     }
 
+    /**
+     * Returns the list of badge achievements
+     */
     fun getBadgeAchievements(projectName: String): CopyOnWriteArrayList<BadgeAchievement> {
         return badgeAchievements[projectName]!!
+    }
+
+    /**
+     * Returns the amount of completed achievements including every badge and every milestone of badge and progress achievements respectively
+     */
+    fun getTotalCompletedAchievementCount(projectName: String) : Int {
+        return completedAchievements[projectName]!!.size +
+                progressAchievements[projectName]!!.sumOf { pa -> pa.milestones.indexOfLast { it <= pa.progress } + 1 } +
+                badgeAchievements[projectName]!!.sumOf { it.badgeCounts.sum() }
     }
 
     override fun getUrlName(): String {

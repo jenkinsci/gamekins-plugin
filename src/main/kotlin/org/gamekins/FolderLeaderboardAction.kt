@@ -69,7 +69,7 @@ class FolderLeaderboardAction(val job: AbstractItem) : ProminentProjectAction, S
                     quests += property.getCompletedQuests(project).size
                     questTasks += property.getCompletedQuestTasks(project).size
                     unfinishedQuests += property.getUnfinishedQuests(project).size
-                    achievements += property.getCompletedAchievements(project).size
+                    achievements += property.getTotalCompletedAchievementCount(project)
                 }
 
                 details.add(
