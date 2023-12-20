@@ -38,5 +38,13 @@
     "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::getSolvedChallengesCount",
     "milestones": [1, 3, 10, 20, 50, 100],
     "unit": ""
+  },
+  {
+    "badgePath": "/plugin/gamekins/achievements/colour/no-mutants-colour.png",
+    "description": "Solve mutation challenges",
+    "title": "No more mutants!",
+    "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::getSolvedMutationChallengesCount",
+    "milestones": [1, 3, 5, 7, 10],
+    "unit": ""
   }
 ]
