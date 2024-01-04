@@ -22,10 +22,7 @@ import hudson.model.Run
 import hudson.model.TaskListener
 import hudson.model.User
 import org.gamekins.GameUserProperty
-import org.gamekins.challenge.BranchCoverageChallenge
-import org.gamekins.challenge.BuildChallenge
-import org.gamekins.challenge.CoverageChallenge
-import org.gamekins.challenge.MutationChallenge
+import org.gamekins.challenge.*
 import org.gamekins.file.FileDetails
 import org.gamekins.util.Constants.Parameters
 import java.util.HashMap
@@ -374,6 +371,15 @@ object AchievementUtil {
                                  run: Run<*, *>, property: GameUserProperty, listener: TaskListener): Int {
 
         return property.getCompletedChallenges(parameters.projectName).filterIsInstance(MutationChallenge::class.java).size
+    }
+
+    /**
+     * Returns the amount of solved smell challenges in the project.
+     */
+    fun getSolvedSmellChallengesCount(classes: ArrayList<FileDetails>, parameters: Parameters,
+                                         run: Run<*, *>, property: GameUserProperty, listener: TaskListener): Int {
+
+        return property.getCompletedChallenges(parameters.projectName).filterIsInstance(SmellChallenge::class.java).size
     }
 
     /**
