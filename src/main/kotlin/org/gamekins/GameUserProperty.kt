@@ -69,6 +69,8 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
     private var unsolvedAchievements: HashMap<String, CopyOnWriteArrayList<Achievement>> = HashMap()
     private var progressAchievements: HashMap<String, CopyOnWriteArrayList<ProgressAchievement>> = HashMap()
     private var badgeAchievements: HashMap<String, CopyOnWriteArrayList<BadgeAchievement>> = HashMap()
+    private var sentChallengesCount: HashMap<String, Int> = HashMap()
+    private var receivedChallengesCount: HashMap<String, Int> = HashMap()
 
     /**
      * Adds an additional [score] to one project [projectName], since one user can participate in multiple projects.
@@ -78,7 +80,7 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
     }
 
     /**
-     * Sets an [achievement] of project [projectName] to complete an removes it from the [unsolvedAchievements].
+     * Sets an [achievement] of project [projectName] to complete and removes it from the [unsolvedAchievements].
      */
     fun completeAchievement(projectName: String, achievement: Achievement) {
         completedAchievements.computeIfAbsent(projectName) { CopyOnWriteArrayList() }
@@ -440,6 +442,20 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
                 badgeAchievements[projectName]!!.sumOf { it.badgeCounts.sum() }
     }
 
+    /**
+     * Returns the amount of challenges this user hast sent in the specified project
+     */
+    fun getSentChallengesCount(projectName: String) : Int {
+        return sentChallengesCount[projectName]!!
+    }
+
+    /**
+     * Returns the amount of challenges this user hast received in the specified project
+     */
+    fun getReceivedChallengesCount(projectName: String) : Int {
+        return receivedChallengesCount[projectName]!!
+    }
+
     override fun getUrlName(): String {
         return "achievements"
     }
@@ -611,6 +627,14 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
         if (participation.size != 0 && storedChallenges.size == 0) {
             participation.keys.forEach { project ->
                 storedChallenges[project] = CopyOnWriteArrayList()
+            }
+        }
+
+        //Add sending statistics if newly introduced
+        if (participation.size != 0 && (sentChallengesCount.size == 0 || receivedChallengesCount.size == 0)) {
+            participation.keys.forEach { project ->
+                sentChallengesCount[project] = 0
+                receivedChallengesCount[project] = 0
             }
         }
 
@@ -845,6 +869,8 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
         unfinishedQuests.putIfAbsent(projectName, CopyOnWriteArrayList())
         completedQuestTasks.putIfAbsent(projectName, CopyOnWriteArrayList())
         currentQuestTasks.putIfAbsent(projectName, CopyOnWriteArrayList())
+        sentChallengesCount.putIfAbsent(projectName, 0)
+        receivedChallengesCount.putIfAbsent(projectName, 0)
     }
 
     /**
@@ -988,6 +1014,20 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
 
     fun addStoredChallenge(projectName: String, challenge: Challenge) {
         storedChallenges[projectName]!!.add(challenge)
+    }
+
+    /**
+     * Increments the counter for sent challenges
+     */
+    fun incrementSentChallenges(projectName: String) {
+        sentChallengesCount[projectName] = sentChallengesCount[projectName]!!.inc()
+    }
+
+    /**
+     * Increments the counter for received challenges
+     */
+    fun incrementReceivedChallenges(projectName: String) {
+        receivedChallengesCount[projectName] = receivedChallengesCount[projectName]!!.inc()
     }
 
 }

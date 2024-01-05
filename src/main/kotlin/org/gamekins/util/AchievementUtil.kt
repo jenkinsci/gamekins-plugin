@@ -402,4 +402,48 @@ object AchievementUtil {
 
         return listOf(parameters.solved.toDouble())
     }
+
+    /**
+     * Returns the amount of challenges sent to other people
+     */
+    fun getChallengesSentAmount(classes: ArrayList<FileDetails>, parameters: Parameters,
+                                run: Run<*, *>, property: GameUserProperty, listener: TaskListener): Int {
+        return property.getSentChallengesCount(parameters.projectName)
+    }
+
+    /**
+     * Returns the amount of challenges received from other people
+     */
+    fun getChallengesReceivedAmount(classes: ArrayList<FileDetails>, parameters: Parameters,
+                                run: Run<*, *>, property: GameUserProperty, listener: TaskListener): Int {
+        return property.getReceivedChallengesCount(parameters.projectName)
+    }
+
+    /**
+     * Solves the achievements with description: Send more than X the amount of challenges you receive (and more than Y)
+     * Needs the keys 'factor' and 'base' in the map [additionalParameters] with positive Int values.
+     */
+    fun solveSentMoreChallengesThanReceived(classes: ArrayList<FileDetails>, parameters: Parameters,
+                     run: Run<*, *>, property: GameUserProperty, listener: TaskListener,
+                     additionalParameters: HashMap<String, String>): Boolean {
+
+        return property.getSentChallengesCount(parameters.projectName) >
+                max(additionalParameters["factor"]?.toInt()
+                    ?.times(property.getReceivedChallengesCount(parameters.projectName)) ?: Int.MAX_VALUE,
+                    additionalParameters["base"]?.toInt() ?: Int.MAX_VALUE)
+    }
+
+    /**
+     * Solves the achievements with description: Receive more than X the amount of challenges you send (and more than Y)
+     * Needs the keys 'factor' and 'base' in the map [additionalParameters] with positive Int values.
+     */
+    fun solveReceiveMoreChallengesThanSent(classes: ArrayList<FileDetails>, parameters: Parameters,
+                                            run: Run<*, *>, property: GameUserProperty, listener: TaskListener,
+                                            additionalParameters: HashMap<String, String>): Boolean {
+
+        return property.getReceivedChallengesCount(parameters.projectName) >
+                max(additionalParameters["factor"]?.toInt()
+                    ?.times(property.getSentChallengesCount(parameters.projectName)) ?: Int.MAX_VALUE,
+                    additionalParameters["base"]?.toInt() ?: Int.MAX_VALUE)
+    }
 }
