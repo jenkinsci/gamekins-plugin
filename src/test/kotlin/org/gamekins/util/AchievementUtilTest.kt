@@ -852,4 +852,82 @@ class AchievementUtilTest: FeatureSpec({
     feature("getSolvedChallengesSimultaneouslyCount") {
         AchievementUtil.getSolvedChallengesSimultaneouslyCount(files, parameters, run, property, TaskListener.NULL) shouldBe listOf(1.0)
     }
+
+    feature("getChallengesSentAmount") {
+        scenario("No Challenges sent") {
+            every { property.getSentChallengesCount(any()) } returns 0
+            AchievementUtil.getChallengesSentAmount(files, parameters, run , property, TaskListener.NULL) shouldBe 0
+        }
+
+        scenario("Two Challenges sent") {
+            every { property.getSentChallengesCount(any()) } returns 2
+            AchievementUtil.getChallengesSentAmount(files, parameters, run , property, TaskListener.NULL) shouldBe 2
+        }
+    }
+
+    feature("getChallengesReceivedAmount") {
+        scenario("No Challenges received") {
+            every { property.getReceivedChallengesCount(any()) } returns 0
+            AchievementUtil.getChallengesReceivedAmount(files, parameters, run , property, TaskListener.NULL) shouldBe 0
+        }
+
+        scenario("Two Challenges received") {
+            every { property.getReceivedChallengesCount(any()) } returns 2
+            AchievementUtil.getChallengesReceivedAmount(files, parameters, run , property, TaskListener.NULL) shouldBe 2
+        }
+    }
+
+    feature("solveSentMoreChallengesThanReceived") {
+        additionalParameters.clear()
+
+        additionalParameters["factor"] = "3"
+        additionalParameters["minimum"] = "0"
+
+        scenario("Less than triple challenges sent than received") {
+            every { property.getSentChallengesCount(any()) } returns 0
+            every { property.getReceivedChallengesCount(any()) } returns 1
+            AchievementUtil.solveSentMoreChallengesThanReceived(files, parameters, run , property, TaskListener.NULL, additionalParameters) shouldBe false
+        }
+
+        scenario("More than triple challenges sent than received") {
+            every { property.getSentChallengesCount(any()) } returns 4
+            every { property.getReceivedChallengesCount(any()) } returns 1
+            AchievementUtil.solveSentMoreChallengesThanReceived(files, parameters, run , property, TaskListener.NULL, additionalParameters) shouldBe true
+        }
+
+        additionalParameters["minimum"] = "6"
+
+        scenario("More than triple challenges sent than received, but not above minimum") {
+            every { property.getSentChallengesCount(any()) } returns 4
+            every { property.getReceivedChallengesCount(any()) } returns 1
+            AchievementUtil.solveSentMoreChallengesThanReceived(files, parameters, run , property, TaskListener.NULL, additionalParameters) shouldBe false
+        }
+    }
+
+    feature("solveReceiveMoreChallengesThanSent") {
+        additionalParameters.clear()
+
+        additionalParameters["factor"] = "3"
+        additionalParameters["minimum"] = "0"
+
+        scenario("Less than triple challenges received than sent") {
+            every { property.getSentChallengesCount(any()) } returns 1
+            every { property.getReceivedChallengesCount(any()) } returns 0
+            AchievementUtil.solveReceiveMoreChallengesThanSent(files, parameters, run , property, TaskListener.NULL, additionalParameters) shouldBe false
+        }
+
+        scenario("More than triple challenges received than sent") {
+            every { property.getSentChallengesCount(any()) } returns 1
+            every { property.getReceivedChallengesCount(any()) } returns 4
+            AchievementUtil.solveReceiveMoreChallengesThanSent(files, parameters, run , property, TaskListener.NULL, additionalParameters) shouldBe true
+        }
+
+        additionalParameters["minimum"] = "6"
+
+        scenario("More than triple challenges received than sent, but not above minimum") {
+            every { property.getSentChallengesCount(any()) } returns 1
+            every { property.getReceivedChallengesCount(any()) } returns 4
+            AchievementUtil.solveReceiveMoreChallengesThanSent(files, parameters, run , property, TaskListener.NULL, additionalParameters) shouldBe false
+        }
+    }
 })

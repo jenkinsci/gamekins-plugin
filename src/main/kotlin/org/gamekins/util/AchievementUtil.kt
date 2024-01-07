@@ -430,7 +430,7 @@ object AchievementUtil {
         return property.getSentChallengesCount(parameters.projectName) >
                 max(additionalParameters["factor"]?.toInt()
                     ?.times(property.getReceivedChallengesCount(parameters.projectName)) ?: Int.MAX_VALUE,
-                    additionalParameters["base"]?.toInt() ?: Int.MAX_VALUE)
+                    additionalParameters["minimum"]?.toInt() ?: Int.MAX_VALUE)
     }
 
     /**
@@ -444,6 +444,6 @@ object AchievementUtil {
         return property.getReceivedChallengesCount(parameters.projectName) >
                 max(additionalParameters["factor"]?.toInt()
                     ?.times(property.getSentChallengesCount(parameters.projectName)) ?: Int.MAX_VALUE,
-                    additionalParameters["base"]?.toInt() ?: Int.MAX_VALUE)
+                    additionalParameters["minimum"]?.toInt() ?: Int.MAX_VALUE)
     }
 }

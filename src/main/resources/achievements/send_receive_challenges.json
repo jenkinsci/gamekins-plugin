@@ -8,7 +8,7 @@
     "secret": false,
     "additionalParameters": {
       "factor": 3,
-      "base": 6
+      "minimum": 6
     }
   },
   {
@@ -20,7 +20,7 @@
     "secret": false,
     "additionalParameters": {
       "factor": 3,
-      "base": 6
+      "minimum": 6
     }
   }
 ]
