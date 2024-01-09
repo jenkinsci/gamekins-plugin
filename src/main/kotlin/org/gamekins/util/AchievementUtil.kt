@@ -24,6 +24,8 @@ import hudson.model.User
 import org.gamekins.GameUserProperty
 import org.gamekins.challenge.*
 import org.gamekins.file.FileDetails
+import org.gamekins.property.GameJobProperty
+import org.gamekins.property.GameMultiBranchProperty
 import org.gamekins.util.Constants.Parameters
 import java.util.HashMap
 import kotlin.math.max
@@ -445,5 +447,22 @@ object AchievementUtil {
                 max(additionalParameters["factor"]?.toInt()
                     ?.times(property.getSentChallengesCount(parameters.projectName)) ?: Int.MAX_VALUE,
                     additionalParameters["minimum"]?.toInt() ?: Int.MAX_VALUE)
+    }
+
+    fun solveInventoryFull(classes: ArrayList<FileDetails>, parameters: Parameters,
+                           run: Run<*, *>, property: GameUserProperty, listener: TaskListener,
+                           additionalParameters: HashMap<String, String>): Boolean {
+
+        val maxStoredChallengesAmount : Int =
+            when (val gameProperty = PropertyUtil.retrieveGamePropertyFromRun(run)) {
+                is GameMultiBranchProperty -> gameProperty.currentStoredChallengesCount
+                is GameJobProperty -> gameProperty.currentStoredChallengesCount
+                else -> -1
+            }
+
+        if (maxStoredChallengesAmount == -1)
+            return false
+
+        return property.getStoredChallenges(parameters.projectName).size >= maxStoredChallengesAmount
     }
 }
