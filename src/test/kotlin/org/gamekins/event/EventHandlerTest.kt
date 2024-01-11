@@ -57,6 +57,7 @@ class EventHandlerTest : FeatureSpec({
         every { project.parent } returns projectParent
         every { project.getProperty(any()) } returns null
         every { achievement.toString() } returns "Achievement"
+        every { achievement.title } returns "Achievement Title"
         every { challengeSolved.toEscapedString() } returns "Challenge1"
         every { challengeUnsolvable.toEscapedString() } returns "Challenge2"
         every { challengeGenerated.toEscapedString() } returns "Challenge3"
