@@ -300,6 +300,46 @@ class CustomAPI : RootAction {
     }
 
     /**
+     * Returns the list of badge achievements.
+     */
+    @GET
+    @WebMethod(name = ["getBadgeAchievements"])
+    fun getBadgeAchievements(@QueryParameter("job") job: String): JsonHttpResponse {
+
+        val user: User = User.current()
+            ?: throw FormValidation.error(Constants.Error.NO_USER_SIGNED_IN)
+        val property = user.getProperty(GameUserProperty::class.java)
+            ?: throw FormValidation.error(Constants.Error.RETRIEVING_PROPERTY)
+
+        val myJsonObjects = property.getBadgeAchievements(job)
+        val response = JSONArray()
+        myJsonObjects.forEach { response.add(it) }
+        val responseJson = JSONObject()
+        responseJson["badgeAchievements"] = myJsonObjects
+        return JsonHttpResponse(responseJson, 200)
+    }
+
+    /**
+     * Returns the list of progress achievements.
+     */
+    @GET
+    @WebMethod(name = ["getProgresAchievements"])
+    fun getProgressAchievements(@QueryParameter("job") job: String): JsonHttpResponse {
+
+        val user: User = User.current()
+            ?: throw FormValidation.error(Constants.Error.NO_USER_SIGNED_IN)
+        val property = user.getProperty(GameUserProperty::class.java)
+            ?: throw FormValidation.error(Constants.Error.RETRIEVING_PROPERTY)
+
+        val myJsonObjects = property.getProgressAchievements(job)
+        val response = JSONArray()
+        myJsonObjects.forEach { response.add(it) }
+        val responseJson = JSONObject()
+        responseJson["progressAchievements"] = myJsonObjects
+        return JsonHttpResponse(responseJson, 200)
+    }
+
+    /**
      * Returns the filename of the current avatar.
      */
     @GET
