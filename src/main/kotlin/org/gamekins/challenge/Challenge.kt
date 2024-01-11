@@ -20,6 +20,7 @@ import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinte
 import hudson.model.Run
 import hudson.model.TaskListener
 import hudson.model.User
+import org.gamekins.CustomAPI
 import org.gamekins.statistics.Statistics
 import org.gamekins.LeaderboardAction
 import org.gamekins.file.FileDetails
@@ -48,6 +49,13 @@ interface Challenge {
         set(v) = Unit
 
     override fun equals(other: Any?): Boolean
+
+    /**
+     * Needed for [CustomAPI]
+     */
+    var generalReason: String?
+        get() = toString()
+        set(value) {}
 
     /**
      * Generates the compilationUnit. The [sourceFile] here is the name of the Java file (e.g., Test.java) and

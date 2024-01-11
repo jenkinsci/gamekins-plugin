@@ -21,6 +21,7 @@ import hudson.model.TaskListener
 import hudson.model.User
 import org.gamekins.GameUserProperty
 import org.gamekins.challenge.Challenge
+import org.gamekins.CustomAPI
 import org.gamekins.util.Constants
 
 /**
@@ -34,6 +35,13 @@ abstract class QuestTask(val numberGoal: Int) {
     val created = System.currentTimeMillis()
     var currentNumber: Int = 0
     var solved: Long = 0
+
+    /**
+     * Needed for [CustomAPI]
+     */
+    var title: String?
+        get() = toString()
+        set(value) {}
 
     /**
      * Gets completed percentage of the progress of the [QuestTask].
