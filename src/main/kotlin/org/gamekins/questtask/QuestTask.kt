@@ -35,10 +35,6 @@ abstract class QuestTask(val numberGoal: Int) {
     var currentNumber: Int = 0
     var solved: Long = 0
 
-    var title: String?
-        get() = toString()
-        set(value) {}
-
     /**
      * Gets completed percentage of the progress of the [QuestTask].
      */

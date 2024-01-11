@@ -49,10 +49,6 @@ interface Challenge {
 
     override fun equals(other: Any?): Boolean
 
-    var generalReason: String?
-        get() = toString()
-        set(value) {}
-
     /**
      * Generates the compilationUnit. The [sourceFile] here is the name of the Java file (e.g., Test.java) and
      * className is the fully qualified name of the class (e.g., org.example.Test).

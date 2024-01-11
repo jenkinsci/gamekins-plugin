@@ -54,14 +54,13 @@ class BuildFinishedEvent(projectName: String, branch: String, build: Run<*, *>)
 
         for ((user, list) in userEvents) {
             if (user.getProperty(GameUserProperty::class.java).getNotifications()) {
-               val lEmailText = EventHandler.generateMailText(projectName, build, user, list)
+               val emailText = EventHandler.generateMailText(projectName, build, user, list)
                 MailUtil.sendMail(user, "Gamekins results", "results@gamekins.org", "Gamekins",
-                    lEmailText)
+                    emailText)
 
                 runBlocking {
-                    WebSocketServer.sendMessage(lEmailText)
+                    WebSocketServer.sendMessage(emailText)
                 }
-
             }
         }
 

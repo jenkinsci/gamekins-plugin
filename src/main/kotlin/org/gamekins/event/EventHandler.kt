@@ -48,10 +48,13 @@ object EventHandler {
      */
     private fun generateChallengesText(list: ArrayList<UserEvent>): String {
         var text = ""
-        if (list.find { it is ChallengeSolvedEvent } != null) {
+        if (list.any { it is ChallengeSolvedEvent }) {
             text += "Challenge(s) solved:\n"
             for (event in list.filterIsInstance<ChallengeSolvedEvent>()) {
                 text += "- ${event.challenge.toEscapedString()}\n"
+                runBlocking {
+                    WebSocketServer.sendMessage("Challenge solved: ${event.challenge.toEscapedString()}")
+                }
             }
             text += "\n"
 
@@ -60,29 +63,26 @@ object EventHandler {
             }
         }
 
-        if (list.find { it is ChallengeUnsolvableEvent } != null) {
+        if (list.any { it is ChallengeUnsolvableEvent }) {
             text += "New unsolvable Challenge(s):\n"
             for (event in list.filterIsInstance<ChallengeUnsolvableEvent>()) {
                 text += "- ${event.challenge.toEscapedString()}\n"
+                runBlocking {
+                    WebSocketServer.sendMessage("Challenge unsolvable: ${event.challenge.toEscapedString()}")
+                }
             }
             text += "\n"
-
-            runBlocking {
-                WebSocketServer.sendMessage("New unsolvable Challenge(s)")
-            }
         }
 
-        if (list.find { it is ChallengeGeneratedEvent } != null) {
+        if (list.any { it is ChallengeGeneratedEvent }) {
             text += "Challenge(s) generated:\n"
             for (event in list.filterIsInstance<ChallengeGeneratedEvent>()) {
                 text += "- ${event.challenge.toEscapedString()}\n"
-
+                runBlocking {
+                    WebSocketServer.sendMessage("New Challenge: ${event.challenge.toEscapedString()}")
+                }
             }
             text += "\n"
-
-            runBlocking {
-                WebSocketServer.sendMessage("Challenge(s) generated")
-            }
         }
 
         return text
@@ -97,14 +97,15 @@ object EventHandler {
 
         text += generateChallengesText(list)
 
-        text += generateQuestsText(list)
-
         text += generateQuestTasksText(list)
 
-        if (list.find { it is AchievementSolvedEvent } != null) {
+        if (list.any { it is AchievementSolvedEvent }) {
             text += "Achievement(s) solved:\n"
             for (event in list.filterIsInstance<AchievementSolvedEvent>()) {
                 text += "- ${event.achievement}\n"
+                runBlocking {
+                    WebSocketServer.sendMessage("Achievement solved: ${event.achievement.title}")
+                }
             }
             text += "\n"
         }
@@ -118,100 +119,41 @@ object EventHandler {
     }
 
     /**
-     * Generates the text for all [Event]s based on Quests.
-     */
-    private fun generateQuestsText(list: ArrayList<UserEvent>): String {
-        var text = ""
-        if (list.find { it is QuestStepSolvedEvent } != null) {
-            text += "Quest step(s) solved:\n"
-            for (event in list.filterIsInstance<QuestStepSolvedEvent>()) {
-                text += "- ${event.quest}: ${event.questStep}\n"
-            }
-            text += "\n"
-
-            runBlocking {
-                WebSocketServer.sendMessage("Quest step(s) solved")
-            }
-        }
-
-        if (list.find { it is QuestSolvedEvent } != null) {
-            text += "Quest(s) solved:\n"
-            for (event in list.filterIsInstance<QuestSolvedEvent>()) {
-                text += "- ${event.quest}\n"
-            }
-            text += "\n"
-
-            runBlocking {
-                WebSocketServer.sendMessage("Quest(s) solved:")
-            }
-        }
-
-        if (list.find { it is QuestUnsolvableEvent } != null) {
-            text += "New unsolvable Quest(s):\n"
-            for (event in list.filterIsInstance<QuestUnsolvableEvent>()) {
-                text += "- ${event.quest}\n"
-            }
-            text += "\n"
-
-            runBlocking {
-                WebSocketServer.sendMessage("New unsolvable Quest(s)")
-            }
-        }
-
-        if (list.find { it is QuestGeneratedEvent } != null) {
-            text += "Quest(s) generated:\n"
-            for (event in list.filterIsInstance<QuestGeneratedEvent>()) {
-                text += "- ${event.quest}\n"
-            }
-            text += "\n"
-
-            runBlocking {
-                WebSocketServer.sendMessage("Quest(s) generated")
-            }
-        }
-
-        return text
-    }
-
-    /**
      * Generates the text for all [Event]s based on QuestTasks.
      */
     private fun generateQuestTasksText(list: ArrayList<UserEvent>): String {
         var text = ""
-        if (list.find { it is QuestTaskProgressEvent } != null) {
+        if (list.any { it is QuestTaskProgressEvent }) {
             text += "Progress in Quest(s):\n"
             for (event in list.filterIsInstance<QuestTaskProgressEvent>()) {
                 text += "- ${event.questTask}: ${event.currentNumber} of ${event.numberGoal} already done\n"
+                runBlocking {
+                    WebSocketServer.sendMessage("Progress in Quest ${event.questTask}: ${event.currentNumber} of ${event.numberGoal} already done")
+                }
             }
             text += "\n"
-
-            runBlocking {
-                WebSocketServer.sendMessage("Progress in Quest(s)")
-            }
         }
 
-        if (list.find { it is QuestTaskSolvedEvent } != null) {
+        if (list.any { it is QuestTaskSolvedEvent }) {
             text += "Quest(s) solved:\n"
             for (event in list.filterIsInstance<QuestTaskSolvedEvent>()) {
                 text += "- ${event.questTask}\n"
+                runBlocking {
+                    WebSocketServer.sendMessage("Quest solved: ${event.questTask}")
+                }
             }
             text += "\n"
-
-            runBlocking {
-                WebSocketServer.sendMessage("Quest(s) solved")
-            }
         }
 
-        if (list.find { it is QuestTaskGeneratedEvent } != null) {
+        if (list.any { it is QuestTaskGeneratedEvent }) {
             text += "Quest(s) generated:\n"
             for (event in list.filterIsInstance<QuestTaskGeneratedEvent>()) {
                 text += "- ${event.questTask}\n"
+                runBlocking {
+                    WebSocketServer.sendMessage("New Quest: ${event.questTask}")
+                }
             }
             text += "\n"
-
-            runBlocking {
-                WebSocketServer.sendMessage("Quest(s) generated")
-            }
         }
 
         return text

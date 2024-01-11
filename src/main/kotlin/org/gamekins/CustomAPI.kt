@@ -1,18 +1,10 @@
 package org.gamekins
 
-import com.google.gson.Gson
 import hudson.Extension
 import hudson.model.Job
 import hudson.model.RootAction
 import hudson.model.User
 import hudson.util.FormValidation
-import io.ktor.application.*
-import io.ktor.features.*
-import io.ktor.http.cio.websocket.*
-import io.ktor.routing.*
-import io.ktor.server.engine.*
-import io.ktor.server.netty.*
-import io.ktor.websocket.*
 import jenkins.model.Jenkins
 import kotlinx.coroutines.*
 import net.sf.json.JSONArray
@@ -20,7 +12,6 @@ import net.sf.json.JSONObject
 import net.sf.json.JsonConfig
 import net.sf.json.util.CycleDetectionStrategy
 import net.sf.json.util.PropertyFilter
-import org.gamekins.event.EventHandler
 import org.gamekins.util.ActionUtil
 import org.gamekins.util.Constants
 import org.kohsuke.stapler.QueryParameter
@@ -29,18 +20,18 @@ import org.kohsuke.stapler.json.JsonBody
 import org.kohsuke.stapler.json.JsonHttpResponse
 import org.kohsuke.stapler.verb.GET
 import org.kohsuke.stapler.verb.POST
-import java.util.concurrent.CopyOnWriteArrayList
+import java.io.Serializable
 
 @Extension
 class CustomAPI : RootAction {
 
-    private val lJsonConfig = JsonConfig()
+    private val jsonConfig = JsonConfig()
 
     init {
-        lJsonConfig.isAllowNonStringKeys = true
-        lJsonConfig.cycleDetectionStrategy = CycleDetectionStrategy.NOPROP
-        lJsonConfig.excludes = arrayOf("File")
-        lJsonConfig.jsonPropertyFilter = PropertyFilter { _, name, _ -> name == "changedByUsers" }
+        jsonConfig.isAllowNonStringKeys = true
+        jsonConfig.cycleDetectionStrategy = CycleDetectionStrategy.NOPROP
+        jsonConfig.excludes = arrayOf("File")
+        jsonConfig.jsonPropertyFilter = PropertyFilter { _, name, _ -> name == "changedByUsers" }
     }
 
     override fun getIconFileName(): String? {
@@ -77,7 +68,7 @@ class CustomAPI : RootAction {
     }
 
     /**
-     * Returns the list of completed Challenges by [projectName].
+     * Returns the list of completed Challenges by [job].
      */
     @GET
     @WebMethod(name = ["getCompletedChallenges"])
@@ -90,29 +81,13 @@ class CustomAPI : RootAction {
         val myJsonObjects = property.getCompletedChallenges(job)
 
         val responseJson = JSONObject()
-        responseJson.accumulate("completedChallenges", myJsonObjects, lJsonConfig)
+        responseJson.accumulate("completedChallenges", myJsonObjects, jsonConfig)
 
         return JsonHttpResponse(responseJson, 200)
     }
 
     /**
-     * Returns the list of completed Quests by [projectName].
-     */
-    @GET
-    @WebMethod(name = ["getCompletedQuests"])
-    fun getCompletedQuests(@QueryParameter("job") job: String): String {
-
-        val user: User = User.current()
-            ?: throw FormValidation.error(Constants.Error.NO_USER_SIGNED_IN)
-        val property = user.getProperty(GameUserProperty::class.java)
-            ?: throw FormValidation.error(Constants.Error.RETRIEVING_PROPERTY)
-        val myJsonObjects = property.getCompletedQuests(job)
-
-        return Gson().toJson(myJsonObjects)
-    }
-
-    /**
-     * Returns the list of completed QuestTasks by [projectName].
+     * Returns the list of completed QuestTasks by [job].
      */
     @GET
     @WebMethod(name = ["getCompletedQuestTasks"])
@@ -125,31 +100,12 @@ class CustomAPI : RootAction {
         val myJsonObjects = property.getCompletedQuestTasks(job)
 
         val responseJson = JSONObject()
-        responseJson.accumulate("completedQuestTasks", myJsonObjects, lJsonConfig)
+        responseJson.accumulate("completedQuestTasks", myJsonObjects, jsonConfig)
         return JsonHttpResponse(responseJson, 200)
     }
 
     /**
-     * Returns the list of current Quests by [projectName].
-     */
-    @GET
-    @WebMethod(name = ["getCurrentQuests"])
-    fun getCurrentQuests(@QueryParameter("job") job: String): JsonHttpResponse {
-
-        val user: User = User.current()
-            ?: throw FormValidation.error(Constants.Error.NO_USER_SIGNED_IN)
-        val property = user.getProperty(GameUserProperty::class.java)
-            ?: throw FormValidation.error(Constants.Error.RETRIEVING_PROPERTY)
-        val myJsonObjects = property.getCurrentQuests(job)
-
-        val responseJson = JSONObject()
-        responseJson.accumulate("currentQuests", myJsonObjects, lJsonConfig)
-
-        return JsonHttpResponse(responseJson, 200)
-    }
-
-    /**
-     * Returns the list of current Challenges by [projectName].
+     * Returns the list of current Challenges by [job].
      */
     @GET
     @WebMethod(name = ["getCurrentChallenges"])
@@ -162,13 +118,13 @@ class CustomAPI : RootAction {
         val myJsonObjects = property.getCurrentChallenges(job)
 
         val responseJson = JSONObject()
-        responseJson.accumulate("currentChallenges", myJsonObjects, lJsonConfig)
+        responseJson.accumulate("currentChallenges", myJsonObjects, jsonConfig)
 
         return JsonHttpResponse(responseJson, 200)
     }
 
     /**
-     * Returns the list of current QuestTasks by [projectName].
+     * Returns the list of current QuestTasks by [job].
      */
     @GET
     @WebMethod(name = ["getCurrentQuestTasks"])
@@ -188,7 +144,7 @@ class CustomAPI : RootAction {
     }
 
     /**
-     * Returns the list of rejected Challenges by [projectName].
+     * Returns the list of rejected Challenges by [job].
      */
     @GET
     @WebMethod(name = ["getRejectedChallenges"])
@@ -202,13 +158,13 @@ class CustomAPI : RootAction {
         val myJsonObjects = property.getRejectedChallenges(job)
 
         val responseJson = JSONObject()
-        responseJson.accumulate("rejectedChallenges", myJsonObjects, lJsonConfig)
+        responseJson.accumulate("rejectedChallenges", myJsonObjects, jsonConfig)
 
         return JsonHttpResponse(responseJson, 200)
     }
 
     /**
-     * Returns the list of stored Challenges by [projectName].
+     * Returns the list of stored Challenges by [job].
      */
     @GET
     @WebMethod(name = ["getStoredChallenges"])
@@ -222,13 +178,13 @@ class CustomAPI : RootAction {
         val myJsonObjects = property.getStoredChallenges(job)
 
         val responseJson = JSONObject()
-        responseJson.accumulate("storedChallenges", myJsonObjects, lJsonConfig)
+        responseJson.accumulate("storedChallenges", myJsonObjects, jsonConfig)
 
         return JsonHttpResponse(responseJson, 200)
     }
 
     /**
-     * stores Challenges by [projectName].
+     * Stores Challenges by [job].
      */
     @POST
     @WebMethod(name = ["storeChallenge"])
@@ -242,7 +198,7 @@ class CustomAPI : RootAction {
     }
 
     /**
-     * re-stores a Challenges by [projectName].
+     * Re-stores a Challenges by [job].
      */
     @POST
     @WebMethod(name = ["restoreChallenge"])
@@ -256,7 +212,7 @@ class CustomAPI : RootAction {
     }
 
     /**
-     * un-stores a Challenges by [projectName].
+     * Un-stores a Challenges by [job].
      */
     @POST
     @WebMethod(name = ["unshelveChallenge"])
@@ -270,7 +226,7 @@ class CustomAPI : RootAction {
     }
 
     /**
-     * rejects a Challenges by [projectName].
+     * Rejects a Challenges by [job].
      */
     @POST
     @WebMethod(name = ["rejectChallenge"])
@@ -284,27 +240,7 @@ class CustomAPI : RootAction {
     }
 
     /**
-     * Returns the list of rejected Quests by [projectName].
-     */
-    @GET
-    @WebMethod(name = ["getRejectedQuests"])
-    fun getRejectedQuests(@QueryParameter("job") job: String): JsonHttpResponse {
-
-        val user: User = User.current()
-            ?: throw FormValidation.error(Constants.Error.NO_USER_SIGNED_IN)
-        val property = user.getProperty(GameUserProperty::class.java)
-            ?: throw FormValidation.error(Constants.Error.RETRIEVING_PROPERTY)
-
-        val myJsonObjects = property.getRejectedQuests(job)
-        val response = JSONArray()
-        myJsonObjects.forEach { response.add(it) }
-        val responseJson = JSONObject()
-        responseJson["rejectedQuests"] = myJsonObjects
-        return JsonHttpResponse(responseJson, 200)
-    }
-
-    /**
-     * Returns the score of the user by [projectName].
+     * Returns the score of the user by [job].
      */
     @GET
     @WebMethod(name = ["getScore"])
@@ -324,7 +260,7 @@ class CustomAPI : RootAction {
     }
 
     /**
-     * Returns the name of the team the user is participating in the project [projectName].
+     * Returns the name of the team the user is participating in the project [job].
      */
     @GET
     @WebMethod(name = ["getTeamName"])
@@ -340,26 +276,6 @@ class CustomAPI : RootAction {
         myJsonObjects.forEach { response.add(it) }
         val responseJson = JSONObject()
         responseJson["teamName"] = myJsonObjects
-        return JsonHttpResponse(responseJson, 200)
-    }
-
-    /**
-     * Returns the list of unfinished Quests by [projectName].
-     */
-    @GET
-    @WebMethod(name = ["getUnfinishedQuests"])
-    fun getUnfinishedQuests(@QueryParameter("job") job: String): JsonHttpResponse {
-
-        val user: User = User.current()
-            ?: throw FormValidation.error(Constants.Error.NO_USER_SIGNED_IN)
-        val property = user.getProperty(GameUserProperty::class.java)
-            ?: throw FormValidation.error(Constants.Error.RETRIEVING_PROPERTY)
-
-        val myJsonObjects = property.getUnfinishedQuests(job)
-        val response = JSONArray()
-        myJsonObjects.forEach { response.add(it) }
-        val responseJson = JSONObject()
-        responseJson["unfinishedQuests"] = myJsonObjects
         return JsonHttpResponse(responseJson, 200)
     }
 
@@ -404,104 +320,6 @@ class CustomAPI : RootAction {
         return JsonHttpResponse(responseJson, 200)
     }
 
-    @GET
-    @WebMethod(name = ["getDisplayName"])
-    fun getName(): JsonHttpResponse {
-
-        val user: User = User.current()
-            ?: throw FormValidation.error(Constants.Error.NO_USER_SIGNED_IN)
-        val property = user.getProperty(GameUserProperty::class.java)
-            ?: throw FormValidation.error(Constants.Error.RETRIEVING_PROPERTY)
-
-        val myJsonObjects = property.displayName
-        val response = JSONArray()
-        myJsonObjects.forEach { response.add(it) }
-        val responseJson = JSONObject()
-        responseJson["displayName"] = myJsonObjects
-
-        return JsonHttpResponse(responseJson, 200)
-    }
-
-    /**
-     * Returns the [gitNames] as String with line breaks after each entry.
-     */
-    @GET
-    @WebMethod(name = ["getNames"])
-    fun getNames(): JsonHttpResponse {
-        val user: User = User.current()
-            ?: throw FormValidation.error(Constants.Error.NO_USER_SIGNED_IN)
-        val property = user.getProperty(GameUserProperty::class.java)
-            ?: throw FormValidation.error(Constants.Error.RETRIEVING_PROPERTY)
-        val myJsonObjects = property.getNames()
-        val response = JSONArray()
-        myJsonObjects.forEach { response.add(it) }
-        val responseJson = JSONObject()
-        responseJson["names"] = myJsonObjects
-        return JsonHttpResponse(responseJson, 200)
-    }
-
-    /**
-     * Returns the parent/owner/user of the property.
-     */
-    @GET
-    @WebMethod(name = ["getUser"])
-    fun getUser(): JsonHttpResponse {
-
-        val user: User = User.current()
-            ?: throw FormValidation.error(Constants.Error.NO_USER_SIGNED_IN)
-        val property = user.getProperty(GameUserProperty::class.java)
-            ?: throw FormValidation.error(Constants.Error.RETRIEVING_PROPERTY)
-
-        val myJsonObjects = property.getUser()
-        //val response = JSONArray()
-        //myJsonObjects.forEach { response.add(it) }
-        val responseJson = JSONObject()
-
-        responseJson["user"] = Gson().toJson(myJsonObjects)
-        return JsonHttpResponse(responseJson, 200)
-    }
-
-    /**
-     * Returns the parent/owner/user of the property.
-     */
-    @GET
-    @WebMethod(name = ["getTarget"])
-    fun getTarget(): JsonHttpResponse {
-
-        val user: User = User.current()
-            ?: throw FormValidation.error(Constants.Error.NO_USER_SIGNED_IN)
-        val property = user.getProperty(GameUserProperty::class.java)
-            ?: throw FormValidation.error(Constants.Error.RETRIEVING_PROPERTY)
-
-        val myJsonObjects = arrayListOf(property.getTarget())
-        val response = JSONArray()
-        myJsonObjects.forEach { response.add(it) }
-        val responseJson = JSONObject()
-        responseJson["target"] = myJsonObjects
-        return JsonHttpResponse(responseJson, 200)
-    }
-
-    @GET
-    @WebMethod(name = ["getEvents"])
-    fun getEvents(@QueryParameter("job") job: String): JsonHttpResponse {
-
-        val user: User = User.current()
-            ?: throw FormValidation.error(Constants.Error.NO_USER_SIGNED_IN)
-
-        val projectEvents = CopyOnWriteArrayList(EventHandler.events)
-
-        projectEvents
-            .filter { it.projectName == job }
-            .forEach { EventHandler.events.remove(it) }
-
-        val myJsonObjects = arrayListOf(projectEvents)
-        val response = JSONArray()
-        myJsonObjects.forEach { response.add(it) }
-        val responseJson = JSONObject()
-        responseJson["events"] = myJsonObjects
-        return JsonHttpResponse(responseJson, 200)
-    }
-
     /**
      * Returns the parent/owner/user of the property.
      */
@@ -537,22 +355,7 @@ class CustomAPI : RootAction {
     }
 
     /**
-     * Returns the list of completed Challenges by [projectName].
-     */
-    @GET
-    @WebMethod(name = ["getStatistics"])
-    fun getStatistics(@QueryParameter("job") job: String): JsonHttpResponse {
-
-        val lJob: Job<*, *> = Jenkins.get().getItemByFullName(job) as Job<*, *>
-
-        val responseJson = JSONObject()
-        responseJson["statistics"] = StatisticsAction(lJob).getStatistics()
-
-        return JsonHttpResponse(responseJson, 200)
-    }
-
-    /**
-     * startSocket [projectName].
+     * StartSocket [job].
      */
     @POST
     @WebMethod(name = ["startSocket"])
@@ -568,7 +371,7 @@ class CustomAPI : RootAction {
     }
 
     /**
-     * Returns the limit of stored challenges of [projectName].
+     * Returns the limit of stored challenges of [job].
      */
     @GET
     @WebMethod(name = ["getStoredChallengesLimit"])
@@ -580,6 +383,20 @@ class CustomAPI : RootAction {
         responseJson["limit"] = TaskAction(lJob).getStoredChallengesLimit()
 
         return JsonHttpResponse(responseJson, 200)
+    }
+
+    class StoreChallenge: Serializable {
+
+        lateinit var job: String;
+        lateinit var challengeName: String;
+        lateinit var reason: String;
+
+        constructor()
+        constructor(job: String,challengeName: String, reason: String ) {
+            this.job = job
+            this.challengeName = challengeName
+            this.reason = reason
+        }
     }
 
 }

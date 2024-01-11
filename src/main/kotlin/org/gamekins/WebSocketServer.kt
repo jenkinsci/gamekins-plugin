@@ -34,7 +34,6 @@ object WebSocketServer {
             println(server)
         } catch (e: Exception) {
             println("Error starting server: ${e.message}")
-            server = findRunningServer()
             if (server != null) {
                 println("Using the running server")
             } else {
@@ -78,9 +77,5 @@ object WebSocketServer {
                 println("Error sending message: ${e.message}")
             }
         }
-    }
-
-    private fun findRunningServer(): ApplicationEngine? {
-        return server
     }
 }
