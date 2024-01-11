@@ -511,6 +511,6 @@ object JacocoUtil {
      * @author Philipp Straubinger
      * @since 0.1
      */
-    class CoverageMethod internal constructor(val methodName: String, val lines: Int, val missedLines: Int,
-                                              val firstLineID: String)
+    class CoverageMethod(val methodName: String, val lines: Int, val missedLines: Int,
+                         val firstLineID: String)
 }

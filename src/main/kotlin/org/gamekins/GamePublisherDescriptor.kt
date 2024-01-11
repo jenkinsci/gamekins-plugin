@@ -23,6 +23,8 @@ import hudson.tasks.Publisher
 import hudson.util.FormValidation
 import org.gamekins.achievement.Achievement
 import org.gamekins.achievement.AchievementInitializer
+import org.gamekins.achievement.BadgeAchievement
+import org.gamekins.achievement.ProgressAchievement
 import org.gamekins.challenge.*
 import org.gamekins.util.PublisherUtil
 import org.jenkinsci.Symbol
@@ -59,6 +61,8 @@ class GamePublisherDescriptor : BuildStepDescriptor<Publisher?>(GamePublisher::c
     companion object {
         @Transient val challenges: HashMap<Class<out Challenge>, Int> = hashMapOf()
         @Transient val achievements: ArrayList<Achievement> = arrayListOf()
+        @Transient val progressAchievements: ArrayList<ProgressAchievement> = arrayListOf()
+        @Transient val badgeAchievements: ArrayList<BadgeAchievement> = arrayListOf()
     }
 
     init {
@@ -110,13 +114,21 @@ class GamePublisherDescriptor : BuildStepDescriptor<Publisher?>(GamePublisher::c
 
             var entry: ZipEntry? = zip.nextEntry
             while (entry != null) {
-                if (!entry.isDirectory && entry.name.startsWith("achievements/") && entry.name.endsWith(".json")) {
+                if (!entry.isDirectory && entry.name.startsWith("achievements/") && entry.name.endsWith(".json") && !entry.name.endsWith("progress_achievements.json")) {
                     val scanner = Scanner(zip)
                     var content = ""
                     while (scanner.hasNextLine()) {
                         content += "${scanner.nextLine()}\n"
                     }
                     achievements.addAll(AchievementInitializer.initializeAchievementsWithContent(content))
+                } else if (entry.name.contains("progress_achievements.json")) {
+                    val scanner = Scanner(zip)
+                    var content = ""
+                    while (scanner.hasNextLine()) {
+                        content += "${scanner.nextLine()}\n"
+                    }
+                    progressAchievements.addAll(AchievementInitializer.initializeProgressAchievementsWithContent(content))
+                    badgeAchievements.addAll(AchievementInitializer.initializeBadgeAchievements(content))
                 }
 
                 entry = zip.nextEntry
@@ -124,7 +136,16 @@ class GamePublisherDescriptor : BuildStepDescriptor<Publisher?>(GamePublisher::c
         } else {
             val files = File(resource?.toURI()!!).listFiles()!!.filter { it.extension == "json" }
             files.forEach { file ->
-                achievements.addAll(AchievementInitializer.initializeAchievements("/achievements/" + file.name))
+                run {
+                    if (file.name.contains("progress_achievements.json")) {
+                        progressAchievements.addAll(AchievementInitializer.initializeProgressAchievements("/achievements/" + file.name))
+                    } else if (file.name.contains("badge_achievements.json")) {
+                        badgeAchievements.addAll(AchievementInitializer.initializeBadgeAchievements("/achievements/" + file.name))
+                    } else {
+                        achievements.addAll(AchievementInitializer.initializeAchievements("/achievements/" + file.name))
+                    }
+                }
+
             }
         }
     }

@@ -164,6 +164,8 @@ class PublisherUtilTest : FeatureSpec( {
         every { userProperty.getUnsolvedAchievements(any()) } returns CopyOnWriteArrayList()
         every { userProperty.getCurrentQuests(any()) } returns CopyOnWriteArrayList()
         every { userProperty.getCurrentQuestTasks(any()) } returns CopyOnWriteArrayList()
+        every { userProperty.getBadgeAchievements(any()) } returns CopyOnWriteArrayList()
+        every { userProperty.getProgressAchievements(any()) } returns CopyOnWriteArrayList()
         every { ChallengeFactory.generateNewChallenges(any(), any(), any(), any(), any()) } returns 0
         every { QuestFactory.generateNewQuests(any(), any(), any(), any(), any()) } returns 0
         every { QuestTaskFactory.generateNewQuestTasks(any(), any(), any(), any(), any()) } returns 0

@@ -8,13 +8,13 @@ for developers in the project, especially for testing. Gamekins aims to improve 
 their project more thoroughly and therefore to increase the quality of the software.
 
 ### Software requirements
-- Java Version 11
-- Apache Maven
+- [Java Version 17](https://adoptium.net/temurin/releases/?package=jdk&version=17)
+- [Apache Maven](https://maven.apache.org/install.html)
 
 ### Project requirements
-- Java (fully supported) or Kotlin (partially supported)
-- JaCoCo
-- JUnit
+- [Java](https://adoptium.net/) (fully supported) or [Kotlin](https://kotlinlang.org/) (partially supported)
+- [JaCoCo](https://www.eclemma.org/jacoco/)
+- [JUnit](https://junit.org/)
 
 ### Development
 Clone the project and execute ```mvn hpi:run``` on the command line. This will start a Jenkins on
@@ -41,7 +41,6 @@ the plugin. After the first installation, the plugin should work without restart
 existing installation requires a restart of Jenkins.
 
 ### Usage
-
 Gamekins support the following project types:
  - Freestyle project
  - Maven project
@@ -51,7 +50,6 @@ Gamekins support the following project types:
  - Folders for grouping projects (Leaderboard only)
 
 #### Non-Pipeline projects
-
 In the configuration page there is a section about Gamekins. The management of the teams and participants is located
 here as well as the activation of Gamekins. Some new data is only displayed after a reload of the configuration page. In
 addition, the publisher for Gamekins has to be added to the **Post-build Actions** with the following properties:
@@ -62,7 +60,6 @@ addition, the publisher for Gamekins has to be added to the **Post-build Actions
   (Note: include also the file name since it can be different from ```jacoco.csv```) (*Mandatory* Property)
 
 #### Pipeline projects
-
 The configuration is the same as before, except that the call to the publisher must be done in the **Jenkinsfile**
 in the following or similar way (with example values):
  
@@ -99,18 +96,15 @@ simultaneous current (stored) challenges and quests, the allowance to send chall
 searched and the configuration for PIT.
 
 #### Execution
-
 If configured correctly, Gamekins is executed after each run of the project. Every output of the plugin, including error
 messages, will be logged at the end of the **Console Output** of the run.
 
 #### Leaderboard
-
 After activating Gamekins, a new entry named **Leaderboard** on the left side panel of the project is displayed. It
 shows the current points of each participant and team for everyone who can see the project. In addition, each signed-in
 user, who is participating, can see his/her Challenges as well as a help text explaining the basics of Gamekins.
 
 #### Statistics
-
 In the background, data about the usage of the project and the participants is logged for evaluation purposes. 
 By activating the **Statistics** checkbox, another entry on the left side panel is displayed. Currently, the 
 information is not sent to the developers, which may come in future with the consent of the owner of the Jenkins 
@@ -141,6 +135,7 @@ the opposite. Each third party Challenge must have a constructor with
 ```org.gamekins.challenge.Challenge.ChallengeGenerationData``` as only input parameter.
 
 Add your Achievements to the default Achievements of Gamekins in this way:
+
 ```kotlin
 org.gamekins.GamePublisherDescriptor.challenges.add(achievement)
 ```

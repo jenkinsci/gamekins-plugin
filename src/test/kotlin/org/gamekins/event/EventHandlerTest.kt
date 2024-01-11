@@ -28,6 +28,8 @@ import io.mockk.mockkClass
 import io.mockk.mockkStatic
 import io.mockk.unmockkAll
 import org.gamekins.achievement.Achievement
+import org.gamekins.achievement.BadgeAchievement
+import org.gamekins.achievement.ProgressAchievement
 import org.gamekins.challenge.Challenge
 import org.gamekins.event.build.BuildStartedEvent
 import org.gamekins.event.user.*
@@ -38,6 +40,8 @@ class EventHandlerTest : FeatureSpec({
     val branch = "master"
     val user = mockkClass(User::class)
     val achievement = mockkClass(Achievement::class)
+    val badgeAchievement = mockkClass(BadgeAchievement::class)
+    val progressAchievement = mockkClass(ProgressAchievement::class)
     val challengeSolved = mockkClass(Challenge::class)
     val challengeUnsolvable = mockkClass(Challenge::class)
     val challengeGenerated = mockkClass(Challenge::class)
@@ -57,7 +61,9 @@ class EventHandlerTest : FeatureSpec({
         every { project.parent } returns projectParent
         every { project.getProperty(any()) } returns null
         every { achievement.toString() } returns "Achievement"
-        every { achievement.title } returns "Achievement Title"
+	    every { achievement.title } returns "Achievement Title"
+        every { badgeAchievement.toString() } returns "BadgeAchievement"
+        every { progressAchievement.toString() } returns "ProgressAchievement"
         every { challengeSolved.toEscapedString() } returns "Challenge1"
         every { challengeUnsolvable.toEscapedString() } returns "Challenge2"
         every { challengeGenerated.toEscapedString() } returns "Challenge3"
@@ -117,6 +123,12 @@ class EventHandlerTest : FeatureSpec({
                 "Achievement(s) solved:\n" +
                 "- Achievement\n" +
                 "\n" +
+                "New Badge(s) earned in:\n" +
+                "- BadgeAchievement\n" +
+                "\n" +
+                "Progress made in Achievements:\n" +
+                "- ProgressAchievement\n" +
+                "\n" +
                 "View the build on http://localhost:8080/jenkins/job/test/0/\n" +
                 "View the leaderboard on http://localhost:8080/jenkins/job/test/leaderboard/\n" +
                 "View your achievements on http://localhost:8080/jenkins/user/user/achievements/"
@@ -137,7 +149,9 @@ class EventHandlerTest : FeatureSpec({
             AchievementSolvedEvent(projectName, branch, user, achievement),
             ChallengeSolvedEvent(projectName, branch, user, challengeSolved),
             ChallengeUnsolvableEvent(projectName, branch, user, challengeUnsolvable),
-            ChallengeGeneratedEvent(projectName, branch, user, challengeGenerated)
+            ChallengeGeneratedEvent(projectName, branch, user, challengeGenerated),
+            BadgeEarnedEvent(projectName, branch, user, badgeAchievement),
+            AchievementProgressedEvent(projectName, branch, user, progressAchievement)
         )
         scenario("List of events happened recently")
         {

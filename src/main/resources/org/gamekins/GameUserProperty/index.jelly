@@ -5,6 +5,7 @@
             <st:include page="sidepanel.jelly" it="${it.user}" optional="true" />
         </l:side-panel>
         <l:main-panel>
+            <st:adjunct includes="io.jenkins.plugins.bootstrap5"/>
             <div>
                 <label for="projects" style="display: block; text-align: center">Choose your project</label>
                 <select id="projects" style="display: block; margin-left: auto; margin-right: auto"/>
@@ -13,8 +14,16 @@
                 <a id="leaderboardLink" style="display: block; text-align: center"/>
             </div>
             <br/>
+            <div id ="badgeAchievements">
+                <h2 id="badgeAchievementsHeader" style="display: block; text-align: center">Badge Achievements</h2>
+            </div>
+            <br/>
+            <div id ="progressAchievements">
+                <h2 id="badgeAchievementsHeader" style="display: block; text-align: center">Progress Achievements</h2>
+            </div>
+            <br/>
             <div id="completedAchievements">
-                <h2 id="completedAchievementsHeader" style="display: block; text-align: center">Completed Achievements</h2>
+                <h2 id="completedAchievementsHeader" style="display: block; text-align: center">Other Completed Achievements</h2>
             </div>
             <br/>
             <div id="unsolvedAchievements">

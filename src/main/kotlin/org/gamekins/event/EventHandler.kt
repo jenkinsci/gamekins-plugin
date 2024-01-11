@@ -110,6 +110,22 @@ object EventHandler {
             text += "\n"
         }
 
+        if (list.find {it is BadgeEarnedEvent} != null) {
+            text += "New Badge(s) earned in:\n"
+            for (event in list.filterIsInstance<BadgeEarnedEvent>()) {
+                text += "- ${event.achievement}\n"
+            }
+            text += "\n"
+        }
+
+        if (list.find {it is AchievementProgressedEvent} != null) {
+            text += "Progress made in Achievements:\n"
+            for (event in list.filterIsInstance<AchievementProgressedEvent>()) {
+                text += "- ${event.achievement}\n"
+            }
+            text += "\n"
+        }
+
         text += "View the build on ${build.parent.absoluteUrl}${build.number}/\n"
         text += MailUtil.generateViewLeaderboardText(build.parent)
 

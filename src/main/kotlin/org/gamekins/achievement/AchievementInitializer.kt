@@ -43,6 +43,26 @@ object AchievementInitializer {
         return initializeAchievementsWithContent(jsonContent)
     }
 
+    @JvmStatic
+    fun initializeProgressAchievements(fileName: String): List<ProgressAchievement> {
+        var json = javaClass.classLoader.getResource(fileName)
+        if (json == null && fileName.startsWith("/")) {
+            json = javaClass.classLoader.getResource(fileName.removePrefix("/"))
+        }
+        val jsonContent = json.readText()
+        return initializeProgressAchievementsWithContent(jsonContent)
+    }
+
+    @JvmStatic
+    fun initializeBadgeAchievements(fileName: String): List<BadgeAchievement> {
+        var json = javaClass.classLoader.getResource(fileName)
+        if (json == null && fileName.startsWith("/")) {
+            json = javaClass.classLoader.getResource(fileName.removePrefix("/"))
+        }
+        val jsonContent = json.readText()
+        return initializeBadgeAchievementsWithContent(jsonContent)
+    }
+
     /**
      * Initializes the [Achievement] specified by the json content given via [fileContent]. [fileContent] must be a
      * valid json String.
@@ -64,6 +84,39 @@ object AchievementInitializer {
         }
     }
 
+    @JvmStatic
+    fun initializeProgressAchievementsWithContent(fileContent: String): List<ProgressAchievement> {
+        val data: List<ProgressAchievementData> = jacksonObjectMapper().readValue(
+            fileContent,
+            jacksonObjectMapper().typeFactory.constructCollectionType(List::class.java, ProgressAchievementData::class.java)
+        )
+        return data.map {
+            ProgressAchievement(
+                it.badgePath, it.milestones, it.fullyQualifiedFunctionName,
+                it.description, it.title,0, it.unit
+            )
+        }
+    }
+
+    @JvmStatic
+    fun initializeBadgeAchievementsWithContent(fileContent: String): List<BadgeAchievement> {
+        val data: List<BadgeAchievementData> = jacksonObjectMapper().readValue(
+            fileContent,
+            jacksonObjectMapper().typeFactory.constructCollectionType(List::class.java, BadgeAchievementData::class.java)
+        )
+
+        return data.map {
+            val badgeCounts = mutableListOf<Int>()
+            for (i in it.lowerBounds) {
+                badgeCounts.add(0)
+            }
+            BadgeAchievement(
+                it.badgePaths, it.lowerBounds, it.fullyQualifiedFunctionName,
+                it.description, it.title, badgeCounts, it.unit, it.titles, it.ascending
+            )
+        }
+    }
+
     /**
      * Data class for mapping the json to an [Achievement]
      *
@@ -77,4 +130,20 @@ object AchievementInitializer {
                                val fullyQualifiedFunctionName: String,
                                val secret: Boolean,
                                val additionalParameters: HashMap<String, String>)
+
+    data class ProgressAchievementData(val badgePath: String,
+                                       val milestones: List<Int>,
+                                       val description: String,
+                                       val title: String,
+                                       val fullyQualifiedFunctionName: String,
+                                       var unit: String)
+
+    data class BadgeAchievementData(val badgePaths: List<String>,
+                                    val lowerBounds: List<Double>,
+                                    val description: String,
+                                    val title: String,
+                                    val fullyQualifiedFunctionName: String,
+                                    var unit: String,
+                                    val titles: List<String>,
+                                    val ascending: Boolean)
 }
