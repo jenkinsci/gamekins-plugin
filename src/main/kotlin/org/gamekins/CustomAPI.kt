@@ -323,7 +323,7 @@ class CustomAPI : RootAction {
      * Returns the list of progress achievements.
      */
     @GET
-    @WebMethod(name = ["getProgresAchievements"])
+    @WebMethod(name = ["getProgressAchievements"])
     fun getProgressAchievements(@QueryParameter("job") job: String): JsonHttpResponse {
 
         val user: User = User.current()
