@@ -815,6 +815,12 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
         val list = CopyOnWriteArrayList<Achievement>()
         GamePublisherDescriptor.achievements.forEach { list.add(it.clone()) }
         unsolvedAchievements[projectName] = list
+        val listBadges = CopyOnWriteArrayList<BadgeAchievement>()
+        GamePublisherDescriptor.badgeAchievements.forEach { listBadges.add(it.clone()) }
+        badgeAchievements[projectName] = listBadges
+        val listProgress = CopyOnWriteArrayList<ProgressAchievement>()
+        GamePublisherDescriptor.progressAchievements.forEach { listProgress.add(it.clone()) }
+        progressAchievements[projectName] = listProgress
         completedQuests[projectName] = CopyOnWriteArrayList()
         currentQuests[projectName] = CopyOnWriteArrayList()
         rejectedQuests[projectName] = CopyOnWriteArrayList()

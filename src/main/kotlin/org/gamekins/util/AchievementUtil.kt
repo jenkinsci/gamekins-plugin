@@ -449,6 +449,9 @@ object AchievementUtil {
                     additionalParameters["minimum"]?.toInt() ?: Int.MAX_VALUE)
     }
 
+    /**
+     * Solves the inventory full achievement
+     */
     fun solveInventoryFull(classes: ArrayList<FileDetails>, parameters: Parameters,
                            run: Run<*, *>, property: GameUserProperty, listener: TaskListener,
                            additionalParameters: HashMap<String, String>): Boolean {
