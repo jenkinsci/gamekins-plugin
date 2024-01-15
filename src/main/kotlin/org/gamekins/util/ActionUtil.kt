@@ -281,6 +281,9 @@ object ActionUtil {
         property.removeStoredChallenge(projectName, challenge)
         otherProperty.addStoredChallenge(projectName, challenge)
 
+        property.incrementSentChallenges(projectName)
+        otherProperty.incrementReceivedChallenges(projectName)
+
         val branch = if (challenge.getParameters().remote.contains(challenge.getParameters().branch.toRegex()))
             challenge.getParameters().branch else "master"
         PropertyUtil.retrieveGameProperty(job)?.getStatistics()
@@ -384,11 +387,11 @@ object ActionUtil {
                         TeamDetails(
                             property.getTeamName(job.fullName),
                             property.getScore(job.fullName),
-                            property.getCompletedChallenges(job.fullName).size,
+                            property.getTotalCompletedAchievementCount(job.fullName),
                             property.getCompletedQuests(job.fullName).size,
                             property.getCompletedQuestTasks(job.fullName).size,
                             property.getUnfinishedQuests(job.fullName).size,
-                            property.getCompletedAchievements(job.fullName).size
+                            property.getTotalCompletedAchievementCount(job.fullName)
                         )
                     )
                 }
@@ -419,7 +422,7 @@ object ActionUtil {
                         property.getCompletedQuests(job.fullName).size,
                         property.getCompletedQuestTasks(job.fullName).size,
                         property.getUnfinishedQuests(job.fullName).size,
-                        property.getCompletedAchievements(job.fullName).size,
+                        property.getTotalCompletedAchievementCount(job.fullName),
                         user.absoluteUrl,
                         property.getCurrentAvatar()
                     )

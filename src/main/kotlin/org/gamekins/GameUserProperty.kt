@@ -23,6 +23,8 @@ import org.gamekins.challenge.DummyChallenge
 import org.gamekins.statistics.Statistics
 import net.sf.json.JSONObject
 import org.gamekins.achievement.Achievement
+import org.gamekins.achievement.BadgeAchievement
+import org.gamekins.achievement.ProgressAchievement
 import org.gamekins.challenge.CoverageChallenge
 import org.gamekins.challenge.quest.Quest
 import org.gamekins.questtask.QuestTask
@@ -65,6 +67,10 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
     private var storedChallenges: HashMap<String, CopyOnWriteArrayList<Challenge>> = HashMap()
     private var unfinishedQuests: HashMap<String, CopyOnWriteArrayList<Quest>> = HashMap()
     private var unsolvedAchievements: HashMap<String, CopyOnWriteArrayList<Achievement>> = HashMap()
+    private var progressAchievements: HashMap<String, CopyOnWriteArrayList<ProgressAchievement>> = HashMap()
+    private var badgeAchievements: HashMap<String, CopyOnWriteArrayList<BadgeAchievement>> = HashMap()
+    private var sentChallengesCount: HashMap<String, Int> = HashMap()
+    private var receivedChallengesCount: HashMap<String, Int> = HashMap()
 
     /**
      * Adds an additional [score] to one project [projectName], since one user can participate in multiple projects.
@@ -74,7 +80,7 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
     }
 
     /**
-     * Sets an [achievement] of project [projectName] to complete an removes it from the [unsolvedAchievements].
+     * Sets an [achievement] of project [projectName] to complete and removes it from the [unsolvedAchievements].
      */
     fun completeAchievement(projectName: String, achievement: Achievement) {
         completedAchievements.computeIfAbsent(projectName) { CopyOnWriteArrayList() }
@@ -200,6 +206,22 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
      */
     fun doGetUnsolvedAchievements(rsp: StaplerResponse, @QueryParameter projectName: String) {
         val json = jacksonObjectMapper().writeValueAsString(unsolvedAchievements[projectName]?.filter { !it.secret })
+        rsp.contentType = Constants.TYPE_JSON
+        val printer = rsp.writer
+        printer.print(json)
+        printer.flush()
+    }
+
+    fun doGetProgressAchievements(rsp: StaplerResponse, @QueryParameter projectName: String) {
+        val json = jacksonObjectMapper().writeValueAsString(progressAchievements[projectName])
+        rsp.contentType = Constants.TYPE_JSON
+        val printer = rsp.writer
+        printer.print(json)
+        printer.flush()
+    }
+
+    fun doGetBadgeAchievements(rsp: StaplerResponse, @QueryParameter projectName: String) {
+        val json = jacksonObjectMapper().writeValueAsString(badgeAchievements[projectName])
         rsp.contentType = Constants.TYPE_JSON
         val printer = rsp.writer
         printer.print(json)
@@ -397,6 +419,43 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
         return unsolvedAchievements[projectName]!!
     }
 
+    /**
+     * Returns the list of progress achievements
+     */
+    fun getProgressAchievements(projectName: String): CopyOnWriteArrayList<ProgressAchievement> {
+        return progressAchievements[projectName]!!
+    }
+
+    /**
+     * Returns the list of badge achievements
+     */
+    fun getBadgeAchievements(projectName: String): CopyOnWriteArrayList<BadgeAchievement> {
+        return badgeAchievements[projectName]!!
+    }
+
+    /**
+     * Returns the amount of completed achievements including every badge and every milestone of badge and progress achievements respectively
+     */
+    fun getTotalCompletedAchievementCount(projectName: String) : Int {
+        return completedAchievements[projectName]!!.size +
+                progressAchievements[projectName]!!.sumOf { pa -> pa.milestones.indexOfLast { it <= pa.progress } + 1 } +
+                badgeAchievements[projectName]!!.sumOf { it.badgeCounts.sum() }
+    }
+
+    /**
+     * Returns the amount of challenges this user hast sent in the specified project
+     */
+    fun getSentChallengesCount(projectName: String) : Int {
+        return sentChallengesCount[projectName]!!
+    }
+
+    /**
+     * Returns the amount of challenges this user hast received in the specified project
+     */
+    fun getReceivedChallengesCount(projectName: String) : Int {
+        return receivedChallengesCount[projectName]!!
+    }
+
     override fun getUrlName(): String {
         return "achievements"
     }
@@ -571,12 +630,29 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
             }
         }
 
-        //Add new achievements
+        //Add sending statistics if newly introduced
+        if (participation.size != 0 && (sentChallengesCount.size == 0 || receivedChallengesCount.size == 0)) {
+            participation.keys.forEach { project ->
+                sentChallengesCount[project] = 0
+                receivedChallengesCount[project] = 0
+            }
+        }
+
+        //Add new achievements and remove deleted ones that have not been solved before
         participation.keys.forEach { project ->
             GamePublisherDescriptor.achievements
                 .filter { !completedAchievements[project]!!.contains(it)
                         && !unsolvedAchievements[project]!!.contains(it) }
                 .forEach { unsolvedAchievements[project]!!.add(it.clone()) }
+            GamePublisherDescriptor.progressAchievements
+                .filter { !progressAchievements[project]!!.contains(it) }
+                .forEach { progressAchievements[project]!!.add(it.clone()) }
+            GamePublisherDescriptor.badgeAchievements
+                .filter { !badgeAchievements[project]!!.contains(it) }
+                .forEach { badgeAchievements[project]!!.add(it.clone()) }
+            unsolvedAchievements[project]!!.removeIf { !GamePublisherDescriptor.achievements.contains(it) }
+            progressAchievements[project]!!.removeIf { it.progress <= 0 && !GamePublisherDescriptor.progressAchievements.contains(it) }
+            badgeAchievements[project]!!.removeIf { it.badgeCounts.all { badgeCount -> badgeCount <= 0 } && !GamePublisherDescriptor.badgeAchievements.contains(it) }
         }
 
         //Update achievements with changed fullyQualifiedFunctionName or secret
@@ -739,6 +815,12 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
         val list = CopyOnWriteArrayList<Achievement>()
         GamePublisherDescriptor.achievements.forEach { list.add(it.clone()) }
         unsolvedAchievements[projectName] = list
+        val listBadges = CopyOnWriteArrayList<BadgeAchievement>()
+        GamePublisherDescriptor.badgeAchievements.forEach { listBadges.add(it.clone()) }
+        badgeAchievements[projectName] = listBadges
+        val listProgress = CopyOnWriteArrayList<ProgressAchievement>()
+        GamePublisherDescriptor.progressAchievements.forEach { listProgress.add(it.clone()) }
+        progressAchievements[projectName] = listProgress
         completedQuests[projectName] = CopyOnWriteArrayList()
         currentQuests[projectName] = CopyOnWriteArrayList()
         rejectedQuests[projectName] = CopyOnWriteArrayList()
@@ -785,12 +867,16 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
         storedChallenges.putIfAbsent(projectName, CopyOnWriteArrayList())
         unsolvedAchievements.putIfAbsent(projectName, CopyOnWriteArrayList(GamePublisherDescriptor.achievements))
         completedAchievements.putIfAbsent(projectName, CopyOnWriteArrayList())
+        progressAchievements.putIfAbsent(projectName, CopyOnWriteArrayList(GamePublisherDescriptor.progressAchievements))
+        badgeAchievements.putIfAbsent(projectName, CopyOnWriteArrayList(GamePublisherDescriptor.badgeAchievements))
         completedQuests.putIfAbsent(projectName, CopyOnWriteArrayList())
         currentQuests.putIfAbsent(projectName, CopyOnWriteArrayList())
         rejectedQuests.putIfAbsent(projectName, CopyOnWriteArrayList())
         unfinishedQuests.putIfAbsent(projectName, CopyOnWriteArrayList())
         completedQuestTasks.putIfAbsent(projectName, CopyOnWriteArrayList())
         currentQuestTasks.putIfAbsent(projectName, CopyOnWriteArrayList())
+        sentChallengesCount.putIfAbsent(projectName, 0)
+        receivedChallengesCount.putIfAbsent(projectName, 0)
     }
 
     /**
@@ -838,6 +924,40 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
             list.removeAll(list.intersect(completedAchievements[project]!!))
             list = CopyOnWriteArrayList(list.distinct())
             unsolvedAchievements[project] = list
+
+            for (achievement in GamePublisherDescriptor.progressAchievements) {
+                val ach = progressAchievements[project]!!.find { it == achievement }
+                if (ach != null &&(ach.fullyQualifiedFunctionName != achievement.fullyQualifiedFunctionName
+                            || !ach.milestones.containsAll(achievement.milestones)
+                            || !achievement.milestones.containsAll(ach.milestones)
+                            || ach.badgePath != achievement.badgePath
+                            || achievement.unit != ach.unit)) {
+
+                    val list = progressAchievements[project]!!
+                    list.remove(ach)
+                    list.add(achievement.clone())
+                    progressAchievements[project] = list
+                }
+            }
+
+
+            for (achievement in GamePublisherDescriptor.badgeAchievements) {
+                val ach = badgeAchievements[project]!!.find { it == achievement }
+                if (ach != null && (ach.fullyQualifiedFunctionName != achievement.fullyQualifiedFunctionName
+                    || !ach.lowerBounds.containsAll(achievement.lowerBounds)
+                    || !achievement.lowerBounds.containsAll(ach.lowerBounds)
+                    || !ach.badgePaths.containsAll(achievement.badgePaths)
+                    || !achievement.badgePaths.containsAll(ach.badgePaths)
+                    || achievement.unit != ach.unit
+                    || !ach.titles.containsAll(achievement.titles)
+                    || !achievement.titles.containsAll(ach.titles))) {
+
+                    val list = badgeAchievements[project]!!
+                    list.remove(ach)
+                    list.add(achievement.clone())
+                    badgeAchievements[project] = list
+                }
+            }
         }
     }
 
@@ -900,6 +1020,20 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
 
     fun addStoredChallenge(projectName: String, challenge: Challenge) {
         storedChallenges[projectName]!!.add(challenge)
+    }
+
+    /**
+     * Increments the counter for sent challenges
+     */
+    fun incrementSentChallenges(projectName: String) {
+        sentChallengesCount[projectName] = sentChallengesCount[projectName]!!.inc()
+    }
+
+    /**
+     * Increments the counter for received challenges
+     */
+    fun incrementReceivedChallenges(projectName: String) {
+        receivedChallengesCount[projectName] = receivedChallengesCount[projectName]!!.inc()
     }
 
 }

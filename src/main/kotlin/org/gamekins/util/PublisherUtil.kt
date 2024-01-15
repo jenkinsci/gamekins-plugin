@@ -61,6 +61,26 @@ object PublisherUtil {
                 solved++
             }
         }
+        property.getProgressAchievements(parameters.projectName).forEach { pa ->
+            val before = pa.milestones.indexOfLast { it <= pa.progress } + 1
+            pa.progress(files, parameters, run, property)
+            if (before < (pa.milestones.indexOfLast { it <= pa.progress } + 1)) {
+                EventHandler.addEvent(AchievementProgressedEvent(parameters.projectName, parameters.branch,
+                    property.getUser(), pa))
+                listener.logger.println("[Gamekins] Progressed achievement $pa form $before to ${pa.progress}")
+                solved += (pa.milestones.indexOfLast { it <= pa.progress } + 1) - before
+            }
+        }
+        property.getBadgeAchievements(parameters.projectName).forEach {
+            val before = it.badgeCounts.sum()
+            it.update(files, parameters, run, property)
+            if (before < it.badgeCounts.sum()) {
+                EventHandler.addEvent(BadgeEarnedEvent(parameters.projectName, parameters.branch,
+                    property.getUser(), it))
+                listener.logger.println("[Gamekins] Badge earned in achievement $it")
+                solved += it.badgeCounts.sum() - before
+            }
+        }
 
         return solved
     }

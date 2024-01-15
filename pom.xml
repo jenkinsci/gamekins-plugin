@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
+    <!-- https://github.com/jenkinsci/plugin-pom -->
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>4.50</version>
+        <version>4.75</version>
     </parent>
     <groupId>org.gamekins</groupId>
     <artifactId>gamekins</artifactId>
@@ -13,14 +14,13 @@
 
     <properties>
         <!-- Baseline Jenkins version you use to build the plugin. Users must have this version or newer to run. -->
-        <jenkins.version>2.387.3</jenkins.version>
-        <java.level>11</java.level>
-        <kotlin.version>1.9.0</kotlin.version>
+        <jenkins.version>2.401.3</jenkins.version>
+        <kotlin.version>1.9.10</kotlin.version>
+        <maven.compiler.release>17</maven.compiler.release>
         <maven.compiler.debug>true</maven.compiler.debug>
         <maven.compiler.debuglevel>lines,source</maven.compiler.debuglevel>
         <animal.sniffer.version>1.20</animal.sniffer.version>
-        <hpi-plugin.version>3.35</hpi-plugin.version>
-	<githubSuffix>jenkinsci/gamekins-plugin</githubSuffix>
+        <githubSuffix>jenkinsci/gamekins-plugin</githubSuffix>
         <!-- <maven.test.skip>true</maven.test.skip> -->
         <!-- Other properties you may want to use:
           ~ jenkins-test-harness.version: Jenkins Test Harness version you use to test the plugin. For Jenkins version >= 1.580.1 use JTH 2.0 or higher.
@@ -98,7 +98,6 @@
             <scope>compile</scope>
         </dependency>
 
-
         <!-- Jenkins dependencies -->
         <dependency>
             <groupId>org.jenkins-ci.main</groupId>
@@ -111,6 +110,7 @@
         </dependency>
 
         <!-- Jenkins plugins -->
+        <!-- https://plugins.jenkins.io/workflow-multibranch/ -->
         <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-multibranch</artifactId>
@@ -134,7 +134,13 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/org.jenkins-ci.plugins/git -->
+        <!-- https://plugins.jenkins.io/pipeline-model-definition/ -->
+        <dependency>
+            <groupId>org.jenkinsci.plugins</groupId>
+            <artifactId>pipeline-model-definition</artifactId>
+            <version>2.2144.v077a_d1928a_40</version>
+        </dependency>
+        <!-- https://plugins.jenkins.io/git/ -->
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>git</artifactId>
@@ -158,37 +164,37 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/org.jenkins-ci.plugins.workflow/workflow-scm-step -->
+        <!-- https://plugins.jenkins.io/workflow-scm-step/ -->
         <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-scm-step</artifactId>
             <version>415.v434365564324</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/org.jenkins-ci.plugins/git-client -->
+        <!-- https://plugins.jenkins.io/git-client/ -->
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>git-client</artifactId>
             <version>4.4.0</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/org.jenkins-ci.plugins/scm-api -->
+        <!-- https://plugins.jenkins.io/scm-api/ -->
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>scm-api</artifactId>
             <version>676.v886669a_199a_a_</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/io.jenkins.plugins/ionicons-api -->
+        <!-- https://plugins.jenkins.io/ionicons-api/ -->
         <dependency>
             <groupId>io.jenkins.plugins</groupId>
             <artifactId>ionicons-api</artifactId>
             <version>56.v1b_1c8c49374e</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/org.jenkins-ci.plugins.workflow/workflow-api -->
+        <!-- https://plugins.jenkins.io/workflow-api/ -->
         <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-api</artifactId>
             <version>1241.v4edc8b_44933b_</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/org.jenkins-ci.main/maven-plugin -->
+        <!-- https://plugins.jenkins.io/maven-plugin/ -->
         <dependency>
             <groupId>org.jenkins-ci.main</groupId>
             <artifactId>maven-plugin</artifactId>
@@ -215,6 +221,7 @@
             <artifactId>popper-api</artifactId>
             <version>1.16.1-3</version>
         </dependency>
+        <!-- https://plugins.jenkins.io/font-awesome-api/ -->
         <dependency>
             <groupId>io.jenkins.plugins</groupId>
             <artifactId>font-awesome-api</artifactId>
@@ -226,6 +233,7 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        <!-- https://plugins.jenkins.io/bootstrap4-api/ -->
         <dependency>
             <groupId>io.jenkins.plugins</groupId>
             <artifactId>bootstrap4-api</artifactId>
@@ -241,12 +249,13 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        <!-- https://plugins.jenkins.io/jquery3-api/ -->
         <dependency>
             <groupId>io.jenkins.plugins</groupId>
             <artifactId>jquery3-api</artifactId>
             <version>3.7.0-1</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/io.jenkins.plugins/commons-text-api -->
+        <!-- https://plugins.jenkins.io/commons-text-api/ -->
         <dependency>
             <groupId>io.jenkins.plugins</groupId>
             <artifactId>commons-text-api</artifactId>
@@ -503,7 +512,7 @@
                                 <source>target/generated-sources/kapt</source>
                                 <source>target/generated-sources/kaptKotlin</source>
                             </sourceDirs>
-                            <jvmTarget>11</jvmTarget>
+                            <jvmTarget>${maven.compiler.release}</jvmTarget>
                         </configuration>
                     </execution>
 
@@ -522,7 +531,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <jvmTarget>11</jvmTarget>
+                    <jvmTarget>${maven.compiler.release}</jvmTarget>
                 </configuration>
             </plugin>
             <plugin>
