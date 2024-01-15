@@ -631,6 +631,12 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
         }
 
         //Add sending statistics if newly introduced
+        if (sentChallengesCount == null) {
+            sentChallengesCount = HashMap()
+        }
+        if (receivedChallengesCount == null) {
+            receivedChallengesCount = HashMap()
+        }
         if (participation.size != 0 && (sentChallengesCount.size == 0 || receivedChallengesCount.size == 0)) {
             participation.keys.forEach { project ->
                 sentChallengesCount[project] = 0

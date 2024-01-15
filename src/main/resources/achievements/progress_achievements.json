@@ -64,9 +64,9 @@
     "unit": ""
   },
   {
-    "badgePath": "/plugin/gamekins/achievements/colour/postman-colour.png",
+    "badgePath": "/plugin/gamekins/achievements/colour/bag-colour.png",
     "description": "Receive challenges from other people",
-    "title": "To good at solving problems",
+    "title": "Too good at solving problems",
     "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::getChallengesReceivedAmount",
     "milestones": [1, 3, 5, 10, 20],
     "unit": ""
