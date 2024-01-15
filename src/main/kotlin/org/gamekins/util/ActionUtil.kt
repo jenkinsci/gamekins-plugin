@@ -281,6 +281,9 @@ object ActionUtil {
         property.removeStoredChallenge(projectName, challenge)
         otherProperty.addStoredChallenge(projectName, challenge)
 
+        property.incrementSentChallenges(projectName)
+        otherProperty.incrementReceivedChallenges(projectName)
+
         val branch = if (challenge.getParameters().remote.contains(challenge.getParameters().branch.toRegex()))
             challenge.getParameters().branch else "master"
         PropertyUtil.retrieveGameProperty(job)?.getStatistics()

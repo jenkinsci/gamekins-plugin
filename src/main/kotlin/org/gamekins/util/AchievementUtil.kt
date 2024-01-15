@@ -22,10 +22,10 @@ import hudson.model.Run
 import hudson.model.TaskListener
 import hudson.model.User
 import org.gamekins.GameUserProperty
-import org.gamekins.challenge.BranchCoverageChallenge
-import org.gamekins.challenge.BuildChallenge
-import org.gamekins.challenge.CoverageChallenge
+import org.gamekins.challenge.*
 import org.gamekins.file.FileDetails
+import org.gamekins.property.GameJobProperty
+import org.gamekins.property.GameMultiBranchProperty
 import org.gamekins.util.Constants.Parameters
 import java.util.HashMap
 import kotlin.math.max
@@ -367,6 +367,24 @@ object AchievementUtil {
     }
 
     /**
+     * Returns the amount of solved mutation challenges in the project.
+     */
+    fun getSolvedMutationChallengesCount(classes: ArrayList<FileDetails>, parameters: Parameters,
+                                 run: Run<*, *>, property: GameUserProperty, listener: TaskListener): Int {
+
+        return property.getCompletedChallenges(parameters.projectName).filterIsInstance(MutationChallenge::class.java).size
+    }
+
+    /**
+     * Returns the amount of solved smell challenges in the project.
+     */
+    fun getSolvedSmellChallengesCount(classes: ArrayList<FileDetails>, parameters: Parameters,
+                                         run: Run<*, *>, property: GameUserProperty, listener: TaskListener): Int {
+
+        return property.getCompletedChallenges(parameters.projectName).filterIsInstance(SmellChallenge::class.java).size
+    }
+
+    /**
      * Solves the achievements with description: Solve X Challenges with one Jenkins build. Needs the key 'solveNumber'
      * in the map [additionalParameters] with a positive Int value.
      */
@@ -385,5 +403,69 @@ object AchievementUtil {
                                                property: GameUserProperty, listener: TaskListener): List<Double> {
 
         return listOf(parameters.solved.toDouble())
+    }
+
+    /**
+     * Returns the amount of challenges sent to other people
+     */
+    fun getChallengesSentAmount(classes: ArrayList<FileDetails>, parameters: Parameters,
+                                run: Run<*, *>, property: GameUserProperty, listener: TaskListener): Int {
+        return property.getSentChallengesCount(parameters.projectName)
+    }
+
+    /**
+     * Returns the amount of challenges received from other people
+     */
+    fun getChallengesReceivedAmount(classes: ArrayList<FileDetails>, parameters: Parameters,
+                                run: Run<*, *>, property: GameUserProperty, listener: TaskListener): Int {
+        return property.getReceivedChallengesCount(parameters.projectName)
+    }
+
+    /**
+     * Solves the achievements with description: Send more than X the amount of challenges you receive (and more than Y)
+     * Needs the keys 'factor' and 'base' in the map [additionalParameters] with positive Int values.
+     */
+    fun solveSentMoreChallengesThanReceived(classes: ArrayList<FileDetails>, parameters: Parameters,
+                     run: Run<*, *>, property: GameUserProperty, listener: TaskListener,
+                     additionalParameters: HashMap<String, String>): Boolean {
+
+        return property.getSentChallengesCount(parameters.projectName) >
+                max(additionalParameters["factor"]?.toInt()
+                    ?.times(property.getReceivedChallengesCount(parameters.projectName)) ?: Int.MAX_VALUE,
+                    additionalParameters["minimum"]?.toInt() ?: Int.MAX_VALUE)
+    }
+
+    /**
+     * Solves the achievements with description: Receive more than X the amount of challenges you send (and more than Y)
+     * Needs the keys 'factor' and 'base' in the map [additionalParameters] with positive Int values.
+     */
+    fun solveReceiveMoreChallengesThanSent(classes: ArrayList<FileDetails>, parameters: Parameters,
+                                            run: Run<*, *>, property: GameUserProperty, listener: TaskListener,
+                                            additionalParameters: HashMap<String, String>): Boolean {
+
+        return property.getReceivedChallengesCount(parameters.projectName) >
+                max(additionalParameters["factor"]?.toInt()
+                    ?.times(property.getSentChallengesCount(parameters.projectName)) ?: Int.MAX_VALUE,
+                    additionalParameters["minimum"]?.toInt() ?: Int.MAX_VALUE)
+    }
+
+    /**
+     * Solves the inventory full achievement
+     */
+    fun solveInventoryFull(classes: ArrayList<FileDetails>, parameters: Parameters,
+                           run: Run<*, *>, property: GameUserProperty, listener: TaskListener,
+                           additionalParameters: HashMap<String, String>): Boolean {
+
+        val maxStoredChallengesAmount : Int =
+            when (val gameProperty = PropertyUtil.retrieveGamePropertyFromRun(run)) {
+                is GameMultiBranchProperty -> gameProperty.currentStoredChallengesCount
+                is GameJobProperty -> gameProperty.currentStoredChallengesCount
+                else -> -1
+            }
+
+        if (maxStoredChallengesAmount == -1)
+            return false
+
+        return property.getStoredChallenges(parameters.projectName).size >= maxStoredChallengesAmount
     }
 }

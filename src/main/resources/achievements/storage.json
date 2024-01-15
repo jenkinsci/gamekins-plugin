@@ -1,0 +1,11 @@
+[
+  {
+    "badgePath": "/plugin/gamekins/achievements/colour/bag-colour.png",
+    "unsolvedBadgePath": "/plugin/gamekins/achievements/blackwhite/bag.png",
+    "description": "Fill you challenge storage completely",
+    "title": "Full Inventory",
+    "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::solveInventoryFull",
+    "secret": true,
+    "additionalParameters": {}
+  }
+]

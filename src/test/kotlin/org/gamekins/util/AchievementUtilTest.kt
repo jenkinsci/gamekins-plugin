@@ -33,6 +33,7 @@ import org.eclipse.jgit.lib.PersonIdent
 import org.eclipse.jgit.revwalk.RevCommit
 import org.gamekins.challenge.BranchCoverageChallenge
 import org.gamekins.challenge.BuildChallenge
+import org.gamekins.challenge.Challenge
 import org.gamekins.challenge.ClassCoverageChallenge
 import org.gamekins.file.FileDetails
 import org.gamekins.file.SourceFileDetails
@@ -54,6 +55,8 @@ class AchievementUtilTest: FeatureSpec({
     val property = mockkClass(org.gamekins.GameUserProperty::class)
     val workspace = mockkClass(FilePath::class)
     val additionalParameters = hashMapOf<String, String>()
+    val job = mockkClass(WorkflowJob::class)
+    val jobProperty = mockkClass(GameJobProperty::class)
     lateinit var path: FilePath
 
     beforeSpec {
@@ -69,6 +72,10 @@ class AchievementUtilTest: FeatureSpec({
         parameters.projectName = "Test-Project"
         parameters.workspace = workspace
         every { property.getCompletedChallenges(any()) } returns CopyOnWriteArrayList(listOf(challenge))
+
+        every { run.parent } returns job
+        every { job.parent } returns mockkClass(ItemGroup::class)
+        every { job.getProperty(any()) } returns jobProperty
     }
 
     afterSpec {
@@ -613,13 +620,8 @@ class AchievementUtilTest: FeatureSpec({
         }
 
         every { property.getUser() } returns user
-        val job = mockkClass(WorkflowJob::class)
-        val jobProperty = mockkClass(GameJobProperty::class)
         val statistics = mockkClass(Statistics::class)
         parameters.branch = "master"
-        every { run.parent } returns job
-        every { job.parent } returns mockkClass(ItemGroup::class)
-        every { job.getProperty(any()) } returns jobProperty
         every { jobProperty.getStatistics() } returns statistics
         every { statistics.getLastRun("master") } returns null
         scenario("Last run is null")
@@ -677,13 +679,8 @@ class AchievementUtilTest: FeatureSpec({
     feature("getProjectCoverageImprovement") {
         var out: List<Double>
 
-        val job = mockkClass(WorkflowJob::class)
-        val jobProperty = mockkClass(GameJobProperty::class)
         val statistics = mockkClass(Statistics::class)
         parameters.branch = "master"
-        every { run.parent } returns job
-        every { job.parent } returns mockkClass(ItemGroup::class)
-        every { job.getProperty(any()) } returns jobProperty
         every { jobProperty.getStatistics() } returns statistics
         every { statistics.getLastRun("master") } returns null
         scenario("No Run before this one")
@@ -851,5 +848,100 @@ class AchievementUtilTest: FeatureSpec({
 
     feature("getSolvedChallengesSimultaneouslyCount") {
         AchievementUtil.getSolvedChallengesSimultaneouslyCount(files, parameters, run, property, TaskListener.NULL) shouldBe listOf(1.0)
+    }
+
+    feature("getChallengesSentAmount") {
+        scenario("No Challenges sent") {
+            every { property.getSentChallengesCount(any()) } returns 0
+            AchievementUtil.getChallengesSentAmount(files, parameters, run , property, TaskListener.NULL) shouldBe 0
+        }
+
+        scenario("Two Challenges sent") {
+            every { property.getSentChallengesCount(any()) } returns 2
+            AchievementUtil.getChallengesSentAmount(files, parameters, run , property, TaskListener.NULL) shouldBe 2
+        }
+    }
+
+    feature("getChallengesReceivedAmount") {
+        scenario("No Challenges received") {
+            every { property.getReceivedChallengesCount(any()) } returns 0
+            AchievementUtil.getChallengesReceivedAmount(files, parameters, run , property, TaskListener.NULL) shouldBe 0
+        }
+
+        scenario("Two Challenges received") {
+            every { property.getReceivedChallengesCount(any()) } returns 2
+            AchievementUtil.getChallengesReceivedAmount(files, parameters, run , property, TaskListener.NULL) shouldBe 2
+        }
+    }
+
+    feature("solveSentMoreChallengesThanReceived") {
+        additionalParameters.clear()
+
+        additionalParameters["factor"] = "3"
+        additionalParameters["minimum"] = "0"
+
+        scenario("Less than triple challenges sent than received") {
+            every { property.getSentChallengesCount(any()) } returns 0
+            every { property.getReceivedChallengesCount(any()) } returns 1
+            AchievementUtil.solveSentMoreChallengesThanReceived(files, parameters, run , property, TaskListener.NULL, additionalParameters) shouldBe false
+        }
+
+        scenario("More than triple challenges sent than received") {
+            every { property.getSentChallengesCount(any()) } returns 4
+            every { property.getReceivedChallengesCount(any()) } returns 1
+            AchievementUtil.solveSentMoreChallengesThanReceived(files, parameters, run , property, TaskListener.NULL, additionalParameters) shouldBe true
+        }
+
+        additionalParameters["minimum"] = "6"
+
+        scenario("More than triple challenges sent than received, but not above minimum") {
+            every { property.getSentChallengesCount(any()) } returns 4
+            every { property.getReceivedChallengesCount(any()) } returns 1
+            AchievementUtil.solveSentMoreChallengesThanReceived(files, parameters, run , property, TaskListener.NULL, additionalParameters) shouldBe false
+        }
+    }
+
+    feature("solveReceiveMoreChallengesThanSent") {
+        additionalParameters.clear()
+
+        additionalParameters["factor"] = "3"
+        additionalParameters["minimum"] = "0"
+
+        scenario("Less than triple challenges received than sent") {
+            every { property.getSentChallengesCount(any()) } returns 1
+            every { property.getReceivedChallengesCount(any()) } returns 0
+            AchievementUtil.solveReceiveMoreChallengesThanSent(files, parameters, run , property, TaskListener.NULL, additionalParameters) shouldBe false
+        }
+
+        scenario("More than triple challenges received than sent") {
+            every { property.getSentChallengesCount(any()) } returns 1
+            every { property.getReceivedChallengesCount(any()) } returns 4
+            AchievementUtil.solveReceiveMoreChallengesThanSent(files, parameters, run , property, TaskListener.NULL, additionalParameters) shouldBe true
+        }
+
+        additionalParameters["minimum"] = "6"
+
+        scenario("More than triple challenges received than sent, but not above minimum") {
+            every { property.getSentChallengesCount(any()) } returns 1
+            every { property.getReceivedChallengesCount(any()) } returns 4
+            AchievementUtil.solveReceiveMoreChallengesThanSent(files, parameters, run , property, TaskListener.NULL, additionalParameters) shouldBe false
+        }
+    }
+
+    feature("solveInventoryFull") {
+
+        val list = CopyOnWriteArrayList<Challenge>()
+
+        every { jobProperty.currentStoredChallengesCount } returns 1
+        every { property.getStoredChallenges(any()) } returns list
+
+        scenario("Inventory not full") {
+            AchievementUtil.solveInventoryFull(files, parameters, run , property, TaskListener.NULL, additionalParameters) shouldBe false
+        }
+
+        list.add(mockkClass(Challenge::class))
+        scenario("Inventory full") {
+            AchievementUtil.solveInventoryFull(files, parameters, run , property, TaskListener.NULL, additionalParameters) shouldBe true
+        }
     }
 })

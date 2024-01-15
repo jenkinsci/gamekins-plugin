@@ -38,5 +38,37 @@
     "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::getSolvedChallengesCount",
     "milestones": [1, 3, 10, 20, 50, 100],
     "unit": ""
+  },
+  {
+    "badgePath": "/plugin/gamekins/achievements/colour/no-mutants-colour.png",
+    "description": "Solve mutation challenges",
+    "title": "No more mutants!",
+    "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::getSolvedMutationChallengesCount",
+    "milestones": [1, 5, 10, 25, 100],
+    "unit": ""
+  },
+  {
+    "badgePath": "/plugin/gamekins/achievements/colour/shit-smell-colour.png",
+    "description": "Solve smell challenges",
+    "title": "Something smells around here!",
+    "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::getSolvedSmellChallengesCount",
+    "milestones": [1, 5, 10, 25, 100],
+    "unit": ""
+  },
+  {
+    "badgePath": "/plugin/gamekins/achievements/colour/postman-colour.png",
+    "description": "Send challenges to other people",
+    "title": "Not my problem anymore!",
+    "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::getChallengesSentAmount",
+    "milestones": [1, 3, 5, 10, 20],
+    "unit": ""
+  },
+  {
+    "badgePath": "/plugin/gamekins/achievements/colour/postman-colour.png",
+    "description": "Receive challenges from other people",
+    "title": "To good at solving problems",
+    "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::getChallengesReceivedAmount",
+    "milestones": [1, 3, 5, 10, 20],
+    "unit": ""
   }
 ]

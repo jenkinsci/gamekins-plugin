@@ -1,0 +1,26 @@
+[
+  {
+    "badgePath": "/plugin/gamekins/achievements/colour/admin-colour.png",
+    "unsolvedBadgePath": "/plugin/gamekins/achievements/blackwhite/admin.png",
+    "description": "Send more than triple the amount of challenges you receive (and more than six)",
+    "title": "You know you should do them yourself right?",
+    "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::solveSentMoreChallengesThanReceived",
+    "secret": false,
+    "additionalParameters": {
+      "factor": 3,
+      "minimum": 6
+    }
+  },
+  {
+    "badgePath": "/plugin/gamekins/achievements/colour/convergence-colour.png",
+    "unsolvedBadgePath": "/plugin/gamekins/achievements/blackwhite/convergence.png",
+    "description": "Receive more than triple the amount of challenges you send (and more than six)",
+    "title": "The only productive one",
+    "fullyQualifiedFunctionName": "org.gamekins.util.AchievementUtil::solveReceiveMoreChallengesThanSent",
+    "secret": false,
+    "additionalParameters": {
+      "factor": 3,
+      "minimum": 6
+    }
+  }
+]
