@@ -114,7 +114,10 @@ class GamePublisherDescriptor : BuildStepDescriptor<Publisher?>(GamePublisher::c
 
             var entry: ZipEntry? = zip.nextEntry
             while (entry != null) {
-                if (!entry.isDirectory && entry.name.startsWith("achievements/") && entry.name.endsWith(".json") && !entry.name.endsWith("progress_achievements.json")) {
+                if (!entry.isDirectory && entry.name.startsWith("achievements/")
+                    && entry.name.endsWith(".json")
+                    && !entry.name.endsWith("progress_achievements.json")
+                    && !entry.name.endsWith("badge_achievements.json")) {
                     val scanner = Scanner(zip)
                     var content = ""
                     while (scanner.hasNextLine()) {
@@ -128,7 +131,13 @@ class GamePublisherDescriptor : BuildStepDescriptor<Publisher?>(GamePublisher::c
                         content += "${scanner.nextLine()}\n"
                     }
                     progressAchievements.addAll(AchievementInitializer.initializeProgressAchievementsWithContent(content))
-                    badgeAchievements.addAll(AchievementInitializer.initializeBadgeAchievements(content))
+                } else if (entry.name.contains("badge_achievements.json")) {
+                    val scanner = Scanner(zip)
+                    var content = ""
+                    while (scanner.hasNextLine()) {
+                        content += "${scanner.nextLine()}\n"
+                    }
+                    badgeAchievements.addAll(AchievementInitializer.initializeBadgeAchievementsWithContent(content))
                 }
 
                 entry = zip.nextEntry
