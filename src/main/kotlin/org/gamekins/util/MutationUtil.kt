@@ -16,7 +16,6 @@
 
 package org.gamekins.util
 
-import com.github.javaparser.ast.CompilationUnit
 import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinter
 import hudson.FilePath
 import hudson.model.TaskListener
@@ -81,6 +80,25 @@ object MutationUtil {
         return true
     }
 
+    fun getAllAliveMutantsOfClass(fileDetails: SourceFileDetails, parameters: Parameters, listener: TaskListener)
+    : List<MutationData> {
+        if (!executePIT(fileDetails, parameters, listener)) return listOf()
+
+        val mutationReport = FilePath(parameters.workspace.channel,
+            parameters.workspace.remote + Constants.Mutation.REPORT_PATH)
+        if (!mutationReport.exists()) return listOf()
+        val mutantLines = mutationReport.readToString().split("\n")
+            .filter { it.startsWith("<mutation ") }.filter { !it.contains("status='KILLED'") }
+        if (mutantLines.isEmpty()) return listOf()
+
+        val mutants = arrayListOf<MutationData>()
+        mutantLines.forEach { mutant ->
+            mutants.add(MutationData(mutant, parameters))
+        }
+
+        return mutants
+    }
+
     /**
      * Returns a mutant based on previous [data] to check whether it is killed. Assumes that the PIT mutation report
      * is stored in <project-root>/target/pit-reports/mutations.xml.
@@ -92,13 +110,11 @@ object MutationUtil {
         if (!mutationReport.exists()) return null
         val mutants = mutationReport.readToString().split("\n").filter { it.startsWith("<mutation ") }
         if (mutants.isEmpty()) return null
-        //return mutants.map { MutationData(it) }.find { it == data } hier war schluss
-        var mutant = mutants.map { MutationData(it) }.find { it == data }
+        var mutant = mutants.map { MutationData(it, parameters) }.find { it == data }
         if (mutant == null) {
             val updatedData = GumTree.findMapping(data, parameters)
-            mutant = mutants.map { MutationData(it) }.find { it == updatedData }
+            mutant = mutants.map { MutationData(it, parameters) }.find { it == updatedData }
         }
-        mutant?.generateCompilationUnit(parameters)
         return mutant
     }
 
@@ -240,7 +256,7 @@ object MutationUtil {
         var sourceCode: String
     ) {
 
-        constructor(line: String) : this(
+        constructor(line: String, parameters: Parameters) : this(
             """detected='([a-z]*)'""".toRegex().find(line)!!.groupValues[1].toBoolean(),
             when ("""status='([A-Z_]*)'""".toRegex().find(line)!!.groupValues[1]) {
                 "NO_COVERAGE" -> MutationStatus.NO_COVERAGE
@@ -272,17 +288,19 @@ object MutationUtil {
             (if (line.contains("<killingTest/>")) "" else
                 """<killingTest>(.*)</killingTest>""".toRegex().find(line)!!.groupValues[1]),
             """<description>(.*)</description>""".toRegex().find(line)!!.groupValues[1],
-            ""
+            generateCompilationUnit(parameters,
+                """<sourceFile>(.*)</sourceFile>""".toRegex().find(line)!!.groupValues[1],
+                """<mutatedClass>(.*)</mutatedClass>""".toRegex().find(line)!!.groupValues[1])
         )
 
-        /**
-         * Generates the compilationUnit if it is null.
-         */
-        fun generateCompilationUnit(parameters: Parameters) {
-            if (sourceCode.isEmpty()) {
+        companion object {
+            /**
+             * Generates the compilationUnit.
+             */
+            fun generateCompilationUnit(parameters: Parameters, sourceFile: String, mutatedClass: String): String {
                 val compilationUnit = JavaParser.parse(sourceFile, mutatedClass, parameters)
                 LexicalPreservingPrinter.setup(compilationUnit)
-                sourceCode = LexicalPreservingPrinter.print(compilationUnit)
+                return LexicalPreservingPrinter.print(compilationUnit)
             }
         }
 

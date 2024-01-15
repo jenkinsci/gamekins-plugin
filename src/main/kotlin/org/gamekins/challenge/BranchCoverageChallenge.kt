@@ -23,6 +23,7 @@ import org.gamekins.file.SourceFileDetails
 import org.gamekins.gumTree.GumTree
 import org.gamekins.util.Constants
 import org.gamekins.util.JacocoUtil
+import org.gamekins.util.JacocoUtil.replaceSpecialEntities
 import org.jsoup.nodes.Element
 
 /**
@@ -35,9 +36,9 @@ class BranchCoverageChallenge(data: Challenge.ChallengeGenerationData)
     : CoverageChallenge(data.selectedFile as SourceFileDetails, data.parameters.workspace) {
 
     private val currentCoveredBranches: Int
-    private var lineContent: String = data.line!!.text()
+    private var lineContent: String = replaceSpecialEntities(data.line!!.text())
     private var lineNumber: Int = data.line!!.attr("id").substring(1).toInt()
-    private val maxCoveredBranches: Int
+    val maxCoveredBranches: Int
     private var solvedCoveredBranches: Int = 0
     private var sourceCode = generateCompilationUnit(details.parameters,
         "${details.packageName}.${details.fileName}", "${details.fileName}.${details.fileExtension}")
@@ -126,7 +127,7 @@ class BranchCoverageChallenge(data: Challenge.ChallengeGenerationData)
 
         val elements = document.select("span." + "pc")
 
-        return elements.any { it.text().trim() == lineContent.trim() }
+        return elements.any { replaceSpecialEntities(it.text().trim()) == replaceSpecialEntities(lineContent.trim()) }
     }
 
     /**

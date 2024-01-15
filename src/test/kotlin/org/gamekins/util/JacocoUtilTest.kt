@@ -209,7 +209,7 @@ class JacocoUtilTest : FeatureSpec({
         mockkStatic(JacocoUtil::class)
         scenario("jacocoSourceFile")
         {
-            JacocoUtil.getLines(jacocoSourceFile) shouldHaveSize 55
+            JacocoUtil.getLines(jacocoSourceFile) shouldHaveSize 54
         }
 
         val rationalPath = FilePath(null, path.remote + "/target/site/jacoco/com.example/Rational.java.html")

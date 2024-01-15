@@ -61,6 +61,42 @@ object ChallengeFactory {
     }
 
     /**
+     * Generates all possible challenges for a specific class in the project.
+     */
+    fun generateAllPossibleChallengesForClass(selectedClass: SourceFileDetails, parameters: Parameters, user: User,
+                                              listener: TaskListener = TaskListener.NULL): List<Challenge> {
+        val challenges = arrayListOf<Challenge>()
+        var challengeGenerationData = ChallengeGenerationData(parameters, user, selectedClass, listener)
+
+        challenges.add(ClassCoverageChallenge(challengeGenerationData))
+
+        JacocoUtil.getLines(FilePath(selectedClass.jacocoSourceFile)).forEach { line ->
+            challengeGenerationData = ChallengeGenerationData(parameters, user, selectedClass, listener, line = line)
+            challenges.add(LineCoverageChallenge(challengeGenerationData))
+        }
+
+        JacocoUtil.getLines(FilePath(selectedClass.jacocoSourceFile), partially = true).forEach { line ->
+            challengeGenerationData = ChallengeGenerationData(parameters, user, selectedClass, listener, line = line)
+            challenges.add(BranchCoverageChallenge(challengeGenerationData))
+        }
+
+        JacocoUtil.getNotFullyCoveredMethodEntries(FilePath(selectedClass.jacocoMethodFile)).forEach { method ->
+            challengeGenerationData = ChallengeGenerationData(parameters, user, selectedClass, listener, method = method)
+            challenges.add(MethodCoverageChallenge(challengeGenerationData))
+        }
+
+        MutationUtil.getAllAliveMutantsOfClass(selectedClass, parameters, listener).forEach { mutant ->
+            challenges.add(MutationChallenge(selectedClass, mutant))
+        }
+
+        SmellUtil.getSmellsOfFile(selectedClass, listener).forEach { smell ->
+            challenges.add(SmellChallenge(selectedClass, smell))
+        }
+
+        return challenges
+    }
+
+    /**
      * Generates a new [BuildChallenge] if the [result] was not [Result.SUCCESS] and returns true.
      */
     @JvmStatic
@@ -280,7 +316,7 @@ object ChallengeFactory {
                 }
                 BranchCoverageChallenge::class.java -> {
                     data.line = JacocoUtil.chooseRandomLine(data.selectedFile, data.parameters.workspace,
-                        partiallyOnly = true)
+                        partially = true)
                     if (data.line == null) null else challengeClass
                         .getConstructor(ChallengeGenerationData::class.java)
                         .newInstance(data)
@@ -315,9 +351,8 @@ object ChallengeFactory {
             .filter { it.startsWith("<mutation ") }.filter { !it.contains("status='KILLED'") }
         if (mutants.isEmpty()) return null
 
-        val mutant = MutationUtil.MutationData(mutants[Random.nextInt(mutants.size)])
+        val mutant = MutationUtil.MutationData(mutants[Random.nextInt(mutants.size)], parameters)
         if (mutant.status == MutationUtil.MutationStatus.KILLED) return null
-        mutant.generateCompilationUnit(parameters)
         return MutationChallenge(fileDetails, mutant)
     }
 

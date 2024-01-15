@@ -44,7 +44,8 @@ class CoverMoreBranchesQuestTask(branchesNumber: Int, csvFile: FilePath): QuestT
         user: User
     ): Boolean {
         val currentCoveredLines = JacocoUtil.getCoveredBranches(
-            FilePath(parameters.workspace.channel, parameters.workspace.remote + "/" + parameters.jacocoCSVPath))
+            FilePath(parameters.workspace.channel,
+                parameters.workspace.remote + "/" + parameters.jacocoCSVPath.replace("**/", "")))
         currentNumber = currentCoveredLines - startNumberOfBranches
         if (currentNumber >= numberGoal) {
             solved = System.currentTimeMillis()

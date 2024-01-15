@@ -92,7 +92,7 @@ class GumTreeTest: FeatureSpec ({
     }
 
     feature("testGumTree") {
-        var mutationData = MutationData(line1)
+        var mutationData = MutationData(line1, parameters)
         mutationData.sourceCode = sourceCode
         //Tests the case when just the lineNumber of the mutant has been changed
         //Gets the method signature through the imports of the class
@@ -107,7 +107,7 @@ class GumTreeTest: FeatureSpec ({
             }
         }
 
-        mutationData = MutationData(line2)
+        mutationData = MutationData(line2, parameters)
         mutationData.sourceCode = sourceCode
         //Tests the case when the class has changed, e.g. the method was refactored into an internal class
         //Tests the case when the method signature has been changed
@@ -123,7 +123,7 @@ class GumTreeTest: FeatureSpec ({
             }
         }
 
-        mutationData = MutationData(line3)
+        mutationData = MutationData(line3, parameters)
         mutationData.sourceCode = sourceCode
         //Tests the case when the method name has been changed
         //Gets the method signature through the reflectionTypeResolver and primitive types
@@ -139,7 +139,7 @@ class GumTreeTest: FeatureSpec ({
             }
         }
 
-        mutationData = MutationData(line4)
+        mutationData = MutationData(line4, parameters)
         mutationData.sourceCode = sourceCode
         //Tests the case when it was not possible to resolve the method signature, so it tries to get that
         //information through the pitReport, e.g. when star-imports were used
