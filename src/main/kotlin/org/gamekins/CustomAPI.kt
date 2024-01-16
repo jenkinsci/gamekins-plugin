@@ -1,7 +1,7 @@
 package org.gamekins
 
 import hudson.Extension
-import hudson.model.Job
+import hudson.model.AbstractItem
 import hudson.model.RootAction
 import hudson.model.User
 import hudson.util.FormValidation
@@ -190,7 +190,7 @@ class CustomAPI : RootAction {
     @WebMethod(name = ["storeChallenge"])
     fun storeChallenge(@JsonBody body: StoreChallenge): JsonHttpResponse {
 
-        val job: Job<*, *> = Jenkins.get().getItemByFullName(body.job) as Job<*, *>
+        val job: AbstractItem = Jenkins.get().getItemByFullName(body.job) as AbstractItem
 
         val response = JSONObject()
         response["message"] = ActionUtil.doStoreChallenge(job, body.challengeName)
@@ -204,7 +204,7 @@ class CustomAPI : RootAction {
     @WebMethod(name = ["restoreChallenge"])
     fun restoreChallenge(@JsonBody body: StoreChallenge): JsonHttpResponse {
 
-        val job: Job<*, *> = Jenkins.get().getItemByFullName(body.job) as Job<*, *>
+        val job: AbstractItem = Jenkins.get().getItemByFullName(body.job) as AbstractItem
 
         val response = JSONObject()
         response["message"] = ActionUtil.doRestoreChallenge(job, body.challengeName)
@@ -218,7 +218,7 @@ class CustomAPI : RootAction {
     @WebMethod(name = ["unshelveChallenge"])
     fun unshelveChallenge(@JsonBody body: StoreChallenge): JsonHttpResponse {
 
-        val job: Job<*, *> = Jenkins.get().getItemByFullName(body.job) as Job<*, *>
+        val job: AbstractItem = Jenkins.get().getItemByFullName(body.job) as AbstractItem
 
         val response = JSONObject()
         response["message"] = ActionUtil.doUndoStoreChallenge(job, body.challengeName)
@@ -232,7 +232,7 @@ class CustomAPI : RootAction {
     @WebMethod(name = ["rejectChallenge"])
     fun rejectChallenge(@JsonBody body: StoreChallenge): JsonHttpResponse {
 
-        val job: Job<*, *> = Jenkins.get().getItemByFullName(body.job) as Job<*, *>
+        val job: AbstractItem = Jenkins.get().getItemByFullName(body.job) as AbstractItem
 
         val response = JSONObject()
         response["message"] = ActionUtil.doRejectChallenge(job, body.challengeName, body.reason)
@@ -367,7 +367,7 @@ class CustomAPI : RootAction {
     @WebMethod(name = ["getUsers"])
     fun getUsers(@QueryParameter("job") job: String): JsonHttpResponse {
 
-        val lJob: Job<*, *> = Jenkins.get().getItemByFullName(job) as Job<*, *>
+        val lJob: AbstractItem = Jenkins.get().getItemByFullName(job) as AbstractItem
         val myJsonObjects = ActionUtil.getUserDetails(lJob)
 
         val response = JSONArray()
@@ -384,7 +384,7 @@ class CustomAPI : RootAction {
     @WebMethod(name = ["getTeams"])
     fun getTeams(@QueryParameter("job") job: String): JsonHttpResponse {
 
-        val lJob: Job<*, *> = Jenkins.get().getItemByFullName(job) as Job<*, *>
+        val lJob: AbstractItem = Jenkins.get().getItemByFullName(job) as AbstractItem
         val myJsonObjects = ActionUtil.getTeamDetails(lJob)
 
         val response = JSONArray()
@@ -417,7 +417,7 @@ class CustomAPI : RootAction {
     @WebMethod(name = ["getStoredChallengesLimit"])
     fun getStoredChallengesLimit(@QueryParameter("job") job: String): JsonHttpResponse {
 
-        val lJob: Job<*, *> = Jenkins.get().getItemByFullName(job) as Job<*, *>
+        val lJob: AbstractItem = Jenkins.get().getItemByFullName(job) as AbstractItem
 
         val responseJson = JSONObject()
         responseJson["limit"] = TaskAction(lJob).getStoredChallengesLimit()
