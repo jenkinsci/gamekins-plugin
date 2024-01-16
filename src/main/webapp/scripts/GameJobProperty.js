@@ -2,17 +2,15 @@ jQuery3("#addTeam").on('click', function () {
     let teamName = jQuery3("#teamName")[0].value
     let descriptorFullUrl = jQuery3(this).data('descriptor-url')
     let url = descriptorFullUrl + "/addTeam"
-    let parameters = {}
-    parameters["teamName"] = teamName
 
-    new Ajax.Request(url, {
-        parameters: parameters,
-        onComplete: function (rsp) {
-            if (!rsp.responseText.includes("class=error")) {
+    jQuery.ajax(url, {
+        data: jQuery.param({teamName: teamName}),
+        success: function (rsp) {
+            if (!rsp.includes("class=error")) {
                 jQuery3("#teamName")[0].value = ""
                 buildTeamsList(descriptorFullUrl)
             }
-            jQuery3("#error-user-team")[0].innerHTML = rsp.responseText
+            jQuery3("#error-user-team")[0].innerHTML = rsp
             updateTeamsTable(descriptorFullUrl)
         }
     })
@@ -23,14 +21,11 @@ jQuery3("#addUserToTeam").on('click', function () {
     let usersBox = jQuery3("#usersBox")[0].value
     let descriptorFullUrl = jQuery3(this).data('descriptor-url')
     let url = descriptorFullUrl + "/addUserToTeam"
-    let parameters = {}
-    parameters["teamsBox"] = teamsBox
-    parameters["usersBox"] = usersBox
 
-    new Ajax.Request(url, {
-        parameters: parameters,
-        onComplete: function (rsp) {
-            jQuery3("#error-user-team")[0].innerHTML = rsp.responseText
+    jQuery.ajax(url, {
+        data: jQuery.param({teamsBox: teamsBox, usersBox: usersBox}),
+        success: function (rsp) {
+            jQuery3("#error-user-team")[0].innerHTML = rsp
             updateTeamsTable(descriptorFullUrl)
         }
     })
@@ -41,14 +36,11 @@ jQuery3("#removeUserFromProject").on('click', function () {
     let usersBox = jQuery3("#usersBox")[0].value
     let descriptorFullUrl = jQuery3(this).data('descriptor-url')
     let url = descriptorFullUrl + "/removeUserFromProject"
-    let parameters = {}
-    parameters["teamsBox"] = teamsBox
-    parameters["usersBox"] = usersBox
 
-    new Ajax.Request(url, {
-        parameters: parameters,
-        onComplete: function (rsp) {
-            jQuery3("#error-user-team")[0].innerHTML = rsp.responseText
+    jQuery.ajax(url, {
+        data: jQuery.param({teamsBox: teamsBox, usersBox: usersBox}),
+        success: function (rsp) {
+            jQuery3("#error-user-team")[0].innerHTML = rsp
             updateTeamsTable(descriptorFullUrl)
         }
     })
@@ -58,13 +50,11 @@ jQuery3("#deleteTeam").on('click', function () {
     let teamsBox = jQuery3("#teamsBox")[0].value
     let descriptorFullUrl = jQuery3(this).data('descriptor-url')
     let url = descriptorFullUrl + "/deleteTeam"
-    let parameters = {}
-    parameters["teamsBox"] = teamsBox
 
-    new Ajax.Request(url, {
-        parameters: parameters,
-        onComplete: function (rsp) {
-            jQuery3("#error-user-team")[0].innerHTML = rsp.responseText
+    jQuery.ajax(url, {
+        data: jQuery.param({teamsBox: teamsBox}),
+        success: function (rsp) {
+            jQuery3("#error-user-team")[0].innerHTML = rsp
 
             buildTeamsList(descriptorFullUrl)
             updateTeamsTable(descriptorFullUrl)
@@ -76,13 +66,11 @@ jQuery3("#participateAlone").on('click', function () {
     let usersBox = jQuery3("#usersBox")[0].value
     let descriptorFullUrl = jQuery3(this).data('descriptor-url')
     let url = descriptorFullUrl + "/participateAlone"
-    let parameters = {}
-    parameters["usersBox"] = usersBox
 
-    new Ajax.Request(url, {
-        parameters: parameters,
-        onComplete: function (rsp) {
-            jQuery3("#error-user-team")[0].innerHTML = rsp.responseText
+    jQuery.ajax(url, {
+        data: jQuery.param({usersBox: usersBox}),
+        success: function (rsp) {
+            jQuery3("#error-user-team")[0].innerHTML = rsp
             updateTeamsTable(descriptorFullUrl)
         }
     })
@@ -95,14 +83,12 @@ jQuery3("#showTeamMemberships").on('click', function () {
 
 function buildTeamsList(descriptorFullUrl) {
     let url = descriptorFullUrl + "/fillTeamsBoxItems"
-    let parameters = {}
-    parameters["includeNoTeam"] = false
 
-    new Ajax.Request(url, {
-        parameters: parameters,
-        onComplete: function (rsp) {
+    jQuery.ajax(url, {
+        data: jQuery.param({includeNoTeam: false}),
+        success: function (rsp) {
             let teamsBox = jQuery3("#teamsBox")[0]
-            let values = rsp.responseJSON.values
+            let values = rsp.values
 
             teamsBox.innerHTML = ""
             for (let i = 0; i < values.length; i++) {
@@ -124,17 +110,15 @@ function buildTeamsList(descriptorFullUrl) {
 function buildTeamsTable(descriptorFullUrl, rebuild = false) {
     let url = descriptorFullUrl + "/showTeamMemberships"
 
-    new Ajax.Request(url, {
-        onComplete: function (rsp) {
+    jQuery.ajax(url, {
+        success: function (rsp) {
             url = descriptorFullUrl + "/fillTeamsBoxItems"
-            let teamMap = JSON.parse(rsp.responseText)
-            let parameters = {}
-            parameters["includeNoTeam"] = true
+            let teamMap = JSON.parse(rsp)
 
-            new Ajax.Request(url, {
-                parameters: parameters,
-                onComplete: function (rsp) {
-                    let teams = rsp.responseJSON.values
+            jQuery.ajax(url, {
+                data: jQuery.param({includeNoTeam: true}),
+                success: function (rsp) {
+                    let teams = rsp.values
 
                     let table = jQuery3("#team-table")[0]
 

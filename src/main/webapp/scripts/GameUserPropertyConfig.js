@@ -1,16 +1,14 @@
 document.addEventListener("DOMContentLoaded", function () {
     let btn = jQuery3("#changeAvatarBtn")
     let descriptorFullUrl = btn.data('descriptor-url')
-    let parameters = {}
     let url = descriptorFullUrl + "/getCurrentAvatar"
 
-    new Ajax.Request(url, {
-        parameters: parameters,
-        onComplete: function (rsp) {
+    jQuery.ajax(url, {
+        success: function (rsp) {
             let src = document.getElementsByTagName("img")[0].src
             let base = src.substring(0, src.indexOf("static"))
             let endSplit = src.substring(src.indexOf("static")).split("/")
-            jQuery3("#currentAvatar").attr("src", base + "static/" + endSplit[1] + rsp.responseText)
+            jQuery3("#currentAvatar").attr("src", base + "static/" + endSplit[1] + rsp)
         }
     })
 })
@@ -18,15 +16,13 @@ document.addEventListener("DOMContentLoaded", function () {
 jQuery3("#changeAvatarBtn").on("click", function () {
     let btn = jQuery3(this)
     let descriptorFullUrl = btn.data('descriptor-url')
-    let parameters = {}
     let url = descriptorFullUrl + "/getAvatars"
 
-    new Ajax.Request(url, {
-        parameters: parameters,
-        onComplete: function (rsp) {
+    jQuery.ajax(url, {
+        success: function (rsp) {
            let avatarPicker = jQuery3("#avatar-picker")
             if (avatarPicker.children().length === 0) {
-                let response = rsp.responseText.replace("[", "")
+                let response = rsp.replace("[", "")
                 response = response.replace("]", "")
                 let avatars = response.split(", ")
                 let avatarRows = sliceIntoChunks(avatars, 10)
@@ -51,7 +47,6 @@ jQuery3("#changeAvatarBtn").on("click", function () {
                         item.setAttribute("id", i + "_" + j + "-card")
                         if (avatarRows[i][j].endsWith(currentAvatarSplit[currentAvatarSplit.length - 1])) {
                             item.style.boxShadow = "0 0 1px 1px #292b2c"
-                        } else {
                         }
                         let img = document.createElement("img")
                         let src = document.getElementsByTagName("img")[0].src
@@ -71,7 +66,7 @@ jQuery3("#changeAvatarBtn").on("click", function () {
                     avatarPicker.append(row)
                 }
                 jQuery3(".card").click(function () {
-                    var inputElement = jQuery3(this).attr('id')
+                    let inputElement = jQuery3(this).attr('id')
                     unclickRadio()
                     clickRadio(inputElement)
                 });
@@ -84,7 +79,7 @@ jQuery3("#changeAvatarBtn").on("click", function () {
 })
 
 jQuery3("#chooseModalBtn").on("click", () => {
-    var card
+    let card;
     let cards = document.getElementsByClassName("card")
     for (let i = 0; i < cards.length; i++) {
         if (cards[i].style.boxShadow != "") {
@@ -97,13 +92,11 @@ jQuery3("#chooseModalBtn").on("click", () => {
 
     let btn = jQuery3("#changeAvatarBtn")
     let descriptorFullUrl = btn.data('descriptor-url')
-    let parameters = {}
-    parameters["name"] = name
     let url = descriptorFullUrl + "/setCurrentAvatar"
 
-    new Ajax.Request(url, {
-        parameters: parameters,
-        onComplete: function () {
+    jQuery.ajax(url, {
+        data: jQuery.param({name: name}),
+        success: function () {
             jQuery3("#currentAvatar").attr("src", newAvatarUrl)
         }
     })

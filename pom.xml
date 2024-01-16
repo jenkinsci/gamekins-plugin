@@ -14,13 +14,14 @@
 
     <properties>
         <!-- Baseline Jenkins version you use to build the plugin. Users must have this version or newer to run. -->
-        <jenkins.version>2.401.3</jenkins.version>
+        <jenkins.version>2.426.1</jenkins.version>
         <kotlin.version>1.9.10</kotlin.version>
         <maven.compiler.release>17</maven.compiler.release>
         <maven.compiler.debug>true</maven.compiler.debug>
         <maven.compiler.debuglevel>lines,source</maven.compiler.debuglevel>
         <animal.sniffer.version>1.20</animal.sniffer.version>
         <githubSuffix>jenkinsci/gamekins-plugin</githubSuffix>
+        <kotlin-coroutines.version>1.7.3</kotlin-coroutines.version>
         <!-- <maven.test.skip>true</maven.test.skip> -->
         <!-- Other properties you may want to use:
           ~ jenkins-test-harness.version: Jenkins Test Harness version you use to test the plugin. For Jenkins version >= 1.580.1 use JTH 2.0 or higher.
@@ -102,7 +103,7 @@
         <dependency>
             <groupId>org.jetbrains.kotlinx</groupId>
             <artifactId>kotlinx-coroutines-core</artifactId>
-            <version>1.7.3</version>
+            <version>${kotlin-coroutines.version}</version>
             <type>pom</type>
         </dependency>
 

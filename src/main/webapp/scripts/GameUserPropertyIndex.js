@@ -2,21 +2,20 @@ let projects = document.getElementById("projects")
 let urlCurrentUser = window.location.href + "isCurrentUser"
 let currentUser = false
 
-new Ajax.Request(urlCurrentUser, {
-    onComplete: function (rsp) {
-        currentUser = (rsp.responseText === "true")
+jQuery.ajax(urlCurrentUser, {
+    success: function (rsp) {
+        currentUser = (rsp === "true")
     }
 })
 
 window.onload = function () {
     let url = window.location.href + "getProjects"
 
-    new Ajax.Request(url, {
-        onComplete: function (rsp) {
-            let obj = JSON.parse(rsp.responseText)
-            for(let i = 0; i < obj.length; i++) {
+    jQuery.ajax(url, {
+        success: function (rsp) {
+            for(let i = 0; i < rsp.length; i++) {
                 let option = document.createElement("option")
-                option.text = obj[i]
+                option.text = rsp[i]
                 projects.add(option)
             }
 
@@ -36,11 +35,11 @@ projects.addEventListener("change", function () {
 
 function changeLeaderboardURL() {
     let url = window.location.href + "getLastLeaderboard"
-    new Ajax.Request(url, {
-        onComplete: function (rsp) {
+    jQuery.ajax(url, {
+        success: function (rsp) {
             let link = document.getElementById("leaderboardLink")
 
-            link.href = rsp.responseText
+            link.href = rsp
             link.innerText = "Go to last leaderboard"
         }
     })
@@ -59,18 +58,16 @@ function loadAchievements() {
     let urlCompleted = window.location.href + "getCompletedAchievements"
     let urlTotalCount = window.location.href + "getAchievementsCount"
     let urlSecretCount = window.location.href + "getUnsolvedSecretAchievementsCount"
-    let parameters = {}
-    parameters["projectName"] = projects.value
 
-    new Ajax.Request(urlTotalCount, {
-        parameters: parameters,
-        onComplete: function (rsp) {
-            let totalCount = rsp.responseText
+    jQuery.ajax(urlTotalCount, {
+        data: jQuery.param({projectName: projects.value}),
+        success: function (rsp) {
+            let totalCount = rsp
 
-            new Ajax.Request(urlCompleted, {
-                parameters: parameters,
-                onComplete: function (rsp) {
-                    let list = JSON.parse(rsp.responseText)
+            jQuery.ajax(urlCompleted, {
+                data: jQuery.param({projectName: projects.value}),
+                success: function (rsp) {
+                    let list = rsp
                     let div = document.getElementById("completedAchievements")
                     while (div.childNodes.length > 1) {
                         div.removeChild(div.lastChild)
@@ -93,10 +90,10 @@ function loadAchievements() {
             })
 
             if (currentUser) {
-                new Ajax.Request(urlUnsolved, {
-                    parameters: parameters,
-                    onComplete: function (rsp) {
-                        let list = JSON.parse(rsp.responseText)
+                jQuery.ajax(urlUnsolved, {
+                    data: jQuery.param({projectName: projects.value}),
+                    success: function (rsp) {
+                        let list = rsp
                         let div = document.getElementById("unsolvedAchievements")
                         while (div.childNodes.length > 1) {
                             div.removeChild(div.lastChild)
@@ -112,11 +109,11 @@ function loadAchievements() {
                     }
                 })
 
-                new Ajax.Request(urlSecretCount, {
-                    parameters: parameters,
-                    onComplete: function (rsp) {
+                jQuery.ajax(urlSecretCount, {
+                    data: jQuery.param({projectName: projects.value}),
+                    success: function (rsp) {
                         let header = document.getElementById("secretAchievementsHeader")
-                        header.innerText = "Secret Achievements" + " (" + rsp.responseText + ")"
+                        header.innerText = "Secret Achievements" + " (" + rsp + ")"
                     }
                 })
             } else {
@@ -126,11 +123,11 @@ function loadAchievements() {
                 div.style.display = "none"
             }
 
-            new Ajax.Request(window.location.href + "getProgressAchievements", {
-                parameters: parameters,
-                onComplete: function (rsp) {
+            jQuery.ajax(window.location.href + "getProgressAchievements", {
+                data: jQuery.param({projectName: projects.value}),
+                success: function (rsp) {
 
-                    let list = JSON.parse(rsp.responseText)
+                    let list = rsp
 
                     for(let i = 0; i < list.length; i++) {
                         let progressAchievements = document.getElementById("progressAchievements")
@@ -141,11 +138,11 @@ function loadAchievements() {
                 }
             })
 
-            new Ajax.Request(window.location.href + "getBadgeAchievements", {
-                parameters: parameters,
-                onComplete: function (rsp) {
+            jQuery.ajax(window.location.href + "getBadgeAchievements", {
+                data: jQuery.param({projectName: projects.value}),
+                success: function (rsp) {
 
-                    let list = JSON.parse(rsp.responseText)
+                    let list = rsp
 
                     for(let i = 0; i < list.length; i++) {
                         let badgeAchievements = document.getElementById("badgeAchievements")
@@ -154,10 +151,10 @@ function loadAchievements() {
                     }
 
                     jQuery3("img").click(function () {
-                                var inputElement = jQuery3(this).attr('id')
-                                unclickBadge(inputElement)
-                                clickBadge(inputElement)
-                            });
+                        let inputElement = jQuery3(this).attr('id')
+                        unclickBadge(inputElement)
+                        clickBadge(inputElement)
+                    });
                 }
             })
 
