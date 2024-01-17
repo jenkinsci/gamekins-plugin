@@ -377,7 +377,7 @@ object ActionUtil {
                 }
 
                 if (index != -1) {
-                    details[index].addCompletedAchievements(property.getCompletedAchievements(job.fullName).size)
+                    details[index].addCompletedAchievements(property.getTotalCompletedAchievementCount(job.fullName))
                     details[index].addCompletedChallenges(property.getCompletedChallenges(job.fullName).size)
                     details[index].addCompletedQuests(property.getCompletedQuests(job.fullName).size)
                     details[index].addUnfinishedQuests(property.getUnfinishedQuests(job.fullName).size)
@@ -387,7 +387,7 @@ object ActionUtil {
                         TeamDetails(
                             property.getTeamName(job.fullName),
                             property.getScore(job.fullName),
-                            property.getTotalCompletedAchievementCount(job.fullName),
+                            property.getCompletedChallenges(job.fullName).size,
                             property.getCompletedQuests(job.fullName).size,
                             property.getCompletedQuestTasks(job.fullName).size,
                             property.getUnfinishedQuests(job.fullName).size,
