@@ -644,6 +644,14 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
             }
         }
 
+        //Initialize new achievements
+        if (badgeAchievements == null) {
+            badgeAchievements = hashMapOf()
+        }
+        if (progressAchievements == null) {
+            progressAchievements = hashMapOf()
+        }
+
         //Add new achievements and remove deleted ones that have not been solved before
         participation.keys.forEach { project ->
             GamePublisherDescriptor.achievements

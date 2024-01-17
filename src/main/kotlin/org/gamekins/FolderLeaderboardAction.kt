@@ -17,6 +17,7 @@
 package org.gamekins
 
 import hudson.model.*
+import jenkins.model.Jenkins
 import org.gamekins.util.ActionUtil
 import org.gamekins.util.PropertyUtil
 import org.kohsuke.stapler.StaplerProxy
@@ -90,6 +91,30 @@ class FolderLeaderboardAction(val job: AbstractItem) : ProminentProjectAction, S
         }
 
         return details
+            .sortedWith(compareBy({it.score}, {it.completedChallenges}, {it.completedQuestTasks},
+                {it.completedAchievements}))
+            .reversed()
+    }
+
+    fun getTeamDetails(): List<ActionUtil.TeamDetails> {
+        val details = arrayListOf<ActionUtil.TeamDetails>()
+        for (user in User.getAll()) {
+            if (!PropertyUtil.realUser(user)) continue
+            val property = user.getProperty(GameUserProperty::class.java)
+            val projects = property.isParticipatingInSubProjects(job.fullName)
+            if (projects.isNotEmpty()) {
+
+                projects.forEach { project ->
+                    val job: AbstractItem = Jenkins.get().getItemByFullName(project) as AbstractItem
+                    details.addAll(ActionUtil.getTeamDetails(job))
+                }
+            }
+        }
+
+        details.removeIf { it.teamName == "---" }
+
+        return details
+            .distinctBy { it.teamName }
             .sortedWith(compareBy({it.score}, {it.completedChallenges}, {it.completedQuestTasks},
                 {it.completedAchievements}))
             .reversed()
