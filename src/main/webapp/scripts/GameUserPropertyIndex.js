@@ -30,6 +30,7 @@ window.onload = function () {
 
 projects.addEventListener("change", function () {
     changeProjectURL()
+    changeLeaderboardURL()
     loadAchievements()
 })
 
@@ -128,9 +129,13 @@ function loadAchievements() {
                 success: function (rsp) {
 
                     let list = rsp
+                    let progressAchievements = document.getElementById("progressAchievements")
+
+                    while (progressAchievements.childNodes.length > 1) {
+                        progressAchievements.removeChild(progressAchievements.lastChild)
+                    }
 
                     for(let i = 0; i < list.length; i++) {
-                        let progressAchievements = document.getElementById("progressAchievements")
                         createProgressAchievement(progressAchievements, list[i], currentUser)
                         progressAchievements.appendChild(document.createElement("br"))
                     }
@@ -143,9 +148,12 @@ function loadAchievements() {
                 success: function (rsp) {
 
                     let list = rsp
+                    let badgeAchievements = document.getElementById("badgeAchievements")
+                    while (badgeAchievements.childNodes.length > 1) {
+                        badgeAchievements.removeChild(badgeAchievements.lastChild)
+                    }
 
                     for(let i = 0; i < list.length; i++) {
-                        let badgeAchievements = document.getElementById("badgeAchievements")
                         createBadgeAchievement(badgeAchievements, list[i])
                         badgeAchievements.appendChild(document.createElement("br"))
                     }
