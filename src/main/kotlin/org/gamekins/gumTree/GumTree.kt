@@ -44,11 +44,18 @@ object GumTree {
      */
     @JvmStatic
     fun findMapping(sourceCode: String, className: String, sourceFile: String, lineNUmber: Int, parameters: Parameters): Int {
-        val source = JavaParser.parse(sourceCode)
-        val destination = JavaParser.parse(sourceFile, className, parameters)
-        val mappings = map(source, destination)
+        var returnValue: Int
+        try {
+            val source = JavaParser.parse(sourceCode)
+            val destination = JavaParser.parse(sourceFile, className, parameters)
+            val mappings = map(source, destination)
 
-        return findMostFrequentDestinationLineNumber(mappings, lineNUmber) ?: 0
+            returnValue = findMostFrequentDestinationLineNumber(mappings, lineNUmber) ?: 0
+        } catch (e: Exception) {
+            returnValue = 0
+        }
+
+        return returnValue
     }
 
     /**
