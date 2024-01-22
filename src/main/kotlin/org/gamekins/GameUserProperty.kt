@@ -62,6 +62,7 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
     private val pseudonym: UUID = UUID.randomUUID()
     private val rejectedChallenges: HashMap<String, CopyOnWriteArrayList<Pair<Challenge, String>>> = HashMap()
     private var rejectedQuests: HashMap<String, CopyOnWriteArrayList<Pair<Quest, String>>> = HashMap()
+    //TODO: Remove score
     private val score: HashMap<String, Int> = HashMap()
     private var sendNotifications: Boolean = true
     private var storedChallenges: HashMap<String, CopyOnWriteArrayList<Challenge>> = HashMap()
@@ -378,7 +379,7 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
         if (isParticipating(projectName) && score[projectName] == null) {
             score[projectName] = 0
         }
-        return score[projectName]!!
+        return completedChallenges[projectName]!!.sumOf { it.getScore() }.plus(completedQuestTasks[projectName]!!.sumOf { it.getScore() })
     }
 
     override fun getTarget(): Any? {
@@ -439,7 +440,7 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
     fun getTotalCompletedAchievementCount(projectName: String) : Int {
         return completedAchievements[projectName]!!.size +
                 progressAchievements[projectName]!!.sumOf { pa -> pa.milestones.indexOfLast { it <= pa.progress } + 1 } +
-                badgeAchievements[projectName]!!.sumOf { it.badgeCounts.sum() }
+                badgeAchievements[projectName]!!.sumOf { it.badgeCounts.sumOf { if (it > 0) 1 as Int else 0 } }
     }
 
     /**
