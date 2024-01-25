@@ -147,7 +147,7 @@ class BranchCoverageChallengeTest : FeatureSpec({
 
         scenario("Partially covered, values from title")
         {
-            every { element.attr("class") } returns "pc"
+            every { element.attr("class") } returns "pc bpc"
             every { element.attr("title") } returns "1 of 2 branches missed."
             every { data.line } returns element
             challenge = BranchCoverageChallenge(data)
@@ -263,7 +263,7 @@ class BranchCoverageChallengeTest : FeatureSpec({
         scenario("2 of 3 branches missed")
         {
             every { element.attr("title") } returns "2 of 3 branches missed."
-            every { element.attr("class") } returns "pc"
+            every { element.attr("class") } returns "pc bpc"
             challenge = BranchCoverageChallenge(data)
             challenge.isSolved(parameters, run, listener) shouldBe false
         }
