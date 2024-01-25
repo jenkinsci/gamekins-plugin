@@ -69,7 +69,7 @@ object QuestTaskFactory {
         }
         questTaskTypes[SolveAchievementQuestTask::class.java] = 1
         questTaskTypes[SolveChallengesQuestTask::class.java] = 7
-        questTaskTypes[SolveChallengesWithoutRejectionQuestTask::class.java] = 6
+        questTaskTypes[SolveChallengesWithoutRejectionQuestTask::class.java] = 2
         questTaskTypes.forEach { (clazz, weight) ->
             (0 until weight).forEach { _ ->
                 weightList.add(clazz)

@@ -194,6 +194,7 @@ class LineCoverageChallenge(data: Challenge.ChallengeGenerationData)
         val javaHtmlPath = JacocoUtil.calculateCurrentFilePath(
             workspace, details.jacocoSourceFile, details.parameters.remote
         )
+        if (!javaHtmlPath.exists()) return
         lineContent = JacocoUtil.getLinesInRange(javaHtmlPath, lineNumber, 0).first
         codeSnippet = LineCoverageChallenge.createCodeSnippet(details, lineNumber, workspace)
         sourceCode = generateCompilationUnit(details.parameters,

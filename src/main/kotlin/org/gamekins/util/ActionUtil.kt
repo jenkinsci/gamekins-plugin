@@ -21,7 +21,6 @@ import hudson.model.AbstractItem
 import hudson.model.User
 import hudson.util.FormValidation
 import org.gamekins.GameUserProperty
-import org.gamekins.LeaderboardAction
 import org.gamekins.challenge.Challenge
 import org.gamekins.challenge.ChallengeFactory
 import org.gamekins.challenge.DummyChallenge
@@ -32,7 +31,6 @@ import org.gamekins.property.GameMultiBranchProperty
 import org.gamekins.questtask.ReceiveChallengeQuestTask
 import org.gamekins.questtask.SendChallengeQuestTask
 import org.gamekins.util.Constants.Parameters
-import org.jenkinsci.remoting.protocol.ProtocolLayer.Send
 import org.kohsuke.stapler.export.Exported
 import org.kohsuke.stapler.export.ExportedBean
 import java.io.IOException
@@ -289,6 +287,11 @@ object ActionUtil {
         PropertyUtil.retrieveGameProperty(job)?.getStatistics()
             ?.incrementSentChallenges(branch)
 
+        property.getCurrentQuestTasks(projectName).filterIsInstance<SendChallengeQuestTask>()
+            .forEach { it.challengeSent(challenge) }
+        property.getCurrentQuestTasks(projectName).filterIsInstance<ReceiveChallengeQuestTask>()
+            .forEach { it.challengeSent(challenge) }
+
         try {
             user.save()
             other.save()
@@ -302,11 +305,6 @@ object ActionUtil {
             MailUtil.sendMail(other, "New Gamekins Challenge", "challenges@gamekins.org", "Gamekins",
                 MailUtil.generateMailText(projectName, challenge, other, user, job))
         }
-
-        property.getCurrentQuestTasks(projectName).filterIsInstance<SendChallengeQuestTask>()
-            .forEach { it.challengeSent(challenge) }
-        property.getCurrentQuestTasks(projectName).filterIsInstance<ReceiveChallengeQuestTask>()
-            .forEach { it.challengeSent(challenge) }
 
         return FormValidation.ok("Challenge sent")
     }

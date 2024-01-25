@@ -248,6 +248,8 @@ object ChallengeFactory {
                     )
                     challenge = generateSmellChallenge(data, listener)
                 }
+                challengeClass == Challenge::class.java -> challenge = null
+                challengeClass == CoverageChallenge::class.java -> challenge = null
                 else -> {
                     challenge = generateThirdPartyChallenge(data, challengeClass)
                 }

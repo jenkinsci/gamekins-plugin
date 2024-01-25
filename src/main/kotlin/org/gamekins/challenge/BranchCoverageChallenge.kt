@@ -51,7 +51,7 @@ class BranchCoverageChallenge(data: Challenge.ChallengeGenerationData)
                 currentCoveredBranches = 0
                 maxCoveredBranches = 1
             }
-            data.line!!.attr("class").startsWith("pc") -> {
+            data.line!!.attr("class").startsWith("pc bpc") -> {
                 currentCoveredBranches = split[2].toInt() - split[0].toInt()
                 maxCoveredBranches = split[2].toInt()
             }
@@ -184,7 +184,7 @@ class BranchCoverageChallenge(data: Challenge.ChallengeGenerationData)
         val split = element.attr("title").split(" ".toRegex())
         val title = split[0]
         if (split.size >= 4 && split[3] == "missed.") return false
-        if (title != "All"
+        if (title != "All" && title != ""
             && maxCoveredBranches > 1 && maxCoveredBranches - title.toInt() <= currentCoveredBranches) {
             return false
         }
@@ -219,6 +219,7 @@ class BranchCoverageChallenge(data: Challenge.ChallengeGenerationData)
         val javaHtmlPath = JacocoUtil.calculateCurrentFilePath(
             workspace, details.jacocoSourceFile, details.parameters.remote
         )
+        if (!javaHtmlPath.exists()) return
         lineContent = JacocoUtil.getLinesInRange(javaHtmlPath, lineNumber, 0).first
         codeSnippet = LineCoverageChallenge.createCodeSnippet(details, lineNumber, workspace)
         sourceCode = generateCompilationUnit(details.parameters,

@@ -67,9 +67,7 @@ abstract class QuestTask(val numberGoal: Int) {
     ): ArrayList<Challenge> {
         val property = user.getProperty(GameUserProperty::class.java)
         if (property != null) {
-            val challenges = property.getCompletedChallenges(project)
-            challenges.removeIf { it.getSolved() < since }
-            return ArrayList(challenges.filterIsInstance(type))
+            return ArrayList(property.getCompletedChallenges(project).filter { it.getSolved() >= since }.filterIsInstance(type))
         }
 
         return arrayListOf()
@@ -80,18 +78,22 @@ abstract class QuestTask(val numberGoal: Int) {
      */
     fun getSolvedChallengesOfUserSinceLastRejection(user: User, project: String, since: Long): ArrayList<Challenge> {
         val property = user.getProperty(GameUserProperty::class.java)
+        val challenges = arrayListOf<Challenge>()
         if (property != null) {
-            val challenges = property.getCompletedChallenges(project)
-            challenges.removeIf { it.getSolved() < since }
             val rejectedChallenges = property.getRejectedChallenges(project)
             if (rejectedChallenges.isNotEmpty()) {
                 val lastRejectedChallenge = rejectedChallenges.last().first
-                challenges.removeIf { it.getSolved() < lastRejectedChallenge.getSolved() }
+                challenges.addAll(
+                    property.getCompletedChallenges(project)
+                    .toList()
+                    .filter { it.getSolved() >= since }
+                    .filter { it.getSolved() >= lastRejectedChallenge.getSolved() })
+            } else {
+                challenges.addAll(property.getCompletedChallenges(project).toList().filter { it.getSolved() >= since })
             }
-            return ArrayList(challenges)
         }
 
-        return arrayListOf()
+        return challenges
     }
 
     /**

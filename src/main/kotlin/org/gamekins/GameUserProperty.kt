@@ -673,33 +673,6 @@ class GameUserProperty : UserProperty(), Action, StaplerProxy {
         //Update achievements with changed fullyQualifiedFunctionName or secret
         updateAchievements()
 
-        //Remove challenges where it was not possible to generate a SourceFileDetails
-        completedChallenges.forEach { (p, challenges) ->
-            val coverageChallenges = ArrayList(challenges.filterIsInstance<CoverageChallenge>())
-            coverageChallenges.removeIf { it.details == null }
-            val finalChallenges = ArrayList(challenges.filter { it !is CoverageChallenge })
-            finalChallenges.addAll(coverageChallenges)
-            completedChallenges[p] = CopyOnWriteArrayList(finalChallenges)
-        }
-
-        currentChallenges.forEach { (p, challenges) ->
-            val coverageChallenges = ArrayList(challenges.filterIsInstance<CoverageChallenge>())
-            coverageChallenges.removeIf { it.details == null }
-            val finalChallenges = ArrayList(challenges.filter { it !is CoverageChallenge })
-            finalChallenges.addAll(coverageChallenges)
-            currentChallenges[p] = CopyOnWriteArrayList(finalChallenges)
-        }
-
-        rejectedChallenges.forEach { (p, challenges) ->
-            val rejChallenges = CopyOnWriteArrayList(challenges.filter { it.first is CoverageChallenge })
-            rejChallenges.removeIf { (challenge, _) ->
-                challenge is CoverageChallenge && challenge.details == null
-            }
-            val finalChallenges = ArrayList(challenges.filter { it.first !is CoverageChallenge })
-            finalChallenges.addAll(rejChallenges)
-            rejectedChallenges[p] = CopyOnWriteArrayList(finalChallenges)
-        }
-
         storedChallenges.forEach { (p, challenges) ->
             val coverageChallenges = ArrayList(challenges.filterIsInstance<CoverageChallenge>())
             coverageChallenges.removeIf { it.details == null }

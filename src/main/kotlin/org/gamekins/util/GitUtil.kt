@@ -349,10 +349,9 @@ object GitUtil {
      */
     @JvmStatic
     fun mapGameUser(ident: PersonIdent, users: Collection<GameUser>): GameUser? {
-        val split = ident.name.split(" ".toRegex())
         for (user in users) {
             if (user.gitNames.contains(ident.name)
-                || user.fullName.contains(split[0]) && user.fullName.contains(split[split.size - 1])
+                || user.fullName == ident.name
                 || ident.emailAddress == user.mail
             ) {
                 return user
