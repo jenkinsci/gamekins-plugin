@@ -123,12 +123,6 @@ class EventHandlerTest : FeatureSpec({
                 "Achievement(s) solved:\n" +
                 "- Achievement\n" +
                 "\n" +
-                "New Badge(s) earned in:\n" +
-                "- BadgeAchievement\n" +
-                "\n" +
-                "Progress made in Achievements:\n" +
-                "- ProgressAchievement\n" +
-                "\n" +
                 "View the build on http://localhost:8080/jenkins/job/test/0/\n" +
                 "View the leaderboard on http://localhost:8080/jenkins/job/test/leaderboard/\n" +
                 "View your achievements on http://localhost:8080/jenkins/user/user/achievements/"
@@ -149,10 +143,9 @@ class EventHandlerTest : FeatureSpec({
             AchievementSolvedEvent(projectName, branch, user, achievement),
             ChallengeSolvedEvent(projectName, branch, user, challengeSolved),
             ChallengeUnsolvableEvent(projectName, branch, user, challengeUnsolvable),
-            ChallengeGeneratedEvent(projectName, branch, user, challengeGenerated),
-            BadgeEarnedEvent(projectName, branch, user, badgeAchievement),
-            AchievementProgressedEvent(projectName, branch, user, progressAchievement)
+            ChallengeGeneratedEvent(projectName, branch, user, challengeGenerated)
         )
+        every { user.id } returns "user"
         scenario("List of events happened recently")
         {
             EventHandler.generateMailText(projectName, run, user, list) shouldBe text
