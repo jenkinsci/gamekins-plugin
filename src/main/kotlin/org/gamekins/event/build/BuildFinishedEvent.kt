@@ -32,13 +32,13 @@ import kotlin.collections.ArrayList
  * @author Philipp Straubinger
  * @since 0.3
  */
-class BuildFinishedEvent(projectName: String, branch: String, build: Run<*, *>)
-    : BuildEvent(projectName, branch, build) {
+class BuildFinishedEvent(projectName: String, branch: String, build: Run<*, *>, sendToUsers: ArrayList<User>)
+    : BuildEvent(projectName, branch, build, sendToUsers) {
 
     override fun run() {
 
         runBlocking {
-            WebSocketServer.sendMessage("Build has finished")
+            WebSocketServer.sendMessage("Build on branch $branch has finished", sendToUsers)
         }
 
         val events = EventHandler.events
@@ -57,10 +57,6 @@ class BuildFinishedEvent(projectName: String, branch: String, build: Run<*, *>)
                val emailText = EventHandler.generateMailText(projectName, build, user, list)
                 MailUtil.sendMail(user, "Gamekins results", "results@gamekins.org", "Gamekins",
                     emailText)
-
-                runBlocking {
-                    WebSocketServer.sendMessage(emailText)
-                }
             }
         }
 

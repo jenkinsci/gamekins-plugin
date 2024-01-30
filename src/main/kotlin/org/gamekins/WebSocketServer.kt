@@ -1,5 +1,6 @@
 package org.gamekins
 
+import hudson.model.User
 import io.ktor.application.*
 import io.ktor.http.cio.websocket.*
 import io.ktor.routing.*
@@ -69,10 +70,20 @@ object WebSocketServer {
         server = null
     }
 
-    suspend fun sendMessage(message: String) {
+    suspend fun sendMessage(message: String, users: ArrayList<User>) {
+        var userText = ""
+        if (users.isNotEmpty()) {
+            userText += "["
+            users.forEach {
+                userText += "${it.id},"
+            }
+            userText = userText.removeSuffix(",")
+            userText += "]"
+        }
+
         connections.forEach { channel ->
             try {
-                channel.send(Frame.Text(message))
+                channel.send(Frame.Text("$userText$message"))
             } catch (e: Exception) {
                 println("Error sending message: ${e.message}")
             }

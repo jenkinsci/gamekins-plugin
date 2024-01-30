@@ -53,14 +53,11 @@ object EventHandler {
             for (event in list.filterIsInstance<ChallengeSolvedEvent>()) {
                 text += "- ${event.challenge.toEscapedString()}\n"
                 runBlocking {
-                    WebSocketServer.sendMessage("Challenge solved: ${event.challenge.toEscapedString()}")
+                    WebSocketServer.sendMessage(
+                        "Challenge solved: ${event.challenge.toEscapedString()}", event.sendToUsers)
                 }
             }
             text += "\n"
-
-            runBlocking {
-                WebSocketServer.sendMessage("Challenge(s) solved")
-            }
         }
 
         if (list.any { it is ChallengeUnsolvableEvent }) {
@@ -68,7 +65,8 @@ object EventHandler {
             for (event in list.filterIsInstance<ChallengeUnsolvableEvent>()) {
                 text += "- ${event.challenge.toEscapedString()}\n"
                 runBlocking {
-                    WebSocketServer.sendMessage("Challenge unsolvable: ${event.challenge.toEscapedString()}")
+                    WebSocketServer.sendMessage(
+                        "Challenge unsolvable: ${event.challenge.toEscapedString()}", event.sendToUsers)
                 }
             }
             text += "\n"
@@ -79,7 +77,8 @@ object EventHandler {
             for (event in list.filterIsInstance<ChallengeGeneratedEvent>()) {
                 text += "- ${event.challenge.toEscapedString()}\n"
                 runBlocking {
-                    WebSocketServer.sendMessage("New Challenge: ${event.challenge.toEscapedString()}")
+                    WebSocketServer.sendMessage(
+                        "New Challenge: ${event.challenge.toEscapedString()}", event.sendToUsers)
                 }
             }
             text += "\n"
@@ -104,24 +103,31 @@ object EventHandler {
             for (event in list.filterIsInstance<AchievementSolvedEvent>()) {
                 text += "- ${event.achievement}\n"
                 runBlocking {
-                    WebSocketServer.sendMessage("Achievement solved: ${event.achievement.title}")
+                    WebSocketServer.sendMessage("Achievement solved: ${event.achievement.title}", event.sendToUsers)
                 }
             }
             text += "\n"
         }
 
-        if (list.find {it is BadgeEarnedEvent} != null) {
+        if (list.any {it is BadgeEarnedEvent}) {
             text += "New Badge(s) earned in:\n"
             for (event in list.filterIsInstance<BadgeEarnedEvent>()) {
                 text += "- ${event.achievement}\n"
+                runBlocking {
+                    WebSocketServer.sendMessage("Badge earned: ${event.achievement.title}", event.sendToUsers)
+                }
             }
             text += "\n"
         }
 
-        if (list.find {it is AchievementProgressedEvent} != null) {
+        if (list.any {it is AchievementProgressedEvent}) {
             text += "Progress made in Achievements:\n"
             for (event in list.filterIsInstance<AchievementProgressedEvent>()) {
                 text += "- ${event.achievement}\n"
+                runBlocking {
+                    WebSocketServer.sendMessage(
+                        "Progress in achievement: ${event.achievement.title}", event.sendToUsers)
+                }
             }
             text += "\n"
         }
@@ -144,7 +150,10 @@ object EventHandler {
             for (event in list.filterIsInstance<QuestTaskProgressEvent>()) {
                 text += "- ${event.questTask}: ${event.currentNumber} of ${event.numberGoal} already done\n"
                 runBlocking {
-                    WebSocketServer.sendMessage("Progress in Quest ${event.questTask}: ${event.currentNumber} of ${event.numberGoal} already done")
+                    WebSocketServer.sendMessage(
+                        "Progress in Quest ${event.questTask}: " +
+                                "${event.currentNumber} of ${event.numberGoal} already done",
+                        event.sendToUsers)
                 }
             }
             text += "\n"
@@ -155,7 +164,7 @@ object EventHandler {
             for (event in list.filterIsInstance<QuestTaskSolvedEvent>()) {
                 text += "- ${event.questTask}\n"
                 runBlocking {
-                    WebSocketServer.sendMessage("Quest solved: ${event.questTask}")
+                    WebSocketServer.sendMessage("Quest solved: ${event.questTask}", event.sendToUsers)
                 }
             }
             text += "\n"
@@ -166,7 +175,7 @@ object EventHandler {
             for (event in list.filterIsInstance<QuestTaskGeneratedEvent>()) {
                 text += "- ${event.questTask}\n"
                 runBlocking {
-                    WebSocketServer.sendMessage("New Quest: ${event.questTask}")
+                    WebSocketServer.sendMessage("New Quest: ${event.questTask}", event.sendToUsers)
                 }
             }
             text += "\n"

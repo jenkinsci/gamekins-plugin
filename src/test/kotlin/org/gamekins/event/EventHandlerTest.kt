@@ -98,7 +98,7 @@ class EventHandlerTest : FeatureSpec({
             EventHandler.events shouldHaveSize 4
         }
 
-        EventHandler.addEvent(BuildStartedEvent(projectName, branch, run))
+        EventHandler.addEvent(BuildStartedEvent(projectName, branch, run, arrayListOf()))
         Thread.sleep(1000)
         scenario("Added BuildStartedEvent (removes other events)")
         {

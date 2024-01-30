@@ -25,4 +25,5 @@ import org.gamekins.event.Event
  * @author Philipp Straubinger
  * @since 0.3
  */
-abstract class UserEvent(projectName: String, branch: String, val user: User): Event(projectName, branch)
+abstract class UserEvent(projectName: String, branch: String, val user: User)
+    : Event(projectName, branch, arrayListOf(user))

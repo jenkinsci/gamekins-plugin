@@ -17,6 +17,7 @@
 package org.gamekins.event.build
 
 import hudson.model.Run
+import hudson.model.User
 import org.gamekins.event.EventHandler
 
 /**
@@ -25,7 +26,8 @@ import org.gamekins.event.EventHandler
  * @author Philipp Straubinger
  * @since 0.3
  */
-class BuildStartedEvent(projectName: String, branch: String, build: Run<*, *>): BuildEvent(projectName, branch, build) {
+class BuildStartedEvent(projectName: String, branch: String, build: Run<*, *>, sendToUsers: ArrayList<User>)
+    : BuildEvent(projectName, branch, build, sendToUsers) {
 
     override fun run() {
         EventHandler.events

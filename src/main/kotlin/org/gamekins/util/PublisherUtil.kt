@@ -401,6 +401,18 @@ object PublisherUtil {
         }
     }
 
+    fun getParticipantsInProject(projectName: String): ArrayList<User> {
+        val users = arrayListOf<User>()
+        User.getAll().forEach {user ->
+            val property = user.getProperty(GameUserProperty::class.java)
+            if (property != null && property.isParticipating(projectName)) {
+                users.add(user)
+            }
+        }
+
+        return users
+    }
+
     /**
      * Retrieves all last changed classes and removes fully covered classes [removeFullyCoveredClasses] and classes
      * without JaCoCo files [removeClassesWithoutJacocoFiles] and sorts them according to their coverage [sort] if

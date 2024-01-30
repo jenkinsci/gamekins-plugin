@@ -17,12 +17,14 @@
 package org.gamekins.event.build
 
 import hudson.model.Run
+import hudson.model.User
 import org.gamekins.event.Event
 
 /**
- * Abstract class of events happening in the context of builds without concrete user.
+ * Abstract class of events happening in the context of builds without a concrete user.
  *
  * @author Philipp Straubinger
  * @since 0.3
  */
-abstract class BuildEvent(projectName: String, branch: String, val build: Run<*, *>): Event(projectName, branch)
+abstract class BuildEvent(projectName: String, branch: String, val build: Run<*, *>, sendToUsers: ArrayList<User>)
+    : Event(projectName, branch, sendToUsers)

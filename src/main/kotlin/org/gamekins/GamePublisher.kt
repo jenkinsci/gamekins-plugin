@@ -73,19 +73,39 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
             }
         }
 
-        EventHandler.addEvent(BuildStartedEvent(parameters.projectName, parameters.branch, run))
+        EventHandler.addEvent(
+            BuildStartedEvent(parameters.projectName,
+                parameters.branch,
+                run,
+                PublisherUtil.getParticipantsInProject(parameters.projectName)
+            )
+        )
 
         //Checks whether the paths of the JaCoCo files are correct
         if (!PublisherUtil.doCheckJacocoResultsPath(parameters.workspace, parameters.jacocoResultsPath)) {
             listener.logger.println("[Gamekins] JaCoCo folder is not correct")
             PublisherUtil.generateBuildAndTestChallenges(parameters, result, listener)
-            EventHandler.addEvent(BuildFinishedEvent(parameters.projectName, parameters.branch, run))
+            EventHandler.addEvent(
+                BuildFinishedEvent(
+                    parameters.projectName,
+                    parameters.branch,
+                    run,
+                    PublisherUtil.getParticipantsInProject(parameters.projectName)
+                )
+            )
             return
         }
         if (!PublisherUtil.doCheckJacocoCSVPath(parameters.workspace, parameters.jacocoCSVPath)) {
             listener.logger.println("[Gamekins] JaCoCo csv file could not be found")
             PublisherUtil.generateBuildAndTestChallenges(parameters, result, listener)
-            EventHandler.addEvent(BuildFinishedEvent(parameters.projectName, parameters.branch, run))
+            EventHandler.addEvent(
+                BuildFinishedEvent(
+                    parameters.projectName,
+                    parameters.branch,
+                    run,
+                    PublisherUtil.getParticipantsInProject(parameters.projectName)
+                )
+            )
             return
         }
 
@@ -132,7 +152,14 @@ class GamePublisher @DataBoundConstructor constructor(@set:DataBoundSetter var j
         PublisherUtil.updateStatistics(run, parameters, generated, solved, solvedAchievements, solvedQuests,
             generatedQuests, solvedQuestTasks, generatedQuestTasks, listener)
 
-        EventHandler.addEvent(BuildFinishedEvent(parameters.projectName, parameters.branch, run))
+        EventHandler.addEvent(
+            BuildFinishedEvent(
+                parameters.projectName,
+                parameters.branch,
+                run,
+                PublisherUtil.getParticipantsInProject(parameters.projectName)
+            )
+        )
 
         listener.logger.println("[Gamekins] Finished")
     }
