@@ -244,6 +244,13 @@ object ActionUtil {
     fun doSendChallenge(job: AbstractItem, send: String, to: String): FormValidation {
         val user: User = User.current()
             ?: return FormValidation.error(Constants.Error.NO_USER_SIGNED_IN)
+        return doSendChallenge(job, send, to, user)
+    }
+
+    /**
+     * Sends a [Challenge] with the String representation [send] to [to].
+     */
+    fun doSendChallenge(job: AbstractItem, send: String, to: String, user:User): FormValidation {
         val property = user.getProperty(GameUserProperty::class.java)
             ?: return FormValidation.error(Constants.Error.RETRIEVING_PROPERTY)
 

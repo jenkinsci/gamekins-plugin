@@ -102,7 +102,7 @@ object MailUtil {
         msg.setText(text)
         try {
             Transport.send(msg)
-        } catch (e: MessagingException) {
+        } catch (e: Exception) {
             e.printStackTrace()
         }
     }

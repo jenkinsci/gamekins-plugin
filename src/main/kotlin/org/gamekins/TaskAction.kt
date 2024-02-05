@@ -147,7 +147,7 @@ class TaskAction(val job: AbstractItem) : ProminentProjectAction, Describable<Ta
         return property.isParticipating(job.fullName)
     }
     /**
-     * Returns the maximal amount of stored Challenges
+     * Returns the maximal amount of stored Challenges.
      */
     fun getStoredChallengesLimit(): Int {
         return when (job) {
@@ -164,14 +164,14 @@ class TaskAction(val job: AbstractItem) : ProminentProjectAction, Describable<Ta
     }
 
     /**
-     * Returns the current amount of stored Challenges
+     * Returns the current amount of stored Challenges.
      */
     fun getStoredChallengesCount(): Int {
         return getStoredChallenges().size
     }
 
     /**
-     * Returns whether challenges can be sent
+     * Returns whether challenges can be sent.
      */
     fun getCanSend(): Boolean {
         return when (job) {

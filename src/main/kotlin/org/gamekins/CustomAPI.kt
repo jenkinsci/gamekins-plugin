@@ -12,7 +12,10 @@ import net.sf.json.JSONObject
 import net.sf.json.JsonConfig
 import net.sf.json.util.CycleDetectionStrategy
 import net.sf.json.util.PropertyFilter
+import org.gamekins.challenge.Challenge
+import org.gamekins.questtask.SendChallengeQuestTask
 import org.gamekins.util.ActionUtil
+import org.gamekins.util.ActionUtil.getUserDetails
 import org.gamekins.util.Constants
 import org.kohsuke.stapler.QueryParameter
 import org.kohsuke.stapler.WebMethod
@@ -21,6 +24,7 @@ import org.kohsuke.stapler.json.JsonHttpResponse
 import org.kohsuke.stapler.verb.GET
 import org.kohsuke.stapler.verb.POST
 import java.io.Serializable
+import java.util.concurrent.CopyOnWriteArrayList
 
 @Extension
 class CustomAPI : RootAction {
@@ -367,8 +371,8 @@ class CustomAPI : RootAction {
     @WebMethod(name = ["getUsers"])
     fun getUsers(@QueryParameter("job") job: String): JsonHttpResponse {
 
-        val lJob: AbstractItem = Jenkins.get().getItemByFullName(job) as AbstractItem
-        val myJsonObjects = ActionUtil.getUserDetails(lJob)
+        val realJob: AbstractItem = Jenkins.get().getItemByFullName(job) as AbstractItem
+        val myJsonObjects = getUserDetails(realJob)
 
         val response = JSONArray()
         myJsonObjects.forEach { response.add(it) }
@@ -384,8 +388,8 @@ class CustomAPI : RootAction {
     @WebMethod(name = ["getTeams"])
     fun getTeams(@QueryParameter("job") job: String): JsonHttpResponse {
 
-        val lJob: AbstractItem = Jenkins.get().getItemByFullName(job) as AbstractItem
-        val myJsonObjects = ActionUtil.getTeamDetails(lJob)
+        val realJob: AbstractItem = Jenkins.get().getItemByFullName(job) as AbstractItem
+        val myJsonObjects = ActionUtil.getTeamDetails(realJob)
 
         val response = JSONArray()
         myJsonObjects.forEach { response.add(it) }
@@ -417,12 +421,63 @@ class CustomAPI : RootAction {
     @WebMethod(name = ["getStoredChallengesLimit"])
     fun getStoredChallengesLimit(@QueryParameter("job") job: String): JsonHttpResponse {
 
-        val lJob: AbstractItem = Jenkins.get().getItemByFullName(job) as AbstractItem
+        val realJob: AbstractItem = Jenkins.get().getItemByFullName(job) as AbstractItem
 
         val responseJson = JSONObject()
-        responseJson["limit"] = TaskAction(lJob).getStoredChallengesLimit()
+        responseJson["limit"] = TaskAction(realJob).getStoredChallengesLimit()
 
         return JsonHttpResponse(responseJson, 200)
+    }
+
+    /**
+     * Returns whether challenges can be sent.
+     */
+    @GET
+    @WebMethod(name = ["getCanSend"])
+    fun getCanSend(@QueryParameter("job") job: String): JsonHttpResponse {
+
+        val realJob: AbstractItem = Jenkins.get().getItemByFullName(job) as AbstractItem
+
+        val responseJson = JSONObject()
+        responseJson["canSend"] = TaskAction(realJob).getCanSend()
+
+        return JsonHttpResponse(responseJson, 200)
+    }
+
+    /**
+     * Returns the details of all users participating in the current project that are eligible for getting sent
+     * Challenges from you.
+     */
+    @GET
+    @WebMethod(name = ["getUserDetailsForSending"])
+    fun getUserDetailsForSending(@QueryParameter("job") job: String, @QueryParameter("username") username: String): JsonHttpResponse {
+        val realJob: AbstractItem = Jenkins.get().getItemByFullName(job) as AbstractItem
+        val details = CopyOnWriteArrayList(getUserDetails(realJob))
+
+        details.removeIf { ud -> User.getAll().first { it.id == username }.fullName == ud.userName }
+
+        val response = JSONArray()
+        details.forEach { response.add(it) }
+        val responseJson = JSONObject()
+        responseJson["users"] = details
+
+        return JsonHttpResponse(responseJson, 200)
+    }
+
+    /**
+     * Send a [Challenge] to another user.
+     */
+    @POST
+    @WebMethod(name = ["sendChallenge"])
+    fun sendChallenge(@JsonBody body: SendChallenge)
+    : JsonHttpResponse {
+
+        val realJob: AbstractItem = Jenkins.get().getItemByFullName(body.job) as AbstractItem
+
+        val response = JSONObject()
+        response["message"] = ActionUtil.doSendChallenge(
+            realJob, body.challengeName, body.sendTo, User.getAll().first { it.id == body.username })
+        return JsonHttpResponse(response, 200)
     }
 
     class StoreChallenge: Serializable {
@@ -436,6 +491,22 @@ class CustomAPI : RootAction {
             this.job = job
             this.challengeName = challengeName
             this.reason = reason
+        }
+    }
+
+    class SendChallenge: Serializable {
+
+        lateinit var job: String
+        lateinit var challengeName: String
+        lateinit var username: String
+        lateinit var sendTo: String
+
+        constructor()
+        constructor(job: String,challengeName: String, username: String, sendTo: String) {
+            this.job = job
+            this.challengeName = challengeName
+            this.username = username
+            this.sendTo = sendTo
         }
     }
 
