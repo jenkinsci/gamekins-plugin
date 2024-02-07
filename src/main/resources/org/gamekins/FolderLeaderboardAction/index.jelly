@@ -67,7 +67,7 @@
                                 <td class="text-center">${index + 1}</td>
                                 <td class="text-center">${teamDetail.teamName}</td>
                                 <td class="text-center">${teamDetail.completedChallenges}</td>
-                                <td class="text-center" style="vertical-align: middle">${userDetail.completedQuestTasks}</td>
+                                <td class="text-center" style="vertical-align: middle">${teamDetail.completedQuestTasks}</td>
                                 <td class="text-center">${teamDetail.completedAchievements}</td>
                                 <td class="text-center">${teamDetail.score}</td>
                             </tr>
