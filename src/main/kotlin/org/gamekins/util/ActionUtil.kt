@@ -296,7 +296,7 @@ object ActionUtil {
 
         property.getCurrentQuestTasks(projectName).filterIsInstance<SendChallengeQuestTask>()
             .forEach { it.challengeSent(challenge) }
-        property.getCurrentQuestTasks(projectName).filterIsInstance<ReceiveChallengeQuestTask>()
+        otherProperty.getCurrentQuestTasks(projectName).filterIsInstance<ReceiveChallengeQuestTask>()
             .forEach { it.challengeSent(challenge) }
 
         try {
@@ -308,7 +308,7 @@ object ActionUtil {
             return FormValidation.error(Constants.Error.SAVING)
         }
 
-        if (other.getProperty(GameUserProperty::class.java).getNotifications()) {
+        if (otherProperty.getNotifications()) {
             MailUtil.sendMail(other, "New Gamekins Challenge", "challenges@gamekins.org", "Gamekins",
                 MailUtil.generateMailText(projectName, challenge, other, user, job))
         }
