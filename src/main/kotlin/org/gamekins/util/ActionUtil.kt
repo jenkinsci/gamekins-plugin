@@ -385,6 +385,7 @@ object ActionUtil {
                     details[index].addCompletedAchievements(property.getTotalCompletedAchievementCount(job.fullName))
                     details[index].addCompletedChallenges(property.getCompletedChallenges(job.fullName).size)
                     details[index].addCompletedQuests(property.getCompletedQuests(job.fullName).size)
+                    details[index].addCompletedQuestTasks(property.getCompletedQuestTasks(job.fullName).size)
                     details[index].addUnfinishedQuests(property.getUnfinishedQuests(job.fullName).size)
                     details[index].addScore(property.getScore(job.fullName))
                 } else {
@@ -463,7 +464,7 @@ object ActionUtil {
     @ExportedBean(defaultVisibility = 999)
     class TeamDetails(@get:Exported val teamName: String, @get:Exported var score: Int,
                       @get:Exported var completedChallenges: Int, @get:Exported var completedQuests: Int,
-                      @get:Exported val completedQuestTasks: Int, @get:Exported var unfinishedQuests: Int,
+                      @get:Exported var completedQuestTasks: Int, @get:Exported var unfinishedQuests: Int,
                       @get:Exported var completedAchievements: Int) {
 
         /**
@@ -488,6 +489,14 @@ object ActionUtil {
         @Exported
         fun addCompletedQuests(completedQuests: Int) {
             this.completedQuests += completedQuests
+        }
+
+        /**
+         * Adds additional completed QuestTasks to the team.
+         */
+        @Exported
+        fun addCompletedQuestTasks(completedQuestTasks: Int) {
+            this.completedQuestTasks += completedQuestTasks
         }
 
         /**
