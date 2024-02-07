@@ -6,6 +6,7 @@ import hudson.FilePath
 import org.gamekins.util.Constants
 import org.gamekins.util.Constants.Parameters
 import org.gamekins.util.MutationUtil.MutationData
+import java.lang.IllegalArgumentException
 import java.util.*
 import kotlin.math.max
 import kotlin.math.min
@@ -31,11 +32,16 @@ object GumTree {
      */
     fun findMapping(mutationData: MutationData, parameters: Parameters): MutationData? {
         if (mutationData.sourceCode.isEmpty()) return null
-        val source = JavaParser.parse(mutationData.sourceCode)
-        val destination = JavaParser.parse(mutationData.sourceFile, mutationData.mutatedClass, parameters)
-        val mappings = map(source, destination)
 
-        return updateMutationData(mutationData, mappings, destination, parameters)
+        try {
+            val source = JavaParser.parse(mutationData.sourceCode)
+            val destination = JavaParser.parse(mutationData.sourceFile, mutationData.mutatedClass, parameters)
+            val mappings = map(source, destination)
+
+            return updateMutationData(mutationData, mappings, destination, parameters)
+        } catch (_: Exception) {}
+
+        return null
     }
 
     /**
