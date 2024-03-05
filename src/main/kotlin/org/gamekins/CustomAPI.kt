@@ -13,9 +13,7 @@ import net.sf.json.JsonConfig
 import net.sf.json.util.CycleDetectionStrategy
 import net.sf.json.util.PropertyFilter
 import org.gamekins.challenge.Challenge
-import org.gamekins.questtask.SendChallengeQuestTask
 import org.gamekins.util.ActionUtil
-import org.gamekins.util.ActionUtil.getUserDetails
 import org.gamekins.util.Constants
 import org.kohsuke.stapler.QueryParameter
 import org.kohsuke.stapler.WebMethod
@@ -372,7 +370,7 @@ class CustomAPI : RootAction {
     fun getUsers(@QueryParameter("job") job: String): JsonHttpResponse {
 
         val realJob: AbstractItem = Jenkins.get().getItemByFullName(job) as AbstractItem
-        val myJsonObjects = getUserDetails(realJob)
+        val myJsonObjects = ActionUtil.getUserDetails(realJob)
 
         val response = JSONArray()
         myJsonObjects.forEach { response.add(it) }
@@ -452,7 +450,7 @@ class CustomAPI : RootAction {
     @WebMethod(name = ["getUserDetailsForSending"])
     fun getUserDetailsForSending(@QueryParameter("job") job: String, @QueryParameter("username") username: String): JsonHttpResponse {
         val realJob: AbstractItem = Jenkins.get().getItemByFullName(job) as AbstractItem
-        val details = CopyOnWriteArrayList(getUserDetails(realJob))
+        val details = CopyOnWriteArrayList(ActionUtil.getUserDetails(realJob))
 
         details.removeIf { ud -> User.getAll().first { it.id == username }.fullName == ud.userName }
 
