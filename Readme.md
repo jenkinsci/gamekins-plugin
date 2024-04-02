@@ -101,8 +101,11 @@ messages, will be logged at the end of the **Console Output** of the run.
 
 #### Leaderboard
 After activating Gamekins, a new entry named **Leaderboard** on the left side panel of the project is displayed. It
-shows the current points of each participant and team for everyone who can see the project. In addition, each signed-in
-user, who is participating, can see his/her Challenges as well as a help text explaining the basics of Gamekins.
+shows the current points of each participant and team for everyone who can see the project.
+
+#### Challenges
+In addition to the leaderboard page, each signed-in user, who is participating, can see their Challenges, Quests and 
+a help text explaining the basics of Gamekins in an additional page.
 
 #### Statistics
 In the background, data about the usage of the project and the participants is logged for evaluation purposes. 
@@ -199,4 +202,8 @@ University of Passau.
 
 ### Publications
 * "Gamekins: Gamifying Software Testing in Jenkins"
-  Philipp Straubinger, Gordon Fraser, ICSE 2022 [[download]](https://arxiv.org/pdf/2202.06562.pdf)
+  Philipp Straubinger, Gordon Fraser, ICSE Demo 2022 [[download]](https://arxiv.org/pdf/2202.06562.pdf)
+* "Gamifying a Software Testing Course with Continuous Integration"
+  Philipp Straubinger, Gordon Fraser, ICSE SEET 2024 [[download]](https://arxiv.org/pdf/2401.17740.pdf)
+* "An IDE Plugin for Gamified Continuous Integration"
+  Philipp Straubinger, Gordon Fraser, ICSE IDE Workshop 2024 [[download]](https://arxiv.org/pdf/2403.03557.pdf)
